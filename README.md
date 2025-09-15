@@ -1,5 +1,20 @@
 # Nadagotchi
-Tamagotchi like game
+
+A Tamagotchi-like game with a deep, emergent personality system.
+
+---
+
+### ✨ Interactive Design Explorer ✨
+
+For a visual and interactive breakdown of the game's core concepts, systems, and design pillars, please see our interactive explorer page. This page details the mood, legacy, career, and other planned systems.
+
+**[Click here to open the Interactive Design Explorer](./psagame.html)**
+
+---
+
+## Game Prototype
+
+This repository also contains the active Phaser.js prototype of the game.
 
 # Tamagotchi-like Game: Detailed System Design
 
