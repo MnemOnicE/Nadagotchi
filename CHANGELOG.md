@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2025-09-14
+
+### Added
+- **Mood-Based Skill Gain:** The 'STUDY' action's effectiveness is now influenced by the Nadagotchi's mood.
+  - A `moodMultiplier` is applied to logic skill gains: `happy` (1.5x), `neutral` (1.0x), `sad` (0.5x), and `angry` (0.2x).
+- **Logic Skill UI:** The current logic skill level is now displayed in the main UI, providing clear feedback to the player.
+
+### Changed
+- Updated `Nadagotchi.js` to include the mood multiplier logic in the `handleAction` method.
+- Updated `MainScene.js` to display the logic skill in `updateStatsUI`.
+
 ## [0.2.0] - 2025-09-14
 
 ### Added

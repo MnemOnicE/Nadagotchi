@@ -103,6 +103,8 @@ class Nadagotchi {
     /**
      * Handles a player-initiated action.
      * This method updates the Nadagotchi's state based on the action performed.
+     * The 'STUDY' action includes a mood-based multiplier for skill gain, making
+     * the Nadagotchi's emotional state a critical factor in its development.
      * @param {string} actionType - The type of action (e.g., 'FEED', 'PLAY', 'STUDY').
      * @param {any} [item=null] - An optional item used in the action.
      */
@@ -147,15 +149,34 @@ class Nadagotchi {
                 this.stats.happiness -= 5;
                 if (this.stats.happiness < 0) this.stats.happiness = 0;
 
-                // Personality hook: Intellectuals thrive on studying.
+                // New Feature: Mood-based skill gain.
+                // The effectiveness of studying is now tied to the Nadagotchi's mood.
+                let moodMultiplier;
+                switch (this.mood) {
+                    case 'happy':
+                        moodMultiplier = 1.5; // A happy pet is a fast learner.
+                        break;
+                    case 'sad':
+                        moodMultiplier = 0.5; // A sad pet struggles to focus.
+                        break;
+                    case 'angry':
+                        moodMultiplier = 0.2; // An angry pet barely learns at all.
+                        break;
+                    default: // 'neutral'
+                        moodMultiplier = 1.0; // The baseline learning rate.
+                }
+
+                // Personality hook: Intellectuals thrive on studying, but mood is still a factor.
                 if (this.dominantArchetype === 'Intellectual') {
-                    this.mood = 'happy';
+                    this.mood = 'happy'; // Studying makes them happy.
                     this.personalityPoints.Intellectual++;
-                    this.skills.logic += 0.1; // Studying directly improves a skill!
+                    // Apply the mood multiplier to the skill gain.
+                    this.skills.logic += (0.1 * moodMultiplier);
                     this.stats.happiness += 15; // They gain a significant happiness boost.
                 } else {
-                    // Even non-Intellectuals can gain points from studying, just less effectively.
+                    // Even non-Intellectuals can gain points from studying, and their mood affects the outcome.
                     this.personalityPoints.Intellectual++;
+                    this.skills.logic += (0.1 * moodMultiplier);
                 }
                 break;
 
