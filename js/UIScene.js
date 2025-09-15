@@ -9,14 +9,13 @@ class UIScene extends Phaser.Scene {
     }
 
     /**
-     * The `create` method is a Phaser lifecycle method called once, after `preload`.
+     * The `create` method is a Phaser lifecycle method called once.
      * It's used to set up the initial state of the UI scene.
      */
     create() {
-        // --- Store a reference to the main game scene ---
-        // This allows us to access the Nadagotchi data directly if needed,
-        // but we'll primarily use events for decoupling.
-        this.mainScene = this.scene.get('MainScene');
+        // --- Store a reference to the main game scene's nadagotchi data ---
+        // This is used to access data when needed, like for the Job Board.
+        this.nadagotchiData = null;
 
         // --- Create UI Elements ---
 
@@ -26,21 +25,22 @@ class UIScene extends Phaser.Scene {
         // --- Create Action Buttons ---
         // The buttons are arranged along the bottom of the screen for a cleaner layout.
         const buttonY = this.cameras.main.height - 40;
+        const buttonSpacing = 70;
 
         // Create a 'Feed' button.
         const feedButton = this.add.text(10, buttonY, 'Feed', { padding: { x: 10, y: 5 }, backgroundColor: '#008800' }).setInteractive();
         feedButton.on('pointerdown', () => this.game.events.emit('uiAction', 'FEED'));
 
         // Create a 'Play' button.
-        const playButton = this.add.text(80, buttonY, 'Play', { padding: { x: 10, y: 5 }, backgroundColor: '#000088' }).setInteractive();
+        const playButton = this.add.text(10 + buttonSpacing, buttonY, 'Play', { padding: { x: 10, y: 5 }, backgroundColor: '#000088' }).setInteractive();
         playButton.on('pointerdown', () => this.game.events.emit('uiAction', 'PLAY'));
 
         // Create a 'Study' button.
-        const studyButton = this.add.text(150, buttonY, 'Study', { padding: { x: 10, y: 5 }, backgroundColor: '#880000' }).setInteractive();
+        const studyButton = this.add.text(10 + buttonSpacing * 2, buttonY, 'Study', { padding: { x: 10, y: 5 }, backgroundColor: '#880000' }).setInteractive();
         studyButton.on('pointerdown', () => this.game.events.emit('uiAction', 'STUDY'));
 
         // Create an 'Explore' button.
-        const exploreButton = this.add.text(220, buttonY, 'Explore', { padding: { x: 10, y: 5 }, backgroundColor: '#aaaa00' }).setInteractive();
+        const exploreButton = this.add.text(10 + buttonSpacing * 3, buttonY, 'Explore', { padding: { x: 10, y: 5 }, backgroundColor: '#aaaa00' }).setInteractive();
         exploreButton.on('pointerdown', () => this.game.events.emit('uiAction', 'EXPLORE'));
 
         // --- Initialize Job Board ---
@@ -49,8 +49,8 @@ class UIScene extends Phaser.Scene {
          * @private
          */
         this.jobBoardButton = this.add.text(
-            this.cameras.main.width - 120, // Position in the bottom-right
-            this.cameras.main.height - 40,
+            this.cameras.main.width - 120, // Position in the top-right
+            10,
             'Job Board',
             { padding: { x: 10, y: 5 }, backgroundColor: '#6A0DAD' }
         );
@@ -61,9 +61,6 @@ class UIScene extends Phaser.Scene {
         // --- Event Listeners ---
         // Set up a listener for the 'updateStats' event from the MainScene.
         this.game.events.on('updateStats', this.updateStatsUI, this);
-
-        // Store the latest nadagotchi data received from the event.
-        this.nadagotchiData = null;
     }
 
     /**
@@ -72,7 +69,7 @@ class UIScene extends Phaser.Scene {
      * @param {object} data - The entire Nadagotchi object, containing stats, skills, mood, etc.
      */
     updateStatsUI(data) {
-        // Store the latest data
+        // Store the latest data for other methods to use.
         this.nadagotchiData = data;
 
         const stats = data.stats;
