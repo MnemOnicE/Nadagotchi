@@ -8,7 +8,7 @@ A Tamagotchi-like game with a deep, emergent personality system.
 
 For a visual and interactive breakdown of the game's core concepts, systems, and design pillars, please see our interactive explorer page. This page details the mood, legacy, career, and other planned systems.
 
-**[Click here to open the Interactive Design Explorer](https://drive.google.com/file/d/1F55Cw2xzBcYaa1461FJyEPBotDTOOpMf/view?usp=drivesdk)**
+**[Click here to open the Interactive Design Explorer](https://drive.google.com/file/d/1F55Cw2xzBcYaa1461FJyEPBotDTOOpMf/preview)**
 
 ---
 
