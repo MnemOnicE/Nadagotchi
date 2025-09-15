@@ -14,12 +14,13 @@ class MainScene extends Phaser.Scene {
      * It's used to load all necessary assets like images, spritesheets, and audio.
      */
     preload() {
-        // --- Fix for Missing Textures ---
-        // Using a more reliable placeholder service (placehold.co) to prevent missing texture errors.
-
-        // Load a placeholder spritesheet for the pet. It contains 4 frames (32x32 each).
-        // Frame 0: Happy, 1: Neutral, 2: Sad, 3: Angry
-        this.load.spritesheet('pet_sprites', 'https://placehold.co/128x32/000000/ffffff.png?text=Pet', { frameWidth: 32, frameHeight: 32 });
+        // --- Load New Pet Art ---
+        // Load the new 16x16 pixel art spritesheet for the pet.
+        // Using a placeholder for now as per user's request.
+        this.load.spritesheet('pet', 'https://placehold.co/64x16/000000/ffffff.png?text=^_^', {
+            frameWidth: 16,
+            frameHeight: 16
+        });
 
         // Load the image for the thought bubble, which indicates a proactive behavior.
         this.load.image('thought_bubble', 'https://placehold.co/32x32/ffffff/000000.png?text=!');
@@ -37,8 +38,11 @@ class MainScene extends Phaser.Scene {
         this.nadagotchi = new Nadagotchi('Adventurer');
 
         // --- Initialize Visual Elements (Non-UI) ---
-        // Create the main sprite for the pet, centered on the screen.
-        this.sprite = this.add.sprite(this.cameras.main.width / 2, this.cameras.main.height / 2, 'pet_sprites');
+        // Create the main sprite for the pet, centered on the screen, using the new 'pet' key.
+        this.sprite = this.add.sprite(this.cameras.main.width / 2, this.cameras.main.height / 2, 'pet');
+        // Scale up the 16x16 sprite to make it more visible.
+        this.sprite.setScale(4);
+
         // Create the thought bubble sprite, positioned above the pet and initially hidden.
         this.thoughtBubble = this.add.sprite(this.sprite.x, this.sprite.y - 40, 'thought_bubble').setVisible(false);
         // Create the new explore bubble sprite, also hidden initially.
@@ -78,15 +82,25 @@ class MainScene extends Phaser.Scene {
 
     /**
      * Updates the pet's sprite to reflect its current mood by changing the animation frame.
+     * The frame numbers now correspond to the new 'pet' spritesheet.
      */
     updateSpriteMood() {
-        // The spritesheet is ordered: 0:happy, 1:neutral, 2:sad, 3:angry.
+        // Spritesheet mapping: 0:happy, 1:neutral, 2:sad, 3:angry
         switch(this.nadagotchi.mood) {
-            case 'happy': this.sprite.setFrame(0); break;
-            case 'neutral': this.sprite.setFrame(1); break;
-            case 'sad': this.sprite.setFrame(2); break;
-            case 'angry': this.sprite.setFrame(3); break;
-            default: this.sprite.setFrame(1); // Default to neutral if mood is unrecognized.
+            case 'happy':
+                this.sprite.setFrame(0);
+                break;
+            case 'neutral':
+                this.sprite.setFrame(1);
+                break;
+            case 'sad':
+                this.sprite.setFrame(2);
+                break;
+            case 'angry':
+                this.sprite.setFrame(3);
+                break;
+            default:
+                this.sprite.setFrame(1); // Default to neutral
         }
     }
 

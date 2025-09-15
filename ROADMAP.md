@@ -22,13 +22,14 @@ This phase focused on building the fundamental mechanics of the game: caring for
 
 ---
 
-## Phase 1.5: Architectural Improvements (Complete)
+## Phase 1.5: Architectural & Visual Improvements (Complete)
 
-This phase focused on improving the underlying code structure to ensure scalability and maintainability.
+This phase focused on improving the underlying code structure and visual presentation.
 
-### **Version 0.5: UI Refactoring**
+### **Version 0.5: UI Refactoring & Art Upgrade**
 -   [x] **Refactor UI into a dedicated scene (`UIScene`).**
 -   [x] Establish event-based communication between game and UI scenes.
+-   [x] **Upgrade pet visuals with a new spritesheet.**
 -   [ ] Add comprehensive tests for the UI scene and its events.
 
 ---
