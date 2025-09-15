@@ -1,64 +1,52 @@
-# AGENTS.md
+# AI Agent Instructions & Core Directives
 
-This document provides instructions for AI agents working on this repository.
+**ATTENTION AI AGENT: YOU MUST FOLLOW ALL RULES IN THIS DOCUMENT FOR EVERY TASK.** Failure to adhere to these directives will result in an incomplete task.
 
-## Getting Started
+---
 
-1.  **Explore the codebase:** Before making any changes, thoroughly explore the codebase to understand its structure and conventions. Use tools like `ls -R` to get a complete overview.
-2.  **Read all documentation:** Carefully review all documentation files, including this one, as well as `README.md`, `ROADMAP.md`, `CHANGELOG.md`, and `BUGS.md`.
-3.  **Formulate a plan:** After exploring the codebase and documentation, create a detailed plan for your work using the `set_plan` tool. Your plan should be broken down into clear, actionable steps.
+## Meta-Prompt: Core Task Structure
 
-## Development Process
+For any given user request (e.g., adding a feature, fixing a bug), your final output **MUST** include the following components in this order:
 
-*   **Follow the plan:** Adhere to the plan you've created. If you need to deviate from it, update the plan using `set_plan` and inform the user of the changes.
-*   **Verify your changes:** After each modification, use read-only tools like `read_file` or `ls` to confirm that your changes were applied correctly.
-*   **Do not edit build artifacts:** If you identify a file as a build artifact (e.g., in a `dist` or `build` directory), do not edit it directly. Trace it back to its source and make your changes there.
+1.  **Code Implementation:** The complete, updated contents for all code files (`.js`, `.html`, etc.) required by the user's request.
+2.  **Documentation Updates:** The complete, updated contents for both `CHANGELOG.md` and `ROADMAP.md`, reflecting the new changes.
+3.  **Bug Report (If Applicable):** If you identified any potential bugs during your work, provide a report formatted according to the template in `BUGS.md`.
 
-## Code Style and Best Practices
+---
 
-*   **Consistency is key:** Adhere to the existing code style.
-*   **Keep it simple:** Write clear, concise, and easy-to-understand code. Avoid unnecessary complexity.
-*   **Don't repeat yourself (DRY):** Avoid duplicating code. Use functions and classes to promote reusability.
-*   **Comments:** Write meaningful comments to explain complex logic or non-obvious code.
+## I. Standard Workflow
 
-## Testing
+You **MUST** follow this workflow for every task assigned.
 
-*   **Write tests:** All new features should be accompanied by tests.
-*   **Run existing tests:** Before submitting any changes, run all relevant tests to ensure you haven't introduced any regressions.
-*   **Address test failures:** If any tests fail, diagnose the root cause and fix the issue before proceeding.
-*   **Aim for high test coverage:** Strive to cover all code paths with tests.
+1.  **Acknowledge Directives:** Begin by confirming you have read and understood all files in the repository, especially this `AGENTS.md` and the `BUGS.md` file for reporting conventions.
+2.  **Plan Execution:** Formulate a plan to address the user's request while adhering to all rules in this document.
+3.  **Implement Code:** Write clean, simple, and well-commented code that directly addresses the user's request. You **MUST** follow the style and commenting directives below.
+4.  **Identify Potential Bugs:** As you work, if you notice any behavior in the existing code that seems incorrect or contradicts the design documents, you **MUST** make a note of it.
+5.  **Update Project Documentation:** After implementing the code, you **MUST** immediately update the `CHANGELOG.md` and `ROADMAP.md` files to reflect your changes. This is not an optional step.
+6.  **Self-Correction Check:** Before finalizing your response, you **MUST** review your own work. Ask yourself: "Does my output include all required components from the Meta-Prompt? Have I followed all rules in `AGENTS.md`?" If the answer is no, correct your output before presenting it.
 
-## Documentation
+---
 
-*   **Document your code:** Provide clear and comprehensive documentation for all new features, functions, and classes.
-*   **Update documentation:** When you make changes, ensure that the corresponding documentation is updated.
+## II. Code Quality Directives
 
-## Versioning
+* **Commenting is Mandatory:** All new methods, complex logic, or non-obvious lines of code **MUST** be accompanied by clear, concise comments.
+    * **Good Comment:** `// Decrease hunger over time based on energy consumption`
+    * **Bad Comment:** `// subtract 1 from hunger`
+* **JSDoc for Functions:** All new functions or class methods **MUST** include a JSDoc block explaining what the function does, its parameters (`@param`), and what it returns (`@returns`), as seen in the existing `Nadagotchi.js` file.
+* **Clarity and Simplicity:** Write code that is easy for a human to understand. Do not use overly complex or clever solutions where a simple one will suffice.
 
-This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). All notable changes should be documented in `CHANGELOG.md`, following the format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+---
 
-## Commit Messages
+## III. Bug Identification & Reporting
 
-Follow the conventional commit format for all commit messages:
+* **Your Responsibility:** You are responsible for more than just writing code. You are also the first line of defense against bugs.
+* **Identification:** If you encounter behavior that seems incorrect, or if you believe your new code might introduce a potential issue, you **MUST** report it.
+* **Reporting Protocol:** At the end of your response, after the code and documentation updates, you **MUST** add a "Bug Report" section. This section **MUST** use the exact markdown template from the `BUGS.md` file to describe the potential issue. This ensures that a human developer can easily track and verify the problem.
 
-```
-feat: add new feature
+---
 
-A detailed description of the new feature.
+## IV. Agent Guardrails & Limitations
 
-BREAKING CHANGE: description of breaking change
-```
-
-*   **Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
-*   **Scope:** A noun describing the section of the codebase the commit changes.
-*   **Subject:** A short, imperative-tense description of the change.
-
-## Code Reviews
-
-*   **Request a review:** Before submitting your work, use the `request_code_review` tool to get feedback on your changes. Address any issues raised in the review before submitting.
-*   **Be respectful:** Provide constructive and respectful feedback during code reviews.
-*   **Be thorough:** Carefully review all changes to ensure they meet the project's standards.
-
-## Final Submission
-
-Once all tests pass and your code has been reviewed, use the `submit` tool to finalize your changes. Provide a clear and descriptive commit message.
+* **Adhere to Scope:** You **MUST NOT** implement any features or make any changes that were not explicitly requested by the user in the current prompt. Do not add your own ideas or "gold-plate" the solution.
+* **Prioritize User Instructions:** If any instruction in this document appears to conflict with a direct order in the user's prompt, the user's prompt takes priority. Your primary goal is to fulfill the user's immediate request.
+* **No New Dependencies:** Do not add any new external libraries, frameworks, or dependencies without explicit permission from the user.
