@@ -106,6 +106,34 @@
                     this.stats.hunger = 100;
                 }
             }
+
+            /**
+             * The Nadagotchi plays, changing its mood based on archetype.
+             */
+            play() {
+                switch (this.archetype) {
+                    case 'Adventurer':
+                    case 'Mischievous':
+                        this.mood = 'happy';
+                        this.personalityPoints[this.archetype]++;
+                        break;
+                    case 'Nurturer':
+                    case 'Intellectual':
+                        // This action is neutral for these archetypes.
+                        break;
+                    case 'Recluse':
+                        this.mood = 'sad';
+                        break;
+                }
+            }
+
+            /**
+             * Gets the personality points object.
+             * @returns {object} The personality points.
+             */
+            getPersonalityPoints() {
+                return this.personalityPoints;
+            }
         }
 
         class MainScene extends Phaser.Scene {
@@ -142,6 +170,19 @@
                 feedButton.setInteractive();
                 feedButton.on('pointerdown', () => {
                     this.nadagotchi_data.feed();
+                });
+
+                // Create a clickable "Play" button
+                const playButton = this.add.text(100, 70, 'Play', {
+                    fontFamily: 'Arial',
+                    fontSize: '16px',
+                    backgroundColor: '#4D4D4D',
+                    color: '#ffffff',
+                    padding: { x: 10, y: 5 }
+                });
+                playButton.setInteractive();
+                playButton.on('pointerdown', () => {
+                    this.nadagotchi_data.play();
                 });
             }
 
