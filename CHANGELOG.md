@@ -2,8 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+The format is based on [Keep a Changelog](https.keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.4.0] - 2025-09-14
+
+### Added
+- **Career-Specific Job Board:** Implemented a new "Job Board" UI element.
+  - The button is initially disabled and becomes active only when the Nadagotchi achieves a career (`currentCareer` is not null).
+  - Clicking the button triggers a career-specific action. Currently, it logs a message to the console for the 'Innovator' career.
+- **Career Display in UI:** The Nadagotchi's current career is now displayed in the stats panel, making it easy for the player to see their progress.
+
+### Changed
+- Modified `js/MainScene.js` to add the Job Board button, its activation logic in the `update` loop, and the new `openJobBoard()` method.
 
 ## [0.3.0] - 2025-09-14
 

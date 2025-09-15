@@ -1,30 +1,40 @@
 # Roadmap
 
-This document outlines the future direction of the project.
+This document outlines the planned future direction of the Nadagotchi project.
 
-## Version 0.1.0 (Current)
+---
 
--   [x] Establish project documentation:
-    -   [x] `AGENTS.md`
-    -   [x] `CHANGELOG.md`
-    -   [x] `ROADMAP.md`
-    -   [x] `BEST_PRACTICES.md`
-    -   [x] `BUGS.md`
+## Phase 1: Core Gameplay Loop (In Progress)
 
-## Version 0.2.0 (Current)
+This phase focuses on building the fundamental mechanics of the game: caring for the Nadagotchi, influencing its personality, and seeing it grow.
 
--   [x] Implement core feature A (Explore Action).
--   [ ] Add comprehensive tests for feature A.
+### **Version 0.1: Project Foundation**
+-   [x] Establish core project documentation (`AGENTS.md`, `CHANGELOG.md`, `ROADMAP.md`, etc.).
 
-## Version 0.3.0 (Current)
+### **Version 0.2: Personality & Interaction**
+-   [x] Implement the "Explore" action to deepen the personality system.
+-   [ ] Add comprehensive tests for archetype-based actions.
 
--   [x] Implement core feature B (e.g., Skill development from actions).
--   [ ] Add comprehensive tests for feature B.
+### **Version 0.3: Skill & Growth**
+-   [x] Implement mood-based skill development ('Study' action).
+-   [ ] Add comprehensive tests for skill gain mechanics.
 
-## Future Versions
+### **Version 0.4: Meaningful Progression**
+-   [x] **Implement Job Board for Unlocked Careers.**
+-   [ ] Add comprehensive tests for the Job Board functionality.
 
-### Version 1.0.0
+---
 
--   [ ] Implement all core features.
--   [ ] Achieve stable API.
--   [ ] Public release.
+## Phase 2: Advanced Systems (Upcoming)
+
+This phase will introduce more complex, long-term systems that give the game replayability and depth.
+
+### **Version 0.5: The Career System**
+-   [ ] **Flesh out the Career System:**
+    -   [ ] Implement the logic for achieving the "Innovator" career based on skill thresholds (e.g., `logic > 10`).
+    -   [ ] Create a visual in-game notification when a career is unlocked.
+
+### **Version 1.0: Public Release**
+-   [ ] Implement all core features from Phases 1 & 2.
+-   [ ] Achieve a stable, well-tested state.
+-   [ ] Prepare for a public release.
