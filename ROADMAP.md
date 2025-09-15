@@ -11,12 +11,17 @@ This document outlines the future direction of the project.
     -   [x] `BEST_PRACTICES.md`
     -   [x] `BUGS.md`
 
+## Version 0.2.0 (Current)
+
+-   [x] Implement core feature A (Explore Action).
+-   [ ] Add comprehensive tests for feature A.
+
 ## Future Versions
 
-### Version 0.2.0
+### Version 0.3.0
 
--   [ ] Implement core feature A.
--   [ ] Add comprehensive tests for feature A.
+-   [ ] Implement core feature B (e.g., Skill development from actions).
+-   [ ] Add comprehensive tests for feature B.
 
 ### Version 1.0.0
 
