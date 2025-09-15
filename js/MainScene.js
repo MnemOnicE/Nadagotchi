@@ -46,6 +46,19 @@ class MainScene extends Phaser.Scene {
         playButton.on('pointerdown', () => {
             this.nadagotchi_data.play();
         });
+
+        // Create a clickable "Study" button
+        const studyButton = this.add.text(190, 70, 'Study', {
+            fontFamily: 'Arial',
+            fontSize: '16px',
+            backgroundColor: '#4D4D4D',
+            color: '#ffffff',
+            padding: { x: 10, y: 5 }
+        });
+        studyButton.setInteractive();
+        studyButton.on('pointerdown', () => {
+            this.nadagotchi_data.study();
+        });
     }
 
     update() {
