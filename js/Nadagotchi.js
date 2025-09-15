@@ -51,12 +51,22 @@ class Nadagotchi {
 
     /**
      * Gets the dominant archetype of the Nadagotchi.
-     * For now, this just returns the initial archetype.
+     * This calculates the dominant archetype based on personality points.
      * @returns {string} The dominant archetype.
      */
     getArchetype() {
-        // In the future, this could calculate the dominant archetype based on personality points.
-        return this.archetype;
+        let dominantArchetype = '';
+        let maxPoints = -1;
+
+        for (const archetype in this.personalityPoints) {
+            if (this.personalityPoints.hasOwnProperty(archetype)) {
+                if (this.personalityPoints[archetype] > maxPoints) {
+                    maxPoints = this.personalityPoints[archetype];
+                    dominantArchetype = archetype;
+                }
+            }
+        }
+        return dominantArchetype;
     }
 
     /**
@@ -88,11 +98,12 @@ class Nadagotchi {
      * The Nadagotchi plays, changing its mood based on archetype.
      */
     play() {
-        switch (this.archetype) {
+        const currentArchetype = this.getArchetype();
+        switch (currentArchetype) {
             case 'Adventurer':
             case 'Mischievous':
                 this.mood = 'happy';
-                this.personalityPoints[this.archetype]++;
+                this.personalityPoints[currentArchetype]++;
                 break;
             case 'Nurturer':
             case 'Intellectual':
@@ -101,6 +112,19 @@ class Nadagotchi {
             case 'Recluse':
                 this.mood = 'sad';
                 break;
+        }
+    }
+
+    /**
+     * The Nadagotchi studies, increasing Intellectual points and changing mood.
+     */
+    study() {
+        this.personalityPoints.Intellectual++;
+        const currentArchetype = this.getArchetype();
+        if (currentArchetype === 'Intellectual') {
+            this.mood = 'happy';
+        } else if (currentArchetype === 'Mischievous') {
+            this.mood = 'sad';
         }
     }
 
