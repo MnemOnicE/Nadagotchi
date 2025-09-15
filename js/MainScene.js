@@ -4,8 +4,8 @@ class MainScene extends Phaser.Scene {
     }
 
     preload() {
-        // Load a placeholder image from an external service
-        this.load.image('pet', 'https://via.placeholder.com/32');
+        // Load a placeholder spritesheet from an external service
+        this.load.spritesheet('pet_sprites', 'https://via.placeholder.com/64x32', { frameWidth: 32, frameHeight: 32 });
     }
 
     create() {
@@ -13,7 +13,7 @@ class MainScene extends Phaser.Scene {
         this.nadagotchi_data = new Nadagotchi('Adventurer');
 
         // Add the placeholder sprite to the center of the screen
-        this.sprite = this.add.sprite(this.cameras.main.width / 2, this.cameras.main.height / 2, 'pet');
+        this.sprite = this.add.sprite(this.cameras.main.width / 2, this.cameras.main.height / 2, 'pet_sprites');
 
         // Attach the data object to the sprite
         this.sprite.setData('instance', this.nadagotchi_data);
@@ -55,8 +55,25 @@ class MainScene extends Phaser.Scene {
             this.nadagotchi_data.stats.hunger = 0;
         }
 
+        // A simple mood change based on hunger
+        if (this.nadagotchi_data.stats.hunger < 30) {
+            this.nadagotchi_data.setMood('sad');
+        } else {
+            // Avoid overriding a mood set by another action unless hunger is high again
+            if(this.nadagotchi_data.getMood() !== 'happy') {
+                this.nadagotchi_data.setMood('happy');
+            }
+        }
+
         // Update the UI text to show the current hunger
         this.statsText.setText(this.getStatsText());
+
+        // Update the sprite frame based on the current mood
+        if (this.nadagotchi_data.getMood() === 'happy') {
+            this.sprite.setFrame(0);
+        } else if (this.nadagotchi_data.getMood() === 'sad') {
+            this.sprite.setFrame(1);
+        }
     }
 
     getStatsText() {
