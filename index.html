@@ -96,6 +96,16 @@
                     this.stats.hunger = 0;
                 }
             }
+
+            /**
+             * Feeds the Nadagotchi, increasing its hunger by 10.
+             */
+            feed() {
+                this.stats.hunger += 10;
+                if (this.stats.hunger > 100) {
+                    this.stats.hunger = 100;
+                }
+            }
         }
 
         class MainScene extends Phaser.Scene {
@@ -118,8 +128,37 @@
                 // Attach the data object to the sprite
                 this.sprite.setData('instance', this.nadagotchi_data);
 
-                // Display the archetype and mood
-                this.add.text(10, 10, `Archetype: ${this.nadagotchi_data.getArchetype()} \nMood: ${this.nadagotchi_data.getMood()}`);
+                // Display the stats and store the text object for updates
+                this.statsText = this.add.text(10, 10, this.getStatsText());
+
+                // Create a clickable "Feed" button
+                const feedButton = this.add.text(10, 70, 'Feed Me!', {
+                    fontFamily: 'Arial',
+                    fontSize: '16px',
+                    backgroundColor: '#4D4D4D',
+                    color: '#ffffff',
+                    padding: { x: 10, y: 5 }
+                });
+                feedButton.setInteractive();
+                feedButton.on('pointerdown', () => {
+                    this.nadagotchi_data.feed();
+                });
+            }
+
+            update() {
+                // Decrease hunger over time
+                this.nadagotchi_data.stats.hunger -= 0.015; // Adjust for desired speed
+                if (this.nadagotchi_data.stats.hunger < 0) {
+                    this.nadagotchi_data.stats.hunger = 0;
+                }
+
+                // Update the UI text to show the current hunger
+                this.statsText.setText(this.getStatsText());
+            }
+
+            getStatsText() {
+                // Helper function to format the stats text
+                return `Archetype: ${this.nadagotchi_data.getArchetype()}\nMood: ${this.nadagotchi_data.getMood()}\nHunger: ${Math.floor(this.nadagotchi_data.stats.hunger)}`;
             }
         }
 
