@@ -73,4 +73,42 @@ class Nadagotchi {
             this.stats.hunger = 0;
         }
     }
+
+    /**
+     * Feeds the Nadagotchi, increasing its hunger by 10.
+     */
+    feed() {
+        this.stats.hunger += 10;
+        if (this.stats.hunger > 100) {
+            this.stats.hunger = 100;
+        }
+    }
+
+    /**
+     * The Nadagotchi plays, changing its mood based on archetype.
+     */
+    play() {
+        switch (this.archetype) {
+            case 'Adventurer':
+            case 'Mischievous':
+                this.mood = 'happy';
+                this.personalityPoints[this.archetype]++;
+                break;
+            case 'Nurturer':
+            case 'Intellectual':
+                // This action is neutral for these archetypes.
+                break;
+            case 'Recluse':
+                this.mood = 'sad';
+                break;
+        }
+    }
+
+    /**
+     * Gets the personality points object.
+     * @returns {object} The personality points.
+     */
+    getPersonalityPoints() {
+        return this.personalityPoints;
+    }
 }
