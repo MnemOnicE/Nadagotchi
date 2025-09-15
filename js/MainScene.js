@@ -89,12 +89,14 @@ class MainScene extends Phaser.Scene {
      */
     updateStatsUI() {
         const stats = this.nadagotchi.stats;
+        const skills = this.nadagotchi.skills;
         // Format the text string with the latest data from the Nadagotchi object.
         const text = `Archetype: ${this.nadagotchi.dominantArchetype}\n` +
                      `Mood: ${this.nadagotchi.mood}\n` +
                      `Hunger: ${Math.floor(stats.hunger)}\n` +
                      `Energy: ${Math.floor(stats.energy)}\n` +
-                     `Happiness: ${Math.floor(stats.happiness)}`;
+                     `Happiness: ${Math.floor(stats.happiness)}\n` +
+                     `Logic Skill: ${skills.logic.toFixed(2)}`;
         this.statsText.setText(text);
     }
 
