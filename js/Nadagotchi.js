@@ -1,19 +1,19 @@
 /**
- * Represents the core Nadagotchi entity.
+ * Represents the core Nadagotchi entity, its "Brain".
+ * This class holds the Nadagotchi's state, including its personality, stats, skills, and more.
  */
 class Nadagotchi {
     /**
      * Creates a new Nadagotchi.
-     * @param {string} archetype - The initial archetype of the Nadagotchi (e.g., 'Adventurer', 'Nurturer').
+     * @param {string} initialArchetype - The initial archetype of the Nadagotchi (e.g., 'Adventurer', 'Nurturer').
      */
-    constructor(archetype) {
-        // Store the initial archetype.
-        this.archetype = archetype;
-
-        // Set a default initial mood.
-        this.mood = 'happy';
-
-        // Initialize personality points for each archetype.
+    constructor(initialArchetype) {
+        // --- I. PERSONALITY & MOOD SYSTEM ---
+        /** @type {string} - The current mood of the Nadagotchi ('happy', 'sad', 'angry', 'neutral'). */
+        this.mood = 'neutral';
+        /** @type {string} - The dominant personality archetype. */
+        this.dominantArchetype = initialArchetype;
+        /** @type {Object.<string, number>} - Points for each personality archetype. */
         this.personalityPoints = {
             Adventurer: 0,
             Nurturer: 0,
@@ -21,118 +21,139 @@ class Nadagotchi {
             Intellectual: 0,
             Recluse: 0
         };
-        // Give the starting archetype some points.
-        if (this.personalityPoints.hasOwnProperty(archetype)) {
-            this.personalityPoints[archetype] = 10;
-        }
+        this.personalityPoints[initialArchetype] = 10;
 
-        // Initialize other stats.
+        // --- CORE STATS ---
+        /** @type {{hunger: number, energy: number, happiness: number}} - Core needs and happiness levels. */
         this.stats = {
             hunger: 100,
-            energy: 100
+            energy: 100,
+            happiness: 70
         };
+
+        // --- III. CAREER & SKILL SYSTEM (Placeholder) ---
+        /** @type {Object.<string, number>} - Skills the Nadagotchi can learn. */
+        this.skills = {
+            // Core Skills
+            communication: 1,
+            resilience: 1,
+            // Archetype-Specific Skills
+            navigation: 0, // Adventurer
+            empathy: 0,    // Nurturer
+            logic: 0       // Intellectual
+        };
+        /** @type {?string} - The current career of the Nadagotchi. */
+        this.currentCareer = null; // e.g., 'Scout', 'Healer'
+        /** @type {Array} - Items that can be used for training or other activities. */
+        this.inventory = [];
+
+        // --- II. GENERATIONAL LEGACY SYSTEM (Placeholder) ---
+        /** @type {number} - The age of the Nadagotchi. */
+        this.age = 0;
+        /** @type {Array<string>} - Inherited traits from previous generations. */
+        this.legacyTraits = []; // e.g., 'Swift Learner', 'Zen Focus'
     }
 
     /**
-     * Gets the current mood of the Nadagotchi.
-     * @returns {string} The current mood.
+     * Simulates the passage of time for the Nadagotchi.
+     * This method should be called in the main game loop. It handles stat decay and autonomous mood changes.
      */
-    getMood() {
-        return this.mood;
+    live() {
+        // 1. Stats decay over time
+        this.stats.hunger -= 0.05; // Slower decay for balance
+        this.stats.energy -= 0.02; // Slower decay for balance
+
+        // Clamp stats to a minimum of 0
+        if (this.stats.hunger < 0) this.stats.hunger = 0;
+        if (this.stats.energy < 0) this.stats.energy = 0;
+
+        // 2. Mood is affected by needs
+        if (this.stats.hunger < 30 || this.stats.energy < 20) {
+            this.mood = 'sad';
+        } else if (this.stats.hunger < 10) {
+            this.mood = 'angry';
+        } else if (this.stats.hunger > 80 && this.stats.energy > 80) {
+            this.mood = 'happy';
+        } else {
+            this.mood = 'neutral';
+        }
+
+        // 3. Age increases
+        this.age += 0.001; // Slower aging
     }
 
     /**
-     * Sets a new mood for the Nadagotchi.
-     * @param {string} newMood - The new mood.
+     * Handles a player-initiated action.
+     * This method updates the Nadagotchi's state based on the action performed.
+     * @param {string} actionType - The type of action (e.g., 'FEED', 'PLAY', 'STUDY').
+     * @param {any} [item=null] - An optional item used in the action.
      */
-    setMood(newMood) {
-        this.mood = newMood;
+    handleAction(actionType, item = null) {
+        switch (actionType) {
+            case 'FEED':
+                this.stats.hunger += 15;
+                if (this.stats.hunger > 100) this.stats.hunger = 100;
+                this.stats.happiness += 5;
+                if (this.stats.happiness > 100) this.stats.happiness = 100;
+
+                // A 'Nurturer' gains a personality point from being cared for
+                if (this.dominantArchetype === 'Nurturer') {
+                    this.personalityPoints.Nurturer++;
+                }
+                break;
+            case 'PLAY':
+                this.stats.energy -= 10;
+                if (this.stats.energy < 0) this.stats.energy = 0;
+                this.stats.happiness += 10;
+                if (this.stats.happiness > 100) this.stats.happiness = 100;
+
+                // Different archetypes react differently to play
+                if (['Adventurer', 'Mischievous'].includes(this.dominantArchetype)) {
+                    this.mood = 'happy';
+                    this.personalityPoints[this.dominantArchetype]++;
+                } else if (this.dominantArchetype === 'Recluse') {
+                    this.mood = 'sad';
+                    this.stats.happiness -= 5; // Recluses don't like to play
+                }
+                break;
+            case 'STUDY':
+                this.stats.energy -= 5;
+                if (this.stats.energy < 0) this.stats.energy = 0;
+                this.stats.happiness -= 5; // Studying can be draining
+                if (this.stats.happiness < 0) this.stats.happiness = 0;
+
+                if (this.dominantArchetype === 'Intellectual') {
+                    this.mood = 'happy';
+                    this.personalityPoints.Intellectual++;
+                    this.skills.logic += 0.1; // Studying increases a skill!
+                    this.stats.happiness += 10; // Intellectuals enjoy studying
+                } else {
+                    this.personalityPoints.Intellectual++; // Anyone can learn
+                }
+                break;
+        }
+        // Ensure stats don't go out of bounds
+        if (this.stats.happiness > 100) this.stats.happiness = 100;
+        if (this.stats.happiness < 0) this.stats.happiness = 0;
+
+        this.updateDominantArchetype();
     }
 
     /**
-     * Gets the dominant archetype of the Nadagotchi.
-     * This calculates the dominant archetype based on personality points.
-     * @returns {string} The dominant archetype.
+     * Updates the dominant archetype based on which personality has the most points.
      */
-    getArchetype() {
-        let dominantArchetype = '';
+    updateDominantArchetype() {
         let maxPoints = -1;
+        let newDominantArchetype = this.dominantArchetype;
 
         for (const archetype in this.personalityPoints) {
             if (this.personalityPoints.hasOwnProperty(archetype)) {
                 if (this.personalityPoints[archetype] > maxPoints) {
                     maxPoints = this.personalityPoints[archetype];
-                    dominantArchetype = archetype;
+                    newDominantArchetype = archetype;
                 }
             }
         }
-        return dominantArchetype;
-    }
-
-    /**
-     * Adjusts the hunger stat of the Nadagotchi.
-     * @param {number} amount - The amount to adjust hunger by (can be positive or negative).
-     */
-    adjustHunger(amount) {
-        this.stats.hunger += amount;
-        // Clamp hunger between 0 and 100 (or a max value).
-        if (this.stats.hunger > 100) {
-            this.stats.hunger = 100;
-        }
-        if (this.stats.hunger < 0) {
-            this.stats.hunger = 0;
-        }
-    }
-
-    /**
-     * Feeds the Nadagotchi, increasing its hunger by 10.
-     */
-    feed() {
-        this.stats.hunger += 10;
-        if (this.stats.hunger > 100) {
-            this.stats.hunger = 100;
-        }
-    }
-
-    /**
-     * The Nadagotchi plays, changing its mood based on archetype.
-     */
-    play() {
-        const currentArchetype = this.getArchetype();
-        switch (currentArchetype) {
-            case 'Adventurer':
-            case 'Mischievous':
-                this.mood = 'happy';
-                this.personalityPoints[currentArchetype]++;
-                break;
-            case 'Nurturer':
-            case 'Intellectual':
-                // This action is neutral for these archetypes.
-                break;
-            case 'Recluse':
-                this.mood = 'sad';
-                break;
-        }
-    }
-
-    /**
-     * The Nadagotchi studies, increasing Intellectual points and changing mood.
-     */
-    study() {
-        this.personalityPoints.Intellectual++;
-        const currentArchetype = this.getArchetype();
-        if (currentArchetype === 'Intellectual') {
-            this.mood = 'happy';
-        } else if (currentArchetype === 'Mischievous') {
-            this.mood = 'sad';
-        }
-    }
-
-    /**
-     * Gets the personality points object.
-     * @returns {object} The personality points.
-     */
-    getPersonalityPoints() {
-        return this.personalityPoints;
+        this.dominantArchetype = newDominantArchetype;
     }
 }
