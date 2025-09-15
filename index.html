@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Nadagotchi</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #222;
+        }
+        #game-container {
+            border: 5px solid #fff;
+            box-shadow: 0 0 20px #fff;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container"></div>
+    <script>
+        class MainScene extends Phaser.Scene {
+            constructor() {
+                super({ key: 'MainScene' });
+            }
+
+            preload() {
+                // Load a placeholder image from an external service
+                this.load.image('pet', 'https://via.placeholder.com/32');
+            }
+
+            create() {
+                // Add the placeholder sprite to the center of the screen
+                this.add.sprite(this.cameras.main.width / 2, this.cameras.main.height / 2, 'pet');
+            }
+        }
+
+        const config = {
+            type: Phaser.AUTO,
+            width: 320,
+            height: 240,
+            parent: 'game-container',
+            backgroundColor: '#cccccc',
+            scene: [MainScene]
+        };
+
+        const game = new Phaser.Game(config);
+    </script>
+</body>
+</html>
