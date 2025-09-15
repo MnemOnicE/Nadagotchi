@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Explorer: Tamagotchi-like Game Concept</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Visualization & Content Choices:
+        - Mood System: Archetypes (Goal: Inform/Organize, Method: Interactive HTML cards + JS). Conceptual Archetype Feature Focus (Goal: Compare, Method: Chart.js Donut, illustrative data).
+        - Legacy System: Breeding Process (Goal: Organize/Inform, Method: HTML/CSS flowchart). Legacy Traits (Goal: Inform, Method: Click-to-reveal HTML list + JS).
+        - Career System: Skill Categories (Goal: Organize/Compare, Method: HTML/CSS Tabs + JS).
+        - Dynamic World: Event types (Goal: Inform, Method: HTML/CSS descriptive blocks with Unicode icons).
+        - Meta-Game Features: (Goal: Organize/Inform, Method: HTML/CSS accordion/details elements).
+        - All diagrams are HTML/CSS. Charts are Chart.js (Canvas). Justification: Prioritize clarity, interactivity, and adherence to no-SVG/Mermaid constraints, using the best available method for each piece of information within the designed SPA structure.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FAF7F5; /* Warm Off-White */
+            color: #4A4A4A; /* Deep Warm Gray */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px; 
+            margin-left: auto;
+            margin-right: auto;
+            height: 280px; 
+            max-height: 350px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 320px;
+            }
+        }
+        .card {
+            background-color: #FFFFFF;
+            border-radius: 0.5rem; 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            padding: 1.5rem; 
+            margin-bottom: 1.5rem; 
+            border: 1px solid #EDEAE8; 
+        }
+        .section-title {
+            font-size: 2.25rem; 
+            font-weight: 700;
+            color: #4A4A4A;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            padding-top: 4rem; 
+        }
+        .sub-title {
+            font-size: 1.5rem; 
+            font-weight: 600;
+            color: #D8A373; /* Muted Terracotta */
+            margin-bottom: 1rem;
+        }
+        .nav-sticky {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background-color: rgba(250, 247, 245, 0.85); 
+            backdrop-filter: blur(8px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .nav-link {
+            color: #4A4A4A;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+        }
+        .nav-link:hover, .nav-link.active {
+            background-color: #D8A373;
+            color: #FFFFFF;
+        }
+        .tab-button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            color: #4A4A4A;
+            background-color: #F0F0F0;
+            border: 1px solid #E0E0E0;
+            transition: background-color 0.2s ease;
+        }
+        .tab-button.active {
+            background-color: #D8A373;
+            color: #FFFFFF;
+            border-color: #D8A373;
+        }
+        .flowchart-node {
+            background-color: #F3EADA; 
+            border: 1px solid #D8A373;
+            color: #4A4A4A;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            text-align: center;
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+        .flowchart-arrow {
+            font-size: 1.5rem;
+            color: #D8A373;
+            text-align: center;
+            margin: 0.1rem 0;
+            line-height: 1;
+        }
+        .details-summary {
+            cursor: pointer;
+            padding: 0.75rem;
+            background-color: #F9F6F4;
+            border: 1px solid #EDEAE8;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            color: #D8A373;
+            margin-bottom: 0.5rem;
+            display: block;
+            transition: background-color 0.2s;
+        }
+        .details-summary:hover {
+            background-color: #F3EADA;
+        }
+        .details-content {
+            padding: 1rem;
+            background-color: #FFFFFF;
+            border: 1px solid #EDEAE8;
+            border-top: none;
+            border-radius: 0 0 0.375rem 0.375rem;
+        }
+        details[open] > summary {
+            background-color: #F3EADA;
+        }
+        .unicode-icon {
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+            color: #A3B8A2; /* Soft Olive Green */
+            vertical-align: middle;
+        }
+        .archetype-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .archetype-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px -2px rgba(0,0,0,0.07);
+        }
+        .archetype-card .details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .archetype-card.open .details {
+            max-height: 200px; /* Adjust as needed */
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-[#A3B8A2] py-12 text-center">
+        <div class="container mx-auto px-4">
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-3">Tamagotchi-like Game Concept</h1>
+            <p class="text-xl md:text-2xl text-white/90">An Interactive Exploration of System Design</p>
+        </div>
+    </header>
+
+    <nav id="navbar" class="nav-sticky py-3">
+        <div class="container mx-auto px-4">
+            <ul class="flex flex-wrap justify-center space-x-1 sm:space-x-2 md:space-x-3 text-xs sm:text-sm">
+                <li><a href="#overview" class="nav-link">Overview</a></li>
+                <li><a href="#mood-system" class="nav-link">Mood System</a></li>
+                <li><a href="#legacy-career" class="nav-link">Legacy & Career</a></li>
+                <li><a href="#dynamic-world" class="nav-link">Dynamic World</a></li>
+                <li><a href="#meta-game" class="nav-link">Meta-Game</a></li>
+                <li><a href="#aesthetics" class="nav-link">Aesthetics</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <section id="overview">
+            <h2 class="section-title">Concept Overview</h2>
+            <div class="card">
+                <p class="text-lg mb-4 leading-relaxed">This interactive explorer delves into the detailed system design for an innovative Tamagotchi-like game. The concept targets mid-to-late twenties players seeking a blend of nostalgia with deep, evolving gameplay that extends far beyond basic pet care. The aim is to create a rich, engaging simulation centered on deep emotional connections and long-term player investment.</p>
+                <p class="mb-4 leading-relaxed">The core vision is to create a virtual companion with a nuanced personality, capable of forming meaningful bonds with the player. This is achieved through several interconnected systems designed for long-term engagement, progression, and a sense of a living, breathing world. Explore the sections below to understand each component of this game design.</p>
+                <div class="text-center my-6 p-6 bg-[#F9F6F4] rounded-lg border border-[#EDEAE8]">
+                    <p class="text-xl text-[#D8A373] font-semibold mb-3">Key Design Pillars:</p>
+                    <ul class="list-none space-y-1 text-[#4A4A4A] text-base">
+                        <li>Dynamic Mood & Personality System</li>
+                        <li>Generational Legacy & Breeding Mechanics</li>
+                        <li>In-depth Career & Skill Development</li>
+                        <li>Responsive World Events & Environmental Interaction</li>
+                        <li>Engaging Meta-Game & Sharing Features</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="mood-system">
+            <h2 class="section-title">The Living Companion: Mood & Personality</h2>
+            <div class="card">
+                <p class="text-lg mb-6 leading-relaxed">The heart of the game lies in its dynamic Mood-Based Interaction and Personality System. This system ensures each virtual pet is unique and reacts intelligently to the player and its environment, fostering a deeper connection than traditional virtual pets.</p>
+                
+                <h3 class="sub-title">Personality Archetypes</h3>
+                <p class="mb-4">Pets embody one of five core archetypes, each with distinct cravings, emotional triggers, and behavioral patterns. Click on an archetype to learn more about its specific characteristics:</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6" id="archetypeContainer">
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8 items-start mt-8">
+                    <div>
+                        <h3 class="sub-title">Mood Meter & Expression</h3>
+                        <p class="mb-4 leading-relaxed">A visible mood meter (e.g., expressive pixel-art face, color aura) clearly communicates the pet's current emotional state: Happy, Sad, or Angry. Crucially, the pet's underlying archetype influences how these moods are expressed, leading to diverse animations and behaviors. For example, an Angry Adventurer might stomp, while an Angry Nurturer might sulk.</p>
+                        <div class="p-4 bg-[#F9F6F4] rounded-lg text-center border border-[#EDEAE8]">
+                            <span class="unicode-icon">😊</span> <span class="unicode-icon">😢</span> <span class="unicode-icon">😠</span>
+                            <p class="text-sm mt-2">Visual cues indicate mood, uniquely expressed by archetype.</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="sub-title">Conceptual Archetype Focus</h3>
+                        <p class="mb-4 text-sm leading-relaxed">This chart conceptually illustrates how various game features and mechanics might cater to or be primarily influenced by the different archetypes, aiming for balanced engagement across personality types.</p>
+                        <div class="chart-container h-[280px] md:h-[300px]">
+                            <canvas id="archetypeFocusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="sub-title mt-8">Dynamic Interaction & Evolution</h3>
+                <p class="mb-2 leading-relaxed">A pet's personality is not static. Player choices in dialogue, activities offered, and responses to the pet's proactive behaviors all shape its personality over time. Consistent interaction can strengthen an archetype, or varied experiences might lead to a fascinating hybrid personality.</p>
+                <ul class="list-disc list-inside space-y-1 text-sm pl-4 mb-4 bg-[#F9F6F4] p-4 rounded-md border border-[#EDEAE8]">
+                    <li>Dialogue options dynamically change based on the pet's current mood and underlying personality.</li>
+                    <li>Pets exhibit proactive behaviors tied to their state (e.g., a Happy Adventurer might spontaneously "explore").</li>
+                    <li>Certain mini-games become more appealing or accessible based on the pet's current mood and personality.</li>
+                    <li>Personality evolution is managed via hidden "personality points" for each archetype, accumulating through experiences.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="legacy-career">
+            <h2 class="section-title">Generations of Growth: Legacy & Career</h2>
+            <div class="card">
+                <p class="text-lg mb-6 leading-relaxed">Long-term engagement is a key goal, fostered through two interconnected systems: a Generational Legacy system allowing traits to be passed down, and a Career/Life Path system for specialized development and progression.</p>
+                
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="sub-title">Generational Legacy System</h3>
+                        <p class="mb-4 leading-relaxed">This system allows players to cultivate a lineage of pets. Offspring can inherit "Personality Genes," the "Mood Sensitivity" trait, and potentially rare, powerful "Legacy Traits" from their parents, creating a unique family tree.</p>
+                        <div class="flowchart-node">1. Pet reaches "Legacy-Ready" Elder Phase (visual cues)</div>
+                        <div class="flowchart-arrow">▼</div>
+                        <div class="flowchart-node">2. Player chooses to initiate generational process</div>
+                        <div class="flowchart-arrow">▼</div>
+                        <div class="flowchart-node">3. Traits (Personality Genes, Mood Sensitivity) inherited by Egg</div>
+                        <div class="flowchart-arrow">▼</div>
+                        <div class="flowchart-node">4. Chance for Hybridization & Rare "Legacy Traits"
+                            <details class="mt-2 text-xs text-left">
+                                <summary class="details-summary !p-1 !text-xs !bg-[#E0D2C1] !text-[#4A4A4A] hover:!bg-[#D8A373] hover:!text-white">Explore Legacy Traits (Examples)</summary>
+                                <div class="details-content !p-2 !text-xs">
+                                    <p><strong>Swift Learner:</strong> Faster skill gain in mini-games.</p>
+                                    <p><strong>Zen Focus:</strong> Improved performance in puzzle-based activities.</p>
+                                    <p><strong>Creative Spark:</strong> Unlocks unique crafting recipes or item variations.</p>
+                                </div>
+                            </details>
+                        </div>
+                        <div class="flowchart-arrow">▼</div>
+                        <div class="flowchart-node">5. New Offspring hatches with inherited potential (unique egg design)</div>
+                        <div class="flowchart-arrow">▼</div>
+                        <div class="flowchart-node">6. Elder "retires" (becomes NPC, adds to Lore Library, offers advice)</div>
+                    </div>
+
+                    <div>
+                        <h3 class="sub-title">Career/Life Path System</h3>
+                        <p class="mb-4 leading-relaxed">Pets can develop skills through mini-games, dialogue choices, and specific training items. Mastering skills and aligning with a dominant personality unlocks specialized Career Paths, complete with unique "Work" opportunities and rewards.</p>
+                        <div id="skillTabsContainer">
+                            <div class="flex space-x-2 mb-3">
+                                <button class="tab-button active" data-tab="coreSkills">Core Universal Skills</button>
+                                <button class="tab-button" data-tab="archetypeSkills">Archetype-Specific Skills</button>
+                            </div>
+                            <div id="coreSkills" class="tab-content">
+                                <p class="text-sm mb-2">These skills are beneficial for all pets, regardless of archetype:</p>
+                                <ul class="list-disc list-inside space-y-1 text-sm bg-[#F9F6F4] p-3 rounded-md border border-[#EDEAE8]">
+                                    <li><strong>Communication:</strong> Affects dialogue success & relationship building.</li>
+                                    <li><strong>Resilience:</strong> Faster mood recovery from negative states.</li>
+                                    <li><strong>Learning Aptitude:</strong> Quicker skill gain from activities.</li>
+                                </ul>
+                            </div>
+                            <div id="archetypeSkills" class="tab-content hidden">
+                                 <p class="text-sm mb-2">These skills are particularly relevant to specific archetypes:</p>
+                                 <ul class="list-disc list-inside space-y-1 text-sm bg-[#F9F6F4] p-3 rounded-md border border-[#EDEAE8]">
+                                    <li><strong>Adventurer:</strong> Navigation, Agility, Foraging.</li>
+                                    <li><strong>Intellectual:</strong> Logic, Research, Deduction.</li>
+                                    <li><strong>Nurturer:</strong> Empathy, First Aid, Botany.</li>
+                                    <li><strong>Mischievous:</strong> Stealth, Deception, Lock-picking (playful).</li>
+                                    <li><strong>Recluse:</strong> Focus, Crafting, Meditation.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <p class="text-sm mt-4"><strong>Example Career Path:</strong> An Adventurer with high "Navigation" and "Agility" skills might unlock the <strong class="text-[#D8A373]">Scout Path</strong>, leading to "Job Board" quests like "Mapping the Whispering Woods" and earning unique explorer gear.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="dynamic-world">
+            <h2 class="section-title">A World That Breathes: Dynamic Events & Interaction</h2>
+            <div class="card">
+                <p class="text-lg mb-6 leading-relaxed">The game world is designed to be dynamic and responsive, offering spontaneous gameplay opportunities and affecting pet behavior through various environmental factors. This creates a sense of a living, evolving space rather than a static backdrop.</p>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="p-4 bg-[#F9F6F4] rounded-lg border border-[#EDEAE8]">
+                        <h4 class="font-semibold text-[#D8A373] mb-2 flex items-center"><span class="unicode-icon">☀️</span>Weather System</h4>
+                        <p class="text-sm leading-relaxed">Real-time or accelerated weather (Sunny, Rainy, Foggy, Windy, rare Auroras/Meteor Showers) directly impacts pet mood and can make certain mini-games or resources available/unavailable. For instance, rain might make a Nurturer cozy but an Adventurer restless.</p>
+                    </div>
+                    <div class="p-4 bg-[#F9F6F4] rounded-lg border border-[#EDEAE8]">
+                        <h4 class="font-semibold text-[#D8A373] mb-2 flex items-center"><span class="unicode-icon">🌙</span>Day/Night Cycle</h4>
+                        <p class="text-sm leading-relaxed">Influences pet activities, sleep schedules, and energy levels. Some pets might be nocturnal or early risers. Unique nocturnal encounters or events can occur in outdoor exploration areas, adding an element of surprise.</p>
+                    </div>
+                    <div class="p-4 bg-[#F9F6F4] rounded-lg border border-[#EDEAE8]">
+                        <h4 class="font-semibold text-[#D8A373] mb-2 flex items-center"><span class="unicode-icon">🛋️</span>Interactive Environments</h4>
+                        <p class="text-sm leading-relaxed">Player-furnished spaces and unlockable outdoor mini-maps feature clickable elements (furniture, plants, resource nodes). Pets can interact with these for skill gains, mood changes, or even to discover new crafting recipes.</p>
+                    </div>
+                    <div class="p-4 bg-[#F9F6F4] rounded-lg md:col-span-2 lg:col-span-3 border border-[#EDEAE8]">
+                         <h4 class="font-semibold text-[#D8A373] mb-2 flex items-center"><span class="unicode-icon">🎉</span>Seasonal Festivals & Random Events</h4>
+                        <p class="text-sm leading-relaxed">An in-game calendar tracks seasons and special festival days (e.g., "Spring Bloom Festival," "Winter Light Parade") featuring unique themed mini-games, limited-time rewards, and special NPC visitors. Spontaneous random events like a "Traveling Merchant," "Stray Critter Needs Help," or "Mystery Box Appears" keep gameplay fresh and unpredictable.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="meta-game">
+            <h2 class="section-title">Beyond the Core: Meta-Game & Community Features</h2>
+            <div class="card">
+                <p class="text-lg mb-6 leading-relaxed">To enhance single-player depth and offer optional, low-pressure sharing opportunities, several meta-game systems are proposed. These focus on personalized narrative, collection, and a sense of lasting legacy beyond individual pets.</p>
+                <div class="space-y-3">
+                    <details>
+                        <summary class="details-summary">"Tamagotchi Journal" (Automated Lore & Progress)</summary>
+                        <div class="details-content text-sm leading-relaxed">This feature acts as a personalized storybook. AI-generated or template-based entries chronicle significant events in the pet's life: discoveries (new areas, rare items), major mood shifts, personality milestones, career achievements, and even high scores in mini-games. Entries might include small, auto-generated pixel-art "snapshots" or icons representing the event, allowing players to browse and relive their unique journey.</div>
+                    </details>
+                    <details>
+                        <summary class="details-summary">"Showcase System" (Optional Sharing & Challenges)</summary>
+                        <div class="details-content text-sm leading-relaxed">Players can take a "snapshot" of their Tamagotchi's current state, capturing its appearance (sprite), dominant personality, key skills, current mood, and notable achievements or badges. These snapshots can be saved to a local "Hall of Fame" or "Photo Album." Optionally, players can participate in anonymized global leaderboards or themed "Showcase Challenges" (e.g., "Most Creatively Decorated Room," "Most Unique Hybrid Personality") for bragging rights and small rewards, without direct competitive pressure.</div>
+                    </details>
+                    <details>
+                        <summary class="details-summary">"Mystery Egg Exchange" (Asynchronous Sharing)</summary>
+                        <div class="details-content text-sm leading-relaxed">An optional feature where players can "deposit" the genetic data (Personality Genes, potential Legacy Traits) of a Legacy-Ready Tamagotchi into a global, anonymous pool. In return, they receive a "Mystery Egg" containing genetic data from another player's lineage. This fosters a sense of a shared world and the surprise of new genetic combinations without requiring direct multiplayer interaction.</div>
+                    </details>
+                    <details>
+                        <summary class="details-summary">"Recipe/Crafting Book" (Discovery & Collection)</summary>
+                        <div class="details-content text-sm leading-relaxed">Players can discover recipes for unique food (providing special mood or stat boosts), craftable items (decorations, tools, toys), or variations/unlocks for mini-games. Recipes are found through specific Tamagotchi actions (e.g., an Intellectual researching), personality milestones, or environmental interactions (e.g., finding a rare herb). Discovered recipes are added to an in-game "Crafting Compendium" or "Cookbook" for easy reference and completionist appeal.</div>
+                    </details>
+                     <details>
+                        <summary class="details-summary">Player Achievements & Milestones</summary>
+                        <div class="details-content text-sm leading-relaxed">A standard achievement tracking system rewards players for various accomplishments, such as "Breed 5 Generations," "Master an Adventurer Career Path," "Experience all Moods with one Tamagotchi," or "Collect 50 Unique Recipes." Achievements grant small in-game rewards like unique cosmetic items, rare crafting materials, currency, or special titles for the player profile, visualized as pixel-art stamps or medals.</div>
+                    </details>
+                </div>
+            </div>
+        </section>
+
+        <section id="aesthetics">
+            <h2 class="section-title">Visualizing the Vision: Aesthetics & Canvas Integration</h2>
+            <div class="card">
+                <p class="text-lg mb-4 leading-relaxed">The game's visual identity is crucial for its nostalgic yet fresh appeal. It aims for a distinct 2D pixel art style and vibrant (yet harmonious within the chosen palette) color scheme reminiscent of Pokémon Emerald/Sapphire. This aesthetic applies consistently to character sprites, environmental details, UI elements, and all animations, creating a cohesive and charming world.</p>
+                <div class="p-6 bg-[#F9F6F4] rounded-lg text-center border border-[#EDEAE8]">
+                    <img src="https://placehold.co/350x180/A3B8A2/FFFFFF?text=Pixel+Art+Aesthetic+(Emerald/Sapphire+Inspired)" alt="Pixel Art Style Example" class="mx-auto rounded-md shadow-sm mb-3">
+                    <p class="text-sm text-[#4A4A4A]">Visuals will evoke classic RPG charm with modern clarity and detail.</p>
+                </div>
+                <p class="mt-4 leading-relaxed">All systems described within this document are designed with "Canvas Integration" in mind. This means they are intended to be visually represented, prototyped, and interacted with in a collaborative game development environment (like the Gemini Canvas feature), facilitating easier conceptualization, iteration, and translation into actual game assets and mechanics.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-10 text-sm text-gray-500 border-t border-[#EDEAE8] mt-12 bg-[#F9F6F4]">
+        <p>Interactive Game Design Document Explorer. Based on "Tamagotchi-like Game System Design v1".</p>
+        <p>© 2025 Concept Design Works. For illustrative purposes.</p>
+    </footer>
+
+    <script>
+        const archetypesData = [
+            { name: "The Adventurer", icon: "🧭", description: "Craves exploration, novelty, challenges. Becomes bored with routine.", happy: "Discovering new areas, mastering new mini-games.", sad: "Stuck in a rut, repetitive tasks.", angry: "Exploration attempts blocked, repeated failures." },
+            { name: "The Nurturer", icon: "❤️", description: "Enjoys caring for others, building relationships, fostering growth.", happy: "Strong relationships, virtual pets/characters well-cared for.", sad: "Perceived neglect (even accidental), weakening social bonds.", angry: "Perceived injustice, mistreatment of a 'friend'." },
+            { name: "The Mischievous", icon: "😈", description: "Likes to bend rules, cause harmless trouble, seeks playful chaos.", happy: "Successfully pulling off a prank, surprising the player.", sad: "Strictly disciplined, unable to express playful side.", angry: "Thwarted by rigid rules/authority." },
+            { name: "The Intellectual", icon: "💡", description: "Driven by curiosity, problem-solving, learning.", happy: "Gaining new knowledge, solving puzzles.", sad: "Simple, repetitive tasks, no new stimuli.", angry: "Faced with illogical situations, blatant misinformation." },
+            { name: "The Recluse", icon: "🏠", description: "Prefers solitude, quiet activities, needs personal space.", happy: "Left alone for reasonable periods, engaging in quiet activities.", sad: "Constantly pestered, forced into crowded situations.", angry: "Repeated violation of personal boundaries." }
+        ];
+
+        const archetypeContainer = document.getElementById('archetypeContainer');
+        archetypesData.forEach(arch => {
+            const card = document.createElement('div');
+            card.className = 'archetype-card p-4 border border-[#D8A373]/50 rounded-lg hover:shadow-md transition-shadow cursor-pointer bg-white';
+            card.innerHTML = `
+                <h4 class="font-semibold text-lg text-[#D8A373] mb-1 flex items-center"><span class="text-2xl mr-2">${arch.icon}</span>${arch.name}</h4>
+                <p class="text-xs text-gray-600 mb-2 leading-relaxed">${arch.description}</p>
+                <div class="text-xs details">
+                    <p class="mt-1"><strong>Happy:</strong> ${arch.happy}</p>
+                    <p class="mt-1"><strong>Sad:</strong> ${arch.sad}</p>
+                    <p class="mt-1"><strong>Angry:</strong> ${arch.angry}</p>
+                </div>
+            `;
+            card.addEventListener('click', () => {
+                card.classList.toggle('open');
+            });
+            archetypeContainer.appendChild(card);
+        });
+
+        const skillTabsContainer = document.getElementById('skillTabsContainer');
+        if (skillTabsContainer) {
+            const tabButtons = skillTabsContainer.querySelectorAll('.tab-button');
+            const tabContents = skillTabsContainer.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    
+                    tabContents.forEach(content => content.classList.add('hidden'));
+                    const activeTabContent = document.getElementById(button.dataset.tab);
+                    if (activeTabContent) {
+                        activeTabContent.classList.remove('hidden');
+                    }
+                });
+            });
+        }
+        
+        const FONT_COLOR_CHART = '#4A4A4A';
+        const GRID_COLOR_CHART = '#E0E0E0';
+        const PALETTE_CHART = {
+            terracotta: '#D8A373',
+            oliveGreen: '#A3B8A2',
+            softBlue: '#9DB4C0', 
+            lightBeige: '#F3EADA',
+            warmGray: '#BFBDBB' 
+        };
+
+        Chart.defaults.font.family = 'Inter';
+        Chart.defaults.color = FONT_COLOR_CHART;
+        Chart.defaults.borderColor = GRID_COLOR_CHART;
+
+        function wrapLabels(labels, maxLength) {
+            return labels.map(label => {
+                if (typeof label === 'string' && label.length > maxLength) {
+                    const words = label.split(' ');
+                    let currentLine = '';
+                    const lines = [];
+                    for (const word of words) {
+                        if ((currentLine + word).length > maxLength && currentLine.length > 0) {
+                            lines.push(currentLine.trim());
+                            currentLine = '';
+                        }
+                        currentLine += word + ' ';
+                    }
+                    if (currentLine.trim().length > 0) {
+                       lines.push(currentLine.trim());
+                    }
+                    return lines.length > 0 ? lines : [label]; // Ensure it returns an array even if one line
+                }
+                return label;
+            });
+        }
+
+        const tooltipTitleCallback = (tooltipItems) => {
+            const item = tooltipItems[0];
+            if (!item || !item.chart || !item.chart.data || !item.chart.data.labels || typeof item.dataIndex === 'undefined') {
+                return '';
+            }
+            let label = item.chart.data.labels[item.dataIndex];
+            if (Array.isArray(label)) { return label.join(' '); }
+            return label;
+        };
+
+        const commonChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { 
+                    labels: { 
+                        color: FONT_COLOR_CHART, 
+                        font: { size: 11 },
+                        boxWidth: 15,
+                        padding: 15
+                    } 
+                },
+                tooltip: {
+                    callbacks: { title: tooltipTitleCallback },
+                    backgroundColor: 'rgba(74, 74, 74, 0.9)', 
+                    titleColor: '#FFFFFF', bodyColor: '#FFFFFF',
+                    padding: 10,
+                    cornerRadius: 4
+                }
+            },
+            scales: {
+                x: { display: false, ticks: { color: FONT_COLOR_CHART, font: {size: 10} }, grid: { display: false } },
+                y: { display: false, ticks: { color: FONT_COLOR_CHART, font: {size: 10} }, grid: { display: false } }
+            }
+        };
+        
+        const archetypeFocusCtx = document.getElementById('archetypeFocusChart');
+        if (archetypeFocusCtx) {
+            new Chart(archetypeFocusCtx.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: wrapLabels(['Adventurer Support', 'Nurturer Support', 'Mischievous Support', 'Intellectual Support', 'Recluse Support'], 16),
+                    datasets: [{
+                        label: 'Conceptual Feature Focus',
+                        data: [22, 20, 18, 23, 17], 
+                        backgroundColor: [PALETTE_CHART.terracotta, PALETTE_CHART.oliveGreen, PALETTE_CHART.softBlue, PALETTE_CHART.lightBeige, PALETTE_CHART.warmGray],
+                        borderColor: '#FFFFFF',
+                        borderWidth: 2,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    ...commonChartOptions,
+                    cutout: '60%',
+                    plugins: { 
+                        ...commonChartOptions.plugins, 
+                        legend: { 
+                            ...commonChartOptions.plugins.legend,
+                            position: 'bottom', 
+                        } 
+                    },
+                }
+            });
+        }
+
+        const navbar = document.getElementById('navbar');
+        const navLinks = navbar.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('main section[id]');
+
+        function updateActiveLink() {
+            let index = sections.length;
+            const navHeight = navbar.offsetHeight;
+
+            while(--index >= 0 && window.scrollY + navHeight + 50 < sections[index].offsetTop) {}
+            
+            navLinks.forEach((link) => link.classList.remove('active'));
+            if (index >= 0 && sections[index] && sections[index].id) {
+                const activeLink = navbar.querySelector(`a[href="#${sections[index].id}"]`);
+                if (activeLink) {
+                    activeLink.classList.add('active');
+                }
+            } else if (window.scrollY < sections[0].offsetTop - navHeight - 50 && navLinks[0]) {
+                 // Default to first link if above all sections or at the very top
+                navLinks[0].classList.add('active');
+            }
+        }
+        
+        window.addEventListener('scroll', updateActiveLink, { passive: true });
+        document.addEventListener('DOMContentLoaded', updateActiveLink);
+
+
+        navLinks.forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if(targetElement) {
+                    const navbarHeight = navbar.offsetHeight;
+                    const elementPosition = targetElement.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - navbarHeight;
+
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: "smooth"
+                    });
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>
+
+
