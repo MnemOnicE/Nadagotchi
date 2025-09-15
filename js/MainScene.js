@@ -63,6 +63,25 @@ class MainScene extends Phaser.Scene {
         const exploreButton = this.add.text(220, 70, 'Explore', { padding: { x: 10, y: 5 }, backgroundColor: '#aaaa00' }).setInteractive();
         // When clicked, it calls the 'EXPLORE' action.
         exploreButton.on('pointerdown', () => this.nadagotchi.handleAction('EXPLORE'));
+
+        // --- Initialize Job Board ---
+        /**
+         * @type {Phaser.GameObjects.Text} - The interactive text object for the Job Board.
+         * It starts as disabled and becomes active only when the Nadagotchi has a career.
+         * @private
+         */
+        this.jobBoardButton = this.add.text(
+            this.cameras.main.width - 120, // Position from the right edge
+            this.cameras.main.height - 50, // Position from the bottom edge
+            'Job Board',
+            { padding: { x: 10, y: 5 }, backgroundColor: '#6A0DAD' } // Distinct purple color
+        );
+
+        // Initially disabled. It will be enabled when a career is unlocked.
+        this.jobBoardButton.setInteractive(false).setAlpha(0.5);
+
+        // Set the event listener for when the button is clicked.
+        this.jobBoardButton.on('pointerdown', () => this.openJobBoard());
     }
 
     /**
@@ -80,6 +99,14 @@ class MainScene extends Phaser.Scene {
         this.updateSpriteMood();
         // 4. Check if the pet should perform a spontaneous, "proactive" action.
         this.checkProactiveBehaviors();
+
+        // --- Job Board Activation Logic ---
+        // If the Nadagotchi has a career and the job board is currently inactive, enable it.
+        // This check runs continuously, but the state change only happens once.
+        if (this.nadagotchi.currentCareer && !this.jobBoardButton.input.enabled) {
+            this.jobBoardButton.setInteractive(true); // Enable clicks.
+            this.jobBoardButton.setAlpha(1.0);       // Make it fully opaque.
+        }
     }
 
     // --- UI Update Methods ---
@@ -93,6 +120,7 @@ class MainScene extends Phaser.Scene {
         // Format the text string with the latest data from the Nadagotchi object.
         const text = `Archetype: ${this.nadagotchi.dominantArchetype}\n` +
                      `Mood: ${this.nadagotchi.mood}\n` +
+                     `Career: ${this.nadagotchi.currentCareer || 'None'}\n` + // Display career
                      `Hunger: ${Math.floor(stats.hunger)}\n` +
                      `Energy: ${Math.floor(stats.energy)}\n` +
                      `Happiness: ${Math.floor(stats.happiness)}\n` +
@@ -132,6 +160,28 @@ class MainScene extends Phaser.Scene {
                     this.exploreBubble.setVisible(false);
                 });
             }
+        }
+    }
+
+    // --- Career and Job Methods ---
+
+    /**
+     * Handles the logic when the "Job Board" button is clicked.
+     * It checks the Nadagotchi's current career and provides a corresponding
+     * "job" or action, which for now is just a console log message.
+     * This method is designed to be easily expandable as new careers are added.
+     */
+    openJobBoard() {
+        // Use a switch statement to handle different jobs for different careers.
+        switch(this.nadagotchi.currentCareer) {
+            case 'Innovator':
+                // The job for the Innovator career.
+                console.log("Job Available: Design a New Gadget!");
+                break;
+            default:
+                // A fallback message if the career has no specific job assigned yet.
+                console.log("No jobs available for your current career.");
+                break;
         }
     }
 }
