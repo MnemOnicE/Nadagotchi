@@ -22,14 +22,13 @@ This phase focused on building the fundamental mechanics of the game: caring for
 
 ---
 
-## Phase 1.5: Architectural & Visual Improvements (Complete)
+## Phase 1.5: Architectural Improvements (Complete)
 
-This phase focused on improving the underlying code structure and visual presentation.
+This phase focused on improving the underlying code structure to ensure scalability and maintainability.
 
-### **Version 0.5: UI Refactoring & Art Upgrade**
+### **Version 0.5: UI Refactoring**
 -   [x] **Refactor UI into a dedicated scene (`UIScene`).**
 -   [x] Establish event-based communication between game and UI scenes.
--   [x] **Upgrade pet visuals with a new spritesheet.**
 -   [ ] Add comprehensive tests for the UI scene and its events.
 
 ---
@@ -38,10 +37,12 @@ This phase focused on improving the underlying code structure and visual present
 
 This phase will introduce more complex, long-term systems that give the game replayability and depth.
 
-### **Version 0.6: The Career System**
--   [x] **Flesh out the Career System:**
+### **Version 0.6/0.7: The Career System**
+-   [ ] **Flesh out the Career System:**
     -   [x] Implement the logic for achieving the "Innovator" career based on skill thresholds (e.g., `logic > 10`).
     -   [x] Create a visual in-game notification when a career is unlocked.
+    -   [x] Add logic for at least one other career path (e.g., "Scout" for Adventurers).
+    -   [ ] Add logic for "Nurturer" and "Recluse" careers.
 
 ### **Version 1.0: Public Release**
 -   [ ] Implement all core features from Phases 1, 1.5 & 2.

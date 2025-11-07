@@ -5,25 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.6.0] - 2025-09-16
+## [0.7.0] - 2025-11-07
 
 ### Added
-- **Career Achievement System:** Implemented the core logic for the career system. The Nadagotchi can now achieve the "Innovator" career by reaching a logic skill level of 10.
-- **Visual Career Notification:** Added a temporary, on-screen notification that appears when the player unlocks a new career, providing immediate visual feedback.
+- **"Scout" Career Path:** Implemented the "Scout" career path, unlocking for 'Adventurer' archetypes when `skills.navigation > 10`.
+  - Added skill gain for `navigation` to the 'EXPLORE' action in `Nadagotchi.js`.
+  - Added a case for "Scout" in the `openJobBoard()` method in `UIScene.js`.
+  - The `Nav Skill` is now displayed in the stats UI.
+- **Career Unlock Notification:** A visual, non-blocking notification now appears for 3 seconds when a new career is unlocked.
+  - `Nadagotchi.js` now has a `newCareerUnlocked` flag.
+  - `UIScene.js` checks for this flag in `updateStatsUI()` and calls a new `showCareerNotification()` method to display the temporary message.
+
+### Fixed
+- **Mood Logic Bug:** Fixed a critical bug in `Nadagotchi.js`'s `live()` method where the 'angry' state (`hunger < 10`) was unreachable because the 'sad' state (`hunger < 30`) was checked first. The conditional logic has been re-ordered.
+
+## [0.6.0] - 2025-11-07
+
+### Added
+- **Career System Logic:** Implemented the logic for career progression as outlined in the roadmap.
+  - Added an `updateCareer()` method to `Nadagotchi.js`.
+  - This method is called at the end of `handleAction()` to check if skill thresholds have been met.
+  - The "Innovator" career is now automatically assigned if the Nadagotchi's dominant archetype is 'Intellectual' and its 'logic' skill is greater than 10.
 
 ### Changed
-- In `js/Nadagotchi.js`, added a new `_updateCareer()` method that is checked on every game tick to handle career progression.
-- In `js/MainScene.js`, a new `checkCareerUnlock()` method now manages the visual notification to ensure it only appears once per achievement.
+- `Nadagotchi.js`: `handleAction()` now calls `updateCareer()` after `updateDominantArchetype()`.
 
-## [0.5.0] - 2025-09-15
+## [0.5.0] - 2025-09-14
 
 ### Changed
 - **UI Refactoring:** Overhauled the UI system by separating it into a dedicated `UIScene`.
   - `MainScene` now only handles core game logic and the pet's visual representation.
   - The new `UIScene` manages all UI elements, including stats text and action buttons.
   - Communication between the two scenes is now handled via Phaser's event emitter, creating a more robust and decoupled architecture.
-- **Upgraded Pet Art:** Replaced the original placeholder art with a new 16x16 pixel art spritesheet to give the pet a distinct visual style. (Note: Using a placeholder until final asset is available).
-- **Fixed Missing Textures:** Replaced unreliable placeholder image URLs with a more stable service (`placehold.co`).
+- **Fixed Missing Textures:** Replaced unreliable placeholder image URLs with a more stable service (`placehold.co`) to prevent missing texture errors.
 
 ### Added
 - **`js/UIScene.js`:** A new file containing the dedicated scene for all UI components.
