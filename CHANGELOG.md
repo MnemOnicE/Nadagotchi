@@ -8,10 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.8.0] - 2025-11-07
 
 ### Added
-- **"Healer" and "Scholar" Career Paths:** Implemented the final two career paths from the roadmap.
-  - "Healer" unlocks for 'Nurturer' archetypes with `skills.empathy > 10`.
-  - "Scholar" unlocks for 'Recluse' archetypes with `skills.focus > 10`.
-- **New Skills and UI Display:** Added 'empathy' and 'focus' to the skill system in `Nadagotchi.js`. These skills are now displayed in `UIScene.js`.
+- "Healer" and "Artisan" career paths.
+- New skills: `empathy`, `focus`, `crafting`.
+- New player actions: "Care for Plant", "Meditate", "Craft Item".
+- New UI buttons and stats display for the new actions/skills.
 
 ## [0.7.0] - 2025-11-07
 
