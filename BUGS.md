@@ -60,3 +60,25 @@ The repository should only contain code that is actively used by the project to 
 
 **Recommendation**
 These two files (`game.js` and `style.css` in the root) should be deleted to clean up the repository.
+
+### Happiness Stat Can Become Negative
+
+**Describe the bug**
+In `js/Nadagotchi.js`, the `live` method decrements the `happiness` stat for the 'Adventurer' archetype in 'Rainy' weather. However, unlike the `hunger` and `energy` stats, there is no check to prevent `happiness` from falling below zero. This can lead to an invalid state where the pet's happiness is a negative value, which could have unforeseen consequences in other parts of the game logic.
+
+**To Reproduce**
+Steps to reproduce the behavior:
+1. Create a new `Nadagotchi` with the 'Adventurer' archetype.
+2. Set the `worldState` to `{ weather: "Rainy" }`.
+3. Call the `live()` method repeatedly in a loop.
+4. Observe that the `nadagotchi.stats.happiness` value will eventually become negative.
+
+**Expected behavior**
+The `happiness` stat should never fall below 0, similar to the `hunger` and `energy` stats. It should be capped at a minimum of 0.
+
+**File and Line Number**
+- **File:** `js/Nadagotchi.js`
+- **Line:** Approximately line 90, within the `live` method. The issue is the absence of a `if (this.stats.happiness < 0) this.stats.happiness = 0;` check after the happiness stat is decremented.
+
+**Strategy for Fixing**
+Add a bounds check immediately after the line that decrements happiness to ensure it cannot go below zero. Specifically, add `if (this.stats.happiness < 0) this.stats.happiness = 0;`.
