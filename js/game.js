@@ -4,7 +4,7 @@ window.onload = function() {
         width: 480,
         height: 320,
         parent: 'game-container',
-        scene: [MainScene, UIScene]
+        scene: [MainScene, UIScene, BreedingScene]
     };
 
     const game = new Phaser.Game(config);

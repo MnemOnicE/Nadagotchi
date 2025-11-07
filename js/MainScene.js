@@ -32,30 +32,68 @@ class MainScene extends Phaser.Scene {
      * The `create` method is a Phaser lifecycle method called once, after `preload`.
      * It sets up game objects, launches the UI scene, and registers event listeners.
      */
-    create() {
-        // --- Initialize the Nadagotchi "Brain" ---
-        // Create an instance of the Nadagotchi class, which manages all the internal logic and state.
-        this.nadagotchi = new Nadagotchi('Adventurer');
+    create(data) {
+        // --- Initialize Persistence & Load/Create Pet ---
+        this.persistence = new PersistenceManager();
 
-        // --- Initialize Visual Elements (Non-UI) ---
-        // Create the main sprite for the pet, centered on the screen, using the new 'pet' key.
-        this.sprite = this.add.sprite(this.cameras.main.width / 2, this.cameras.main.height / 2, 'pet');
-        // Scale up the 16x16 sprite to make it more visible.
-        this.sprite.setScale(4);
+        if (data && data.newPetData) {
+            this.nadagotchi = new Nadagotchi(data.newPetData.archetype, data.newPetData);
+            this.persistence.savePet(this.nadagotchi);
+        } else {
+            const loadedPet = this.persistence.loadPet();
+            if (loadedPet) {
+                this.nadagotchi = new Nadagotchi(loadedPet.archetype, loadedPet);
+            } else {
+                this.nadagotchi = new Nadagotchi('Adventurer');
+                this.persistence.savePet(this.nadagotchi);
+            }
+        }
 
-        // Create the thought bubble sprite, positioned above the pet and initially hidden.
+        // --- World State Initialization ---
+        this.currentWeather = "Sunny";
+        this.timeOfDay = "Day";
+        // A simple state object to pass to the "Brain"
+        this.worldState = { weather: this.currentWeather, time: this.timeOfDay };
+        this.weatherOverlay = this.add.rectangle(0, 0, this.cameras.main.width, this.cameras.main.height, 0x0000ff, 0.2).setOrigin(0).setVisible(false);
+
+
+        // --- Initialize Visual Elements ---
+        this.sprite = this.add.sprite(this.cameras.main.width / 2, this.cameras.main.height / 2, 'pet').setScale(4);
         this.thoughtBubble = this.add.sprite(this.sprite.x, this.sprite.y - 40, 'thought_bubble').setVisible(false);
-        // Create the new explore bubble sprite, also hidden initially.
         this.exploreBubble = this.add.sprite(this.sprite.x, this.sprite.y - 40, 'explore_bubble').setVisible(false);
 
-        // --- Launch the UI Scene ---
-        // This runs the UIScene in parallel with the MainScene.
+        // --- Launch UI ---
         this.scene.launch('UIScene');
 
-        // --- Event Listeners for UI Actions ---
-        // Listen for actions dispatched from the UIScene.
+        // --- Timed World Events ---
+        this.time.addEvent({
+            delay: 30000, // Every 30 seconds for demonstration
+            callback: () => {
+                this.timeOfDay = (this.timeOfDay === "Day") ? "Night" : "Day";
+                this.worldState.time = this.timeOfDay;
+                this.updateWorldVisuals();
+            },
+            loop: true
+        });
+        this.time.addEvent({
+            delay: 60000, // Every 60 seconds for demonstration
+            callback: () => {
+                this.currentWeather = Phaser.Utils.Array.GetRandom(["Sunny", "Rainy", "Foggy"]);
+                this.worldState.weather = this.currentWeather;
+                this.updateWorldVisuals();
+            },
+            loop: true
+        });
+
+        // --- Auto-Save Timer ---
+        this.time.addEvent({
+            delay: 5000,
+            callback: () => this.persistence.savePet(this.nadagotchi),
+            loop: true
+        });
+
+        // --- Event Listeners ---
         this.game.events.on('uiAction', (actionType) => {
-            // When an action event is received, call the Nadagotchi's handler.
             this.nadagotchi.handleAction(actionType);
         }, this);
     }
@@ -67,8 +105,8 @@ class MainScene extends Phaser.Scene {
      * @param {number} delta - The time in milliseconds since the last frame.
      */
     update(time, delta) {
-        // 1. Tell the Nadagotchi brain to process the passage of time.
-        this.nadagotchi.live();
+        // 1. Tell the Nadagotchi brain to process the passage of time, now with world state.
+        this.nadagotchi.live(this.worldState);
 
         // 2. Emit an event with the latest Nadagotchi data for the UI to update.
         this.game.events.emit('updateStats', this.nadagotchi);
@@ -81,6 +119,25 @@ class MainScene extends Phaser.Scene {
 
         // 5. Check for and handle the one-time event of unlocking a career.
         this.checkCareerUnlock();
+    }
+
+    /**
+     * Updates the scene's visuals based on the current weather and time of day.
+     */
+    updateWorldVisuals() {
+        // Handle weather overlay
+        if (this.currentWeather === "Rainy") {
+            this.weatherOverlay.setVisible(true);
+        } else {
+            this.weatherOverlay.setVisible(false);
+        }
+
+        // Handle time of day tint
+        if (this.timeOfDay === "Night") {
+            this.cameras.main.setAlpha(0.7); // Darken the scene
+        } else {
+            this.cameras.main.setAlpha(1.0); // Normal brightness
+        }
     }
 
     /**

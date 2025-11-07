@@ -24,36 +24,24 @@ class UIScene extends Phaser.Scene {
         this.statsText = this.add.text(10, 10, '', { fontFamily: 'Arial', fontSize: '16px', color: '#ffffff' });
 
         // --- Create Action Buttons ---
-        // The buttons are arranged along the bottom of the screen for a cleaner layout.
         const buttonY = this.cameras.main.height - 40;
+        const buttonStyle = { padding: { x: 8, y: 4 }, backgroundColor: '#555' };
+        let startX = 10;
 
-        // Create a 'Feed' button.
-        const feedButton = this.add.text(10, buttonY, 'Feed', { padding: { x: 10, y: 5 }, backgroundColor: '#008800' }).setInteractive();
-        feedButton.on('pointerdown', () => this.game.events.emit('uiAction', 'FEED'));
+        const addButton = (text, action) => {
+            const button = this.add.text(startX, buttonY, text, buttonStyle).setInteractive();
+            button.on('pointerdown', () => this.game.events.emit('uiAction', action));
+            startX += button.width + 10; // Advance position for the next button
+            return button;
+        };
 
-        // Create a 'Play' button.
-        const playButton = this.add.text(80, buttonY, 'Play', { padding: { x: 10, y: 5 }, backgroundColor: '#000088' }).setInteractive();
-        playButton.on('pointerdown', () => this.game.events.emit('uiAction', 'PLAY'));
-
-        // Create a 'Study' button.
-        const studyButton = this.add.text(150, buttonY, 'Study', { padding: { x: 10, y: 5 }, backgroundColor: '#880000' }).setInteractive();
-        studyButton.on('pointerdown', () => this.game.events.emit('uiAction', 'STUDY'));
-
-        // Create an 'Explore' button.
-        const exploreButton = this.add.text(220, buttonY, 'Explore', { padding: { x: 10, y: 5 }, backgroundColor: '#aaaa00' }).setInteractive();
-        exploreButton.on('pointerdown', () => this.game.events.emit('uiAction', 'EXPLORE'));
-
-        // Create a 'Care' button.
-        const careButton = this.add.text(310, buttonY, 'Care', { padding: { x: 10, y: 5 }, backgroundColor: '#00aa88' }).setInteractive();
-        careButton.on('pointerdown', () => this.game.events.emit('uiAction', 'CARE_FOR_PLANT'));
-
-        // Create a 'Meditate' button.
-        const meditateButton = this.add.text(380, buttonY, 'Meditate', { padding: { x: 10, y: 5 }, backgroundColor: '#880088' }).setInteractive();
-        meditateButton.on('pointerdown', () => this.game.events.emit('uiAction', 'MEDITATE'));
-
-        // Create a 'Craft' button.
-        const craftButton = this.add.text(480, buttonY, 'Craft', { padding: { x: 10, y: 5 }, backgroundColor: '#888888' }).setInteractive();
-        craftButton.on('pointerdown', () => this.game.events.emit('uiAction', 'CRAFT_ITEM'));
+        addButton('Feed', 'FEED');
+        addButton('Play', 'PLAY');
+        addButton('Study', 'STUDY');
+        addButton('Explore', 'EXPLORE');
+        addButton('Care', 'CARE_FOR_PLANT');
+        addButton('Meditate', 'MEDITATE');
+        addButton('Craft', 'CRAFT_ITEM');
 
         // --- Initialize Job Board ---
         /**
@@ -77,12 +65,40 @@ class UIScene extends Phaser.Scene {
          */
         this.careerNotificationText = null;
 
+        // --- Legacy Button ---
+        this.legacyButton = this.add.text(
+            this.cameras.main.width - 120,
+            10,
+            'Legacy',
+            { padding: { x: 10, y: 5 }, backgroundColor: '#ff00ff' }
+        ).setInteractive().setVisible(false);
+
+        this.legacyButton.on('pointerdown', () => {
+            // Start the BreedingScene, passing the current pet's data
+            this.scene.start('BreedingScene', this.nadagotchiData);
+        });
+
         // --- Event Listeners ---
         // Set up a listener for the 'updateStats' event from the MainScene.
         this.game.events.on('updateStats', this.updateStatsUI, this);
 
         // Store the latest nadagotchi data received from the event.
         this.nadagotchiData = null;
+
+        // --- Meta-Game UI ---
+        this.persistence = new PersistenceManager();
+
+        // Journal Button
+        const journalButton = this.add.text(10, 50, 'Journal', { padding: { x: 10, y: 5 }, backgroundColor: '#444' }).setInteractive();
+        journalButton.on('pointerdown', () => this.openJournal());
+
+        // Recipe Book Button
+        const recipeButton = this.add.text(100, 50, 'Recipes', { padding: { x: 10, y: 5 }, backgroundColor: '#444' }).setInteractive();
+        recipeButton.on('pointerdown', () => this.openRecipeBook());
+
+        // Modals (initially hidden)
+        this.journalModal = this.createModal("Journal");
+        this.recipeModal = this.createModal("Recipe Book");
     }
 
     /**
@@ -125,6 +141,12 @@ class UIScene extends Phaser.Scene {
             this.showCareerNotification(data.newCareerUnlocked);
             // Clear the flag on the source object so it doesn't trigger again.
             data.newCareerUnlocked = null;
+        }
+
+        // --- Legacy Button Visibility ---
+        // If the pet is ready for legacy and the button is not yet visible, show it.
+        if (data.isLegacyReady && !this.legacyButton.visible) {
+            this.legacyButton.setVisible(true);
         }
     }
 
@@ -171,7 +193,6 @@ class UIScene extends Phaser.Scene {
             case 'Innovator':
                 console.log("Job Available: Design a New Gadget!");
                 break;
-            // Added new case for the 'Scout' career
             case 'Scout':
                 console.log("Job Available: Map the Whispering Woods!");
                 break;
@@ -185,5 +206,45 @@ class UIScene extends Phaser.Scene {
                 console.log("No jobs available for your current career.");
                 break;
         }
+    }
+
+    // --- NEW MODAL HELPER FUNCTIONS ---
+
+    /**
+     * Creates a generic modal group (container, background, title, content, close button).
+     * @param {string} title - The title to display at the top of the modal.
+     * @returns {Phaser.GameObjects.Group} The created modal group.
+     */
+    createModal(title) {
+        const modalGroup = this.add.group();
+
+        const modalBg = this.add.rectangle(this.cameras.main.width / 2, this.cameras.main.height / 2, 500, 400, 0x000000, 0.8).setOrigin(0.5);
+        const modalTitle = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2 - 170, title, { fontSize: '24px' }).setOrigin(0.5);
+        const modalContent = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2, '', { fontSize: '16px', wordWrap: { width: 480 } }).setOrigin(0.5);
+        const closeButton = this.add.text(this.cameras.main.width / 2 + 220, this.cameras.main.height / 2 - 170, 'X', { padding: { x: 5, y: 2 }, backgroundColor: '#ff0000' }).setOrigin(0.5).setInteractive();
+
+        closeButton.on('pointerdown', () => modalGroup.setVisible(false));
+
+        modalGroup.addMultiple([modalBg, modalTitle, modalContent, closeButton]);
+        modalGroup.setVisible(false); // Hide by default
+        modalGroup.content = modalContent; // Attach content text for easy access
+
+        return modalGroup;
+    }
+
+    openJournal() {
+        const journalEntries = this.persistence.loadJournal();
+        const formattedText = journalEntries.map(entry => `${entry.date}: ${entry.text}`).join('\n');
+        this.journalModal.content.setText(formattedText || "No entries yet.");
+        this.journalModal.setVisible(true);
+        this.scene.pause('MainScene');
+    }
+
+    openRecipeBook() {
+        const recipes = this.persistence.loadRecipes();
+        const formattedText = recipes.join('\n');
+        this.recipeModal.content.setText(formattedText || "No recipes discovered.");
+        this.recipeModal.setVisible(true);
+        this.scene.pause('MainScene');
     }
 }
