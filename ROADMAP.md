@@ -39,9 +39,9 @@ This phase focused on improving the underlying code structure and visual present
 This phase will introduce more complex, long-term systems that give the game replayability and depth.
 
 ### **Version 0.6: The Career System**
--   [ ] **Flesh out the Career System:**
-    -   [ ] Implement the logic for achieving the "Innovator" career based on skill thresholds (e.g., `logic > 10`).
-    -   [ ] Create a visual in-game notification when a career is unlocked.
+-   [x] **Flesh out the Career System:**
+    -   [x] Implement the logic for achieving the "Innovator" career based on skill thresholds (e.g., `logic > 10`).
+    -   [x] Create a visual in-game notification when a career is unlocked.
 
 ### **Version 1.0: Public Release**
 -   [ ] Implement all core features from Phases 1, 1.5 & 2.

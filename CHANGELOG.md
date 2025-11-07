@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2025-09-16
+
+### Added
+- **Career Achievement System:** Implemented the core logic for the career system. The Nadagotchi can now achieve the "Innovator" career by reaching a logic skill level of 10.
+- **Visual Career Notification:** Added a temporary, on-screen notification that appears when the player unlocks a new career, providing immediate visual feedback.
+
+### Changed
+- In `js/Nadagotchi.js`, added a new `_updateCareer()` method that is checked on every game tick to handle career progression.
+- In `js/MainScene.js`, a new `checkCareerUnlock()` method now manages the visual notification to ensure it only appears once per achievement.
+
 ## [0.5.0] - 2025-09-15
 
 ### Changed
