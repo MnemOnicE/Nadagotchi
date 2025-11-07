@@ -96,6 +96,10 @@ class MainScene extends Phaser.Scene {
         this.game.events.on('uiAction', (actionType) => {
             this.nadagotchi.handleAction(actionType);
         }, this);
+
+        // --- Resize Event Listener ---
+        this.scale.on('resize', this.resize, this);
+        this.resize({ width: this.scale.width, height: this.scale.height });
     }
 
     /**
@@ -119,6 +123,17 @@ class MainScene extends Phaser.Scene {
 
         // 5. Check for and handle the one-time event of unlocking a career.
         this.checkCareerUnlock();
+    }
+
+    /**
+     * Handles window resize events to keep game elements centered.
+     * @param {object} gameSize - The new size of the game window.
+     */
+    resize(gameSize) {
+        const { width, height } = gameSize;
+        this.cameras.main.setSize(width, height);
+        this.sprite.setPosition(width / 2, height / 2);
+        this.weatherOverlay.setSize(width, height);
     }
 
     /**

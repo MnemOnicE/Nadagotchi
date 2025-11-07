@@ -29,6 +29,7 @@ This phase focused on improving the underlying code structure to ensure scalabil
 ### **Version 0.5: UI Refactoring**
 -   [x] **Refactor UI into a dedicated scene (`UIScene`).**
 -   [x] Establish event-based communication between game and UI scenes.
+-   [x] **Optimize for Mobile:** The game is now fully responsive and playable on both desktop and mobile devices.
 -   [ ] Add comprehensive tests for the UI scene and its events.
 
 ---
