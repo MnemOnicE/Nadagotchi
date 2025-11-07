@@ -1,0 +1,36 @@
+/* Style the main game container */
+#game-world {
+    border: 2px solid black;
+    background-color: #f0f0f0;
+    padding: 20px;
+    width: 300px;
+    text-align: center;
+    margin: 20px auto; /* Center the box on the page */
+}
+
+/* Style the pet's visual display */
+#pet-display {
+    font-size: 50px; /* Makes the pet emoji large */
+    margin: 20px;
+}
+
+/* Style the container for the stat text */
+#stats-container {
+    font-family: Arial, sans-serif;
+    font-size: 18px;
+}
+
+/* Style the container for the buttons */
+#button-container {
+    text-align: center;
+    width: 300px;
+    margin: 0 auto; /* Center the buttons under the game box */
+}
+
+/* Style for the buttons */
+button {
+    font-size: 16px;
+    padding: 10px 15px;
+    margin: 5px;
+    cursor: pointer; /* Show a hand icon on hover */
+}
