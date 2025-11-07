@@ -46,8 +46,9 @@ class Nadagotchi {
             // Archetype-Specific Skills, which develop based on activities
             navigation: 0, // Adventurer
             empathy: 0,    // Nurturer
-            logic: 0,      // Intellectual
-            focus: 0       // Recluse
+            logic: 0,       // Intellectual
+            focus: 0,
+            crafting: 0
         };
 
         /** @type {?string} - The current career path of the Nadagotchi. This is a placeholder for a future feature. */
@@ -117,6 +118,21 @@ class Nadagotchi {
      * @param {any} [item=null] - An optional item used in the action.
      */
     handleAction(actionType, item = null) {
+        let moodMultiplier;
+        switch (this.mood) {
+            case 'happy':
+                moodMultiplier = 1.5; // A happy pet is a fast learner.
+                break;
+            case 'sad':
+                moodMultiplier = 0.5; // A sad pet struggles to focus.
+                break;
+            case 'angry':
+                moodMultiplier = 0.2; // An angry pet barely learns at all.
+                break;
+            default: // 'neutral'
+                moodMultiplier = 1.0; // The baseline learning rate.
+        }
+
         switch (actionType) {
             case 'FEED':
                 // Feeding replenishes hunger and provides a small amount of happiness.
@@ -128,7 +144,6 @@ class Nadagotchi {
                 // Personality hook: Nurturers gain personality points from being cared for.
                 if (this.dominantArchetype === 'Nurturer') {
                     this.personalityPoints.Nurturer++;
-                    this.skills.empathy += 0.1; // Caring action improves empathy
                 }
                 break;
 
@@ -158,23 +173,6 @@ class Nadagotchi {
                 this.stats.happiness -= 5;
                 if (this.stats.happiness < 0) this.stats.happiness = 0;
 
-                // New Feature: Mood-based skill gain.
-                // The effectiveness of studying is now tied to the Nadagotchi's mood.
-                let moodMultiplier;
-                switch (this.mood) {
-                    case 'happy':
-                        moodMultiplier = 1.5; // A happy pet is a fast learner.
-                        break;
-                    case 'sad':
-                        moodMultiplier = 0.5; // A sad pet struggles to focus.
-                        break;
-                    case 'angry':
-                        moodMultiplier = 0.2; // An angry pet barely learns at all.
-                        break;
-                    default: // 'neutral'
-                        moodMultiplier = 1.0; // The baseline learning rate.
-                }
-
                 // Personality hook: Intellectuals thrive on studying, but mood is still a factor.
                 if (this.dominantArchetype === 'Intellectual') {
                     this.mood = 'happy'; // Studying makes them happy.
@@ -191,10 +189,6 @@ class Nadagotchi {
                 // Add skill gain for Adventurer's 'navigation' skill when exploring
                 if (this.dominantArchetype === 'Adventurer') {
                     this.skills.navigation += (0.05 * moodMultiplier); // Less gain than dedicated study
-                }
-                // Add skill gain for Recluse's 'focus' skill when studying
-                if (this.dominantArchetype === 'Recluse') {
-                    this.skills.focus += (0.1 * moodMultiplier);
                 }
                 break;
 
@@ -219,6 +213,34 @@ class Nadagotchi {
                 } else {
                     // Other archetypes get a small, neutral benefit.
                     this.stats.happiness += 5;
+                }
+                break;
+
+            case "CARE_FOR_PLANT":
+                this.stats.energy -= 5;
+                this.stats.happiness += 10;
+                this.skills.empathy += (0.1 * moodMultiplier);
+                if (this.dominantArchetype === "Nurturer") {
+                    this.personalityPoints.Nurturer += 2;
+                }
+                break;
+
+            case "MEDITATE":
+                this.stats.energy += 5;
+                if (this.stats.energy > 100) this.stats.energy = 100;
+                this.stats.happiness += 5;
+                this.skills.focus += (0.1 * moodMultiplier);
+                if (this.dominantArchetype === "Recluse") {
+                    this.personalityPoints.Recluse += 2;
+                }
+                break;
+
+            case "CRAFT_ITEM":
+                this.stats.energy -= 10;
+                this.skills.crafting += (0.1 * moodMultiplier);
+                console.log("A new item was crafted!");
+                if (this.dominantArchetype === "Recluse") {
+                    this.stats.happiness += 10;
                 }
                 break;
         }
@@ -278,16 +300,16 @@ class Nadagotchi {
                  this.newCareerUnlocked = 'Scout'; // Set flag for UI notification
             }
 
-            // Logic for Healer career (Nurturer)
+            // Logic for Healer career
             else if (this.dominantArchetype === 'Nurturer' && this.skills.empathy > 10) {
-                this.currentCareer = 'Healer';
-                this.newCareerUnlocked = 'Healer';
+                 this.currentCareer = 'Healer';
+                 this.newCareerUnlocked = 'Healer';
             }
 
-            // Logic for Scholar career (Recluse)
-            else if (this.dominantArchetype === 'Recluse' && this.skills.focus > 10) {
-                this.currentCareer = 'Scholar';
-                this.newCareerUnlocked = 'Scholar';
+            // Logic for Artisan career
+            else if (this.dominantArchetype === 'Recluse' && this.skills.crafting > 10 && this.skills.focus > 5) {
+                 this.currentCareer = 'Artisan';
+                 this.newCareerUnlocked = 'Artisan';
             }
         }
     }

@@ -43,6 +43,18 @@ class UIScene extends Phaser.Scene {
         const exploreButton = this.add.text(220, buttonY, 'Explore', { padding: { x: 10, y: 5 }, backgroundColor: '#aaaa00' }).setInteractive();
         exploreButton.on('pointerdown', () => this.game.events.emit('uiAction', 'EXPLORE'));
 
+        // Create a 'Care' button.
+        const careButton = this.add.text(310, buttonY, 'Care', { padding: { x: 10, y: 5 }, backgroundColor: '#00aa88' }).setInteractive();
+        careButton.on('pointerdown', () => this.game.events.emit('uiAction', 'CARE_FOR_PLANT'));
+
+        // Create a 'Meditate' button.
+        const meditateButton = this.add.text(380, buttonY, 'Meditate', { padding: { x: 10, y: 5 }, backgroundColor: '#880088' }).setInteractive();
+        meditateButton.on('pointerdown', () => this.game.events.emit('uiAction', 'MEDITATE'));
+
+        // Create a 'Craft' button.
+        const craftButton = this.add.text(480, buttonY, 'Craft', { padding: { x: 10, y: 5 }, backgroundColor: '#888888' }).setInteractive();
+        craftButton.on('pointerdown', () => this.game.events.emit('uiAction', 'CRAFT_ITEM'));
+
         // --- Initialize Job Board ---
         /**
          * @type {Phaser.GameObjects.Text} - The interactive text object for the Job Board.
@@ -94,8 +106,9 @@ class UIScene extends Phaser.Scene {
                      `Happiness: ${Math.floor(stats.happiness)}\n` +
                      `Logic Skill: ${skills.logic.toFixed(2)}\n` +
                      `Nav Skill: ${skills.navigation.toFixed(2)}\n` +
-                     `Empathy Skill: ${skills.empathy.toFixed(2)}\n` +
-                     `Focus Skill: ${skills.focus.toFixed(2)}`;
+                     `Empathy: ${skills.empathy.toFixed(2)}\n` +
+                     `Focus: ${skills.focus.toFixed(2)}\n` +
+                     `Crafting: ${skills.crafting.toFixed(2)}`;
         this.statsText.setText(text);
 
         // --- Job Board Activation Logic ---
@@ -163,10 +176,10 @@ class UIScene extends Phaser.Scene {
                 console.log("Job Available: Map the Whispering Woods!");
                 break;
             case 'Healer':
-                console.log("Job Available: Comfort a Lost Sprite!");
+                console.log("Job Available: Comfort the Lost Sprite!");
                 break;
-            case 'Scholar':
-                console.log("Job Available: Decipher Ancient Runes!");
+            case 'Artisan':
+                console.log("Job Available: Craft a Ceremonial Item!");
                 break;
             default:
                 console.log("No jobs available for your current career.");

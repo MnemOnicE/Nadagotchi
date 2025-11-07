@@ -40,3 +40,23 @@ If applicable, add screenshots to help explain your problem.
 **Additional context**
 Add any other context about the problem here.
 ```
+
+---
+
+## Active Bug Reports
+
+### Legacy Files in Root Directory
+
+**Describe the bug**
+The repository contains two files in the root directory, `game.js` and `style.css`, that appear to be dead code from a legacy, pre-Phaser version of the project.
+
+**To Reproduce**
+1.  Observe the file `Nadagotchi-main/game.js` (root).
+2.  Observe the file `Nadagotchi-main/style.css` (root).
+3.  Compare their contents to the current Phaser architecture (e.g., `index.html` does not load them, `js/game.js` is the real entry point, and `style.css` targets IDs like `game-world` that don't exist).
+
+**Expected behavior**
+The repository should only contain code that is actively used by the project to avoid confusion for new developers.
+
+**Recommendation**
+These two files (`game.js` and `style.css` in the root) should be deleted to clean up the repository.
