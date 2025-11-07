@@ -42,7 +42,7 @@ This phase will introduce more complex, long-term systems that give the game rep
     -   [x] Implement the logic for achieving the "Innovator" career based on skill thresholds (e.g., `logic > 10`).
     -   [x] Create a visual in-game notification when a career is unlocked.
     -   [x] Add logic for at least one other career path (e.g., "Scout" for Adventurers).
-    -   [ ] Add logic for "Nurturer" and "Recluse" careers.
+    -   [x] Add logic for "Nurturer" and "Recluse" careers.
 
 ### **Version 1.0: Public Release**
 -   [ ] Implement all core features from Phases 1, 1.5 & 2.

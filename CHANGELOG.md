@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2025-11-07
+
+### Added
+- **"Healer" and "Scholar" Career Paths:** Implemented the final two career paths from the roadmap.
+  - "Healer" unlocks for 'Nurturer' archetypes with `skills.empathy > 10`.
+  - "Scholar" unlocks for 'Recluse' archetypes with `skills.focus > 10`.
+- **New Skills and UI Display:** Added 'empathy' and 'focus' to the skill system in `Nadagotchi.js`. These skills are now displayed in `UIScene.js`.
+
 ## [0.7.0] - 2025-11-07
 
 ### Added

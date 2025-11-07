@@ -46,7 +46,8 @@ class Nadagotchi {
             // Archetype-Specific Skills, which develop based on activities
             navigation: 0, // Adventurer
             empathy: 0,    // Nurturer
-            logic: 0       // Intellectual
+            logic: 0,      // Intellectual
+            focus: 0       // Recluse
         };
 
         /** @type {?string} - The current career path of the Nadagotchi. This is a placeholder for a future feature. */
@@ -127,6 +128,7 @@ class Nadagotchi {
                 // Personality hook: Nurturers gain personality points from being cared for.
                 if (this.dominantArchetype === 'Nurturer') {
                     this.personalityPoints.Nurturer++;
+                    this.skills.empathy += 0.1; // Caring action improves empathy
                 }
                 break;
 
@@ -189,6 +191,10 @@ class Nadagotchi {
                 // Add skill gain for Adventurer's 'navigation' skill when exploring
                 if (this.dominantArchetype === 'Adventurer') {
                     this.skills.navigation += (0.05 * moodMultiplier); // Less gain than dedicated study
+                }
+                // Add skill gain for Recluse's 'focus' skill when studying
+                if (this.dominantArchetype === 'Recluse') {
+                    this.skills.focus += (0.1 * moodMultiplier);
                 }
                 break;
 
@@ -270,6 +276,18 @@ class Nadagotchi {
             else if (this.dominantArchetype === 'Adventurer' && this.skills.navigation > 10) {
                  this.currentCareer = 'Scout';
                  this.newCareerUnlocked = 'Scout'; // Set flag for UI notification
+            }
+
+            // Logic for Healer career (Nurturer)
+            else if (this.dominantArchetype === 'Nurturer' && this.skills.empathy > 10) {
+                this.currentCareer = 'Healer';
+                this.newCareerUnlocked = 'Healer';
+            }
+
+            // Logic for Scholar career (Recluse)
+            else if (this.dominantArchetype === 'Recluse' && this.skills.focus > 10) {
+                this.currentCareer = 'Scholar';
+                this.newCareerUnlocked = 'Scholar';
             }
         }
     }

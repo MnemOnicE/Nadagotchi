@@ -93,7 +93,9 @@ class UIScene extends Phaser.Scene {
                      `Energy: ${Math.floor(stats.energy)}\n` +
                      `Happiness: ${Math.floor(stats.happiness)}\n` +
                      `Logic Skill: ${skills.logic.toFixed(2)}\n` +
-                     `Nav Skill: ${skills.navigation.toFixed(2)}`;
+                     `Nav Skill: ${skills.navigation.toFixed(2)}\n` +
+                     `Empathy Skill: ${skills.empathy.toFixed(2)}\n` +
+                     `Focus Skill: ${skills.focus.toFixed(2)}`;
         this.statsText.setText(text);
 
         // --- Job Board Activation Logic ---
@@ -159,6 +161,12 @@ class UIScene extends Phaser.Scene {
             // Added new case for the 'Scout' career
             case 'Scout':
                 console.log("Job Available: Map the Whispering Woods!");
+                break;
+            case 'Healer':
+                console.log("Job Available: Comfort a Lost Sprite!");
+                break;
+            case 'Scholar':
+                console.log("Job Available: Decipher Ancient Runes!");
                 break;
             default:
                 console.log("No jobs available for your current career.");
