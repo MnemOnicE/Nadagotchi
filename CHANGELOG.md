@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2025-11-07
+
+### Changed
+- **Responsive Design:** The game now dynamically scales to fit the browser window, making it fully playable on both desktop and mobile devices.
+  - `js/game.js` was updated to use Phaser's Scale Manager.
+  - `js/MainScene.js` now handles resize events to keep the pet centered.
+  - `index.html` and `style.css` were modified to support a full-screen layout.
+
+### Removed
+- **Legacy Files:** Deleted the unused `game.js` and `style.css` files from the root directory to clean up the project structure.
+
 ## [0.8.0] - 2025-11-07
 
 ### Added
