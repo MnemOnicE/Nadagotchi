@@ -78,6 +78,48 @@ class MainScene extends Phaser.Scene {
 
         // 4. Check if the pet should perform a spontaneous, "proactive" action.
         this.checkProactiveBehaviors();
+
+        // 5. Check for and handle the one-time event of unlocking a career.
+        this.checkCareerUnlock();
+    }
+
+    /**
+     * Checks if a career has just been unlocked and displays a visual notification.
+     * This is designed to only fire once per career unlock.
+     */
+    checkCareerUnlock() {
+        // A simple flag to ensure the notification only shows once.
+        // In a more complex game, this might be part of a larger event system.
+        if (this.nadagotchi.currentCareer && !this.careerUnlockedNotified) {
+            this.careerUnlockedNotified = true; // Set the flag
+
+            // Create a visually distinct text notification.
+            const notificationText = this.add.text(
+                this.cameras.main.width / 2,
+                this.cameras.main.height / 2 - 50, // Position it above the pet
+                `Career Unlocked: ${this.nadagotchi.currentCareer}!`,
+                {
+                    fontFamily: 'Arial',
+                    fontSize: '20px',
+                    color: '#FFD700', // Gold color for emphasis
+                    backgroundColor: 'rgba(0,0,0,0.7)',
+                    padding: { x: 15, y: 10 }
+                }
+            ).setOrigin(0.5); // Center the text
+
+            // Use a tween to make the notification fade in and then out.
+            this.tweens.add({
+                targets: notificationText,
+                alpha: { from: 0, to: 1 },
+                ease: 'Linear',
+                duration: 500,
+                yoyo: true, // Fade back out
+                hold: 2500, // Stay on screen for 2.5 seconds
+                onComplete: () => {
+                    notificationText.destroy(); // Clean up the text object
+                }
+            });
+        }
     }
 
     /**

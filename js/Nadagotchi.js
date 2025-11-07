@@ -98,6 +98,28 @@ class Nadagotchi {
         // Section 3: Aging
         // The pet's age gradually increases.
         this.age += 0.001;
+
+        // Section 4: Career Progression Check
+        this._updateCareer();
+    }
+
+    /**
+     * Checks for and applies career progression based on skill thresholds.
+     * This is an internal method called by the `live` loop.
+     * @private
+     */
+    _updateCareer() {
+        // Do nothing if the Nadagotchi already has a career.
+        if (this.currentCareer) {
+            return;
+        }
+
+        // Check for the "Innovator" career path.
+        if (this.skills.logic > 10) {
+            this.currentCareer = 'Innovator';
+            // In a real game, we might emit an event here for the UI to catch.
+            console.log(`Career Unlocked: ${this.currentCareer}`);
+        }
     }
 
     /**
