@@ -36,7 +36,7 @@ class Nadagotchi {
             happiness: 70   // Influenced by needs being met and activities.
         };
 
-        // --- III. CAREER & SKILL SYSTEM (Placeholder) ---
+        // --- III. CAREER & SKILL SYSTEM ---
 
         /** @type {Object.<string, number>} - A map of skills the Nadagotchi can learn. These are planned to influence career paths and mini-game performance. */
         this.skills = {
@@ -51,6 +51,9 @@ class Nadagotchi {
 
         /** @type {?string} - The current career path of the Nadagotchi. This is a placeholder for a future feature. */
         this.currentCareer = null; // e.g., 'Scout', 'Healer'
+
+        /** @type {?string} - A flag used by the UI to show a one-time notification when a career is unlocked. */
+        this.newCareerUnlocked = null; // e.g., 'Innovator'
 
         /** @type {Array} - A list of items the Nadagotchi possesses. This is a placeholder for a future feature. */
         this.inventory = [];
@@ -81,12 +84,16 @@ class Nadagotchi {
         // Section 2: Mood Calculation
         // The Nadagotchi's mood is a direct consequence of its current needs.
         // This creates a clear feedback loop for the player.
-        if (this.stats.hunger < 30 || this.stats.energy < 20) {
-            // If needs are low, the pet becomes sad.
-            this.mood = 'sad';
-        } else if (this.stats.hunger < 10) {
+
+        // --- BUG FIX ---
+        // The conditional logic has been re-ordered to check for the most critical
+        // state ('angry') first, as the previous logic would never allow it to be reached.
+        if (this.stats.hunger < 10) {
             // If needs are critically low, the pet becomes angry.
             this.mood = 'angry';
+        } else if (this.stats.hunger < 30 || this.stats.energy < 20) {
+            // If needs are low, the pet becomes sad.
+            this.mood = 'sad';
         } else if (this.stats.hunger > 80 && this.stats.energy > 80) {
             // If needs are high, the pet is happy.
             this.mood = 'happy';
@@ -98,28 +105,6 @@ class Nadagotchi {
         // Section 3: Aging
         // The pet's age gradually increases.
         this.age += 0.001;
-
-        // Section 4: Career Progression Check
-        this._updateCareer();
-    }
-
-    /**
-     * Checks for and applies career progression based on skill thresholds.
-     * This is an internal method called by the `live` loop.
-     * @private
-     */
-    _updateCareer() {
-        // Do nothing if the Nadagotchi already has a career.
-        if (this.currentCareer) {
-            return;
-        }
-
-        // Check for the "Innovator" career path.
-        if (this.skills.logic > 10) {
-            this.currentCareer = 'Innovator';
-            // In a real game, we might emit an event here for the UI to catch.
-            console.log(`Career Unlocked: ${this.currentCareer}`);
-        }
     }
 
     /**
@@ -200,6 +185,11 @@ class Nadagotchi {
                     this.personalityPoints.Intellectual++;
                     this.skills.logic += (0.1 * moodMultiplier);
                 }
+
+                // Add skill gain for Adventurer's 'navigation' skill when exploring
+                if (this.dominantArchetype === 'Adventurer') {
+                    this.skills.navigation += (0.05 * moodMultiplier); // Less gain than dedicated study
+                }
                 break;
 
             case 'EXPLORE':
@@ -212,6 +202,10 @@ class Nadagotchi {
                     this.mood = 'happy';
                     this.stats.happiness += 20; // A big boost for doing what they love.
                     this.personalityPoints.Adventurer += 2; // Strongly reinforces the archetype.
+
+                    // Add skill gain for 'navigation'
+                    this.skills.navigation += 0.1; // Base gain for successful exploration
+
                 } else if (this.dominantArchetype === 'Recluse') {
                     // Recluses are stressed by exploration.
                     this.mood = 'sad';
@@ -228,10 +222,14 @@ class Nadagotchi {
 
         // After any action that might affect personality, check if the dominant archetype needs to be updated.
         this.updateDominantArchetype();
+
+        // After updating the archetype, check if a new career has been unlocked.
+        this.updateCareer();
     }
 
     /**
      * Updates the dominant archetype based on which personality has the most points.
+     * @private
      */
     updateDominantArchetype() {
         let maxPoints = -1;
@@ -251,5 +249,28 @@ class Nadagotchi {
         // If a new archetype has more points, it becomes the new dominant one.
         // This allows for dynamic personality shifts based on player actions.
         this.dominantArchetype = newDominantArchetype;
+    }
+
+    /**
+     * Checks and updates the Nadagotchi's career based on its skills and archetype.
+     * This is the logic specified in the v0.6 roadmap.
+     * @private
+     */
+    updateCareer() {
+        // Only check for a new career if the Nadagotchi doesn't have one.
+        if (this.currentCareer === null) {
+
+            // Logic for Innovator career
+            if (this.dominantArchetype === 'Intellectual' && this.skills.logic > 10) {
+                this.currentCareer = 'Innovator';
+                this.newCareerUnlocked = 'Innovator'; // Set flag for UI notification
+            }
+
+            // Logic for Scout career
+            else if (this.dominantArchetype === 'Adventurer' && this.skills.navigation > 10) {
+                 this.currentCareer = 'Scout';
+                 this.newCareerUnlocked = 'Scout'; // Set flag for UI notification
+            }
+        }
     }
 }
