@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `index.html` and `style.css` were modified to support a full-screen layout.
 
 ### Fixed
-- **Negative Happiness Bug:** Fixed a bug in `js/Nadagotchi.js` where the `happiness` stat for the 'Adventurer' archetype could become negative in 'Rainy' weather. A bounds check was added to ensure `happiness` does not fall below 0.
+- **Negative Happiness Bug (Rainy Weather):** Fixed a bug in `js/Nadagotchi.js` where the `happiness` stat for the 'Adventurer' archetype could become negative during prolonged 'Rainy' weather. A bounds check was added to the `live` method to ensure `happiness` does not fall below 0.
 
 ### Removed
 - **Legacy Files:** Deleted the unused `game.js` and `style.css` files from the root directory to clean up the project structure.
