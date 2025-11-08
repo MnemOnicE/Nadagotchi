@@ -1,3 +1,11 @@
+// Check if running in a Node.js environment for testing purposes
+if (typeof module !== 'undefined' && module.exports) {
+    // When in Node.js, dependencies like PersistenceManager must be explicitly required.
+    // In a browser environment, these would be loaded via <script> tags.
+    const PersistenceManager = require('./PersistenceManager.js');
+    global.PersistenceManager = PersistenceManager; // Make it globally available for the class constructor
+}
+
 /**
  * Represents the core Nadagotchi entity, its "Brain".
  * This class holds the Nadagotchi's state, including its personality, stats, skills, and more.
@@ -134,20 +142,11 @@ class Nadagotchi {
      * @param {any} [item=null] - An optional item used in the action.
      */
     handleAction(actionType, item = null) {
+        // --- BUG FIX ---
+        // The moodMultiplier is now calculated *inside* each action that needs it.
+        // This ensures that any mood changes from the action itself are accounted for
+        // *before* calculating skill gains, which was the source of the bug.
         let moodMultiplier;
-        switch (this.mood) {
-            case 'happy':
-                moodMultiplier = 1.5; // A happy pet is a fast learner.
-                break;
-            case 'sad':
-                moodMultiplier = 0.5; // A sad pet struggles to focus.
-                break;
-            case 'angry':
-                moodMultiplier = 0.2; // An angry pet barely learns at all.
-                break;
-            default: // 'neutral'
-                moodMultiplier = 1.0; // The baseline learning rate.
-        }
 
         switch (actionType) {
             case 'FEED':
@@ -191,14 +190,18 @@ class Nadagotchi {
                 if (this.dominantArchetype === 'Intellectual') {
                     this.mood = 'happy';
                     this.personalityPoints.Intellectual++;
+                    // Recalculate multiplier *after* mood change
+                    moodMultiplier = this._getMoodMultiplier();
                     this.skills.logic += (0.1 * moodMultiplier);
                     this.stats.happiness += 15;
                 } else {
                     this.personalityPoints.Intellectual++;
+                    moodMultiplier = this._getMoodMultiplier();
                     this.skills.logic += (0.1 * moodMultiplier);
                 }
 
                 if (this.dominantArchetype === 'Adventurer') {
+                    moodMultiplier = this._getMoodMultiplier();
                     this.skills.navigation += (0.05 * moodMultiplier);
                 }
 
@@ -233,6 +236,7 @@ class Nadagotchi {
             case "CARE_FOR_PLANT":
                 this.stats.energy -= 5;
                 this.stats.happiness += 10;
+                moodMultiplier = this._getMoodMultiplier();
                 this.skills.empathy += (0.1 * moodMultiplier);
                 if (this.dominantArchetype === "Nurturer") {
                     this.personalityPoints.Nurturer += 2;
@@ -243,6 +247,7 @@ class Nadagotchi {
                 this.stats.energy += 5;
                 if (this.stats.energy > 100) this.stats.energy = 100;
                 this.stats.happiness += 5;
+                moodMultiplier = this._getMoodMultiplier();
                 this.skills.focus += (0.1 * moodMultiplier);
                 if (this.dominantArchetype === "Recluse") {
                     this.personalityPoints.Recluse += 2;
@@ -251,6 +256,7 @@ class Nadagotchi {
 
             case "CRAFT_ITEM":
                 this.stats.energy -= 10;
+                moodMultiplier = this._getMoodMultiplier();
                 this.skills.crafting += (0.1 * moodMultiplier);
                 this.inventory.push("Simple Widget");
                 if (this.dominantArchetype === "Recluse") {
@@ -267,6 +273,20 @@ class Nadagotchi {
 
         // After updating the archetype, check if a new career has been unlocked.
         this.updateCareer();
+    }
+
+    /**
+     * Calculates the skill gain multiplier based on the pet's current mood.
+     * @returns {number} The calculated mood multiplier.
+     * @private
+     */
+    _getMoodMultiplier() {
+        switch (this.mood) {
+            case 'happy': return 1.5; // A happy pet is a fast learner.
+            case 'sad': return 0.5;   // A sad pet struggles to focus.
+            case 'angry': return 0.2; // An angry pet barely learns at all.
+            default: return 1.0;      // Neutral is the baseline.
+        }
     }
 
     /**
@@ -342,4 +362,9 @@ class Nadagotchi {
             }
         }
     }
+}
+
+// Check if running in a Node.js environment and export the class
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = Nadagotchi;
 }

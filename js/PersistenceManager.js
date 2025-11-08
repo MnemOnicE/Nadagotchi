@@ -2,6 +2,18 @@
  * PersistenceManager is a utility class for handling game state saving and loading via localStorage.
  * This allows the game to remember the pet's state, retired pets, and other meta-game data across browser sessions.
  */
+// Check if running in Node.js environment for testing
+if (typeof module !== 'undefined' && module.exports) {
+    // Mock localStorage for Node.js
+    global.localStorage = {
+        store: {},
+        setItem(key, value) { this.store[key] = value; },
+        getItem(key) { return this.store[key]; },
+        removeItem(key) { delete this.store[key]; },
+        clear() { this.store = {}; }
+    };
+}
+
 class PersistenceManager {
     /**
      * Saves the active Nadagotchi's data to localStorage.
@@ -80,4 +92,9 @@ class PersistenceManager {
         const recipes = localStorage.getItem("nadagotchi_recipes");
         return recipes ? JSON.parse(recipes) : [];
     }
+}
+
+// Check if running in a Node.js environment and export the class
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = PersistenceManager;
 }
