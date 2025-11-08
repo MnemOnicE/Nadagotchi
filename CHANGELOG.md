@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `index.html` and `style.css` were modified to support a full-screen layout.
 
 ### Fixed
+- **Stale Mood Calculation:** Fixed a critical bug in `js/Nadagotchi.js` where skill gains were calculated using the pet's mood *before* an action was processed, not after. This resulted in incorrect skill gains for actions that also changed the pet's mood (e.g., a sad 'Intellectual' pet studying). The logic has been refactored to calculate the mood multiplier *after* any mood changes occur.
 - **Negative Happiness Bug:** Fixed a bug in `js/Nadagotchi.js` where the `happiness` stat for the 'Adventurer' archetype could become negative in 'Rainy' weather. A bounds check was added to ensure `happiness` does not fall below 0.
 
 ### Removed
