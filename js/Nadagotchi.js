@@ -1,11 +1,3 @@
-// Check if running in a Node.js environment for testing purposes
-if (typeof module !== 'undefined' && module.exports) {
-    // When in Node.js, dependencies like PersistenceManager must be explicitly required.
-    // In a browser environment, these would be loaded via <script> tags.
-    const PersistenceManager = require('./PersistenceManager.js');
-    global.PersistenceManager = PersistenceManager; // Make it globally available for the class constructor
-}
-
 /**
  * Represents the core Nadagotchi entity, its "Brain".
  * This class holds the Nadagotchi's state, including its personality, stats, skills, and more.
@@ -214,27 +206,31 @@ class Nadagotchi {
             case 'INTERACT_BOOKSHELF':
                 this.stats.energy -= 5;
                 this.stats.happiness -= 5;
-                moodMultiplier = this._getMoodMultiplier();
-                this.skills.logic += (0.15 * moodMultiplier); // Slightly more effective
-                this.personalityPoints.Intellectual++;
 
+                // Set mood first, then calculate multiplier
                 if (this.dominantArchetype === 'Intellectual') {
                     this.stats.happiness += 20; // Big happiness boost for Intellectuals
                     this.mood = 'happy';
                 }
+
+                moodMultiplier = this._getMoodMultiplier();
+                this.skills.logic += (0.15 * moodMultiplier); // Slightly more effective
+                this.personalityPoints.Intellectual++;
                 break;
 
             case 'INTERACT_PLANT':
                 this.stats.energy -= 5;
                 this.stats.happiness += 10;
-                moodMultiplier = this._getMoodMultiplier();
-                this.skills.empathy += (0.15 * moodMultiplier); // Slightly more effective
-                this.personalityPoints.Nurturer++;
 
+                // Set mood first, then calculate multiplier
                 if (this.dominantArchetype === 'Nurturer') {
                     this.stats.happiness += 20; // Big happiness boost for Nurturers
                     this.mood = 'happy';
                 }
+
+                moodMultiplier = this._getMoodMultiplier();
+                this.skills.empathy += (0.15 * moodMultiplier); // Slightly more effective
+                this.personalityPoints.Nurturer++;
                 break;
 
             case 'EXPLORE':
@@ -378,9 +374,4 @@ class Nadagotchi {
             }
         }
     }
-}
-
-// Check if running in a Node.js environment and export the class
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Nadagotchi;
 }
