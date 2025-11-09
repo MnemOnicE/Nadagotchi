@@ -108,6 +108,22 @@ class UIScene extends Phaser.Scene {
         // Modals (initially hidden)
         this.journalModal = this.createModal("Journal");
         this.recipeModal = this.createModal("Recipe Book");
+        this.hobbyModal = this.createModal("Hobbies");
+        this.craftingModal = this.createModal("Crafting");
+        this.relationshipModal = this.createModal("Relationships");
+
+
+        // --- New Subsystem Buttons ---
+        const hobbyButton = this.add.text(200, 50, 'Hobbies', { padding: { x: 10, y: 5 }, backgroundColor: '#444' }).setInteractive();
+        hobbyButton.on('pointerdown', () => this.openHobbyMenu());
+
+        this.game.events.on('uiAction', (action) => {
+            if (action === 'OPEN_CRAFTING_MENU') {
+                this.openCraftingMenu();
+            } else if (action === 'INTERACT_NPC') {
+                this.openRelationshipMenu();
+            }
+        });
     }
 
     /**
@@ -126,7 +142,8 @@ class UIScene extends Phaser.Scene {
 
         // Format the text string with the latest data.
         // Added 'Navigation' skill to the display.
-        const text = `Archetype: ${data.dominantArchetype}\n` +
+        const text = `Location: ${data.location}\n` +
+                     `Archetype: ${data.dominantArchetype}\n` +
                      `Mood: ${data.mood} ${moodEmoji}\n` +
                      `Career: ${data.currentCareer || 'None'}\n` +
                      `Hunger: ${Math.floor(stats.hunger)}\n` +
@@ -278,7 +295,10 @@ class UIScene extends Phaser.Scene {
             padding: { x: 8, y: 4 }
         }).setOrigin(0.5).setInteractive();
 
-        closeButton.on('pointerdown', () => modalGroup.setVisible(false));
+        closeButton.on('pointerdown', () => {
+            modalGroup.setVisible(false);
+            this.scene.resume('MainScene');
+        });
 
         modalGroup.addMultiple([modalBg, modalTitle, modalContent, closeButton]);
         modalGroup.setVisible(false); // Hide by default
@@ -300,6 +320,34 @@ class UIScene extends Phaser.Scene {
         const formattedText = recipes.join('\n');
         this.recipeModal.content.setText(formattedText || "No recipes discovered.");
         this.recipeModal.setVisible(true);
+        this.scene.pause('MainScene');
+    }
+
+    // --- New Subsystem UI Methods ---
+    openHobbyMenu() {
+        if (!this.nadagotchiData) return;
+        const hobbies = this.nadagotchiData.hobbies;
+        const formattedText = Object.keys(hobbies).map(hobby => `${hobby}: Level ${hobbies[hobby]}`).join('\n');
+        this.hobbyModal.content.setText(formattedText);
+        this.hobbyModal.setVisible(true);
+        this.scene.pause('MainScene');
+    }
+
+    openCraftingMenu() {
+        if (!this.nadagotchiData) return;
+        const inventory = this.nadagotchiData.inventory;
+        const formattedText = `Inventory:\n- ${inventory.join('\n- ')}\n\n(Crafting recipes will go here)`;
+        this.craftingModal.content.setText(formattedText);
+        this.craftingModal.setVisible(true);
+        this.scene.pause('MainScene');
+    }
+
+    openRelationshipMenu() {
+        if (!this.nadagotchiData) return;
+        const relationships = this.nadagotchiData.relationships;
+        const formattedText = Object.keys(relationships).map(npc => `${npc}: Friendship ${relationships[npc].level}`).join('\n');
+        this.relationshipModal.content.setText(formattedText);
+        this.relationshipModal.setVisible(true);
         this.scene.pause('MainScene');
     }
 }

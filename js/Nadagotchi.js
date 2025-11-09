@@ -61,6 +61,11 @@ class Nadagotchi {
         this.journal = this.persistence.loadJournal();
         /** @type {Array<string>} - A list of crafting recipes the pet has discovered. */
         this.discoveredRecipes = this.persistence.loadRecipes();
+
+        // --- New Subsystems ---
+        this.hobbies = loadedData ? loadedData.hobbies : { painting: 0, music: 0 };
+        this.relationships = loadedData ? loadedData.relationships : { friend: { level: 0 } };
+        this.location = loadedData ? loadedData.location : 'Home';
     }
 
     /**
@@ -275,6 +280,15 @@ class Nadagotchi {
                     this.stats.happiness += 10;
                 }
                 break;
+            case 'PRACTICE_HOBBY':
+                this.practiceHobby(item); // e.g., item = 'painting'
+                break;
+            case 'FORAGE':
+                this.forage();
+                break;
+            case 'INTERACT_NPC':
+                this.interact('friend', item); // e.g., item = 'GIFT'
+                break;
         }
         // Final check to ensure happiness stat stays within the 0-100 bounds after any action.
         if (this.stats.happiness > 100) this.stats.happiness = 100;
@@ -285,6 +299,56 @@ class Nadagotchi {
 
         // After updating the archetype, check if a new career has been unlocked.
         this.updateCareer();
+    }
+
+    /**
+     * Increases the level of a specific hobby.
+     * @param {string} hobbyName - The name of the hobby to practice.
+     */
+    practiceHobby(hobbyName) {
+        if (this.hobbies.hasOwnProperty(hobbyName)) {
+            this.hobbies[hobbyName] += 1;
+            this.stats.happiness += 5;
+            this.stats.energy -= 5;
+            this.addJournalEntry(`I spent some time practicing ${hobbyName}.`);
+        }
+    }
+
+    /**
+     * Simulates foraging for items, adding them to the inventory.
+     */
+    forage() {
+        this.location = 'Forest'; // Change location
+        this.stats.energy -= 10;
+        const moodMultiplier = this._getMoodMultiplier();
+        this.skills.navigation += (0.2 * moodMultiplier);
+
+        const foundItem = Phaser.Utils.Array.GetRandom(['Berries', 'Sticks', 'Shiny Stone']);
+        this.inventory.push(foundItem);
+        this.addJournalEntry(`I went foraging in the ${this.location} and found ${foundItem}.`);
+        this.location = 'Home'; // Return home
+    }
+
+    /**
+     * Manages interaction with an NPC.
+     * @param {string} npcName - The name of the NPC.
+     * @param {string} interactionType - The type of interaction.
+     */
+    interact(npcName, interactionType) {
+        if (this.relationships.hasOwnProperty(npcName)) {
+            if (interactionType === 'GIFT' && this.inventory.includes('Berries')) {
+                this.inventory.splice(this.inventory.indexOf('Berries'), 1);
+                this.relationships[npcName].level += 5;
+                this.stats.happiness += 10;
+                this.skills.empathy += 0.2;
+                this.addJournalEntry(`I gave Berries to ${npcName}. They seemed to like it!`);
+            } else {
+                this.relationships[npcName].level += 1;
+                this.stats.happiness += 2;
+                this.skills.communication += 0.1;
+                this.addJournalEntry(`I had a nice chat with ${npcName}.`);
+            }
+        }
     }
 
     /**
