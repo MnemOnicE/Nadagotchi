@@ -27,6 +27,7 @@ class MainScene extends Phaser.Scene {
         // Load a new icon for the "explore" hint. The text is a unicode magnifying glass.
         this.load.image('explore_bubble', 'https://placehold.co/32x32/ffffff/000000.png?text=🔎');
 
+        this.load.image('pixel', 'https://placehold.co/1x1/ffffff/ffffff.png');
         // --- Load Interactive Environment Objects ---
         this.load.image('bookshelf', 'https://placehold.co/64x64/8B4513/ffffff.png?text=Books');
         this.load.image('plant', 'https://placehold.co/64x64/228B22/ffffff.png?text=Plant');
@@ -37,6 +38,30 @@ class MainScene extends Phaser.Scene {
      * It sets up game objects, launches the UI scene, and registers event listeners.
      */
     create(data) {
+        // --- Layer 1: Sky (Dynamic Texture) ---
+        this.skyTexture = this.textures.addDynamicTexture('sky', this.cameras.main.width, this.cameras.main.height);
+        this.add.image(0, 0, 'sky').setOrigin(0);
+
+        // --- Layer 2: Environment ---
+        const groundHeight = 100;
+        const ground = this.add.graphics();
+        ground.fillStyle(0x228B22, 1); // ForestGreen
+        ground.fillRect(0, this.cameras.main.height - groundHeight, this.cameras.main.width, groundHeight);
+
+        // --- Layer 3: Weather Effects ---
+        this.rainEmitter = this.add.particles('pixel').createEmitter({
+            x: { min: 0, max: this.cameras.main.width },
+            y: 0,
+            lifespan: 2000,
+            speedY: { min: 200, max: 400 },
+            scale: { start: 0.2, end: 0 },
+            quantity: 2,
+            blendMode: 'ADD',
+            on: false // Start inactive
+        });
+        this.rainEmitter.setTint(0xADD8E6); // Light blue tint
+
+
         // --- Initialize Persistence & Load/Create Pet ---
         this.persistence = new PersistenceManager();
 
@@ -58,10 +83,10 @@ class MainScene extends Phaser.Scene {
         this.timeOfDay = "Day";
         // A simple state object to pass to the "Brain"
         this.worldState = { weather: this.currentWeather, time: this.timeOfDay };
-        this.weatherOverlay = this.add.rectangle(0, 0, this.cameras.main.width, this.cameras.main.height, 0x0000ff, 0.2).setOrigin(0).setVisible(false);
+        this.drawSky(this.timeOfDay);
 
 
-        // --- Initialize Visual Elements ---
+        // --- Layer 4: The Pet ---
         this.sprite = this.add.sprite(this.cameras.main.width / 2, this.cameras.main.height / 2, 'pet').setScale(4);
         this.thoughtBubble = this.add.sprite(this.sprite.x, this.sprite.y - 40, 'thought_bubble').setVisible(false);
         this.exploreBubble = this.add.sprite(this.sprite.x, this.sprite.y - 40, 'explore_bubble').setVisible(false);
@@ -73,6 +98,10 @@ class MainScene extends Phaser.Scene {
         const plant = this.add.sprite(this.cameras.main.width - 80, 80, 'plant').setInteractive({ useHandCursor: true });
         plant.on('pointerdown', () => this.game.events.emit('uiAction', 'INTERACT_PLANT'));
 
+        // --- Layer 5: Lighting & Post-FX (Added After Pet) ---
+        this.lightTexture = this.add.renderTexture(0, 0, this.cameras.main.width, this.cameras.main.height).setVisible(false);
+        this.lightTexture.setBlendMode('MULTIPLY');
+
         // --- Launch UI ---
         this.scene.launch('UIScene');
 
@@ -82,6 +111,7 @@ class MainScene extends Phaser.Scene {
             callback: () => {
                 this.timeOfDay = (this.timeOfDay === "Day") ? "Night" : "Day";
                 this.worldState.time = this.timeOfDay;
+                this.drawSky(this.timeOfDay);
                 this.updateWorldVisuals();
             },
             loop: true
@@ -128,6 +158,62 @@ class MainScene extends Phaser.Scene {
     }
 
     /**
+     * Procedurally draws the sky to the dynamic texture.
+     * @param {string} timeOfDay - "Day" or "Night".
+     */
+    drawSky(timeOfDay) {
+        this.skyTexture.clear(); // Clear the previous drawing
+
+        if (timeOfDay === "Day") {
+            const gradient = this.skyTexture.context.createLinearGradient(0, 0, 0, this.cameras.main.height);
+            gradient.addColorStop(0, '#87CEEB'); // Light Sky Blue
+            gradient.addColorStop(1, '#ADD8E6'); // Lighter Blue
+            this.skyTexture.context.fillStyle = gradient;
+            this.skyTexture.context.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height);
+        } else { // Night
+            const gradient = this.skyTexture.context.createLinearGradient(0, 0, 0, this.cameras.main.height);
+            gradient.addColorStop(0, '#000033'); // Dark Blue
+            gradient.addColorStop(1, '#000000'); // Black
+            this.skyTexture.context.fillStyle = gradient;
+            this.skyTexture.context.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height);
+
+            // Add some stars
+            this.skyTexture.context.fillStyle = '#FFFFFF';
+            for (let i = 0; i < 100; i++) {
+                const x = Math.random() * this.cameras.main.width;
+                const y = Math.random() * this.cameras.main.height * 0.7; // Only in the upper part
+                this.skyTexture.context.fillRect(x, y, 1, 1);
+            }
+        }
+        this.skyTexture.refresh(); // Apply the changes
+    }
+
+    /**
+     * Draws the lighting effect to the render texture.
+     */
+    drawLight() {
+        this.lightTexture.clear(); // Clear the previous frame
+
+        // Create a radial gradient centered on the pet
+        const gradient = this.lightTexture.context.createRadialGradient(
+            this.sprite.x, this.sprite.y, 50, // Inner circle radius (brightest area)
+            this.sprite.x, this.sprite.y, 150  // Outer circle radius (falloff)
+        );
+
+        // The center of the light is white (no change with MULTIPLY)
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+        // The edge of the light is black (full darkness with MULTIPLY)
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 1)');
+
+        // Fill the entire texture with this gradient
+        this.lightTexture.context.fillStyle = gradient;
+        this.lightTexture.context.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height);
+
+        // Tell the texture to update
+        this.lightTexture.refresh();
+    }
+
+    /**
      * The `update` method is the core of the game loop.
      * It updates the game state and emits data for the UI to display.
      * @param {number} time - The current time in milliseconds.
@@ -148,6 +234,11 @@ class MainScene extends Phaser.Scene {
 
         // 5. Check for and handle the one-time event of unlocking a career.
         this.checkCareerUnlock();
+
+        // 6. Update lighting if it's night
+        if (this.timeOfDay === "Night") {
+            this.drawLight();
+        }
     }
 
     /**
@@ -158,25 +249,27 @@ class MainScene extends Phaser.Scene {
         const { width, height } = gameSize;
         this.cameras.main.setSize(width, height);
         this.sprite.setPosition(width / 2, height / 2);
-        this.weatherOverlay.setSize(width, height);
+        this.lightTexture.setSize(width, height);
+        this.skyTexture.setSize(width, height);
+        this.drawSky(this.timeOfDay);
     }
 
     /**
      * Updates the scene's visuals based on the current weather and time of day.
      */
     updateWorldVisuals() {
-        // Handle weather overlay
+        // Handle weather effects
         if (this.currentWeather === "Rainy") {
-            this.weatherOverlay.setVisible(true);
+            this.rainEmitter.start();
         } else {
-            this.weatherOverlay.setVisible(false);
+            this.rainEmitter.stop();
         }
 
-        // Handle time of day tint
+        // Handle lighting
         if (this.timeOfDay === "Night") {
-            this.cameras.main.setAlpha(0.7); // Darken the scene
+            this.lightTexture.setVisible(true);
         } else {
-            this.cameras.main.setAlpha(1.0); // Normal brightness
+            this.lightTexture.setVisible(false);
         }
     }
 
