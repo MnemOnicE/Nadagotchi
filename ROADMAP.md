@@ -46,6 +46,12 @@ This phase will introduce more complex, long-term systems that give the game rep
 -   [x] **Enrich the Core Loop:**
     -   [x] Added an interactive home environment to provide more organic simulation and skill-building opportunities.
 
+### **Version 1.1: Dynamic Subsystems**
+-   [x] **Hobby & Crafting System:** Pets can now develop hobbies and craft items from foraged materials.
+-   [x] **Exploration & Foraging System:** The world is now expandable with different locations for pets to explore and find resources.
+-   [x] **Social & Relationship System:** Pets can now build relationships with other characters in the game world.
+
+
 ## Phase 3: Future Enhancements (Proposed)
 
 With the core simulation and progression systems now in a stable and engaging state, future development could focus on expanding the world and adding long-term variety.
@@ -53,3 +59,5 @@ With the core simulation and progression systems now in a stable and engaging st
 -   **Expand Career Mini-Games:** Design and implement unique mini-games for the Scout, Healer, and Artisan careers.
 -   **Deeper Environmental Interaction:** Add more interactive objects to the home and create proactive behaviors where the pet uses them autonomously.
 -   **Generational Goals:** Introduce long-term goals or challenges that can only be completed by specific lineages or pets with rare, inherited Legacy Traits.
+-   **Dynamic NPC Interactions:** Expand the social system with more complex NPC behaviors, dialogues, and relationship-based events.
+-   **Advanced Crafting Recipes:** Introduce a wider variety of crafting recipes that require specific items and hobby levels to create.

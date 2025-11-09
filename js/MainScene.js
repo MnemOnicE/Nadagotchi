@@ -31,6 +31,9 @@ class MainScene extends Phaser.Scene {
         // --- Load Interactive Environment Objects ---
         this.load.image('bookshelf', 'https://placehold.co/64x64/8B4513/ffffff.png?text=Books');
         this.load.image('plant', 'https://placehold.co/64x64/228B22/ffffff.png?text=Plant');
+
+        // --- New Subsystem Assets ---
+        this.load.image('crafting_table', 'https://placehold.co/64x64/A0522D/ffffff.png?text=Craft');
     }
 
     /**
@@ -97,6 +100,17 @@ class MainScene extends Phaser.Scene {
 
         const plant = this.add.sprite(this.cameras.main.width - 80, 80, 'plant').setInteractive({ useHandCursor: true });
         plant.on('pointerdown', () => this.game.events.emit('uiAction', 'INTERACT_PLANT'));
+
+        // --- New Subsystem Interactables ---
+        const craftingTable = this.add.sprite(80, this.cameras.main.height - 150, 'crafting_table').setInteractive({ useHandCursor: true });
+        craftingTable.on('pointerdown', () => this.game.events.emit('uiAction', 'OPEN_CRAFTING_MENU'));
+
+        const npc = this.add.graphics();
+        npc.fillStyle(0xffff00, 1);
+        npc.fillCircle(this.cameras.main.width - 80, this.cameras.main.height - 150, 30);
+        npc.setInteractive(new Phaser.Geom.Circle(this.cameras.main.width - 80, this.cameras.main.height - 150, 30), Phaser.Geom.Circle.Contains);
+        npc.on('pointerdown', () => this.game.events.emit('uiAction', 'INTERACT_NPC'));
+
 
         // --- Layer 5: Lighting & Post-FX (Added After Pet) ---
         this.lightTexture = this.add.renderTexture(0, 0, this.cameras.main.width, this.cameras.main.height).setVisible(false);
