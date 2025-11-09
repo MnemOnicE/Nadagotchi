@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2025-11-09
+
+### Added
+- **Interactive Home Environment:** The pet's home is now interactive. Added a clickable "Bookshelf" and "Potted Plant" that provide skill gains and mood boosts, deepening the core simulation.
+- **Career Mini-Games:** The "Job Board" for the 'Innovator' career now launches an interactive logic puzzle mini-game. Success grants significant skill and happiness rewards, making careers more engaging.
+- **`js/LogicPuzzleScene.js`:** A new scene for the Innovator's career mini-game.
+
+### Changed
+- The `STUDY` action in `Nadagotchi.js` has been refactored and its functionality is now primarily handled by the new interactive bookshelf.
+- The `CARE_FOR_PLANT` action has been removed and its functionality is replaced by the new interactive plant.
+- The "Care" button was removed from `UIScene.js` as it is now redundant.
+
 ## [0.9.0] - 2025-11-07
 
 ### Changed

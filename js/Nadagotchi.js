@@ -211,6 +211,32 @@ class Nadagotchi {
                 }
                 break;
 
+            case 'INTERACT_BOOKSHELF':
+                this.stats.energy -= 5;
+                this.stats.happiness -= 5;
+                moodMultiplier = this._getMoodMultiplier();
+                this.skills.logic += (0.15 * moodMultiplier); // Slightly more effective
+                this.personalityPoints.Intellectual++;
+
+                if (this.dominantArchetype === 'Intellectual') {
+                    this.stats.happiness += 20; // Big happiness boost for Intellectuals
+                    this.mood = 'happy';
+                }
+                break;
+
+            case 'INTERACT_PLANT':
+                this.stats.energy -= 5;
+                this.stats.happiness += 10;
+                moodMultiplier = this._getMoodMultiplier();
+                this.skills.empathy += (0.15 * moodMultiplier); // Slightly more effective
+                this.personalityPoints.Nurturer++;
+
+                if (this.dominantArchetype === 'Nurturer') {
+                    this.stats.happiness += 20; // Big happiness boost for Nurturers
+                    this.mood = 'happy';
+                }
+                break;
+
             case 'EXPLORE':
                 this.stats.energy -= 15;
                 if (this.stats.energy < 0) this.stats.energy = 0;
@@ -230,16 +256,6 @@ class Nadagotchi {
                     this.stats.happiness -= 20;
                 } else {
                     this.stats.happiness += 5;
-                }
-                break;
-
-            case "CARE_FOR_PLANT":
-                this.stats.energy -= 5;
-                this.stats.happiness += 10;
-                moodMultiplier = this._getMoodMultiplier();
-                this.skills.empathy += (0.1 * moodMultiplier);
-                if (this.dominantArchetype === "Nurturer") {
-                    this.personalityPoints.Nurturer += 2;
                 }
                 break;
 

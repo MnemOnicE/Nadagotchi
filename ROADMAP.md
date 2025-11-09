@@ -38,14 +38,18 @@ This phase focused on improving the underlying code structure to ensure scalabil
 
 This phase will introduce more complex, long-term systems that give the game replayability and depth.
 
-### **Version 0.6/0.7: The Career System**
--   [ ] **Flesh out the Career System:**
-    -   [x] Implement the logic for achieving the "Innovator" career based on skill thresholds (e.g., `logic > 10`).
+### **Version 1.0: The Career System & Interactive World**
+-   [x] **Flesh out the Career System:**
+    -   [x] Implement the logic for all core careers (Innovator, Scout, Healer, Artisan).
     -   [x] Create a visual in-game notification when a career is unlocked.
-    -   [x] Add logic for at least one other career path (e.g., "Scout" for Adventurers).
-    -   [x] Add logic for "Nurturer" and "Recluse" careers.
+    -   [x] **Implement Career Mini-Games:** The 'Innovator' now has an engaging mini-game, making their career active rather than passive.
+-   [x] **Enrich the Core Loop:**
+    -   [x] Added an interactive home environment to provide more organic simulation and skill-building opportunities.
 
-### **Version 1.0: Public Release**
--   [ ] Implement all core features from Phases 1, 1.5 & 2.
--   [ ] Achieve a stable, well-tested state.
--   [ ] Prepare for a public release.
+## Phase 3: Future Enhancements (Proposed)
+
+With the core simulation and progression systems now in a stable and engaging state, future development could focus on expanding the world and adding long-term variety.
+
+-   **Expand Career Mini-Games:** Design and implement unique mini-games for the Scout, Healer, and Artisan careers.
+-   **Deeper Environmental Interaction:** Add more interactive objects to the home and create proactive behaviors where the pet uses them autonomously.
+-   **Generational Goals:** Introduce long-term goals or challenges that can only be completed by specific lineages or pets with rare, inherited Legacy Traits.
