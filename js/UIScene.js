@@ -49,7 +49,6 @@ class UIScene extends Phaser.Scene {
         addButton('Play', 'PLAY');
         addButton('Study', 'STUDY');
         addButton('Explore', 'EXPLORE');
-        addButton('Care', 'CARE_FOR_PLANT');
         addButton('Meditate', 'MEDITATE');
         addButton('Craft', 'CRAFT_ITEM');
 
@@ -224,7 +223,9 @@ class UIScene extends Phaser.Scene {
         // Use a switch statement to handle different jobs for different careers.
         switch(this.nadagotchiData.currentCareer) {
             case 'Innovator':
-                console.log("Job Available: Design a New Gadget!");
+                this.scene.start('LogicPuzzleScene');
+                this.scene.stop('MainScene');
+                this.scene.stop('UIScene');
                 break;
             case 'Scout':
                 console.log("Job Available: Map the Whispering Woods!");

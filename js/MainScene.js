@@ -26,6 +26,10 @@ class MainScene extends Phaser.Scene {
         this.load.image('thought_bubble', 'https://placehold.co/32x32/ffffff/000000.png?text=!');
         // Load a new icon for the "explore" hint. The text is a unicode magnifying glass.
         this.load.image('explore_bubble', 'https://placehold.co/32x32/ffffff/000000.png?text=🔎');
+
+        // --- Load Interactive Environment Objects ---
+        this.load.image('bookshelf', 'https://placehold.co/64x64/8B4513/ffffff.png?text=Books');
+        this.load.image('plant', 'https://placehold.co/64x64/228B22/ffffff.png?text=Plant');
     }
 
     /**
@@ -62,6 +66,13 @@ class MainScene extends Phaser.Scene {
         this.thoughtBubble = this.add.sprite(this.sprite.x, this.sprite.y - 40, 'thought_bubble').setVisible(false);
         this.exploreBubble = this.add.sprite(this.sprite.x, this.sprite.y - 40, 'explore_bubble').setVisible(false);
 
+        // --- Interactive Environment ---
+        const bookshelf = this.add.sprite(80, 80, 'bookshelf').setInteractive({ useHandCursor: true });
+        bookshelf.on('pointerdown', () => this.game.events.emit('uiAction', 'INTERACT_BOOKSHELF'));
+
+        const plant = this.add.sprite(this.cameras.main.width - 80, 80, 'plant').setInteractive({ useHandCursor: true });
+        plant.on('pointerdown', () => this.game.events.emit('uiAction', 'INTERACT_PLANT'));
+
         // --- Launch UI ---
         this.scene.launch('UIScene');
 
@@ -96,6 +107,20 @@ class MainScene extends Phaser.Scene {
         this.game.events.on('uiAction', (actionType) => {
             this.nadagotchi.handleAction(actionType);
         }, this);
+
+        this.game.events.on('workResult', (data) => {
+            if (data.success) {
+                // Apply a reward based on the career
+                if (data.career === 'Innovator') {
+                    this.nadagotchi.skills.logic += 1.5; // Significant skill boost
+                    this.nadagotchi.stats.happiness += 25;
+                    this.nadagotchi.addJournalEntry("I solved a complex puzzle at work today!");
+                }
+            } else {
+                this.nadagotchi.stats.happiness -= 10;
+                this.nadagotchi.addJournalEntry("I struggled with a puzzle at work. It was frustrating.");
+            }
+        });
 
         // --- Resize Event Listener ---
         this.scale.on('resize', this.resize, this);
