@@ -59,9 +59,13 @@ describe('Nadagotchi', () => {
             expect(pet.dominantArchetype).toBe('Nurturer');
         });
 
-        test('should handle ties by selecting the last archetype checked', () => {
-            pet.personalityPoints.Nurturer = 10;
+        test('should not change dominant archetype in case of a tie', () => {
+            // Intellectual starts at 10 points.
+            // Set Recluse to the same score. Since Recluse is iterated after Intellectual,
+            // the bug will cause the dominant archetype to incorrectly switch.
+            pet.personalityPoints.Recluse = 10;
             pet.updateDominantArchetype();
+            // The dominant archetype should remain Intellectual.
             expect(pet.dominantArchetype).toBe('Intellectual');
         });
     });
