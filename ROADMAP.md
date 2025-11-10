@@ -30,7 +30,7 @@ This phase focused on improving the underlying code structure to ensure scalabil
 -   [x] **Refactor UI into a dedicated scene (`UIScene`).**
 -   [x] Establish event-based communication between game and UI scenes.
 -   [x] **Optimize for Mobile:** The game is now fully responsive and playable on both desktop and mobile devices.
--   [ ] Add comprehensive tests for the UI scene and its events.
+-   [x] Add comprehensive tests for the UI scene and its events.
 
 ---
 
@@ -51,6 +51,8 @@ This phase will introduce more complex, long-term systems that give the game rep
 -   [x] **Exploration & Foraging System:** The world is now expandable with different locations for pets to explore and find resources.
 -   [x] **Social & Relationship System:** Pets can now build relationships with other characters in the game world.
 
+### **Version 1.2: Test Coverage**
+-   [x] **Unit Tests:** Added unit tests for `PersistenceManager.js` and `Nadagotchi.js`.
 
 ## Phase 3: Future Enhancements (Proposed)
 
