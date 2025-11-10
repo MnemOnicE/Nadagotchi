@@ -168,6 +168,9 @@ class MainScene extends Phaser.Scene {
 
         // --- Resize Event Listener ---
         this.scale.on('resize', this.resize, this);
+
+        // Perform initial resize to ensure everything is positioned correctly from the start.
+        // This is done last to ensure all objects it might manipulate have been created.
         this.resize({ width: this.scale.width, height: this.scale.height });
     }
 
