@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Exploration and Foraging System:** The Nadagotchi can now explore different locations and forage for items, which are added to its inventory.
 - **Social and Relationship System:** A new social system allows the Nadagotchi to build relationships with NPCs.
 
+### Fixed
+- **Critical Black Screen Regression:** Fixed a race condition in `js/MainScene.js` where the `resize` event could be called before the scene's objects were fully created, causing a fatal error that prevented the game from rendering.
+
 ## [1.0.0] - 2025-11-09
 
 ### Added
