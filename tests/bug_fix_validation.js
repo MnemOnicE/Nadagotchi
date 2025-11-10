@@ -74,3 +74,26 @@ function runBookshelfInteractionTest() {
 
 runBugFixValidationTest();
 runBookshelfInteractionTest();
+runImmediateArchetypeUpdateTest();
+
+// --- Test Case: Immediate Archetype Update ---
+function runImmediateArchetypeUpdateTest() {
+    console.log("--- Running Immediate Archetype Update Test ---");
+    const { Nadagotchi } = require('./test_setup.js');
+
+    // 1. Setup: Create a pet that is *one point* away from changing archetype.
+    const pet = new Nadagotchi('Nurturer');
+    pet.personalityPoints.Intellectual = 9; // Nurturer starts at 10
+    pet.personalityPoints.Nurturer = 10;
+    pet.dominantArchetype = 'Nurturer'; // Manually ensure it starts as Nurturer
+
+    // 2. Action: Perform the action that should trigger the archetype change.
+    pet.handleAction('STUDY');
+
+    // 3. Assertion: Check if the archetype changed in the *same* turn.
+    if (pet.dominantArchetype !== 'Intellectual') {
+        throw new Error(`BUG NOT FIXED: Archetype did not update immediately. Expected 'Intellectual', got '${pet.dominantArchetype}'`);
+    }
+    console.log("✅ BUG FIX CONFIRMED: Archetype updated immediately.");
+    console.log("------------------------------------");
+}
