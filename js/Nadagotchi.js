@@ -399,7 +399,7 @@ class Nadagotchi {
         for (const archetype in this.personalityPoints) {
             // A safety check to ensure we only check properties of the object itself.
             if (this.personalityPoints.hasOwnProperty(archetype)) {
-                if (this.personalityPoints[archetype] > maxPoints) {
+                if (this.personalityPoints[archetype] >= maxPoints) {
                     maxPoints = this.personalityPoints[archetype];
                     newDominantArchetype = archetype;
                 }
