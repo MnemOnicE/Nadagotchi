@@ -71,12 +71,21 @@ class Nadagotchi {
     /**
      * Simulates the passage of time for the Nadagotchi.
      * This method should be called in the main game loop. It handles stat decay and autonomous mood changes.
-     * @param {object} worldState - An object containing information about the game world (e.g., weather, time).
+     * @param {object} worldState - An object containing information about the game world (e.g., weather, time, activeEvent).
      */
-    live(worldState = { weather: "Sunny", time: "Day" }) {
+    live(worldState = { weather: "Sunny", time: "Day", activeEvent: null }) {
         // Section 1: Stats Decay with environmental modifiers
         let hungerDecay = 0.05;
         let energyDecay = 0.02;
+
+        // Apply event modifiers first
+        if (worldState.activeEvent) {
+            // Festivals make the pet happier
+            if (worldState.activeEvent.name.includes('Festival')) {
+                this.stats.happiness += 0.02;
+                if (this.stats.happiness > 100) this.stats.happiness = 100;
+            }
+        }
 
         // Apply weather/time modifiers
         if (worldState.weather === "Rainy") {

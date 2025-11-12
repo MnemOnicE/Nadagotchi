@@ -81,12 +81,30 @@ class MainScene extends Phaser.Scene {
             }
         }
 
-        // --- World State Initialization ---
+        // --- Calendar, Events, and World State Initialization ---
+        // Load calendar data or create a new one.
+        const loadedCalendar = this.persistence.loadCalendar();
+        this.calendar = new Calendar(loadedCalendar);
+        this.eventManager = new EventManager(this.calendar);
+
         this.currentWeather = "Sunny";
         this.timeOfDay = "Day";
-        // A simple state object to pass to the "Brain"
-        this.worldState = { weather: this.currentWeather, time: this.timeOfDay };
+        // The worldState object is passed to the Nadagotchi "Brain" each tick.
+        this.worldState = {
+            weather: this.currentWeather,
+            time: this.timeOfDay,
+            activeEvent: this.eventManager.getActiveEvent()
+        };
         this.drawSky(this.timeOfDay);
+
+        // --- UI Text for Date and Events ---
+        this.dateText = this.add.text(10, 10, '', {
+            fontFamily: 'Arial',
+            fontSize: '16px',
+            color: '#ffffff',
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            padding: { x: 5, y: 3 }
+        }).setScrollFactor(0); // Stays in place
 
 
         // --- Layer 4: The Pet ---
@@ -120,30 +138,22 @@ class MainScene extends Phaser.Scene {
         this.scene.launch('UIScene');
 
         // --- Timed World Events ---
+        // A single timer now controls the passage of a day.
+        // One in-game day passes every 2 minutes (120,000 ms) for demonstration.
         this.time.addEvent({
-            delay: 30000, // Every 30 seconds for demonstration
-            callback: () => {
-                this.timeOfDay = (this.timeOfDay === "Day") ? "Night" : "Day";
-                this.worldState.time = this.timeOfDay;
-                this.drawSky(this.timeOfDay);
-                this.updateWorldVisuals();
-            },
-            loop: true
-        });
-        this.time.addEvent({
-            delay: 60000, // Every 60 seconds for demonstration
-            callback: () => {
-                this.currentWeather = Phaser.Utils.Array.GetRandom(["Sunny", "Rainy", "Foggy"]);
-                this.worldState.weather = this.currentWeather;
-                this.updateWorldVisuals();
-            },
+            delay: 120000,
+            callback: this.advanceDay,
+            callbackScope: this,
             loop: true
         });
 
         // --- Auto-Save Timer ---
         this.time.addEvent({
-            delay: 5000,
-            callback: () => this.persistence.savePet(this.nadagotchi),
+            delay: 5000, // Save every 5 seconds
+            callback: () => {
+                this.persistence.savePet(this.nadagotchi);
+                this.persistence.saveCalendar(this.calendar); // Also save the calendar state
+            },
             loop: true
         });
 
@@ -172,6 +182,9 @@ class MainScene extends Phaser.Scene {
         // Perform initial resize to ensure everything is positioned correctly from the start.
         // This is done last to ensure all objects it might manipulate have been created.
         this.resize({ width: this.scale.width, height: this.scale.height });
+
+        // Initial text update after everything is created.
+        this.updateDateText();
     }
 
     /**
@@ -265,10 +278,68 @@ class MainScene extends Phaser.Scene {
     resize(gameSize) {
         const { width, height } = gameSize;
         this.cameras.main.setSize(width, height);
+
+        // Center the pet sprite
         this.sprite.setPosition(width / 2, height / 2);
+
+        // Make sure our full-screen textures cover the new size
         this.lightTexture.setSize(width, height);
         this.skyTexture.setSize(width, height);
-        this.drawSky(this.timeOfDay);
+        this.drawSky(this.timeOfDay); // Redraw sky for new dimensions
+
+        // Reposition the date text to the top-left corner
+        this.dateText.setPosition(10, 10);
+    }
+
+    /**
+     * Advances the game world by one full day.
+     * This centralizes the logic for daily updates.
+     */
+    advanceDay() {
+        // 1. Advance the calendar
+        this.calendar.advanceDay();
+
+        // 2. Check for new events for the new day
+        this.eventManager.update();
+        this.worldState.activeEvent = this.eventManager.getActiveEvent();
+
+        // 3. Update the UI text
+        this.updateDateText();
+
+        // 4. (Optional) Add a log entry for the new day
+        this.nadagotchi.addJournalEntry(`A new day has begun: Day ${this.calendar.day} of ${this.calendar.season}.`);
+
+        // 5. Simulate day/night and weather changes for flavor
+        // This is simplified; a real game might have a more complex sequence.
+        this.timeOfDay = "Day";
+        this.worldState.time = "Day";
+        this.currentWeather = Phaser.Utils.Array.GetRandom(["Sunny", "Rainy", "Foggy"]);
+        this.worldState.weather = this.currentWeather;
+        this.updateWorldVisuals();
+        this.drawSky("Day");
+
+        // Schedule the transition to night
+        this.time.delayedCall(60000, () => { // Half of the day duration
+            this.timeOfDay = "Night";
+            this.worldState.time = "Night";
+            this.updateWorldVisuals();
+            this.drawSky("Night");
+        });
+    }
+
+    /**
+     * Updates the text object that displays the date and current event.
+     */
+    updateDateText() {
+        const date = this.calendar.getDate();
+        let text = `${date.season}, Day ${date.day}`;
+        const activeEvent = this.eventManager.getActiveEvent();
+
+        if (activeEvent) {
+            text += `\nEvent: ${activeEvent.description}`;
+        }
+
+        this.dateText.setText(text);
     }
 
     /**

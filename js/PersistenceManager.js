@@ -80,5 +80,22 @@ class PersistenceManager {
         const recipes = localStorage.getItem("nadagotchi_recipes");
         return recipes ? JSON.parse(recipes) : [];
     }
+
+    /**
+     * Saves the game's calendar data to localStorage.
+     * @param {object} calendarData - The Calendar object to save.
+     */
+    saveCalendar(calendarData) {
+        localStorage.setItem("nadagotchi_calendar", JSON.stringify(calendarData));
+    }
+
+    /**
+     * Loads the game's calendar data from localStorage.
+     * @returns {object|null} The parsed calendar data, or null if no save exists.
+     */
+    loadCalendar() {
+        const data = localStorage.getItem("nadagotchi_calendar");
+        return data ? JSON.parse(data) : null;
+    }
 }
 
