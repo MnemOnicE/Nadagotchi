@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2025-11-12
+
+### Added
+- **New Career Mini-Games:** Designed and implemented unique, engaging mini-games for the Scout, Healer, and Artisan careers.
+  - **Scout:** A timed "match the pairs" game (`ScoutMinigameScene.js`).
+  - **Healer:** A diagnostic game where the player chooses the correct remedy for a symptom (`HealerMinigameScene.js`).
+  - **Artisan:** A pattern-matching game where the player replicates a displayed pattern (`ArtisanMinigameScene.js`).
+- **Mini-Game Integration:** Integrated the new mini-games into the main game loop. The `MainScene` now launches the appropriate mini-game when the "Work" button is clicked, based on the pet's current career.
+
 ## [1.2.0] - 2025-11-10
 
 ### Added

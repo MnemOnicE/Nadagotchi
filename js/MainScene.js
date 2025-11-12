@@ -149,20 +149,39 @@ class MainScene extends Phaser.Scene {
 
         // --- Event Listeners ---
         this.game.events.on('uiAction', (actionType) => {
-            this.nadagotchi.handleAction(actionType);
+            if (actionType === 'WORK') {
+                this.startWorkMinigame();
+            } else {
+                this.nadagotchi.handleAction(actionType);
+            }
         }, this);
 
         this.game.events.on('workResult', (data) => {
             if (data.success) {
-                // Apply a reward based on the career
-                if (data.career === 'Innovator') {
-                    this.nadagotchi.skills.logic += 1.5; // Significant skill boost
-                    this.nadagotchi.stats.happiness += 25;
-                    this.nadagotchi.addJournalEntry("I solved a complex puzzle at work today!");
+                this.nadagotchi.stats.happiness += 25;
+                let skillUp = '';
+                switch (data.career) {
+                    case 'Innovator':
+                        this.nadagotchi.skills.logic += 1.5;
+                        skillUp = 'logic';
+                        break;
+                    case 'Scout':
+                        this.nadagotchi.skills.navigation += 1.5;
+                        skillUp = 'navigation';
+                        break;
+                    case 'Healer':
+                        this.nadagotchi.skills.empathy += 1.5;
+                        skillUp = 'empathy';
+                        break;
+                    case 'Artisan':
+                        this.nadagotchi.skills.crafting += 1.5;
+                        skillUp = 'crafting';
+                        break;
                 }
+                this.nadagotchi.addJournalEntry(`I had a successful day at my ${data.career} job! My ${skillUp} skill increased.`);
             } else {
                 this.nadagotchi.stats.happiness -= 10;
-                this.nadagotchi.addJournalEntry("I struggled with a puzzle at work. It was frustrating.");
+                this.nadagotchi.addJournalEntry(`I struggled at my ${data.career} job today. It was frustrating.`);
             }
         });
 
@@ -172,6 +191,38 @@ class MainScene extends Phaser.Scene {
         // Perform initial resize to ensure everything is positioned correctly from the start.
         // This is done last to ensure all objects it might manipulate have been created.
         this.resize({ width: this.scale.width, height: this.scale.height });
+    }
+
+    /**
+     * Starts the appropriate mini-game based on the Nadagotchi's current career.
+     */
+    startWorkMinigame() {
+        if (!this.nadagotchi.currentCareer) {
+            console.log("No career to work in!");
+            return;
+        }
+
+        let sceneKey;
+        switch (this.nadagotchi.currentCareer) {
+            case 'Innovator':
+                sceneKey = 'LogicPuzzleScene';
+                break;
+            case 'Scout':
+                sceneKey = 'ScoutMinigameScene';
+                break;
+            case 'Healer':
+                sceneKey = 'HealerMinigameScene';
+                break;
+            case 'Artisan':
+                sceneKey = 'ArtisanMinigameScene';
+                break;
+            default:
+                console.log(`No minigame found for career: ${this.nadagotchi.currentCareer}`);
+                return;
+        }
+
+        this.scene.pause();
+        this.scene.launch(sceneKey);
     }
 
     /**

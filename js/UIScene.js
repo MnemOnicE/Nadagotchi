@@ -65,7 +65,7 @@ class UIScene extends Phaser.Scene {
         );
         // Initially disabled.
         this.jobBoardButton.setInteractive(false).setAlpha(0.5);
-        this.jobBoardButton.on('pointerdown', () => this.openJobBoard());
+        this.jobBoardButton.on('pointerdown', () => this.game.events.emit('uiAction', 'WORK'));
 
         // --- Career Notification ---
         /**
@@ -230,34 +230,6 @@ class UIScene extends Phaser.Scene {
         });
     }
 
-    /**
-     * Handles the logic when the "Job Board" button is clicked.
-     * It checks the Nadagotchi's current career and provides a corresponding job.
-     */
-    openJobBoard() {
-        if (!this.nadagotchiData) return; // Guard against no data
-
-        // Use a switch statement to handle different jobs for different careers.
-        switch(this.nadagotchiData.currentCareer) {
-            case 'Innovator':
-                this.scene.start('LogicPuzzleScene');
-                this.scene.stop('MainScene');
-                this.scene.stop('UIScene');
-                break;
-            case 'Scout':
-                console.log("Job Available: Map the Whispering Woods!");
-                break;
-            case 'Healer':
-                console.log("Job Available: Comfort the Lost Sprite!");
-                break;
-            case 'Artisan':
-                console.log("Job Available: Craft a Ceremonial Item!");
-                break;
-            default:
-                console.log("No jobs available for your current career.");
-                break;
-        }
-    }
 
     // --- NEW MODAL HELPER FUNCTIONS ---
 
