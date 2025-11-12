@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.3.0] - 2025-11-12
 
 ### Added
+- **Seasonal Festivals and Spontaneous Events:** Implemented a dynamic event system that introduces seasonal festivals (e.g., "Spring Bloom Festival") and rare, spontaneous events (e.g., "Traveling Merchant").
+  - **`js/Calendar.js`:** A new class to manage the in-game date, including days and seasons.
+  - **`js/EventManager.js`:** A new class to define and manage all in-game events.
+  - The main game loop now advances the calendar, checks for active events, and displays them to the player.
+  - Active events can now directly influence the Nadagotchi's mood and stats.
 - **New Career Mini-Games:** Designed and implemented unique, engaging mini-games for the Scout, Healer, and Artisan careers.
   - **Scout:** A timed "match the pairs" game (`ScoutMinigameScene.js`).
   - **Healer:** A diagnostic game where the player chooses the correct remedy for a symptom (`HealerMinigameScene.js`).

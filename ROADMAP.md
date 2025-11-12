@@ -40,9 +40,10 @@ This phase focuses on building out the primary gameplay loops, giving players cl
     -   [x] Implemented a system for discovering new locations and finding crafting resources.
 -   **[x] Social & Relationship System:**
     -   [x] Pets can now build foundational relationships with other characters.
+-   **[x] Dynamic World System:**
+    -   [x] Implemented a full Day/Night cycle and dynamic Weather System that affects mood and activities.
+    -   [x] Introduced seasonal festivals and rare, spontaneous events (e.g., 'Traveling Merchant').
 -   **[ ] Future Work:**
-    -   [ ] Implement a full Day/Night cycle and dynamic Weather System that affects mood and activities.
-    -   [ ] Introduce seasonal festivals and rare, spontaneous events (e.g., 'Traveling Merchant').
     -   [ ] Allow for deeper home customization with player-placed furniture.
     -   [ ] Expand NPC interactions with more complex dialogues and relationship-based events.
 
