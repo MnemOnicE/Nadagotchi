@@ -96,6 +96,21 @@ class MainScene extends Phaser.Scene {
             activeEvent: this.eventManager.getActiveEvent()
         };
         this.drawSky(this.timeOfDay);
+        // --- Initialize World Systems ---
+        this.worldClock = new WorldClock(this);
+        this.weatherSystem = new WeatherSystem(this);
+
+        // --- World State Initialization ---
+        this.worldState = {
+            time: this.worldClock.getCurrentPeriod(),
+            weather: this.weatherSystem.getCurrentWeather()
+        };
+
+        // For drawing stars
+        this.stars = [];
+        for (let i = 0; i < 100; i++) {
+            this.stars.push({ x: Math.random(), y: Math.random() });
+        }
 
         // --- UI Text for Date and Events ---
         this.dateText = this.add.text(10, 10, '', {
@@ -146,6 +161,12 @@ class MainScene extends Phaser.Scene {
             callbackScope: this,
             loop: true
         });
+        // --- Event Listeners for World Systems ---
+        this.game.events.on('weatherChanged', (newWeather) => {
+            this.worldState.weather = newWeather;
+            this.updateWorldVisuals();
+        }, this);
+
 
         // --- Auto-Save Timer ---
         this.time.addEvent({
@@ -159,20 +180,39 @@ class MainScene extends Phaser.Scene {
 
         // --- Event Listeners ---
         this.game.events.on('uiAction', (actionType) => {
-            this.nadagotchi.handleAction(actionType);
+            if (actionType === 'WORK') {
+                this.startWorkMinigame();
+            } else {
+                this.nadagotchi.handleAction(actionType);
+            }
         }, this);
 
         this.game.events.on('workResult', (data) => {
             if (data.success) {
-                // Apply a reward based on the career
-                if (data.career === 'Innovator') {
-                    this.nadagotchi.skills.logic += 1.5; // Significant skill boost
-                    this.nadagotchi.stats.happiness += 25;
-                    this.nadagotchi.addJournalEntry("I solved a complex puzzle at work today!");
+                this.nadagotchi.stats.happiness += 25;
+                let skillUp = '';
+                switch (data.career) {
+                    case 'Innovator':
+                        this.nadagotchi.skills.logic += 1.5;
+                        skillUp = 'logic';
+                        break;
+                    case 'Scout':
+                        this.nadagotchi.skills.navigation += 1.5;
+                        skillUp = 'navigation';
+                        break;
+                    case 'Healer':
+                        this.nadagotchi.skills.empathy += 1.5;
+                        skillUp = 'empathy';
+                        break;
+                    case 'Artisan':
+                        this.nadagotchi.skills.crafting += 1.5;
+                        skillUp = 'crafting';
+                        break;
                 }
+                this.nadagotchi.addJournalEntry(`I had a successful day at my ${data.career} job! My ${skillUp} skill increased.`);
             } else {
                 this.nadagotchi.stats.happiness -= 10;
-                this.nadagotchi.addJournalEntry("I struggled with a puzzle at work. It was frustrating.");
+                this.nadagotchi.addJournalEntry(`I struggled at my ${data.career} job today. It was frustrating.`);
             }
         });
 
@@ -185,37 +225,89 @@ class MainScene extends Phaser.Scene {
 
         // Initial text update after everything is created.
         this.updateDateText();
+        this.drawSky(); // Initial sky draw
+    }
+
+    /**
+     * Starts the appropriate mini-game based on the Nadagotchi's current career.
+     */
+    startWorkMinigame() {
+        if (!this.nadagotchi.currentCareer) {
+            console.log("No career to work in!");
+            return;
+        }
+
+        let sceneKey;
+        switch (this.nadagotchi.currentCareer) {
+            case 'Innovator':
+                sceneKey = 'LogicPuzzleScene';
+                break;
+            case 'Scout':
+                sceneKey = 'ScoutMinigameScene';
+                break;
+            case 'Healer':
+                sceneKey = 'HealerMinigameScene';
+                break;
+            case 'Artisan':
+                sceneKey = 'ArtisanMinigameScene';
+                break;
+            default:
+                console.log(`No minigame found for career: ${this.nadagotchi.currentCareer}`);
+                return;
+        }
+
+        this.scene.pause();
+        this.scene.launch(sceneKey);
     }
 
     /**
      * Procedurally draws the sky to the dynamic texture.
      * @param {string} timeOfDay - "Day" or "Night".
+     * Procedurally draws the sky, interpolating colors for smooth transitions.
      */
-    drawSky(timeOfDay) {
-        this.skyTexture.clear(); // Clear the previous drawing
+    drawSky() {
+        const daylightFactor = this.worldClock.getDaylightFactor();
 
-        if (timeOfDay === "Day") {
-            const gradient = this.skyTexture.context.createLinearGradient(0, 0, 0, this.cameras.main.height);
-            gradient.addColorStop(0, '#87CEEB'); // Light Sky Blue
-            gradient.addColorStop(1, '#ADD8E6'); // Lighter Blue
-            this.skyTexture.context.fillStyle = gradient;
-            this.skyTexture.context.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height);
+        // Define the sky colors for different times of day
+        const nightTop = new Phaser.Display.Color(0, 0, 51);
+        const nightBottom = new Phaser.Display.Color(0, 0, 0);
+        const dawnTop = new Phaser.Display.Color(255, 153, 102);
+        const dawnBottom = new Phaser.Display.Color(255, 204, 153);
+        const dayTop = new Phaser.Display.Color(135, 206, 235);
+        const dayBottom = new Phaser.Display.Color(173, 216, 230);
+
+        let topColor, bottomColor;
+
+        if (this.worldClock.getCurrentPeriod() === 'Dawn') {
+            topColor = Phaser.Display.Color.Interpolate.ColorWithColor(nightTop, dawnTop, 1, daylightFactor);
+            bottomColor = Phaser.Display.Color.Interpolate.ColorWithColor(nightBottom, dawnBottom, 1, daylightFactor);
+        } else if (this.worldClock.getCurrentPeriod() === 'Dusk') {
+            topColor = Phaser.Display.Color.Interpolate.ColorWithColor(dawnTop, nightTop, 1, 1 - daylightFactor);
+            bottomColor = Phaser.Display.Color.Interpolate.ColorWithColor(dawnBottom, nightBottom, 1, 1 - daylightFactor);
+        } else if (daylightFactor === 1) { // Day
+            topColor = dayTop;
+            bottomColor = dayBottom;
         } else { // Night
-            const gradient = this.skyTexture.context.createLinearGradient(0, 0, 0, this.cameras.main.height);
-            gradient.addColorStop(0, '#000033'); // Dark Blue
-            gradient.addColorStop(1, '#000000'); // Black
-            this.skyTexture.context.fillStyle = gradient;
-            this.skyTexture.context.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height);
-
-            // Add some stars
-            this.skyTexture.context.fillStyle = '#FFFFFF';
-            for (let i = 0; i < 100; i++) {
-                const x = Math.random() * this.cameras.main.width;
-                const y = Math.random() * this.cameras.main.height * 0.7; // Only in the upper part
-                this.skyTexture.context.fillRect(x, y, 1, 1);
-            }
+            topColor = nightTop;
+            bottomColor = nightBottom;
         }
-        this.skyTexture.refresh(); // Apply the changes
+
+        this.skyTexture.clear();
+        const gradient = this.skyTexture.context.createLinearGradient(0, 0, 0, this.cameras.main.height);
+        gradient.addColorStop(0, `rgba(${topColor.r}, ${topColor.g}, ${topColor.b}, 1)`);
+        gradient.addColorStop(1, `rgba(${bottomColor.r}, ${bottomColor.g}, ${bottomColor.b}, 1)`);
+        this.skyTexture.context.fillStyle = gradient;
+        this.skyTexture.context.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height);
+
+        // Draw stars at night
+        if (daylightFactor < 0.5) {
+            this.skyTexture.context.fillStyle = `rgba(255, 255, 255, ${1 - (daylightFactor * 2)})`;
+            this.stars.forEach(star => {
+                this.skyTexture.context.fillRect(star.x * this.cameras.main.width, star.y * this.cameras.main.height * 0.7, 1, 1);
+            });
+        }
+
+        this.skyTexture.refresh();
     }
 
     /**
@@ -250,23 +342,32 @@ class MainScene extends Phaser.Scene {
      * @param {number} delta - The time in milliseconds since the last frame.
      */
     update(time, delta) {
-        // 1. Tell the Nadagotchi brain to process the passage of time, now with world state.
+        // 1. Update the world clock
+        this.worldClock.update(delta);
+
+        // 2. Update the world state from the systems
+        this.worldState.time = this.worldClock.getCurrentPeriod();
+
+        // 3. Redraw the dynamic sky for smooth transitions
+        this.drawSky();
+
+        // 3. Tell the Nadagotchi brain to process the passage of time
         this.nadagotchi.live(this.worldState);
 
-        // 2. Emit an event with the latest Nadagotchi data for the UI to update.
+        // 4. Emit an event with the latest Nadagotchi data for the UI to update.
         this.game.events.emit('updateStats', this.nadagotchi);
 
-        // 3. Update the pet's visual appearance based on its mood.
+        // 5. Update the pet's visual appearance based on its mood.
         this.updateSpriteMood();
 
-        // 4. Check if the pet should perform a spontaneous, "proactive" action.
+        // 6. Check if the pet should perform a spontaneous, "proactive" action.
         this.checkProactiveBehaviors();
 
-        // 5. Check for and handle the one-time event of unlocking a career.
+        // 7. Check for and handle the one-time event of unlocking a career.
         this.checkCareerUnlock();
 
-        // 6. Update lighting if it's night
-        if (this.timeOfDay === "Night") {
+        // 8. Update lighting based on the time of day
+        if (this.worldState.time === "Night" || this.worldState.time === "Dusk") {
             this.drawLight();
         }
     }
@@ -346,15 +447,32 @@ class MainScene extends Phaser.Scene {
      * Updates the scene's visuals based on the current weather and time of day.
      */
     updateWorldVisuals() {
-        // Handle weather effects
-        if (this.currentWeather === "Rainy") {
-            this.rainEmitter.start();
-        } else {
-            this.rainEmitter.stop();
+        // Stop all emitters by default
+        this.rainEmitter.stop();
+        // this.snowEmitter.stop(); // Example for future expansion
+
+        switch (this.worldState.weather) {
+            case "Rainy":
+                this.rainEmitter.start();
+                break;
+            case "Stormy":
+                this.rainEmitter.setQuantity(5); // More intense rain
+                this.rainEmitter.setSpeedY({ min: 300, max: 500 });
+                this.rainEmitter.start();
+                // Add lightning flashes here in the future
+                break;
+            case "Cloudy":
+                // You might add a cloud layer image that moves across the screen
+                break;
+            case "Sunny":
+                // No precipitation
+                this.rainEmitter.setQuantity(2); // Reset to default
+                this.rainEmitter.setSpeedY({ min: 200, max: 400 });
+                break;
         }
 
         // Handle lighting
-        if (this.timeOfDay === "Night") {
+        if (this.worldState.time === "Night" || this.worldState.time === "Dusk") {
             this.lightTexture.setVisible(true);
         } else {
             this.lightTexture.setVisible(false);

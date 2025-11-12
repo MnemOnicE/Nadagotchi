@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **`js/EventManager.js`:** A new class to define and manage all in-game events.
   - The main game loop now advances the calendar, checks for active events, and displays them to the player.
   - Active events can now directly influence the Nadagotchi's mood and stats.
+- **New Career Mini-Games:** Designed and implemented unique, engaging mini-games for the Scout, Healer, and Artisan careers.
+  - **Scout:** A timed "match the pairs" game (`ScoutMinigameScene.js`).
+  - **Healer:** A diagnostic game where the player chooses the correct remedy for a symptom (`HealerMinigameScene.js`).
+  - **Artisan:** A pattern-matching game where the player replicates a displayed pattern (`ArtisanMinigameScene.js`).
+- **Mini-Game Integration:** Integrated the new mini-games into the main game loop. The `MainScene` now launches the appropriate mini-game when the "Work" button is clicked, based on the pet's current career.
 
 ## [1.2.0] - 2025-11-10
 

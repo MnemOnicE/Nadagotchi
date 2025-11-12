@@ -4,7 +4,7 @@ window.onload = function() {
         width: window.innerWidth,
         height: window.innerHeight,
         parent: 'game-container',
-        scene: [MainScene, UIScene, BreedingScene, LogicPuzzleScene],
+        scene: [MainScene, UIScene, BreedingScene, LogicPuzzleScene, ScoutMinigameScene, HealerMinigameScene, ArtisanMinigameScene],
         scale: {
             mode: Phaser.Scale.FIT,
             autoCenter: Phaser.Scale.CENTER_BOTH
