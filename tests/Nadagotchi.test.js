@@ -112,6 +112,16 @@ describe('Nadagotchi', () => {
             // The dominant archetype should remain Intellectual.
             expect(pet.dominantArchetype).toBe('Intellectual');
         });
+
+        test('should not change dominant archetype to one that appears earlier in case of a tie', () => {
+            // Intellectual starts at 10 points.
+            // Set Adventurer (which comes before Intellectual in object definition) to the same score.
+            pet.personalityPoints.Adventurer = 10;
+            pet.updateDominantArchetype();
+            // The correct behavior is for the archetype to remain 'Intellectual' as there is no
+            // archetype with a strictly greater score.
+            expect(pet.dominantArchetype).toBe('Intellectual');
+        });
     });
 
     describe('handleAction', () => {
