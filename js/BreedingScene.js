@@ -77,11 +77,13 @@ class BreedingScene extends Phaser.Scene {
      * Contains the core logic for creating the next generation's data.
      */
     initiateLegacy() {
-        const newPetData = {};
+        // Helper functions to remove Phaser dependencies
+        const between = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+        const clamp = (value, min, max) => Math.max(min, Math.min(value, max));
+        const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
         // 1. Inherit Personality: New pet's archetype is the parent's dominant one.
         const topArchetype = this.parentData.dominantArchetype;
-        // A simple way to find the second highest archetype for variety.
         let secondArchetype = 'Adventurer';
         let maxPoints = -1;
         for (const archetype in this.parentData.personalityPoints) {
@@ -90,10 +92,34 @@ class BreedingScene extends Phaser.Scene {
                 secondArchetype = archetype;
             }
         }
-        newPetData.archetype = topArchetype;
-        newPetData.personalityPoints = { [topArchetype]: 5, [secondArchetype]: 2 };
 
-        // 2. Apply Environmental Influence
+        // 2. Create the complete data structure for the new pet.
+        // This ensures the new Nadagotchi is created with a valid, complete state.
+        const newPetData = {
+            mood: 'neutral',
+            dominantArchetype: topArchetype,
+            personalityPoints: {
+                [topArchetype]: 5,
+                [secondArchetype]: 2
+            },
+            stats: { hunger: 100, energy: 100, happiness: 70 },
+            skills: {
+                communication: 1, resilience: 1, navigation: 0,
+                empathy: 0, logic: 0, focus: 0, crafting: 0
+            },
+            currentCareer: null,
+            inventory: [],
+            age: 0,
+            generation: this.parentData.generation + 1,
+            isLegacyReady: false,
+            legacyTraits: [],
+            moodSensitivity: clamp(this.parentData.moodSensitivity + between(-1, 1), 1, 10),
+            hobbies: { painting: 0, music: 0 },
+            relationships: { friend: { level: 0 } },
+            location: 'Home'
+        };
+
+        // 3. Apply Environmental Influence
         if (this.selectedItems.includes('logic')) {
             newPetData.personalityPoints.Intellectual = (newPetData.personalityPoints.Intellectual || 0) + 5;
         }
@@ -101,11 +127,7 @@ class BreedingScene extends Phaser.Scene {
             newPetData.personalityPoints.Nurturer = (newPetData.personalityPoints.Nurturer || 0) + 5;
         }
 
-        // 3. Inherit and Mutate Mood Sensitivity
-        newPetData.moodSensitivity = Phaser.Math.Clamp(this.parentData.moodSensitivity + Phaser.Math.Between(-1, 1), 1, 10);
-
         // 4. Inherit Legacy Traits with a chance of being passed down
-        newPetData.legacyTraits = [];
         this.parentData.legacyTraits.forEach(trait => {
             if (Math.random() < 0.3) { // 30% chance to inherit each trait
                 newPetData.legacyTraits.push(trait);
@@ -115,20 +137,17 @@ class BreedingScene extends Phaser.Scene {
         // 5. Add a NEW rare trait (low chance)
         if (Math.random() < 0.05) { // 5% chance for a brand new trait
             const possibleNewTraits = ["Quick Learner", "Resilient Spirit", "Charming"];
-            newPetData.legacyTraits.push(Phaser.Utils.Array.GetRandom(possibleNewTraits));
+            newPetData.legacyTraits.push(getRandom(possibleNewTraits));
         }
 
-        // 6. Set the new generation number
-        newPetData.generation = this.parentData.generation + 1;
-
         // --- Final Steps ---
-        // 7. Save the retiring pet to the Hall of Fame.
+        // 6. Save the retiring pet to the Hall of Fame.
         this.persistence.saveToHallOfFame(this.parentData);
 
-        // 8. Clear the active pet save file.
+        // 7. Clear the active pet save file.
         this.persistence.clearActivePet();
 
-        // 9. Restart the game, passing the new pet's data to MainScene to begin the next generation.
+        // 8. Restart the game with the new pet's data.
         this.scene.start('MainScene', { newPetData: newPetData });
     }
 }

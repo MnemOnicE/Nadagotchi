@@ -55,7 +55,7 @@ This phase will introduce long-term replayability and a deeper sense of history 
 
 ### **III. Generational Legacy & Breeding System**
 -   **[ ] Initial Implementation:**
-    -   [ ] Design the "Breeding Den" UI and environment.
+    -   [ ] Design the "Breeding Den" UI and environment. *(Backend logic implemented, UI pending)*
     -   [ ] Develop the core mechanic for "Personality Gene" inheritance.
     -   [ ] Create unique egg designs that hint at the offspring's inherited traits.
 -   **[ ] Advanced Features:**
