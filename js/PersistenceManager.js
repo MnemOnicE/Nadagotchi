@@ -81,3 +81,4 @@ class PersistenceManager {
         return recipes ? JSON.parse(recipes) : [];
     }
 }
+

@@ -25,12 +25,22 @@ class UIScene extends Phaser.Scene {
 
         // --- Create Action Buttons ---
         const buttonY = this.cameras.main.height - 40;
-        const buttonStyle = { padding: { x: 8, y: 4 }, backgroundColor: '#555' };
+        const buttonStyle = {
+            fontFamily: 'Arial',
+            fontSize: '14px',
+            color: '#ffffff',
+            backgroundColor: '#4a4a4a',
+            padding: { x: 10, y: 5 },
+            border: '1px solid #ffffff'
+        };
         let startX = 10;
 
         const addButton = (text, action) => {
-            const button = this.add.text(startX, buttonY, text, buttonStyle).setInteractive();
-            button.on('pointerdown', () => this.game.events.emit('uiAction', action));
+            const button = this.add.text(startX, buttonY, text, buttonStyle)
+                .setInteractive({ useHandCursor: true })
+                .on('pointerdown', () => this.game.events.emit('uiAction', action))
+                .on('pointerover', () => button.setStyle({ fill: '#ff0' }))
+                .on('pointerout', () => button.setStyle({ fill: '#fff' }));
             startX += button.width + 10; // Advance position for the next button
             return button;
         };
@@ -39,7 +49,6 @@ class UIScene extends Phaser.Scene {
         addButton('Play', 'PLAY');
         addButton('Study', 'STUDY');
         addButton('Explore', 'EXPLORE');
-        addButton('Care', 'CARE_FOR_PLANT');
         addButton('Meditate', 'MEDITATE');
         addButton('Craft', 'CRAFT_ITEM');
 
@@ -99,6 +108,22 @@ class UIScene extends Phaser.Scene {
         // Modals (initially hidden)
         this.journalModal = this.createModal("Journal");
         this.recipeModal = this.createModal("Recipe Book");
+        this.hobbyModal = this.createModal("Hobbies");
+        this.craftingModal = this.createModal("Crafting");
+        this.relationshipModal = this.createModal("Relationships");
+
+
+        // --- New Subsystem Buttons ---
+        const hobbyButton = this.add.text(200, 50, 'Hobbies', { padding: { x: 10, y: 5 }, backgroundColor: '#444' }).setInteractive();
+        hobbyButton.on('pointerdown', () => this.openHobbyMenu());
+
+        this.game.events.on('uiAction', (action) => {
+            if (action === 'OPEN_CRAFTING_MENU') {
+                this.openCraftingMenu();
+            } else if (action === 'INTERACT_NPC') {
+                this.openRelationshipMenu();
+            }
+        });
     }
 
     /**
@@ -112,10 +137,14 @@ class UIScene extends Phaser.Scene {
 
         const stats = data.stats;
         const skills = data.skills;
+        // Get a visual indicator for the pet's current mood.
+        const moodEmoji = this.getMoodEmoji(data.mood);
+
         // Format the text string with the latest data.
         // Added 'Navigation' skill to the display.
-        const text = `Archetype: ${data.dominantArchetype}\n` +
-                     `Mood: ${data.mood}\n` +
+        const text = `Location: ${data.location}\n` +
+                     `Archetype: ${data.dominantArchetype}\n` +
+                     `Mood: ${data.mood} ${moodEmoji}\n` +
                      `Career: ${data.currentCareer || 'None'}\n` +
                      `Hunger: ${Math.floor(stats.hunger)}\n` +
                      `Energy: ${Math.floor(stats.energy)}\n` +
@@ -147,6 +176,26 @@ class UIScene extends Phaser.Scene {
         // If the pet is ready for legacy and the button is not yet visible, show it.
         if (data.isLegacyReady && !this.legacyButton.visible) {
             this.legacyButton.setVisible(true);
+        }
+    }
+
+    /**
+     * Returns an emoji character based on the pet's mood.
+     * @param {string} mood - The current mood of the Nadagotchi (e.g., 'Happy', 'Neutral', 'Sad').
+     * @returns {string} An emoji representing the mood.
+     */
+    getMoodEmoji(mood) {
+        switch (mood.toLowerCase()) {
+            case 'happy':
+                return '\u{1F604}';
+            case 'sad':
+                return '\u{1F622}';
+            case 'angry':
+                return '\u{1F620}';
+            case 'neutral':
+                return '\u{1F610}';
+            default:
+                return '❓'; // Return a question mark for unknown moods.
         }
     }
 
@@ -191,7 +240,9 @@ class UIScene extends Phaser.Scene {
         // Use a switch statement to handle different jobs for different careers.
         switch(this.nadagotchiData.currentCareer) {
             case 'Innovator':
-                console.log("Job Available: Design a New Gadget!");
+                this.scene.start('LogicPuzzleScene');
+                this.scene.stop('MainScene');
+                this.scene.stop('UIScene');
                 break;
             case 'Scout':
                 console.log("Job Available: Map the Whispering Woods!");
@@ -218,12 +269,36 @@ class UIScene extends Phaser.Scene {
     createModal(title) {
         const modalGroup = this.add.group();
 
-        const modalBg = this.add.rectangle(this.cameras.main.width / 2, this.cameras.main.height / 2, 500, 400, 0x000000, 0.8).setOrigin(0.5);
-        const modalTitle = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2 - 170, title, { fontSize: '24px' }).setOrigin(0.5);
-        const modalContent = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2, '', { fontSize: '16px', wordWrap: { width: 480 } }).setOrigin(0.5);
-        const closeButton = this.add.text(this.cameras.main.width / 2 + 220, this.cameras.main.height / 2 - 170, 'X', { padding: { x: 5, y: 2 }, backgroundColor: '#ff0000' }).setOrigin(0.5).setInteractive();
+        const modalBg = this.add.rectangle(this.cameras.main.width / 2, this.cameras.main.height / 2, 500, 400, 0x1a1a1a, 0.9).setOrigin(0.5);
+        modalBg.setStrokeStyle(2, 0xffffff); // Add a white border
 
-        closeButton.on('pointerdown', () => modalGroup.setVisible(false));
+        const modalTitle = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2 - 170, title, {
+            fontFamily: 'Arial',
+            fontSize: '28px',
+            color: '#ffffff',
+            align: 'center'
+        }).setOrigin(0.5);
+
+        const modalContent = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2, '', {
+            fontFamily: 'Arial',
+            fontSize: '16px',
+            color: '#ffffff',
+            wordWrap: { width: 480 },
+            align: 'left'
+        }).setOrigin(0.5);
+
+        const closeButton = this.add.text(this.cameras.main.width / 2 + 220, this.cameras.main.height / 2 - 170, 'X', {
+            fontFamily: 'Arial',
+            fontSize: '20px',
+            color: '#ffffff',
+            backgroundColor: '#8B0000',
+            padding: { x: 8, y: 4 }
+        }).setOrigin(0.5).setInteractive();
+
+        closeButton.on('pointerdown', () => {
+            modalGroup.setVisible(false);
+            this.scene.resume('MainScene');
+        });
 
         modalGroup.addMultiple([modalBg, modalTitle, modalContent, closeButton]);
         modalGroup.setVisible(false); // Hide by default
@@ -245,6 +320,34 @@ class UIScene extends Phaser.Scene {
         const formattedText = recipes.join('\n');
         this.recipeModal.content.setText(formattedText || "No recipes discovered.");
         this.recipeModal.setVisible(true);
+        this.scene.pause('MainScene');
+    }
+
+    // --- New Subsystem UI Methods ---
+    openHobbyMenu() {
+        if (!this.nadagotchiData) return;
+        const hobbies = this.nadagotchiData.hobbies;
+        const formattedText = Object.keys(hobbies).map(hobby => `${hobby}: Level ${hobbies[hobby]}`).join('\n');
+        this.hobbyModal.content.setText(formattedText);
+        this.hobbyModal.setVisible(true);
+        this.scene.pause('MainScene');
+    }
+
+    openCraftingMenu() {
+        if (!this.nadagotchiData) return;
+        const inventory = this.nadagotchiData.inventory;
+        const formattedText = `Inventory:\n- ${inventory.join('\n- ')}\n\n(Crafting recipes will go here)`;
+        this.craftingModal.content.setText(formattedText);
+        this.craftingModal.setVisible(true);
+        this.scene.pause('MainScene');
+    }
+
+    openRelationshipMenu() {
+        if (!this.nadagotchiData) return;
+        const relationships = this.nadagotchiData.relationships;
+        const formattedText = Object.keys(relationships).map(npc => `${npc}: Friendship ${relationships[npc].level}`).join('\n');
+        this.relationshipModal.content.setText(formattedText);
+        this.relationshipModal.setVisible(true);
         this.scene.pause('MainScene');
     }
 }

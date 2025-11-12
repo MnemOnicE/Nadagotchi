@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-11-10
+
+### Added
+- **Test Coverage:** Added unit tests for `PersistenceManager.js` and `Nadagotchi.js`.
+  - `PersistenceManager.js`: Added tests for all methods.
+  - `Nadagotchi.js`: Added tests for the `live` and `updateDominantArchetype` methods.
+
+## [1.1.0] - 2025-11-09
+
+### Added
+- **Hobby and Crafting System:** Implemented a new hobby system allowing the Nadagotchi to practice skills like painting and music. A new crafting system allows the pet to use foraged items.
+- **Exploration and Foraging System:** The Nadagotchi can now explore different locations and forage for items, which are added to its inventory.
+- **Social and Relationship System:** A new social system allows the Nadagotchi to build relationships with NPCs.
+
+### Fixed
+- **Critical Black Screen Regression:** Fixed a race condition in `js/MainScene.js` where the `resize` event could be called before the scene's objects were fully created, causing a fatal error that prevented the game from rendering.
+
+## [1.0.0] - 2025-11-09
+
+### Added
+- **Interactive Home Environment:** The pet's home is now interactive. Added a clickable "Bookshelf" and "Potted Plant" that provide skill gains and mood boosts, deepening the core simulation.
+- **Career Mini-Games:** The "Job Board" for the 'Innovator' career now launches an interactive logic puzzle mini-game. Success grants significant skill and happiness rewards, making careers more engaging.
+- **`js/LogicPuzzleScene.js`:** A new scene for the Innovator's career mini-game.
+
+### Changed
+- The `STUDY` action in `Nadagotchi.js` has been refactored and its functionality is now primarily handled by the new interactive bookshelf.
+- The `CARE_FOR_PLANT` action has been removed and its functionality is replaced by the new interactive plant.
+- The "Care" button was removed from `UIScene.js` as it is now redundant.
+
 ## [0.9.0] - 2025-11-07
 
 ### Changed
@@ -14,7 +43,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `index.html` and `style.css` were modified to support a full-screen layout.
 
 ### Fixed
-- **Negative Happiness Bug (Rainy Weather):** Fixed a bug in `js/Nadagotchi.js` where the `happiness` stat for the 'Adventurer' archetype could become negative during prolonged 'Rainy' weather. A bounds check was added to the `live` method to ensure `happiness` does not fall below 0.
+- **Stale Mood Calculation:** Fixed a critical bug in `js/Nadagotchi.js` where skill gains were calculated using the pet's mood *before* an action was processed, not after. This resulted in incorrect skill gains for actions that also changed the pet's mood (e.g., a sad 'Intellectual' pet studying). The logic has been refactored to calculate the mood multiplier *after* any mood changes occur.
+- **Negative Happiness Bug:** Fixed a bug in `js/Nadagotchi.js` where the `happiness` stat for the 'Adventurer' archetype could become negative in 'Rainy' weather. A bounds check was added to ensure `happiness` does not fall below 0.
 
 ### Removed
 - **Legacy Files:** Deleted the unused `game.js` and `style.css` files from the root directory to clean up the project structure.

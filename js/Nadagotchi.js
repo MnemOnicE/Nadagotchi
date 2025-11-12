@@ -61,6 +61,11 @@ class Nadagotchi {
         this.journal = this.persistence.loadJournal();
         /** @type {Array<string>} - A list of crafting recipes the pet has discovered. */
         this.discoveredRecipes = this.persistence.loadRecipes();
+
+        // --- New Subsystems ---
+        this.hobbies = loadedData ? loadedData.hobbies : { painting: 0, music: 0 };
+        this.relationships = loadedData ? loadedData.relationships : { friend: { level: 0 } };
+        this.location = loadedData ? loadedData.location : 'Home';
     }
 
     /**
@@ -135,20 +140,11 @@ class Nadagotchi {
      * @param {any} [item=null] - An optional item used in the action.
      */
     handleAction(actionType, item = null) {
+        // --- BUG FIX ---
+        // The moodMultiplier is now calculated *inside* each action that needs it.
+        // This ensures that any mood changes from the action itself are accounted for
+        // *before* calculating skill gains, which was the source of the bug.
         let moodMultiplier;
-        switch (this.mood) {
-            case 'happy':
-                moodMultiplier = 1.5; // A happy pet is a fast learner.
-                break;
-            case 'sad':
-                moodMultiplier = 0.5; // A sad pet struggles to focus.
-                break;
-            case 'angry':
-                moodMultiplier = 0.2; // An angry pet barely learns at all.
-                break;
-            default: // 'neutral'
-                moodMultiplier = 1.0; // The baseline learning rate.
-        }
 
         switch (actionType) {
             case 'FEED':
@@ -192,14 +188,18 @@ class Nadagotchi {
                 if (this.dominantArchetype === 'Intellectual') {
                     this.mood = 'happy';
                     this.personalityPoints.Intellectual++;
+                    // Recalculate multiplier *after* mood change
+                    moodMultiplier = this._getMoodMultiplier();
                     this.skills.logic += (0.1 * moodMultiplier);
                     this.stats.happiness += 15;
                 } else {
                     this.personalityPoints.Intellectual++;
+                    moodMultiplier = this._getMoodMultiplier();
                     this.skills.logic += (0.1 * moodMultiplier);
                 }
 
                 if (this.dominantArchetype === 'Adventurer') {
+                    moodMultiplier = this._getMoodMultiplier();
                     this.skills.navigation += (0.05 * moodMultiplier);
                 }
 
@@ -207,6 +207,36 @@ class Nadagotchi {
                 if (Math.random() < 0.05) { // 5% chance
                     this.discoverRecipe("Logic-Boosting Snack");
                 }
+                break;
+
+            case 'INTERACT_BOOKSHELF':
+                this.stats.energy -= 5;
+                this.stats.happiness -= 5;
+
+                // Set mood first, then calculate multiplier
+                if (this.dominantArchetype === 'Intellectual') {
+                    this.stats.happiness += 20; // Big happiness boost for Intellectuals
+                    this.mood = 'happy';
+                }
+
+                moodMultiplier = this._getMoodMultiplier();
+                this.skills.logic += (0.15 * moodMultiplier); // Slightly more effective
+                this.personalityPoints.Intellectual++;
+                break;
+
+            case 'INTERACT_PLANT':
+                this.stats.energy -= 5;
+                this.stats.happiness += 10;
+
+                // Set mood first, then calculate multiplier
+                if (this.dominantArchetype === 'Nurturer') {
+                    this.stats.happiness += 20; // Big happiness boost for Nurturers
+                    this.mood = 'happy';
+                }
+
+                moodMultiplier = this._getMoodMultiplier();
+                this.skills.empathy += (0.15 * moodMultiplier); // Slightly more effective
+                this.personalityPoints.Nurturer++;
                 break;
 
             case 'EXPLORE':
@@ -231,19 +261,11 @@ class Nadagotchi {
                 }
                 break;
 
-            case "CARE_FOR_PLANT":
-                this.stats.energy -= 5;
-                this.stats.happiness += 10;
-                this.skills.empathy += (0.1 * moodMultiplier);
-                if (this.dominantArchetype === "Nurturer") {
-                    this.personalityPoints.Nurturer += 2;
-                }
-                break;
-
             case "MEDITATE":
                 this.stats.energy += 5;
                 if (this.stats.energy > 100) this.stats.energy = 100;
                 this.stats.happiness += 5;
+                moodMultiplier = this._getMoodMultiplier();
                 this.skills.focus += (0.1 * moodMultiplier);
                 if (this.dominantArchetype === "Recluse") {
                     this.personalityPoints.Recluse += 2;
@@ -252,11 +274,21 @@ class Nadagotchi {
 
             case "CRAFT_ITEM":
                 this.stats.energy -= 10;
+                moodMultiplier = this._getMoodMultiplier();
                 this.skills.crafting += (0.1 * moodMultiplier);
                 this.inventory.push("Simple Widget");
                 if (this.dominantArchetype === "Recluse") {
                     this.stats.happiness += 10;
                 }
+                break;
+            case 'PRACTICE_HOBBY':
+                this.practiceHobby(item); // e.g., item = 'painting'
+                break;
+            case 'FORAGE':
+                this.forage();
+                break;
+            case 'INTERACT_NPC':
+                this.interact('friend', item); // e.g., item = 'GIFT'
                 break;
         }
         // Final check to ensure happiness stat stays within the 0-100 bounds after any action.
@@ -268,6 +300,70 @@ class Nadagotchi {
 
         // After updating the archetype, check if a new career has been unlocked.
         this.updateCareer();
+    }
+
+    /**
+     * Increases the level of a specific hobby.
+     * @param {string} hobbyName - The name of the hobby to practice.
+     */
+    practiceHobby(hobbyName) {
+        if (this.hobbies.hasOwnProperty(hobbyName)) {
+            this.hobbies[hobbyName] += 1;
+            this.stats.happiness += 5;
+            this.stats.energy -= 5;
+            this.addJournalEntry(`I spent some time practicing ${hobbyName}.`);
+        }
+    }
+
+    /**
+     * Simulates foraging for items, adding them to the inventory.
+     */
+    forage() {
+        this.location = 'Forest'; // Change location
+        this.stats.energy -= 10;
+        const moodMultiplier = this._getMoodMultiplier();
+        this.skills.navigation += (0.2 * moodMultiplier);
+
+        const foundItem = Phaser.Utils.Array.GetRandom(['Berries', 'Sticks', 'Shiny Stone']);
+        this.inventory.push(foundItem);
+        this.addJournalEntry(`I went foraging in the ${this.location} and found ${foundItem}.`);
+        this.location = 'Home'; // Return home
+    }
+
+    /**
+     * Manages interaction with an NPC.
+     * @param {string} npcName - The name of the NPC.
+     * @param {string} interactionType - The type of interaction.
+     */
+    interact(npcName, interactionType) {
+        if (this.relationships.hasOwnProperty(npcName)) {
+            if (interactionType === 'GIFT' && this.inventory.includes('Berries')) {
+                this.inventory.splice(this.inventory.indexOf('Berries'), 1);
+                this.relationships[npcName].level += 5;
+                this.stats.happiness += 10;
+                this.skills.empathy += 0.2;
+                this.addJournalEntry(`I gave Berries to ${npcName}. They seemed to like it!`);
+            } else {
+                this.relationships[npcName].level += 1;
+                this.stats.happiness += 2;
+                this.skills.communication += 0.1;
+                this.addJournalEntry(`I had a nice chat with ${npcName}.`);
+            }
+        }
+    }
+
+    /**
+     * Calculates the skill gain multiplier based on the pet's current mood.
+     * @returns {number} The calculated mood multiplier.
+     * @private
+     */
+    _getMoodMultiplier() {
+        switch (this.mood) {
+            case 'happy': return 1.5; // A happy pet is a fast learner.
+            case 'sad': return 0.5;   // A sad pet struggles to focus.
+            case 'angry': return 0.2; // An angry pet barely learns at all.
+            default: return 1.0;      // Neutral is the baseline.
+        }
     }
 
     /**
