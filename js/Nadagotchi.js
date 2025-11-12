@@ -82,6 +82,7 @@ class Nadagotchi {
         if (worldState.weather === "Rainy") {
             if (this.dominantArchetype === "Adventurer") {
                 this.stats.happiness -= 0.01; // Adventurers get restless in rain
+                if (this.stats.happiness < 0) this.stats.happiness = 0; // Prevent negative happiness
             }
             if (this.dominantArchetype === "Nurturer") {
                 energyDecay *= 0.5; // Nurturers get cozy and save energy
