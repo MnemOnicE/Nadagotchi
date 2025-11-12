@@ -74,27 +74,51 @@ class Nadagotchi {
      * @param {object} worldState - An object containing information about the game world (e.g., weather, time).
      */
     live(worldState = { weather: "Sunny", time: "Day" }) {
-        // Section 1: Stats Decay with environmental modifiers
+        // Section 1: Stats Decay with more nuanced environmental modifiers
         let hungerDecay = 0.05;
         let energyDecay = 0.02;
+        let happinessChange = 0; // Start with no change
 
-        // Apply weather/time modifiers
-        if (worldState.weather === "Rainy") {
-            if (this.dominantArchetype === "Adventurer") {
-                this.stats.happiness -= 0.01; // Adventurers get restless in rain
-                if (this.stats.happiness < 0) this.stats.happiness = 0; // Prevent negative happiness
-            }
-            if (this.dominantArchetype === "Nurturer") {
-                energyDecay *= 0.5; // Nurturers get cozy and save energy
-            }
+        // Weather effects
+        switch (worldState.weather) {
+            case "Rainy":
+                if (this.dominantArchetype === "Adventurer") happinessChange -= 0.01;
+                if (this.dominantArchetype === "Nurturer") energyDecay *= 0.5;
+                break;
+            case "Stormy":
+                if (this.dominantArchetype === "Adventurer") happinessChange -= 0.03;
+                if (this.dominantArchetype === "Recluse") happinessChange += 0.01; // Recluses enjoy the storm
+                energyDecay *= 1.2; // The noise is draining
+                break;
+            case "Cloudy":
+                energyDecay *= 0.8; // Less sun, less energy expenditure
+                break;
+            case "Sunny":
+                if (this.dominantArchetype === "Adventurer") happinessChange += 0.01;
+                energyDecay *= 1.1; // More active in the sun
+                break;
         }
 
-        if (worldState.time === "Night") {
-            hungerDecay *= 0.5; // Less activity at night means less hunger
+        // Time of day effects
+        switch (worldState.time) {
+            case "Night":
+                hungerDecay *= 0.5;
+                if (this.dominantArchetype === "Recluse") happinessChange += 0.01;
+                if (this.dominantArchetype === "Adventurer") energyDecay *= 1.1; // Restless at night
+                break;
+            case "Dusk":
+            case "Dawn":
+                energyDecay *= 0.9; // Less active during twilight hours
+                break;
+            case "Day":
+                if (this.dominantArchetype === "Intellectual") energyDecay *= 1.1; // Minds are active
+                break;
         }
+
 
         this.stats.hunger -= hungerDecay;
         this.stats.energy -= energyDecay;
+        this.stats.happiness += happinessChange;
 
         // Ensure stats do not fall below zero.
         if (this.stats.hunger < 0) this.stats.hunger = 0;
