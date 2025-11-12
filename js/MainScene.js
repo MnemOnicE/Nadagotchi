@@ -69,13 +69,16 @@ class MainScene extends Phaser.Scene {
         this.persistence = new PersistenceManager();
 
         if (data && data.newPetData) {
-            this.nadagotchi = new Nadagotchi(data.newPetData.archetype, data.newPetData);
+            // A new pet is being created from the breeding scene
+            this.nadagotchi = new Nadagotchi(data.newPetData.dominantArchetype, data.newPetData);
             this.persistence.savePet(this.nadagotchi);
         } else {
+            // Standard game load
             const loadedPet = this.persistence.loadPet();
             if (loadedPet) {
                 this.nadagotchi = new Nadagotchi(loadedPet.archetype, loadedPet);
             } else {
+                // First time playing
                 this.nadagotchi = new Nadagotchi('Adventurer');
                 this.persistence.savePet(this.nadagotchi);
             }
@@ -182,6 +185,10 @@ class MainScene extends Phaser.Scene {
         this.game.events.on('uiAction', (actionType) => {
             if (actionType === 'WORK') {
                 this.startWorkMinigame();
+            } else if (actionType === 'RETIRE') {
+                // When the retire action is triggered, stop this scene and the UI scene, then launch the BreedingScene.
+                this.scene.stop('UIScene');
+                this.scene.start('BreedingScene', this.nadagotchi);
             } else {
                 this.nadagotchi.handleAction(actionType);
             }

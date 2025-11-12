@@ -16,9 +16,9 @@ const persistenceManagerCode = fs.readFileSync(path.resolve(__dirname, '../js/Pe
 const PersistenceManager = eval(persistenceManagerCode + '; PersistenceManager');
 global.PersistenceManager = PersistenceManager;
 
-// Load the class from the source file
+// Load the class from the source file and append module.exports
 const nadagotchiCode = fs.readFileSync(path.resolve(__dirname, '../js/Nadagotchi.js'), 'utf8');
-const Nadagotchi = eval(nadagotchiCode + '; Nadagotchi');
+const Nadagotchi = eval(nadagotchiCode + '; module.exports = Nadagotchi;');
 
 // Mock Phaser since it's not available in the Node.js test environment
 const Phaser = {

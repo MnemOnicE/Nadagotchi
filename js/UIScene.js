@@ -74,17 +74,17 @@ class UIScene extends Phaser.Scene {
          */
         this.careerNotificationText = null;
 
-        // --- Legacy Button ---
-        this.legacyButton = this.add.text(
+        // --- Retire Button (formerly Legacy) ---
+        this.retireButton = this.add.text(
             this.cameras.main.width - 120,
             10,
-            'Legacy',
+            'Retire', // Changed text for clarity
             { padding: { x: 10, y: 5 }, backgroundColor: '#ff00ff' }
         ).setInteractive().setVisible(false);
 
-        this.legacyButton.on('pointerdown', () => {
-            // Start the BreedingScene, passing the current pet's data
-            this.scene.start('BreedingScene', this.nadagotchiData);
+        this.retireButton.on('pointerdown', () => {
+            // Emit a specific, clear event for the MainScene to handle.
+            this.game.events.emit('uiAction', 'RETIRE');
         });
 
         // --- Event Listeners ---
@@ -172,10 +172,10 @@ class UIScene extends Phaser.Scene {
             data.newCareerUnlocked = null;
         }
 
-        // --- Legacy Button Visibility ---
+        // --- Retire Button Visibility ---
         // If the pet is ready for legacy and the button is not yet visible, show it.
-        if (data.isLegacyReady && !this.legacyButton.visible) {
-            this.legacyButton.setVisible(true);
+        if (data.isLegacyReady && !this.retireButton.visible) {
+            this.retireButton.setVisible(true);
         }
     }
 
