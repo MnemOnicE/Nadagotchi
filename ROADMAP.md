@@ -1,65 +1,71 @@
-# Roadmap
+# Nadagotchi Project Roadmap
 
-This document outlines the planned future direction of the Nadagotchi project.
-
----
-
-## Phase 1: Core Gameplay Loop (Complete)
-
-This phase focused on building the fundamental mechanics of the game: caring for the Nadagotchi, influencing its personality, and seeing it grow.
-
-### **Version 0.1: Project Foundation**
--   [x] Establish core project documentation.
-
-### **Version 0.2: Personality & Interaction**
--   [x] Implement the "Explore" action to deepen the personality system.
-
-### **Version 0.3: Skill & Growth**
--   [x] Implement mood-based skill development ('Study' action).
-
-### **Version 0.4: Meaningful Progression**
--   [x] Implement Job Board for Unlocked Careers.
+This document outlines the development plan for the Nadagotchi project, inspired by the detailed vision in `Design.md`. Our goal is to create a deeply engaging and reactive virtual pet experience.
 
 ---
 
-## Phase 1.5: Architectural Improvements (Complete)
+## **Phase 1: Core Simulation & Personality (Complete)**
 
-This phase focused on improving the underlying code structure to ensure scalability and maintainability.
+This foundational phase focused on bringing the Nadagotchi to life with a dynamic personality and core interactive systems.
 
-### **Version 0.5: UI Refactoring**
--   [x] **Refactor UI into a dedicated scene (`UIScene`).**
--   [x] Establish event-based communication between game and UI scenes.
--   [x] **Optimize for Mobile:** The game is now fully responsive and playable on both desktop and mobile devices.
--   [x] Add comprehensive tests for the UI scene and its events.
+-   **[x] Version 0.1: Project Foundation:** Established core documentation.
+-   **[x] Version 0.2: Foundational Personality System:** Implemented core archetypes and mood responses.
+-   **[x] Version 0.3: Basic Interaction & Growth:** Introduced early actions ('Explore', 'Study') to influence personality and skills.
+-   **[x] Version 0.5: UI Refactoring:** Separated UI into a dedicated `UIScene` for better scalability and implemented a responsive, mobile-first design.
+-   **[x] Version 1.2: Core Test Coverage:** Added crucial unit tests for `PersistenceManager.js` and `Nadagotchi.js` to ensure stability.
 
 ---
 
-## Phase 2: Advanced Systems (Upcoming)
+## **Phase 2: Progression & A Living World (In Progress)**
 
-This phase will introduce more complex, long-term systems that give the game replayability and depth.
+This phase focuses on building out the primary gameplay loops, giving players clear goals and a more interactive environment.
 
-### **Version 1.0: The Career System & Interactive World**
--   [x] **Flesh out the Career System:**
-    -   [x] Implement the logic for all core careers (Innovator, Scout, Healer, Artisan).
-    -   [x] Create a visual in-game notification when a career is unlocked.
-    -   [x] **Implement Career Mini-Games:** The 'Innovator' now has an engaging mini-game, making their career active rather than passive.
--   [x] **Enrich the Core Loop:**
-    -   [x] Added an interactive home environment to provide more organic simulation and skill-building opportunities.
+### **I. Career/Life Path System & Skill Development**
+-   **[x] Foundational Career System:**
+    -   [x] Implemented logic for core careers (Innovator, Scout, Healer, Artisan).
+    -   [x] Added in-game notifications for unlocking new careers.
+    -   [x] Created a Job Board for unlocked career paths.
+-   **[x] Initial Mini-Game Implementation:**
+    -   [x] Designed and implemented the 'Logic Puzzle' mini-game for the Innovator career.
+-   **[ ] Future Work:**
+    -   [ ] Design and implement unique, engaging mini-games for the Scout, Healer, and Artisan careers.
+    -   [ ] Develop a "multi-classing" system to allow for hybrid careers (e.g., Archaeologist from Adventurer + Intellectual skills).
+    -   [ ] Introduce NPC "mentors" in career-specific guilds to guide skill development.
 
-### **Version 1.1: Dynamic Subsystems**
--   [x] **Hobby & Crafting System:** Pets can now develop hobbies and craft items from foraged materials.
--   [x] **Exploration & Foraging System:** The world is now expandable with different locations for pets to explore and find resources.
--   [x] **Social & Relationship System:** Pets can now build relationships with other characters in the game world.
+### **II. Dynamic World Events & Environmental Interaction**
+-   **[x] Interactive Home Environment:**
+    -   [x] Added clickable objects and furniture in the pet's home for organic skill-building.
+-   **[x] Exploration & Foraging System:**
+    -   [x] Implemented a system for discovering new locations and finding crafting resources.
+-   **[x] Social & Relationship System:**
+    -   [x] Pets can now build foundational relationships with other characters.
+-   **[ ] Future Work:**
+    -   [ ] Implement a full Day/Night cycle and dynamic Weather System that affects mood and activities.
+    -   [ ] Introduce seasonal festivals and rare, spontaneous events (e.g., 'Traveling Merchant').
+    -   [ ] Allow for deeper home customization with player-placed furniture.
+    -   [ ] Expand NPC interactions with more complex dialogues and relationship-based events.
 
-### **Version 1.2: Test Coverage**
--   [x] **Unit Tests:** Added unit tests for `PersistenceManager.js` and `Nadagotchi.js`.
+---
 
-## Phase 3: Future Enhancements (Proposed)
+## **Phase 3: Generational & Meta-Game Systems (Upcoming)**
 
-With the core simulation and progression systems now in a stable and engaging state, future development could focus on expanding the world and adding long-term variety.
+This phase will introduce long-term replayability and a deeper sense of history and accomplishment.
 
--   **Expand Career Mini-Games:** Design and implement unique mini-games for the Scout, Healer, and Artisan careers.
--   **Deeper Environmental Interaction:** Add more interactive objects to the home and create proactive behaviors where the pet uses them autonomously.
--   **Generational Goals:** Introduce long-term goals or challenges that can only be completed by specific lineages or pets with rare, inherited Legacy Traits.
--   **Dynamic NPC Interactions:** Expand the social system with more complex NPC behaviors, dialogues, and relationship-based events.
--   **Advanced Crafting Recipes:** Introduce a wider variety of crafting recipes that require specific items and hobby levels to create.
+### **III. Generational Legacy & Breeding System**
+-   **[ ] Initial Implementation:**
+    -   [ ] Design the "Breeding Den" UI and environment.
+    -   [ ] Develop the core mechanic for "Personality Gene" inheritance.
+    -   [ ] Create unique egg designs that hint at the offspring's inherited traits.
+-   **[ ] Advanced Features:**
+    -   [ ] Implement rare, inheritable "Legacy Traits" that grant unique abilities.
+    -   [ ] Introduce a "Hall of Ancestors" to commemorate retired pets.
+    -   [ ] Allow player actions to influence offspring traits ("Nurture over Nature").
+
+### **IV. Meta-Game & Community Features**
+-   **[ ] Initial Implementation:**
+    -   [ ] Create the "Tamagotchi Journal" to automatically log significant events and create a personal narrative.
+    -   [ ] Develop a "Recipe/Crafting Book" to collect and reference discovered recipes.
+-   **[ ] Advanced Features:**
+    -   [ ] Implement an in-game achievement and milestone system.
+    -   [ ] Introduce a "Showcase System" for sharing pet snapshots and achievements.
+    -   [ ] Develop the "Mystery Egg Exchange" for asynchronous sharing of genetic data with other players.
