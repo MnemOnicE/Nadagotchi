@@ -17,7 +17,7 @@ const mockScene = {
     add: { text: jest.fn(() => ({ setOrigin: jest.fn() })), rectangle: jest.fn(() => ({ setInteractive: jest.fn(() => ({ on: jest.fn(), name: 'red' })) })) },
     tweens: { add: jest.fn() },
     cameras: { main: { width: 800, height: 600, setBackgroundColor: jest.fn() } },
-    scene: { start: jest.fn(), stop: jest.fn(), launch: jest.fn() },
+    scene: { start: jest.fn(), stop: jest.fn(), launch: jest.fn(), resume: jest.fn() },
     game: { events: { emit: jest.fn() } }
 };
 
@@ -61,7 +61,7 @@ describe('LogicPuzzleScene', () => {
         scene.handlePlayerClick('blue');
 
         expect(mockScene.game.events.emit).toHaveBeenCalledWith('workResult', { success: false, career: 'Innovator' });
-        expect(mockScene.scene.start).toHaveBeenCalledWith('MainScene');
+        expect(mockScene.scene.resume).toHaveBeenCalledWith('MainScene');
     });
 
     test('should not allow player input when canPlayerClick is false', () => {
@@ -81,6 +81,6 @@ describe('LogicPuzzleScene', () => {
         scene.handlePlayerClick('red');
 
         expect(mockScene.game.events.emit).toHaveBeenCalledWith('workResult', { success: true, career: 'Innovator' });
-        expect(mockScene.scene.start).toHaveBeenCalledWith('MainScene');
+        expect(mockScene.scene.resume).toHaveBeenCalledWith('MainScene');
     });
 });
