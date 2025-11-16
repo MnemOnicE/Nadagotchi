@@ -13,6 +13,9 @@ class LocalStorageMock {
 global.localStorage = new LocalStorageMock();
 global.PersistenceManager = PersistenceManager;
 
+// Load the class from the source file and append module.exports
+const nadagotchiCode = fs.readFileSync(path.resolve(__dirname, '../js/Nadagotchi.js'), 'utf8');
+const Nadagotchi = eval(nadagotchiCode + '; module.exports = Nadagotchi;');
 
 // Mock Phaser since it's not available in the Node.js test environment
 const Phaser = {
@@ -129,6 +132,18 @@ describe('Nadagotchi', () => {
 
             // Nurturer comes before Recluse in the object property order, so it should win the tie.
             expect(pet.dominantArchetype).toBe('Nurturer');
+        });
+
+        test('should correctly handle a three-way tie for dominant archetype', () => {
+            pet.personalityPoints.Intellectual = 5; // Demote the current dominant
+            pet.personalityPoints.Adventurer = 20;
+            pet.personalityPoints.Nurturer = 20;
+            pet.personalityPoints.Mischievous = 20;
+
+            pet.updateDominantArchetype();
+
+            // The first in the list of tied archetypes should be chosen.
+            expect(pet.dominantArchetype).toBe('Adventurer');
         });
     });
 

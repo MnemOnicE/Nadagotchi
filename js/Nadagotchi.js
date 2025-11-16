@@ -114,6 +114,27 @@ class Nadagotchi {
                 break;
         }
 
+        }
+
+        switch (worldState.weather) {
+            case "Rainy":
+                if (this.dominantArchetype === "Adventurer") happinessChange -= 0.01;
+                if (this.dominantArchetype === "Nurturer") energyDecay *= 0.5;
+                break;
+            case "Stormy":
+                if (this.dominantArchetype === "Adventurer") happinessChange -= 0.03;
+                if (this.dominantArchetype === "Recluse") happinessChange += 0.01;
+                energyDecay *= 1.2;
+                break;
+            case "Cloudy":
+                energyDecay *= 0.8;
+                break;
+            case "Sunny":
+                if (this.dominantArchetype === "Adventurer") happinessChange += 0.01;
+                energyDecay *= 1.1;
+                break;
+        }
+
         switch (worldState.time) {
             case "Night":
                 hungerDecay *= 0.5;
@@ -388,6 +409,9 @@ class Nadagotchi {
         }
 
         // If the current dominant archetype is in the list of top contenders, it remains dominant.
+        // Otherwise, the first archetype from the tied list becomes dominant to ensure deterministic behavior.
+        if (potentialDominantArchetypes.length > 0 && !potentialDominantArchetypes.includes(this.dominantArchetype)) {
+            this.dominantArchetype = potentialDominantArchetypes[0];
         // Otherwise, a random archetype from the tied list becomes dominant.
         if (potentialDominantArchetypes.includes(this.dominantArchetype)) {
             return; // No change needed
