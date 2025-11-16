@@ -182,7 +182,7 @@ class Nadagotchi {
         // *before* calculating skill gains, which was the source of the bug.
         let moodMultiplier;
 
-        switch (actionType) {
+        switch (actionType.toUpperCase()) {
             case 'FEED':
                 // Feeding replenishes hunger and provides a small amount of happiness.
                 this.stats.hunger += 15;

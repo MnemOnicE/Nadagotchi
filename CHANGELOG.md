@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Artisan:** A pattern-matching game where the player replicates a displayed pattern (`ArtisanMinigameScene.js`).
 - **Mini-Game Integration:** Integrated the new mini-games into the main game loop. The `MainScene` now launches the appropriate mini-game when the "Work" button is clicked, based on the pet's current career.
 
+### Fixed
+- **Case-Insensitive Actions:** Fixed a bug in `js/Nadagotchi.js` where player actions were case-sensitive. Actions are now converted to uppercase to ensure commands like 'feed' and 'FEED' are treated the same.
+
 ## [1.2.0] - 2025-11-10
 
 ### Added
