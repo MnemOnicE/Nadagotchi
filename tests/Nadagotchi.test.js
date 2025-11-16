@@ -1,8 +1,8 @@
 // tests/Nadagotchi.test.js
-const fs = require('fs');
-const path = require('path');
+const Nadagotchi = require('../js/Nadagotchi');
+const PersistenceManager = require('../js/PersistenceManager');
 
-// Mock localStorage and PersistenceManager
+// Mock localStorage
 class LocalStorageMock {
     constructor() { this.store = {}; }
     clear() { this.store = {}; }
@@ -11,14 +11,8 @@ class LocalStorageMock {
     removeItem(key) { delete this.store[key]; }
 }
 global.localStorage = new LocalStorageMock();
-
-const persistenceManagerCode = fs.readFileSync(path.resolve(__dirname, '../js/PersistenceManager.js'), 'utf8');
-const PersistenceManager = eval(persistenceManagerCode + '; PersistenceManager');
 global.PersistenceManager = PersistenceManager;
 
-// Load the class from the source file and append module.exports
-const nadagotchiCode = fs.readFileSync(path.resolve(__dirname, '../js/Nadagotchi.js'), 'utf8');
-const Nadagotchi = eval(nadagotchiCode + '; module.exports = Nadagotchi;');
 
 // Mock Phaser since it's not available in the Node.js test environment
 const Phaser = {
