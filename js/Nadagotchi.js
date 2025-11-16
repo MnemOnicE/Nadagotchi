@@ -393,7 +393,11 @@ class Nadagotchi {
             return; // No change needed
         } else {
             this.dominantArchetype = Phaser.Utils.Array.GetRandom(potentialDominantArchetypes);
-        if (!potentialDominantArchetypes.includes(this.dominantArchetype)) {
+        }
+
+        // In a non-Phaser environment (like testing), GetRandom might not work.
+        // This ensures a predictable outcome in case of a tie.
+        if (potentialDominantArchetypes.length > 0 && !potentialDominantArchetypes.includes(this.dominantArchetype)) {
             this.dominantArchetype = potentialDominantArchetypes[0];
         }
     }
