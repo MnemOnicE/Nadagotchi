@@ -41,6 +41,7 @@ This phase focuses on building out the primary gameplay loops, giving players cl
     -   [x] Implemented a system for discovering new locations and finding crafting resources.
 -   **[x] Social & Relationship System:**
     -   [x] Pets can now build foundational relationships with other characters.
+    -   [x] Replaced the generic 'friend' with a cast of career-focused NPCs (Scout, Artisan, Healer) to create a more interconnected world.
 -   **[x] Dynamic World System:**
     -   [x] Implemented a full Day/Night cycle and dynamic Weather System that affects mood and activities.
     -   [x] Introduced seasonal festivals and rare, spontaneous events (e.g., 'Traveling Merchant').

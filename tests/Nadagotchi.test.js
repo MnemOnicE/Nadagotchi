@@ -47,7 +47,7 @@ describe('Nadagotchi', () => {
                 legacyTraits: ['Charisma'],
                 moodSensitivity: 7,
                 hobbies: { painting: 10, music: 5 },
-                relationships: { friend: { level: 10 } },
+                relationships: { 'Grizzled Scout': { level: 10 } },
                 location: 'Home'
             };
             const loadedPet = new Nadagotchi('Adventurer', loadedData);
@@ -61,7 +61,7 @@ describe('Nadagotchi', () => {
             expect(loadedPet.age).toBe(10);
             expect(loadedPet.generation).toBe(2);
             expect(loadedPet.hobbies.painting).toBe(10);
-            expect(loadedPet.relationships.friend.level).toBe(10);
+            expect(loadedPet.relationships['Grizzled Scout'].level).toBe(10);
         });
     });
 
@@ -257,22 +257,18 @@ describe('Nadagotchi', () => {
             expect(pet.skills.navigation).toBeGreaterThan(1);
         });
 
-        test('interact should improve relationships and skills', () => {
-            pet.relationships.friend.level = 5;
-            pet.skills.communication = 1;
-            pet.interact('friend', 'CHAT');
-            expect(pet.relationships.friend.level).toBe(6);
-            expect(pet.skills.communication).toBeGreaterThan(1);
-        });
+        test('interact should improve relationships and specific skills based on the NPC', () => {
+            pet.relationships['Grizzled Scout'].level = 5;
+            pet.skills.navigation = 1;
+            pet.interact('Grizzled Scout');
+            expect(pet.relationships['Grizzled Scout'].level).toBe(6);
+            expect(pet.skills.navigation).toBeGreaterThan(1);
 
-        test('interact with GIFT should use an inventory item and have a greater effect', () => {
-            pet.inventory.push('Berries');
-            pet.relationships.friend.level = 5;
-            pet.skills.empathy = 1;
-            pet.interact('friend', 'GIFT');
-            expect(pet.inventory).not.toContain('Berries');
-            expect(pet.relationships.friend.level).toBe(10);
-            expect(pet.skills.empathy).toBeGreaterThan(1);
+            pet.relationships['Master Artisan'].level = 5;
+            pet.skills.crafting = 1;
+            pet.interact('Master Artisan');
+            expect(pet.relationships['Master Artisan'].level).toBe(6);
+            expect(pet.skills.crafting).toBeGreaterThan(1);
         });
     });
 });
