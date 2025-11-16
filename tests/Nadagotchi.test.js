@@ -184,6 +184,12 @@ describe('Nadagotchi', () => {
             expect(reclusePet.mood).toBe('sad');
             expect(reclusePet.stats.happiness).toBe(30);
         });
+
+        test('should ignore case for action types', () => {
+            pet.stats.hunger = 50;
+            pet.handleAction('feed');
+            expect(pet.stats.hunger).toBe(65);
+        });
     });
 
     describe('updateCareer', () => {
