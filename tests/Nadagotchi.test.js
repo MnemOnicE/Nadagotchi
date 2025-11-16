@@ -110,17 +110,34 @@ describe('Nadagotchi', () => {
             pet.personalityPoints.Recluse = 10;
             pet.updateDominantArchetype();
             // The dominant archetype should remain Intellectual.
+            // Since Intellectual appears before Recluse, it should win the tie-break and remain dominant.
             expect(pet.dominantArchetype).toBe('Intellectual');
         });
 
-        test('should not change dominant archetype to one that appears earlier in case of a tie', () => {
+        test('should switch dominant archetype to the first one found in case of a tie', () => {
             // Intellectual starts at 10 points.
             // Set Adventurer (which comes before Intellectual in object definition) to the same score.
             pet.personalityPoints.Adventurer = 10;
             pet.updateDominantArchetype();
-            // The correct behavior is for the archetype to remain 'Intellectual' as there is no
-            // archetype with a strictly greater score.
-            expect(pet.dominantArchetype).toBe('Intellectual');
+            // The new, correct behavior is for the dominant archetype to switch to the first
+            // one encountered in the loop with the highest score, making the system more dynamic.
+            expect(pet.dominantArchetype).toBe('Adventurer');
+        });
+
+        test('should switch dominant archetype when a tie occurs to make the system more dynamic', () => {
+            // Intellectual starts at 10.
+            pet.dominantArchetype = 'Intellectual';
+            pet.personalityPoints.Intellectual = 10;
+
+            // Nurturer comes before Intellectual in the object property order.
+            // Set its score to be equal. With the bug, 'Intellectual' keeps an unfair advantage.
+            pet.personalityPoints.Nurturer = 10;
+
+            // Run the update. The corrected code should allow 'Nurturer' to become dominant.
+            pet.updateDominantArchetype();
+
+            // Expect the archetype to change, making the system less static.
+            expect(pet.dominantArchetype).toBe('Nurturer');
         });
     });
 
