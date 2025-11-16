@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **Updated README:** Replaced the existing `README.md`, which was a copy of the design document, with a comprehensive guide for developers. The new README now includes a project overview, local setup and running instructions, and a detailed breakdown of the code structure.
 
+### Fixed
+- **Flawed Tie-Breaking Logic:** Fixed a bug in `updateDominantArchetype` where a tie in personality points was not handled correctly, causing the new dominant archetype to be selected unpredictably. The logic now ensures that a new archetype is chosen randomly from the tied contenders.
+
 ## [1.3.2] - 2025-11-16
 
 ### Fixed

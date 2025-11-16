@@ -399,6 +399,8 @@ class Nadagotchi {
         // This ensures a predictable outcome in case of a tie.
         if (potentialDominantArchetypes.length > 0 && !potentialDominantArchetypes.includes(this.dominantArchetype)) {
             this.dominantArchetype = potentialDominantArchetypes[0];
+        if (!potentialDominantArchetypes.includes(this.dominantArchetype)) {
+             this.dominantArchetype = Phaser.Utils.Array.GetRandom(potentialDominantArchetypes);
         }
     }
 

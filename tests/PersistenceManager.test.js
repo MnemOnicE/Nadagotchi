@@ -1,6 +1,5 @@
 // tests/PersistenceManager.test.js
-const fs = require('fs');
-const path = require('path');
+const PersistenceManager = require('../js/PersistenceManager');
 
 // Mock localStorage
 class LocalStorageMock {
@@ -11,10 +10,6 @@ class LocalStorageMock {
     removeItem(key) { delete this.store[key]; }
 }
 global.localStorage = new LocalStorageMock();
-
-// Load the class from the source file
-const persistenceManagerCode = fs.readFileSync(path.resolve(__dirname, '../js/PersistenceManager.js'), 'utf8');
-const PersistenceManager = eval(persistenceManagerCode + '; PersistenceManager');
 
 describe('PersistenceManager', () => {
     let persistenceManager;
@@ -31,6 +26,11 @@ describe('PersistenceManager', () => {
         expect(loadedPet).toEqual(petData);
     });
 
+    test('should return null when no pet data is saved', () => {
+        const loadedPet = persistenceManager.loadPet();
+        expect(loadedPet).toBeNull();
+    });
+
     test('should clear active pet data', () => {
         const petData = { name: 'Testy', mood: 'happy' };
         persistenceManager.savePet(petData);
@@ -45,6 +45,11 @@ describe('PersistenceManager', () => {
         const hallOfFame = persistenceManager.loadHallOfFame();
         expect(hallOfFame).toHaveLength(1);
         expect(hallOfFame[0]).toEqual(retiredPet);
+    });
+
+    test('should return empty array when no hall of fame data is saved', () => {
+        const hallOfFame = persistenceManager.loadHallOfFame();
+        expect(hallOfFame).toEqual([]);
     });
 
     test('should append to hall of fame', () => {
@@ -64,10 +69,20 @@ describe('PersistenceManager', () => {
         expect(loadedEntries).toEqual(entries);
     });
 
+    test('should return empty array when no journal entries are saved', () => {
+        const loadedEntries = persistenceManager.loadJournal();
+        expect(loadedEntries).toEqual([]);
+    });
+
     test('should save and load recipes', () => {
         const recipes = ['Recipe A', 'Recipe B'];
         persistenceManager.saveRecipes(recipes);
         const loadedRecipes = persistenceManager.loadRecipes();
         expect(loadedRecipes).toEqual(recipes);
+    });
+
+    test('should return empty array when no recipes are saved', () => {
+        const loadedRecipes = persistenceManager.loadRecipes();
+        expect(loadedRecipes).toEqual([]);
     });
 });
