@@ -248,11 +248,11 @@ describe('Nadagotchi', () => {
         });
 
         test('forage should add an item to inventory and affect stats and skills', () => {
-            const initialInventoryLength = pet.inventory.length;
+            const initialInventoryCount = Object.keys(pet.inventory).length;
             pet.stats.energy = 50;
             pet.skills.navigation = 1;
             pet.forage();
-            expect(pet.inventory.length).toBe(initialInventoryLength + 1);
+            expect(Object.keys(pet.inventory).length).toBe(initialInventoryCount + 1);
             expect(pet.stats.energy).toBe(40);
             expect(pet.skills.navigation).toBeGreaterThan(1);
         });
@@ -266,13 +266,33 @@ describe('Nadagotchi', () => {
         });
 
         test('interact with GIFT should use an inventory item and have a greater effect', () => {
-            pet.inventory.push('Berries');
+            pet.inventory['Berries'] = 1;
             pet.relationships.friend.level = 5;
             pet.skills.empathy = 1;
             pet.interact('friend', 'GIFT');
-            expect(pet.inventory).not.toContain('Berries');
+            expect(pet.inventory['Berries']).toBeUndefined();
             expect(pet.relationships.friend.level).toBe(10);
             expect(pet.skills.empathy).toBeGreaterThan(1);
+        });
+
+        test('craftItem should consume materials and add the new item to inventory', () => {
+            pet.inventory = { 'Sticks': 10, 'Shiny Stone': 2 };
+            pet.craftItem('Fancy Bookshelf');
+            expect(pet.inventory['Sticks']).toBe(5);
+            expect(pet.inventory['Shiny Stone']).toBe(1);
+            expect(pet.inventory['Fancy Bookshelf']).toBe(1);
+        });
+
+        test('craftItem should not work if materials are insufficient', () => {
+            pet.inventory = { 'Sticks': 4, 'Shiny Stone': 1 };
+            pet.craftItem('Fancy Bookshelf');
+            expect(pet.inventory['Fancy Bookshelf']).toBeUndefined();
+        });
+
+        test('INTERACT_FANCY_BOOKSHELF should provide a better study buff', () => {
+            pet.skills.logic = 1;
+            pet.handleAction('INTERACT_FANCY_BOOKSHELF');
+            expect(pet.skills.logic).toBeGreaterThan(1.2);
         });
     });
 });

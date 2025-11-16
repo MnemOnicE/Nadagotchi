@@ -42,6 +42,7 @@ class UIScene extends Phaser.Scene {
         this.hobbyModal = this.createModal("Hobbies");
         this.craftingModal = this.createModal("Crafting");
         this.relationshipModal = this.createModal("Relationships");
+        this.decorateModal = this.createModal("Decorate");
     }
 
     /**
@@ -62,10 +63,12 @@ class UIScene extends Phaser.Scene {
             startX += button.width + 10;
         };
 
-        ['Feed', 'Play', 'Study', 'Explore', 'Meditate', 'Craft'].forEach(action => addButton(action, action.toUpperCase()));
+        ['Feed', 'Play', 'Study', 'Explore', 'Meditate'].forEach(action => addButton(action, action.toUpperCase()));
         addButton('Journal', 'OPEN_JOURNAL');
         addButton('Recipes', 'OPEN_RECIPES');
         addButton('Hobbies', 'OPEN_HOBBIES');
+        addButton('Craft', 'OPEN_CRAFTING_MENU');
+        addButton('Decorate', 'DECORATE');
     }
 
     /**
@@ -79,6 +82,7 @@ class UIScene extends Phaser.Scene {
             case 'OPEN_RECIPES': this.openRecipeBook(); break;
             case 'OPEN_HOBBIES': this.openHobbyMenu(); break;
             case 'OPEN_CRAFTING_MENU': this.openCraftingMenu(); break;
+            case 'DECORATE': this.openDecorateMenu(); break;
             case 'INTERACT_NPC': this.openRelationshipMenu(); break;
         }
     }
@@ -195,8 +199,49 @@ class UIScene extends Phaser.Scene {
      */
     openCraftingMenu() {
         if (!this.nadagotchiData) return;
-        const text = `Inventory:\n- ${this.nadagotchiData.inventory.join('\n- ')}\n\n(Crafting recipes will go here)`;
-        this.craftingModal.content.setText(text);
+
+        // Clear existing buttons
+        if (this.craftingButtons) {
+            this.craftingButtons.forEach(btn => btn.destroy());
+        }
+        this.craftingButtons = [];
+
+        const inventoryText = "Inventory:\n" +
+            Object.entries(this.nadagotchiData.inventory)
+                  .map(([item, count]) => `- ${item}: ${count}`)
+                  .join('\n');
+
+        let recipeText = "\n\nRecipes:\n";
+        let yPos = this.cameras.main.height / 2 - 50; // Start position for buttons
+
+        for (const recipeName in this.nadagotchiData.recipes) {
+            const recipe = this.nadagotchiData.recipes[recipeName];
+            const materials = Object.entries(recipe.materials)
+                                    .map(([mat, count]) => `${count} ${mat}`)
+                                    .join(', ');
+            recipeText += `- ${recipeName}: ${recipe.description} (Req: ${materials})\n`;
+
+            // Check if player can craft it
+            const canCraft = Object.entries(recipe.materials).every(([mat, count]) => {
+                return (this.nadagotchiData.inventory[mat] || 0) >= count;
+            });
+
+            if (canCraft) {
+                const craftButton = this.add.text(this.cameras.main.width / 2 + 100, yPos, 'Craft', {
+                    padding: { x: 8, y: 4 },
+                    backgroundColor: '#008000'
+                }).setInteractive({ useHandCursor: true }).on('pointerdown', () => {
+                    this.game.events.emit('uiAction', 'CRAFT_ITEM', recipeName);
+                    this.craftingModal.setVisible(false);
+                    this.scene.resume('MainScene');
+                });
+                this.craftingModal.add(craftButton);
+                this.craftingButtons.push(craftButton);
+                yPos += 30;
+            }
+        }
+
+        this.craftingModal.content.setText(inventoryText + recipeText);
         this.craftingModal.setVisible(true);
         this.scene.pause('MainScene');
     }
@@ -209,6 +254,45 @@ class UIScene extends Phaser.Scene {
         const text = Object.entries(this.nadagotchiData.relationships).map(([npc, data]) => `${npc}: Friendship ${data.level}`).join('\n');
         this.relationshipModal.content.setText(text);
         this.relationshipModal.setVisible(true);
+        this.scene.pause('MainScene');
+    }
+
+    openDecorateMenu() {
+        if (!this.nadagotchiData) return;
+
+        // Clear existing buttons
+        if (this.decorateButtons) {
+            this.decorateButtons.forEach(btn => btn.destroy());
+        }
+        this.decorateButtons = [];
+
+        const furniture = Object.entries(this.nadagotchiData.inventory)
+            .filter(([item, count]) => this.nadagotchiData.recipes[item] && count > 0);
+
+        let yPos = this.cameras.main.height / 2 - 50; // Start position for buttons
+        let text = "Select an item to place:\n\n";
+
+        if (furniture.length === 0) {
+            text += "You have no furniture to place.";
+        }
+
+        furniture.forEach(([itemName, count]) => {
+            text += `- ${itemName}: ${count}\n`;
+            const placeButton = this.add.text(this.cameras.main.width / 2 + 100, yPos, 'Place', {
+                padding: { x: 8, y: 4 },
+                backgroundColor: '#008000'
+            }).setInteractive({ useHandCursor: true }).on('pointerdown', () => {
+                this.game.events.emit('uiAction', 'DECORATE', itemName);
+                this.decorateModal.setVisible(false);
+                this.scene.resume('MainScene');
+            });
+            this.decorateModal.add(placeButton);
+            this.decorateButtons.push(placeButton);
+            yPos += 30;
+        });
+
+        this.decorateModal.content.setText(text);
+        this.decorateModal.setVisible(true);
         this.scene.pause('MainScene');
     }
 }
