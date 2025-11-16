@@ -94,6 +94,13 @@ describe('Nadagotchi', () => {
             pet.live();
             expect(pet.mood).toBe('happy');
         });
+
+        test('should not allow happiness to fall below 0', () => {
+            const adventurerPet = new Nadagotchi('Adventurer');
+            adventurerPet.stats.happiness = 0.02; // Set happiness low enough to go negative
+            adventurerPet.live({ weather: "Stormy", time: "Night", activeEvent: null }); // Stormy weather reduces happiness by 0.03 for Adventurer
+            expect(adventurerPet.stats.happiness).toBe(0);
+        });
     });
 
     describe('updateDominantArchetype', () => {
