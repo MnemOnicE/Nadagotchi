@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2025-11-16
+
+### Added
+- **Expanded NPC Interactions:** Replaced the generic "friend" NPC with a cast of three distinct, career-focused NPCs: the "Grizzled Scout," "Master Artisan," and "Sickly Villager."
+  - Interacting with these NPCs now provides small skill gains in their respective career paths (Navigation, Crafting, and Empathy), creating a more interconnected game world and rewarding social engagement.
+  - Added unique sprites and interaction handlers for each new NPC in `MainScene.js`.
+
 ## [1.4.1] - 2025-11-16
 
 ### Fixed

@@ -23,6 +23,9 @@ class MainScene extends Phaser.Scene {
         this.load.image('bookshelf', 'https://placehold.co/64x64/8B4513/ffffff.png?text=Books');
         this.load.image('plant', 'https://placehold.co/64x64/228B22/ffffff.png?text=Plant');
         this.load.image('crafting_table', 'https://placehold.co/64x64/A0522D/ffffff.png?text=Craft');
+        this.load.image('npc_scout', 'https://placehold.co/48x48/704214/ffffff.png?text=Scout');
+        this.load.image('npc_artisan', 'https://placehold.co/48x48/4682B4/ffffff.png?text=Artisan');
+        this.load.image('npc_villager', 'https://placehold.co/48x48/6B8E23/ffffff.png?text=Villager');
     }
 
     /**
@@ -76,6 +79,14 @@ class MainScene extends Phaser.Scene {
         this.add.sprite(80, this.cameras.main.height - 150, 'crafting_table').setInteractive({ useHandCursor: true })
             .on('pointerdown', () => this.game.events.emit('uiAction', 'OPEN_CRAFTING_MENU'));
 
+        // Add NPCs to the scene
+        this.add.sprite(this.cameras.main.width - 150, this.cameras.main.height - 150, 'npc_scout').setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => this.game.events.emit('uiAction', 'INTERACT_SCOUT', 'Grizzled Scout'));
+        this.add.sprite(this.cameras.main.width / 2 + 100, 80, 'npc_artisan').setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => this.game.events.emit('uiAction', 'INTERACT_ARTISAN', 'Master Artisan'));
+        this.add.sprite(150, this.cameras.main.height / 2, 'npc_villager').setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => this.game.events.emit('uiAction', 'INTERACT_VILLAGER', 'Sickly Villager'));
+
         // --- Post-FX & UI ---
         this.lightTexture = this.add.renderTexture(0, 0, this.cameras.main.width, this.cameras.main.height).setBlendMode('MULTIPLY').setVisible(false);
         this.dateText = this.add.text(10, 10, '', { fontFamily: 'Arial', fontSize: '16px', color: '#ffffff', backgroundColor: 'rgba(0,0,0,0.5)', padding: { x: 5, y: 3 } });
@@ -123,15 +134,29 @@ class MainScene extends Phaser.Scene {
     /**
      * Handles actions dispatched from the UIScene.
      * @param {string} actionType - The type of action to handle (e.g., 'FEED', 'WORK', 'RETIRE').
+     * @param {any} [payload] - Optional data associated with the action.
      */
-    handleUIAction(actionType) {
-        if (actionType === 'WORK') {
-            this.startWorkMinigame();
-        } else if (actionType === 'RETIRE') {
-            this.scene.stop('UIScene');
-            this.scene.start('BreedingScene', this.nadagotchi);
-        } else {
-            this.nadagotchi.handleAction(actionType);
+    handleUIAction(actionType, payload) {
+        switch (actionType) {
+            case 'WORK':
+                this.startWorkMinigame();
+                break;
+            case 'RETIRE':
+                this.scene.stop('UIScene');
+                this.scene.start('BreedingScene', this.nadagotchi);
+                break;
+            case 'INTERACT_SCOUT':
+                this.nadagotchi.interact('Grizzled Scout');
+                break;
+            case 'INTERACT_ARTISAN':
+                this.nadagotchi.interact('Master Artisan');
+                break;
+            case 'INTERACT_VILLAGER':
+                this.nadagotchi.interact('Sickly Villager');
+                break;
+            default:
+                this.nadagotchi.handleAction(actionType);
+                break;
         }
     }
 
