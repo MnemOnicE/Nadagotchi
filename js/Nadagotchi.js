@@ -429,23 +429,34 @@ class Nadagotchi {
      * @private
      */
     updateDominantArchetype() {
-        let maxPoints = -1; // Start with -1 to ensure the first archetype always becomes the initial max
-        let newDominantArchetype = this.dominantArchetype;
+        let maxPoints = -1;
+        let potentialDominantArchetypes = [];
 
-        // Iterate through all personality archetypes to find the one with the highest score.
+        // First, find the maximum score.
         for (const archetype in this.personalityPoints) {
-            // A safety check to ensure we only check properties of the object itself.
             if (this.personalityPoints.hasOwnProperty(archetype)) {
                 if (this.personalityPoints[archetype] > maxPoints) {
                     maxPoints = this.personalityPoints[archetype];
-                    newDominantArchetype = archetype;
                 }
             }
         }
 
-        // If a new archetype has more points, it becomes the new dominant one.
-        // This allows for dynamic personality shifts based on player actions.
-        this.dominantArchetype = newDominantArchetype;
+        // Next, find all archetypes that have that maximum score.
+        for (const archetype in this.personalityPoints) {
+            if (this.personalityPoints.hasOwnProperty(archetype)) {
+                if (this.personalityPoints[archetype] === maxPoints) {
+                    potentialDominantArchetypes.push(archetype);
+                }
+            }
+        }
+
+        // If the current dominant archetype is in the list of top contenders, it remains dominant.
+        // Otherwise, the first one in the list becomes dominant.
+        if (potentialDominantArchetypes.includes(this.dominantArchetype)) {
+            return; // No change needed
+        } else {
+            this.dominantArchetype = potentialDominantArchetypes[0];
+        }
     }
 
     /**

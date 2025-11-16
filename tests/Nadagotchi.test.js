@@ -103,40 +103,30 @@ describe('Nadagotchi', () => {
             expect(pet.dominantArchetype).toBe('Nurturer');
         });
 
-        test('should not change dominant archetype in case of a tie', () => {
+        test('should not change dominant archetype when it is part of a tie', () => {
             // Intellectual starts at 10 points.
-            // Set Recluse to the same score. Since Recluse is iterated after Intellectual,
-            // the bug will cause the dominant archetype to incorrectly switch.
-            pet.personalityPoints.Recluse = 10;
+            expect(pet.dominantArchetype).toBe('Intellectual');
+
+            // Set Nurturer to the same score.
+            pet.personalityPoints.Nurturer = 10;
+
             pet.updateDominantArchetype();
-            // The dominant archetype should remain Intellectual.
-            // Since Intellectual appears before Recluse, it should win the tie-break and remain dominant.
+
+            // The dominant archetype should remain 'Intellectual' because it was the incumbent in the tie.
             expect(pet.dominantArchetype).toBe('Intellectual');
         });
 
-        test('should switch dominant archetype to the first one found in case of a tie', () => {
-            // Intellectual starts at 10 points.
-            // Set Adventurer (which comes before Intellectual in object definition) to the same score.
-            pet.personalityPoints.Adventurer = 10;
-            pet.updateDominantArchetype();
-            // The new, correct behavior is for the dominant archetype to switch to the first
-            // one encountered in the loop with the highest score, making the system more dynamic.
-            expect(pet.dominantArchetype).toBe('Adventurer');
-        });
+        test('should switch to the first archetype in a tie when the incumbent is not involved', () => {
+            // Intellectual starts at 10 points. Drop its score so it's not in the running.
+            pet.personalityPoints.Intellectual = 5;
 
-        test('should switch dominant archetype when a tie occurs to make the system more dynamic', () => {
-            // Intellectual starts at 10.
-            pet.dominantArchetype = 'Intellectual';
-            pet.personalityPoints.Intellectual = 10;
+            // Nurturer and Recluse tie for the highest score.
+            pet.personalityPoints.Nurturer = 15;
+            pet.personalityPoints.Recluse = 15;
 
-            // Nurturer comes before Intellectual in the object property order.
-            // Set its score to be equal. With the bug, 'Intellectual' keeps an unfair advantage.
-            pet.personalityPoints.Nurturer = 10;
-
-            // Run the update. The corrected code should allow 'Nurturer' to become dominant.
             pet.updateDominantArchetype();
 
-            // Expect the archetype to change, making the system less static.
+            // Nurturer comes before Recluse in the object property order, so it should win the tie.
             expect(pet.dominantArchetype).toBe('Nurturer');
         });
     });
