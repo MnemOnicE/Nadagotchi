@@ -392,22 +392,23 @@ class Nadagotchi {
         let maxPoints = -1;
         let potentialDominantArchetypes = [];
 
+        // First, find the maximum number of points.
         for (const archetype in this.personalityPoints) {
-            if (this.personalityPoints.hasOwnProperty(archetype)) {
-                if (this.personalityPoints[archetype] > maxPoints) {
-                    maxPoints = this.personalityPoints[archetype];
-                }
+            if (this.personalityPoints[archetype] > maxPoints) {
+                maxPoints = this.personalityPoints[archetype];
             }
         }
 
+        // Next, gather all archetypes that have that maximum score.
         for (const archetype in this.personalityPoints) {
-            if (this.personalityPoints.hasOwnProperty(archetype)) {
-                if (this.personalityPoints[archetype] === maxPoints) {
-                    potentialDominantArchetypes.push(archetype);
-                }
+            if (this.personalityPoints[archetype] === maxPoints) {
+                potentialDominantArchetypes.push(archetype);
             }
         }
 
+        // If the current dominant archetype is not in the list of top contenders (or if there's only one),
+        // a new dominant archetype is chosen randomly from the list of contenders.
+        // This preserves the incumbent if it's still tied for the highest score.
         // If the current dominant archetype is in the list of top contenders, it remains dominant.
         // Otherwise, the first archetype from the tied list becomes dominant to ensure deterministic behavior.
         if (potentialDominantArchetypes.length > 0 && !potentialDominantArchetypes.includes(this.dominantArchetype)) {
@@ -424,7 +425,7 @@ class Nadagotchi {
         if (potentialDominantArchetypes.length > 0 && !potentialDominantArchetypes.includes(this.dominantArchetype)) {
             this.dominantArchetype = potentialDominantArchetypes[0];
         if (!potentialDominantArchetypes.includes(this.dominantArchetype)) {
-             this.dominantArchetype = Phaser.Utils.Array.GetRandom(potentialDominantArchetypes);
+            this.dominantArchetype = Phaser.Utils.Array.GetRandom(potentialDominantArchetypes);
         }
     }
 

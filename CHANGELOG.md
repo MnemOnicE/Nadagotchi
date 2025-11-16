@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2025-11-16
+
+### Fixed
+- **Incorrect Tie-Breaking Logic:** Fixed a bug in `updateDominantArchetype` where a tie for the dominant archetype was not handled correctly. The logic now correctly uses a random selection from the tied archetypes if the incumbent is not part of the tie.
+
 ## [1.4.0] - 2025-11-16
 
 ### Added
