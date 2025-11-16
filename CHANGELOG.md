@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **Unpredictable Personality Tie-Breaking:** Fixed a logical flaw in `Nadagotchi.js`'s `updateDominantArchetype` method that caused unpredictable behavior when handling ties for the dominant archetype.
+- **Flawed Tie-Breaking Logic:** Fixed a bug in `updateDominantArchetype` where a tie in personality points was not handled correctly, causing the new dominant archetype to be selected unpredictably. The logic now ensures that a new archetype is chosen randomly from the tied contenders.
 
 ## [1.3.2] - 2025-11-16
 

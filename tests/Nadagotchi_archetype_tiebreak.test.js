@@ -1,4 +1,4 @@
-// tests/Nadagotchi_tiebreak.test.js
+// tests/Nadagotchi_archetype_tiebreak.test.js
 const fs = require('fs');
 const path = require('path');
 
@@ -21,12 +21,11 @@ const nadagotchiCode = fs.readFileSync(path.resolve(__dirname, '../js/Nadagotchi
 const Nadagotchi = eval(nadagotchiCode + '; module.exports = Nadagotchi;');
 
 
-describe('Nadagotchi Tie-Breaking', () => {
+describe('Nadagotchi Archetype Tie-Breaking', () => {
     let pet;
 
     beforeEach(() => {
-        // Mock Phaser since it's not available in the Node.js test environment
-        // We are going to control the "random" selection to test the tie-breaking logic.
+        // Mock Phaser to control the "random" selection.
         const Phaser = {
             Utils: {
                 Array: {
@@ -39,20 +38,17 @@ describe('Nadagotchi Tie-Breaking', () => {
         pet = new Nadagotchi('Intellectual');
     });
 
-    test('should switch to the second archetype in a tie when the incumbent is not involved', () => {
-        // Intellectual starts at 10 points. Drop its score so it's not in the running.
+    test('should correctly select a new archetype in a tie-break', () => {
+        // Drop the incumbent's score.
         pet.personalityPoints.Intellectual = 5;
 
-        // Nurturer and Recluse tie for the highest score.
+        // Create a tie for the highest score.
         pet.personalityPoints.Nurturer = 15;
         pet.personalityPoints.Recluse = 15;
 
         pet.updateDominantArchetype();
 
-        // With the corrected deterministic implementation, Nurturer should always be chosen as it appears first.
-        expect(pet.dominantArchetype).toBe('Nurturer');
-        // The current buggy implementation will always choose Nurturer because it comes first.
-        // The corrected implementation should use GetRandom, which we've mocked to return the second element, 'Recluse'.
+        // The fix should use our mocked GetRandom, picking 'Recluse' (the second).
         expect(pet.dominantArchetype).toBe('Recluse');
     });
 });
