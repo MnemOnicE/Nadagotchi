@@ -5,5 +5,6 @@ module.exports = {
   coverageReporters: ['text', 'lcov'],
   transform: {
     '^.+\\/js\\/.*\\.js$': './jest.transformer.js',
+    '^.+\\.js$': './jest.transformer.js',
   },
 };
