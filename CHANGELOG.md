@@ -5,6 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2025-11-16
+
+### Added
+- **Comprehensive Code Documentation:** Added detailed JSDoc comments to every class, method, and function across all JavaScript files in the `js/` directory. This improves code clarity, maintainability, and makes the codebase significantly easier for new developers to understand.
+
+### Changed
+- **Updated README:** Replaced the existing `README.md`, which was a copy of the design document, with a comprehensive guide for developers. The new README now includes a project overview, local setup and running instructions, and a detailed breakdown of the code structure.
+
+### Fixed
+- **Unpredictable Personality Tie-Breaking:** Fixed a logical flaw in `Nadagotchi.js`'s `updateDominantArchetype` method that caused unpredictable behavior when handling ties for the dominant archetype.
+
+## [1.3.2] - 2025-11-16
+
+### Fixed
+- **Unpredictable Personality Tie-Breaking:** Fixed a bug in `updateDominantArchetype` where a tie in personality points would be broken unpredictably based on object property iteration order. The logic now ensures that the incumbent dominant archetype will always win a tie, preventing unexpected personality shifts.
+
+## [1.3.1] - 2025-11-16
+
+### Fixed
+- **Stagnant Personality Bug:** Fixed a bug in `updateDominantArchetype` where the dominant archetype would not change if another archetype's score was equal to it. The logic now correctly handles ties by allowing a personality shift, making the system more dynamic.
+
+## [1.3.0] - 2025-11-12
+
+### Added
+- **Seasonal Festivals and Spontaneous Events:** Implemented a dynamic event system that introduces seasonal festivals (e.g., "Spring Bloom Festival") and rare, spontaneous events (e.g., "Traveling Merchant").
+  - **`js/Calendar.js`:** A new class to manage the in-game date, including days and seasons.
+  - **`js/EventManager.js`:** A new class to define and manage all in-game events.
+  - The main game loop now advances the calendar, checks for active events, and displays them to the player.
+  - Active events can now directly influence the Nadagotchi's mood and stats.
+- **New Career Mini-Games:** Designed and implemented unique, engaging mini-games for the Scout, Healer, and Artisan careers.
+  - **Scout:** A timed "match the pairs" game (`ScoutMinigameScene.js`).
+  - **Healer:** A diagnostic game where the player chooses the correct remedy for a symptom (`HealerMinigameScene.js`).
+  - **Artisan:** A pattern-matching game where the player replicates a displayed pattern (`ArtisanMinigameScene.js`).
+- **Mini-Game Integration:** Integrated the new mini-games into the main game loop. The `MainScene` now launches the appropriate mini-game when the "Work" button is clicked, based on the pet's current career.
+
+### Fixed
+- **Case-Insensitive Actions:** Fixed a bug in `js/Nadagotchi.js` where player actions were case-sensitive. Actions are now converted to uppercase to ensure commands like 'feed' and 'FEED' are treated the same.
+
 ## [1.2.0] - 2025-11-10
 
 ### Added

@@ -1,38 +1,56 @@
 /**
- * UIScene is a dedicated Phaser Scene for managing and displaying all UI elements.
- * It runs in parallel with the MainScene and communicates with it via events.
+ * @class UIScene
+ * @extends Phaser.Scene
+ * @classdesc
+ * A dedicated Phaser Scene for managing and displaying all UI elements.
+ * It runs in parallel with the MainScene and communicates with it via global events.
  */
 class UIScene extends Phaser.Scene {
     constructor() {
-        // The key 'UIScene' is used to identify this scene.
         super({ key: 'UIScene' });
     }
 
     /**
-     * The `create` method is a Phaser lifecycle method called once, after `preload`.
-     * It's used to set up the initial state of the UI scene.
+     * Phaser lifecycle method called once, after `preload`.
+     * Used to set up the initial state of the UI scene, create UI elements, and register event listeners.
      */
     create() {
-        // --- Store a reference to the main game scene ---
-        // This allows us to access the Nadagotchi data directly if needed,
-        // but we'll primarily use events for decoupling.
-        this.mainScene = this.scene.get('MainScene');
-
-        // --- Create UI Elements ---
-
-        // Create the text object that will display the pet's stats in the top-left.
+        // --- UI Elements ---
         this.statsText = this.add.text(10, 10, '', { fontFamily: 'Arial', fontSize: '16px', color: '#ffffff' });
 
-        // --- Create Action Buttons ---
+        // --- Action Buttons ---
+        this.createActionButtons();
+
+        // --- Job Board ---
+        this.jobBoardButton = this.add.text(this.cameras.main.width - 120, this.cameras.main.height - 40, 'Job Board', { padding: { x: 10, y: 5 }, backgroundColor: '#6A0DAD' })
+            .setInteractive(false).setAlpha(0.5)
+            .on('pointerdown', () => this.game.events.emit('uiAction', 'WORK'));
+
+        // --- Retire Button ---
+        this.retireButton = this.add.text(this.cameras.main.width - 120, 10, 'Retire', { padding: { x: 10, y: 5 }, backgroundColor: '#ff00ff' })
+            .setInteractive().setVisible(false)
+            .on('pointerdown', () => this.game.events.emit('uiAction', 'RETIRE'));
+
+        // --- Event Listeners ---
+        this.game.events.on('updateStats', this.updateStatsUI, this);
+        this.game.events.on('uiAction', this.handleUIActions, this);
+
+
+        // --- Modals ---
+        this.journalModal = this.createModal("Journal");
+        this.recipeModal = this.createModal("Recipe Book");
+        this.hobbyModal = this.createModal("Hobbies");
+        this.craftingModal = this.createModal("Crafting");
+        this.relationshipModal = this.createModal("Relationships");
+    }
+
+    /**
+     * Creates and positions the main action buttons.
+     * @private
+     */
+    createActionButtons() {
         const buttonY = this.cameras.main.height - 40;
-        const buttonStyle = {
-            fontFamily: 'Arial',
-            fontSize: '14px',
-            color: '#ffffff',
-            backgroundColor: '#4a4a4a',
-            padding: { x: 10, y: 5 },
-            border: '1px solid #ffffff'
-        };
+        const buttonStyle = { fontFamily: 'Arial', fontSize: '14px', color: '#ffffff', backgroundColor: '#4a4a4a', padding: { x: 10, y: 5 } };
         let startX = 10;
 
         const addButton = (text, action) => {
@@ -41,312 +59,155 @@ class UIScene extends Phaser.Scene {
                 .on('pointerdown', () => this.game.events.emit('uiAction', action))
                 .on('pointerover', () => button.setStyle({ fill: '#ff0' }))
                 .on('pointerout', () => button.setStyle({ fill: '#fff' }));
-            startX += button.width + 10; // Advance position for the next button
-            return button;
+            startX += button.width + 10;
         };
 
-        addButton('Feed', 'FEED');
-        addButton('Play', 'PLAY');
-        addButton('Study', 'STUDY');
-        addButton('Explore', 'EXPLORE');
-        addButton('Meditate', 'MEDITATE');
-        addButton('Craft', 'CRAFT_ITEM');
+        ['Feed', 'Play', 'Study', 'Explore', 'Meditate', 'Craft'].forEach(action => addButton(action, action.toUpperCase()));
+        addButton('Journal', 'OPEN_JOURNAL');
+        addButton('Recipes', 'OPEN_RECIPES');
+        addButton('Hobbies', 'OPEN_HOBBIES');
+    }
 
-        // --- Initialize Job Board ---
-        /**
-         * @type {Phaser.GameObjects.Text} - The interactive text object for the Job Board.
-         * @private
-         */
-        this.jobBoardButton = this.add.text(
-            this.cameras.main.width - 120, // Position in the bottom-right
-            this.cameras.main.height - 40,
-            'Job Board',
-            { padding: { x: 10, y: 5 }, backgroundColor: '#6A0DAD' }
-        );
-        // Initially disabled.
-        this.jobBoardButton.setInteractive(false).setAlpha(0.5);
-        this.jobBoardButton.on('pointerdown', () => this.openJobBoard());
-
-        // --- Career Notification ---
-        /**
-         * @type {?Phaser.GameObjects.Text} - A reference to the career notification text object, if it's on screen.
-         * @private
-         */
-        this.careerNotificationText = null;
-
-        // --- Legacy Button ---
-        this.legacyButton = this.add.text(
-            this.cameras.main.width - 120,
-            10,
-            'Legacy',
-            { padding: { x: 10, y: 5 }, backgroundColor: '#ff00ff' }
-        ).setInteractive().setVisible(false);
-
-        this.legacyButton.on('pointerdown', () => {
-            // Start the BreedingScene, passing the current pet's data
-            this.scene.start('BreedingScene', this.nadagotchiData);
-        });
-
-        // --- Event Listeners ---
-        // Set up a listener for the 'updateStats' event from the MainScene.
-        this.game.events.on('updateStats', this.updateStatsUI, this);
-
-        // Store the latest nadagotchi data received from the event.
-        this.nadagotchiData = null;
-
-        // --- Meta-Game UI ---
-        this.persistence = new PersistenceManager();
-
-        // Journal Button
-        const journalButton = this.add.text(10, 50, 'Journal', { padding: { x: 10, y: 5 }, backgroundColor: '#444' }).setInteractive();
-        journalButton.on('pointerdown', () => this.openJournal());
-
-        // Recipe Book Button
-        const recipeButton = this.add.text(100, 50, 'Recipes', { padding: { x: 10, y: 5 }, backgroundColor: '#444' }).setInteractive();
-        recipeButton.on('pointerdown', () => this.openRecipeBook());
-
-        // Modals (initially hidden)
-        this.journalModal = this.createModal("Journal");
-        this.recipeModal = this.createModal("Recipe Book");
-        this.hobbyModal = this.createModal("Hobbies");
-        this.craftingModal = this.createModal("Crafting");
-        this.relationshipModal = this.createModal("Relationships");
-
-
-        // --- New Subsystem Buttons ---
-        const hobbyButton = this.add.text(200, 50, 'Hobbies', { padding: { x: 10, y: 5 }, backgroundColor: '#444' }).setInteractive();
-        hobbyButton.on('pointerdown', () => this.openHobbyMenu());
-
-        this.game.events.on('uiAction', (action) => {
-            if (action === 'OPEN_CRAFTING_MENU') {
-                this.openCraftingMenu();
-            } else if (action === 'INTERACT_NPC') {
-                this.openRelationshipMenu();
-            }
-        });
+    /**
+     * Handles specific UI actions that open modals.
+     * @param {string} action - The UI action to handle.
+     * @private
+     */
+    handleUIActions(action) {
+        switch (action) {
+            case 'OPEN_JOURNAL': this.openJournal(); break;
+            case 'OPEN_RECIPES': this.openRecipeBook(); break;
+            case 'OPEN_HOBBIES': this.openHobbyMenu(); break;
+            case 'OPEN_CRAFTING_MENU': this.openCraftingMenu(); break;
+            case 'INTERACT_NPC': this.openRelationshipMenu(); break;
+        }
     }
 
     /**
      * Updates all UI elements with the latest data from the Nadagotchi.
-     * This method is called by the 'updateStats' event from the MainScene.
-     * @param {object} data - The entire Nadagotchi object, containing stats, skills, mood, etc.
+     * This method is the callback for the 'updateStats' event.
+     * @param {object} data - The entire Nadagotchi object from MainScene.
      */
     updateStatsUI(data) {
-        // Store the latest data
-        this.nadagotchiData = data;
+        this.nadagotchiData = data; // Cache the latest data
+        const { stats, skills, mood, dominantArchetype, currentCareer, location, isLegacyReady, newCareerUnlocked } = data;
 
-        const stats = data.stats;
-        const skills = data.skills;
-        // Get a visual indicator for the pet's current mood.
-        const moodEmoji = this.getMoodEmoji(data.mood);
-
-        // Format the text string with the latest data.
-        // Added 'Navigation' skill to the display.
-        const text = `Location: ${data.location}\n` +
-                     `Archetype: ${data.dominantArchetype}\n` +
-                     `Mood: ${data.mood} ${moodEmoji}\n` +
-                     `Career: ${data.currentCareer || 'None'}\n` +
+        const moodEmoji = this.getMoodEmoji(mood);
+        const text = `Location: ${location}\n` +
+                     `Archetype: ${dominantArchetype}\n` +
+                     `Mood: ${mood} ${moodEmoji}\n` +
+                     `Career: ${currentCareer || 'None'}\n` +
                      `Hunger: ${Math.floor(stats.hunger)}\n` +
                      `Energy: ${Math.floor(stats.energy)}\n` +
                      `Happiness: ${Math.floor(stats.happiness)}\n` +
-                     `Logic Skill: ${skills.logic.toFixed(2)}\n` +
-                     `Nav Skill: ${skills.navigation.toFixed(2)}\n` +
-                     `Empathy: ${skills.empathy.toFixed(2)}\n` +
-                     `Focus: ${skills.focus.toFixed(2)}\n` +
-                     `Crafting: ${skills.crafting.toFixed(2)}`;
+                     `Logic: ${skills.logic.toFixed(2)} | Nav: ${skills.navigation.toFixed(2)} | Empathy: ${skills.empathy.toFixed(2)}`;
         this.statsText.setText(text);
 
-        // --- Job Board Activation Logic ---
-        // If the Nadagotchi has a career and the job board is currently inactive, enable it.
-        if (data.currentCareer && !this.jobBoardButton.input.enabled) {
-            this.jobBoardButton.setInteractive(true);
-            this.jobBoardButton.setAlpha(1.0);
-        }
+        // Update interactive element states
+        this.jobBoardButton.setInteractive(!!currentCareer).setAlpha(currentCareer ? 1.0 : 0.5);
+        this.retireButton.setVisible(isLegacyReady);
 
-        // --- Career Notification Logic ---
-        // Check if the 'newCareerUnlocked' flag is set AND if a notification is not already on screen.
-        if (data.newCareerUnlocked && !this.careerNotificationText) {
-            // Call the function to display the notification.
-            this.showCareerNotification(data.newCareerUnlocked);
-            // Clear the flag on the source object so it doesn't trigger again.
-            data.newCareerUnlocked = null;
-        }
-
-        // --- Legacy Button Visibility ---
-        // If the pet is ready for legacy and the button is not yet visible, show it.
-        if (data.isLegacyReady && !this.legacyButton.visible) {
-            this.legacyButton.setVisible(true);
+        if (newCareerUnlocked) {
+            this.showCareerNotification(newCareerUnlocked);
+            this.mainScene.nadagotchi.newCareerUnlocked = null; // Reset flag
         }
     }
 
     /**
-     * Returns an emoji character based on the pet's mood.
-     * @param {string} mood - The current mood of the Nadagotchi (e.g., 'Happy', 'Neutral', 'Sad').
+     * Returns an emoji character corresponding to a given mood.
+     * @param {string} mood - The current mood of the Nadagotchi (e.g., 'happy', 'sad').
      * @returns {string} An emoji representing the mood.
      */
     getMoodEmoji(mood) {
-        switch (mood.toLowerCase()) {
-            case 'happy':
-                return '\u{1F604}';
-            case 'sad':
-                return '\u{1F622}';
-            case 'angry':
-                return '\u{1F620}';
-            case 'neutral':
-                return '\u{1F610}';
-            default:
-                return '❓'; // Return a question mark for unknown moods.
-        }
+        const moodMap = { 'happy': '😊', 'sad': '😢', 'angry': '😠', 'neutral': '😐' };
+        return moodMap[mood] || '❓';
     }
 
     /**
-     * Displays a temporary notification for a new career.
-     * @param {string} careerName - The name of the career that was unlocked (e.g., 'Innovator').
+     * Displays a temporary notification in the center of the screen.
+     * @param {string} message - The message to display.
      */
-    showCareerNotification(careerName) {
-        const message = `Career Unlocked: ${careerName}!`;
-
-        // Create the text object in the center of the UI scene.
-        this.careerNotificationText = this.add.text(
-            this.cameras.main.width / 2,
-            this.cameras.main.height / 2 - 30, // Position slightly above center
-            message,
-            {
-                fontFamily: 'Arial',
-                fontSize: '18px',
-                color: '#000000',
-                backgroundColor: '#ffffff',
-                padding: { x: 10, y: 5 },
-                align: 'center'
-            }
-        ).setOrigin(0.5, 0.5); // Center the text object
-
-        // Create a timed event to destroy the text after 3 seconds.
-        this.time.delayedCall(3000, () => {
-            if (this.careerNotificationText) {
-                this.careerNotificationText.destroy();
-                this.careerNotificationText = null; // Clear the reference
-            }
-        });
+    showCareerNotification(message) {
+        const notificationText = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2 - 30, `Career Unlocked: ${message}!`,
+            { fontFamily: 'Arial', fontSize: '18px', color: '#000', backgroundColor: '#fff', padding: { x: 10, y: 5 }, align: 'center' }
+        ).setOrigin(0.5);
+        this.time.delayedCall(3000, () => notificationText.destroy());
     }
 
     /**
-     * Handles the logic when the "Job Board" button is clicked.
-     * It checks the Nadagotchi's current career and provides a corresponding job.
-     */
-    openJobBoard() {
-        if (!this.nadagotchiData) return; // Guard against no data
-
-        // Use a switch statement to handle different jobs for different careers.
-        switch(this.nadagotchiData.currentCareer) {
-            case 'Innovator':
-                this.scene.start('LogicPuzzleScene');
-                this.scene.stop('MainScene');
-                this.scene.stop('UIScene');
-                break;
-            case 'Scout':
-                console.log("Job Available: Map the Whispering Woods!");
-                break;
-            case 'Healer':
-                console.log("Job Available: Comfort the Lost Sprite!");
-                break;
-            case 'Artisan':
-                console.log("Job Available: Craft a Ceremonial Item!");
-                break;
-            default:
-                console.log("No jobs available for your current career.");
-                break;
-        }
-    }
-
-    // --- NEW MODAL HELPER FUNCTIONS ---
-
-    /**
-     * Creates a generic modal group (container, background, title, content, close button).
+     * Creates a generic modal group (background, title, content, close button).
      * @param {string} title - The title to display at the top of the modal.
-     * @returns {Phaser.GameObjects.Group} The created modal group.
+     * @returns {Phaser.GameObjects.Group} The created (but hidden) modal group.
      */
     createModal(title) {
         const modalGroup = this.add.group();
-
-        const modalBg = this.add.rectangle(this.cameras.main.width / 2, this.cameras.main.height / 2, 500, 400, 0x1a1a1a, 0.9).setOrigin(0.5);
-        modalBg.setStrokeStyle(2, 0xffffff); // Add a white border
-
-        const modalTitle = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2 - 170, title, {
-            fontFamily: 'Arial',
-            fontSize: '28px',
-            color: '#ffffff',
-            align: 'center'
-        }).setOrigin(0.5);
-
-        const modalContent = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2, '', {
-            fontFamily: 'Arial',
-            fontSize: '16px',
-            color: '#ffffff',
-            wordWrap: { width: 480 },
-            align: 'left'
-        }).setOrigin(0.5);
-
-        const closeButton = this.add.text(this.cameras.main.width / 2 + 220, this.cameras.main.height / 2 - 170, 'X', {
-            fontFamily: 'Arial',
-            fontSize: '20px',
-            color: '#ffffff',
-            backgroundColor: '#8B0000',
-            padding: { x: 8, y: 4 }
-        }).setOrigin(0.5).setInteractive();
+        const modalBg = this.add.rectangle(this.cameras.main.width / 2, this.cameras.main.height / 2, 500, 400, 0x1a1a1a, 0.9).setStrokeStyle(2, 0xffffff);
+        const modalTitle = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2 - 170, title, { fontSize: '28px', color: '#fff' }).setOrigin(0.5);
+        const modalContent = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2, '', { fontSize: '16px', color: '#fff', wordWrap: { width: 480 } }).setOrigin(0.5);
+        const closeButton = this.add.text(this.cameras.main.width / 2 + 220, this.cameras.main.height / 2 - 170, 'X', { fontSize: '20px', color: '#fff', backgroundColor: '#800' , padding: { x: 8, y: 4 }}).setOrigin(0.5).setInteractive();
 
         closeButton.on('pointerdown', () => {
             modalGroup.setVisible(false);
-            this.scene.resume('MainScene');
+            if (this.scene.isPaused('MainScene')) this.scene.resume('MainScene');
         });
 
         modalGroup.addMultiple([modalBg, modalTitle, modalContent, closeButton]);
-        modalGroup.setVisible(false); // Hide by default
-        modalGroup.content = modalContent; // Attach content text for easy access
-
+        modalGroup.setVisible(false);
+        modalGroup.content = modalContent; // For easy access
         return modalGroup;
     }
 
+    /**
+     * Populates and displays the journal modal.
+     */
     openJournal() {
-        const journalEntries = this.persistence.loadJournal();
-        const formattedText = journalEntries.map(entry => `${entry.date}: ${entry.text}`).join('\n');
-        this.journalModal.content.setText(formattedText || "No entries yet.");
+        const entries = new PersistenceManager().loadJournal();
+        const text = entries.map(e => `${e.date}: ${e.text}`).join('\n') || "No entries yet.";
+        this.journalModal.content.setText(text);
         this.journalModal.setVisible(true);
         this.scene.pause('MainScene');
     }
 
+    /**
+     * Populates and displays the recipe book modal.
+     */
     openRecipeBook() {
-        const recipes = this.persistence.loadRecipes();
-        const formattedText = recipes.join('\n');
-        this.recipeModal.content.setText(formattedText || "No recipes discovered.");
+        const recipes = new PersistenceManager().loadRecipes();
+        const text = recipes.join('\n') || "No recipes discovered.";
+        this.recipeModal.content.setText(text);
         this.recipeModal.setVisible(true);
         this.scene.pause('MainScene');
     }
 
-    // --- New Subsystem UI Methods ---
+    /**
+     * Populates and displays the hobby menu modal.
+     */
     openHobbyMenu() {
         if (!this.nadagotchiData) return;
-        const hobbies = this.nadagotchiData.hobbies;
-        const formattedText = Object.keys(hobbies).map(hobby => `${hobby}: Level ${hobbies[hobby]}`).join('\n');
-        this.hobbyModal.content.setText(formattedText);
+        const text = Object.entries(this.nadagotchiData.hobbies).map(([hobby, level]) => `${hobby}: Level ${level}`).join('\n');
+        this.hobbyModal.content.setText(text);
         this.hobbyModal.setVisible(true);
         this.scene.pause('MainScene');
     }
 
+    /**
+     * Populates and displays the crafting menu modal.
+     */
     openCraftingMenu() {
         if (!this.nadagotchiData) return;
-        const inventory = this.nadagotchiData.inventory;
-        const formattedText = `Inventory:\n- ${inventory.join('\n- ')}\n\n(Crafting recipes will go here)`;
-        this.craftingModal.content.setText(formattedText);
+        const text = `Inventory:\n- ${this.nadagotchiData.inventory.join('\n- ')}\n\n(Crafting recipes will go here)`;
+        this.craftingModal.content.setText(text);
         this.craftingModal.setVisible(true);
         this.scene.pause('MainScene');
     }
 
+    /**
+     * Populates and displays the relationship menu modal.
+     */
     openRelationshipMenu() {
         if (!this.nadagotchiData) return;
-        const relationships = this.nadagotchiData.relationships;
-        const formattedText = Object.keys(relationships).map(npc => `${npc}: Friendship ${relationships[npc].level}`).join('\n');
-        this.relationshipModal.content.setText(formattedText);
+        const text = Object.entries(this.nadagotchiData.relationships).map(([npc, data]) => `${npc}: Friendship ${data.level}`).join('\n');
+        this.relationshipModal.content.setText(text);
         this.relationshipModal.setVisible(true);
         this.scene.pause('MainScene');
     }
