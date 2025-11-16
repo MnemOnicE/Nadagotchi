@@ -135,6 +135,7 @@ class Nadagotchi {
         // Ensure stats do not fall below zero.
         if (this.stats.hunger < 0) this.stats.hunger = 0;
         if (this.stats.energy < 0) this.stats.energy = 0;
+        if (this.stats.happiness < 0) this.stats.happiness = 0;
 
         // Section 2: Mood Calculation
         // The Nadagotchi's mood is a direct consequence of its current needs.
