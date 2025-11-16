@@ -389,6 +389,16 @@ class Nadagotchi {
 
         // If the current dominant archetype is in the list of top contenders, it remains dominant.
         // Otherwise, a random archetype from the tied list becomes dominant.
+        if (potentialDominantArchetypes.includes(this.dominantArchetype)) {
+            return; // No change needed
+        } else {
+            this.dominantArchetype = Phaser.Utils.Array.GetRandom(potentialDominantArchetypes);
+        }
+
+        // In a non-Phaser environment (like testing), GetRandom might not work.
+        // This ensures a predictable outcome in case of a tie.
+        if (potentialDominantArchetypes.length > 0 && !potentialDominantArchetypes.includes(this.dominantArchetype)) {
+            this.dominantArchetype = potentialDominantArchetypes[0];
         if (!potentialDominantArchetypes.includes(this.dominantArchetype)) {
              this.dominantArchetype = Phaser.Utils.Array.GetRandom(potentialDominantArchetypes);
         }
