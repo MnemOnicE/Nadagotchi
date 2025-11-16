@@ -1,19 +1,31 @@
 /**
- * ArtisanMinigameScene is a mini-game for the 'Artisan' career path.
- * The player must replicate a pattern shown on a grid.
+ * @class ArtisanMinigameScene
+ * @extends Phaser.Scene
+ * @classdesc
+ * A mini-game for the 'Artisan' career path.
+ * The player must memorize and replicate a pattern shown on a grid.
  */
 class ArtisanMinigameScene extends Phaser.Scene {
     constructor() {
         super({ key: 'ArtisanMinigameScene' });
-        this.gridSize = 3; // 3x3 grid
+        /** @type {number} The size of the grid (e.g., 3 for a 3x3 grid). */
+        this.gridSize = 3;
+        /** @type {Array<boolean>} The target pattern to be matched. */
         this.pattern = [];
+        /** @type {Array<boolean>} The player's current input pattern. */
         this.playerPattern = [];
+        /** @type {boolean} A flag to prevent input while the pattern is being displayed. */
         this.isDisplayingPattern = false;
+        /** @type {Array<Phaser.GameObjects.Rectangle>} An array of the grid button game objects. */
         this.gridButtons = [];
     }
 
+    /**
+     * Phaser lifecycle method. Called once when the scene is created.
+     * Sets up the background, text, and initializes the game flow.
+     */
     create() {
-        this.cameras.main.setBackgroundColor('#663399'); // Rebecca purple for a creative feel
+        this.cameras.main.setBackgroundColor('#663399'); // A creative purple
         this.add.text(this.cameras.main.width / 2, 50, 'Artisan Craft: Recreate the Pattern', { fontSize: '24px', fill: '#FFF' }).setOrigin(0.5);
         this.statusText = this.add.text(this.cameras.main.width / 2, 100, 'Memorize the pattern!', { fontSize: '20px', fill: '#FFF' }).setOrigin(0.5);
 
@@ -24,6 +36,7 @@ class ArtisanMinigameScene extends Phaser.Scene {
 
     /**
      * Creates the interactive grid of buttons.
+     * @private
      */
     createGrid() {
         const buttonSize = 80;
@@ -39,34 +52,31 @@ class ArtisanMinigameScene extends Phaser.Scene {
 
                 const button = this.add.rectangle(x, y, buttonSize, buttonSize, 0xD3D3D3).setInteractive({ useHandCursor: true });
                 button.setData('index', index);
-                button.setData('isActive', false);
 
                 button.on('pointerdown', () => this.handleGridClick(button));
                 this.gridButtons.push(button);
-                this.playerPattern.push(false); // Initialize player pattern with all false
             }
         }
     }
 
     /**
      * Generates a random pattern for the player to copy.
+     * @private
      */
     generatePattern() {
-        this.pattern = [];
-        const patternLength = 4; // 4 tiles will be in the pattern
-        const indices = Array.from(Array(this.gridSize * this.gridSize).keys()); // [0, 1, ..., 8]
+        const patternLength = 4; // Number of tiles in the pattern
+        const totalTiles = this.gridSize * this.gridSize;
+        const indices = Array.from({ length: totalTiles }, (_, i) => i);
         const shuffledIndices = Phaser.Utils.Array.Shuffle(indices);
+        const patternIndices = new Set(shuffledIndices.slice(0, patternLength));
 
-        const patternIndices = shuffledIndices.slice(0, patternLength);
-
-        // Create a boolean array for the pattern
-        for (let i = 0; i < this.gridSize * this.gridSize; i++) {
-            this.pattern.push(patternIndices.includes(i));
-        }
+        this.pattern = Array.from({ length: totalTiles }, (_, i) => patternIndices.has(i));
+        this.playerPattern = Array(totalTiles).fill(false);
     }
 
     /**
-     * Briefly shows the pattern on the grid.
+     * Briefly displays the generated pattern on the grid for the player to memorize.
+     * @private
      */
     displayPattern() {
         this.isDisplayingPattern = true;
@@ -84,25 +94,27 @@ class ArtisanMinigameScene extends Phaser.Scene {
     }
 
     /**
-     * Handles clicks on the grid buttons.
-     * @param {Phaser.GameObjects.Rectangle} button - The button that was clicked.
+     * Handles player clicks on the grid buttons, updating their input.
+     * @param {Phaser.GameObjects.Rectangle} button - The grid button that was clicked.
+     * @private
      */
     handleGridClick(button) {
         if (this.isDisplayingPattern) return;
 
         const index = button.getData('index');
-        const currentState = this.playerPattern[index];
-        this.playerPattern[index] = !currentState;
-        button.setFillStyle(!currentState ? 0x4169E1 : 0xD3D3D3); // Toggle color
+        this.playerPattern[index] = !this.playerPattern[index];
+        button.setFillStyle(this.playerPattern[index] ? 0x4169E1 : 0xD3D3D3);
 
-        // Check if pattern is complete
-        if (this.playerPattern.filter(Boolean).length === this.pattern.filter(Boolean).length) {
+        const playerActiveTiles = this.playerPattern.filter(Boolean).length;
+        const patternActiveTiles = this.pattern.filter(Boolean).length;
+        if (playerActiveTiles === patternActiveTiles) {
             this.checkPattern();
         }
     }
 
     /**
-     * Checks if the player's pattern matches the correct pattern.
+     * Checks if the player's input pattern matches the target pattern.
+     * @private
      */
     checkPattern() {
         const isSuccess = JSON.stringify(this.pattern) === JSON.stringify(this.playerPattern);
@@ -111,13 +123,13 @@ class ArtisanMinigameScene extends Phaser.Scene {
     }
 
     /**
-     * Ends the mini-game.
-     * @param {boolean} isSuccess - Did the player succeed?
+     * Ends the mini-game and returns the result to the MainScene.
+     * @param {boolean} isSuccess - Whether the player successfully completed the task.
+     * @private
      */
     endGame(isSuccess) {
         this.game.events.emit('workResult', { success: isSuccess, career: 'Artisan' });
-        this.scene.start('MainScene');
-        this.scene.stop('UIScene');
-        this.scene.launch('UIScene');
+        this.scene.stop();
+        this.scene.resume('MainScene');
     }
 }

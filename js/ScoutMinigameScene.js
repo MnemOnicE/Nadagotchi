@@ -1,27 +1,40 @@
 /**
- * ScoutMinigameScene is a mini-game for the 'Scout' career path.
- * The player must find and match pairs of icons within a time limit.
+ * @class ScoutMinigameScene
+ * @extends Phaser.Scene
+ * @classdesc
+ * A memory matching mini-game for the 'Scout' career path.
+ * The player must find and match pairs of icons on a grid within a time limit.
  */
 class ScoutMinigameScene extends Phaser.Scene {
     constructor() {
         super({ key: 'ScoutMinigameScene' });
-        this.icons = ['\u{1F333}', '\u{1F344}', '\u{1F41D}', '\u{1F341}', '\u{1F33F}', '\u{1F43E}']; // Tree, Mushroom, Bee, Maple Leaf, Herb, Paw Prints
+        /** @type {Array<string>} The set of unique icons to be matched. */
+        this.icons = ['🌳', '🍄', '🐝', '🍁', '🌿', '🐾'];
+        /** @type {Array<string>} The shuffled grid of paired icons. */
         this.grid = [];
+        /** @type {?Phaser.GameObjects.Rectangle} The first card selected by the player. */
         this.firstSelection = null;
+        /** @type {?Phaser.GameObjects.Rectangle} The second card selected by the player. */
         this.secondSelection = null;
+        /** @type {number} The number of pairs successfully matched. */
         this.matchesFound = 0;
+        /** @type {?Phaser.Time.TimerEvent} The countdown timer for the game. */
         this.timer = null;
-        this.timeLeft = 30; // 30 seconds for the game
+        /** @type {number} The time remaining in seconds. */
+        this.timeLeft = 30;
     }
 
+    /**
+     * Phaser lifecycle method. Called once when the scene is created.
+     * Sets up the background, text, timer, and game grid.
+     */
     create() {
         this.cameras.main.setBackgroundColor('#2E8B57'); // Forest green
         this.add.text(this.cameras.main.width / 2, 50, 'Scout Mission: Match the Pairs!', { fontSize: '24px', fill: '#FFF' }).setOrigin(0.5);
-
         this.timerText = this.add.text(this.cameras.main.width - 150, 50, `Time: ${this.timeLeft}`, { fontSize: '20px', fill: '#FFF' }).setOrigin(0.5);
 
         this.setupGrid();
-        this.createGrid();
+        this.createGridDisplay();
 
         this.timer = this.time.addEvent({
             delay: 1000,
@@ -32,55 +45,50 @@ class ScoutMinigameScene extends Phaser.Scene {
     }
 
     /**
-     * Sets up the 4x3 grid with shuffled pairs of icons.
+     * Creates the shuffled array of paired icons for the grid.
+     * @private
      */
     setupGrid() {
-        let pairs = this.icons.concat(this.icons); // Duplicate icons to create pairs
-        this.grid = Phaser.Utils.Array.Shuffle(pairs);
+        this.grid = Phaser.Utils.Array.Shuffle(this.icons.concat(this.icons));
     }
 
     /**
-     * Creates the visual grid of cards (buttons) on the screen.
+     * Creates the visual grid of interactive cards on the screen.
+     * @private
      */
-    createGrid() {
-        const rows = 3;
-        const cols = 4;
-        const cardWidth = 100;
-        const cardHeight = 100;
-        const spacing = 20;
+    createGridDisplay() {
+        const rows = 3, cols = 4;
+        const cardWidth = 100, cardHeight = 100, spacing = 20;
         const startX = (this.cameras.main.width - (cols * cardWidth + (cols - 1) * spacing)) / 2;
         const startY = (this.cameras.main.height - (rows * cardHeight + (rows - 1) * spacing)) / 2;
 
-        for (let i = 0; i < this.grid.length; i++) {
+        this.grid.forEach((icon, i) => {
             const row = Math.floor(i / cols);
             const col = i % cols;
-            const x = startX + col * (cardWidth + spacing);
-            const y = startY + row * (cardHeight + spacing);
+            const x = startX + col * (cardWidth + spacing) + cardWidth / 2;
+            const y = startY + row * (cardHeight + spacing) + cardHeight / 2;
 
             const card = this.add.rectangle(x, y, cardWidth, cardHeight, 0xDEB887).setInteractive({ useHandCursor: true });
-            card.setData('icon', this.grid[i]);
-            card.setData('index', i);
-            card.setData('revealed', false);
+            card.setData({ icon: icon, index: i, revealed: false });
 
             const iconText = this.add.text(x, y, '', { fontSize: '48px' }).setOrigin(0.5);
             card.setData('iconText', iconText);
 
             card.on('pointerdown', () => this.handleCardClick(card));
-        }
+        });
     }
 
     /**
      * Handles the logic when a player clicks a card.
-     * @param {Phaser.GameObjects.Rectangle} card - The card that was clicked.
+     * @param {Phaser.GameObjects.Rectangle} card - The card game object that was clicked.
+     * @private
      */
     handleCardClick(card) {
-        if (card.getData('revealed') || this.secondSelection) {
-            return; // Ignore clicks on already revealed cards or when two are selected
-        }
+        if (card.getData('revealed') || this.secondSelection) return;
 
         card.getData('iconText').setText(card.getData('icon'));
         card.setData('revealed', true);
-        card.setFillStyle(0xFFF8DC); // Change color to show it's selected
+        card.setFillStyle(0xFFF8DC); // Lighten color to show selection
 
         if (!this.firstSelection) {
             this.firstSelection = card;
@@ -91,28 +99,26 @@ class ScoutMinigameScene extends Phaser.Scene {
     }
 
     /**
-     * Checks if the two selected cards are a match.
+     * Checks if the two currently selected cards are a match.
+     * @private
      */
     checkForMatch() {
-        if (this.firstSelection.getData('icon') === this.secondSelection.getData('icon')) {
-            // It's a match!
+        const isMatch = this.firstSelection.getData('icon') === this.secondSelection.getData('icon');
+        if (isMatch) {
             this.matchesFound++;
             this.firstSelection = null;
             this.secondSelection = null;
             if (this.matchesFound === this.icons.length) {
-                this.endGame(true); // All pairs found
+                this.endGame(true); // Win condition
             }
         } else {
-            // Not a match, hide them again after a delay
+            // Not a match, flip them back after a delay
             this.time.delayedCall(1000, () => {
-                this.firstSelection.getData('iconText').setText('');
-                this.firstSelection.setData('revealed', false);
-                this.firstSelection.setFillStyle(0xDEB887);
-
-                this.secondSelection.getData('iconText').setText('');
-                this.secondSelection.setData('revealed', false);
-                this.secondSelection.setFillStyle(0xDEB887);
-
+                [this.firstSelection, this.secondSelection].forEach(card => {
+                    card.getData('iconText').setText('');
+                    card.setData('revealed', false);
+                    card.setFillStyle(0xDEB887);
+                });
                 this.firstSelection = null;
                 this.secondSelection = null;
             });
@@ -120,27 +126,26 @@ class ScoutMinigameScene extends Phaser.Scene {
     }
 
     /**
-     * Updates the game timer every second.
+     * Updates the game timer every second and ends the game if time runs out.
+     * @private
      */
     updateTimer() {
         this.timeLeft--;
         this.timerText.setText(`Time: ${this.timeLeft}`);
         if (this.timeLeft <= 0) {
-            this.endGame(false); // Time's up
+            this.endGame(false);
         }
     }
 
     /**
-     * Ends the mini-game and returns to the MainScene.
-     * @param {boolean} isSuccess - Whether the player successfully completed the puzzle.
+     * Ends the mini-game, stops the timer, and returns the result to the MainScene.
+     * @param {boolean} isSuccess - Whether the player successfully matched all pairs.
+     * @private
      */
     endGame(isSuccess) {
-        if (this.timer) {
-            this.timer.remove(false);
-        }
+        if (this.timer) this.timer.destroy();
         this.game.events.emit('workResult', { success: isSuccess, career: 'Scout' });
-        this.scene.start('MainScene');
-        this.scene.stop('UIScene');
-        this.scene.launch('UIScene');
+        this.scene.stop();
+        this.scene.resume('MainScene');
     }
 }

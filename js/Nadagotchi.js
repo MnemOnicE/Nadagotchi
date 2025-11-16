@@ -1,6 +1,7 @@
 /**
  * Represents the core Nadagotchi entity, its "Brain".
  * This class holds the Nadagotchi's state, including its personality, stats, skills, and more.
+ * @class Nadagotchi
  */
 class Nadagotchi {
     /**
@@ -11,18 +12,30 @@ class Nadagotchi {
     constructor(initialArchetype, loadedData = null) {
         if (loadedData) {
             // This is a loaded pet. Populate all properties from the save file.
+            /** @type {string} The pet's current mood (e.g., 'happy', 'sad'). */
             this.mood = loadedData.mood;
+            /** @type {string} The dominant personality trait. */
             this.dominantArchetype = loadedData.dominantArchetype;
+            /** @type {Object.<string, number>} A map of personality points for each archetype. */
             this.personalityPoints = loadedData.personalityPoints;
+            /** @type {{hunger: number, energy: number, happiness: number}} The pet's core stats. */
             this.stats = loadedData.stats;
+            /** @type {Object.<string, number>} A map of the pet's skills and their levels. */
             this.skills = loadedData.skills;
+            /** @type {?string} The pet's current career, if any. */
             this.currentCareer = loadedData.currentCareer;
+            /** @type {Array<string>} The items the pet is currently holding. */
             this.inventory = loadedData.inventory || [];
+            /** @type {number} The pet's age. */
             this.age = loadedData.age;
+            /** @type {number} The generation number of the pet. */
             this.generation = loadedData.generation || 1;
+            /** @type {boolean} Whether the pet is ready for the legacy/breeding system. */
             this.isLegacyReady = loadedData.isLegacyReady || false;
+            /** @type {Array<string>} Special traits inherited from ancestors. */
             this.legacyTraits = loadedData.legacyTraits || [];
-            this.moodSensitivity = loadedData.moodSensitivity || 5; // Default to 5 if not present
+             /** @type {number} A 1-10 scale affecting mood swing intensity. */
+            this.moodSensitivity = loadedData.moodSensitivity || 5;
         } else {
             // This is a brand new game. Start from defaults.
             this.mood = 'neutral';
@@ -42,254 +55,185 @@ class Nadagotchi {
             this.inventory = [];
             this.age = 0;
             this.generation = 1;
-
-            // --- IV. GENERATIONAL LEGACY SYSTEM ---
-            /** @type {boolean} - Becomes true when the pet is old enough to retire. */
             this.isLegacyReady = false;
-            /** @type {Array<string>} - Special traits inherited from ancestors. */
             this.legacyTraits = [];
-            /** @type {number} - A 1-10 scale affecting mood swing intensity. */
-            this.moodSensitivity = 5; // Mid-range default
+            this.moodSensitivity = 5;
         }
 
-        /** @type {?string} - A flag used by the UI to show a one-time notification when a career is unlocked. */
+        /** @type {?string} A flag used by the UI to show a one-time notification when a career is unlocked. */
         this.newCareerUnlocked = null;
 
-        // --- V. META-GAME FEATURES ---
+        /** @type {PersistenceManager} Manages saving and loading game data. */
         this.persistence = new PersistenceManager();
-        /** @type {Array<object>} - A log of significant events. */
+        /** @type {Array<{date: string, text: string}>} A log of significant events. */
         this.journal = this.persistence.loadJournal();
-        /** @type {Array<string>} - A list of crafting recipes the pet has discovered. */
+        /** @type {Array<string>} A list of crafting recipes the pet has discovered. */
         this.discoveredRecipes = this.persistence.loadRecipes();
 
-        // --- New Subsystems ---
+        /** @type {{painting: number, music: number}} A map of hobby levels. */
         this.hobbies = loadedData ? loadedData.hobbies : { painting: 0, music: 0 };
+        /** @type {Object.<string, {level: number}>} A map of relationships with NPCs. */
         this.relationships = loadedData ? loadedData.relationships : { friend: { level: 0 } };
+        /** @type {string} The pet's current location. */
         this.location = loadedData ? loadedData.location : 'Home';
     }
 
     /**
      * Simulates the passage of time for the Nadagotchi.
-     * This method should be called in the main game loop. It handles stat decay and autonomous mood changes.
-     * @param {object} worldState - An object containing information about the game world (e.g., weather, time, activeEvent).
+     * This method should be called in the main game loop. It handles stat decay, mood changes, and aging.
+     * @param {object} [worldState={ weather: "Sunny", time: "Day", activeEvent: null }] - An object containing information about the game world.
+     * @param {string} worldState.weather - The current weather (e.g., "Sunny", "Rainy").
+     * @param {string} worldState.time - The current time of day (e.g., "Day", "Night").
+     * @param {?object} worldState.activeEvent - The currently active world event, if any.
      */
     live(worldState = { weather: "Sunny", time: "Day", activeEvent: null }) {
-        // Section 1: Stats Decay with environmental modifiers
         let hungerDecay = 0.05;
         let energyDecay = 0.02;
-        let happinessChange = 0; // Start with no change
+        let happinessChange = 0;
 
-        // Apply event modifiers first
-        if (worldState.activeEvent) {
-            // Festivals make the pet happier
-            if (worldState.activeEvent.name.includes('Festival')) {
-                this.stats.happiness += 0.02;
-                if (this.stats.happiness > 100) this.stats.happiness = 100;
-            }
+        if (worldState.activeEvent && worldState.activeEvent.name.includes('Festival')) {
+            this.stats.happiness += 0.02;
         }
 
-        // Weather effects
         switch (worldState.weather) {
             case "Rainy":
-                if (this.dominantArchetype === "Adventurer") {
-                    happinessChange -= 0.01;
-                    if (this.stats.happiness < 0) this.stats.happiness = 0;
-                }
+                if (this.dominantArchetype === "Adventurer") happinessChange -= 0.01;
                 if (this.dominantArchetype === "Nurturer") energyDecay *= 0.5;
                 break;
             case "Stormy":
                 if (this.dominantArchetype === "Adventurer") happinessChange -= 0.03;
-                if (this.dominantArchetype === "Recluse") happinessChange += 0.01; // Recluses enjoy the storm
-                energyDecay *= 1.2; // The noise is draining
+                if (this.dominantArchetype === "Recluse") happinessChange += 0.01;
+                energyDecay *= 1.2;
                 break;
             case "Cloudy":
-                energyDecay *= 0.8; // Less sun, less energy expenditure
+                energyDecay *= 0.8;
                 break;
             case "Sunny":
                 if (this.dominantArchetype === "Adventurer") happinessChange += 0.01;
-                energyDecay *= 1.1; // More active in the sun
+                energyDecay *= 1.1;
                 break;
         }
 
-        // Time of day effects
         switch (worldState.time) {
             case "Night":
                 hungerDecay *= 0.5;
                 if (this.dominantArchetype === "Recluse") happinessChange += 0.01;
-                if (this.dominantArchetype === "Adventurer") energyDecay *= 1.1; // Restless at night
+                if (this.dominantArchetype === "Adventurer") energyDecay *= 1.1;
                 break;
             case "Dusk":
             case "Dawn":
-                energyDecay *= 0.9; // Less active during twilight hours
+                energyDecay *= 0.9;
                 break;
             case "Day":
-                if (this.dominantArchetype === "Intellectual") energyDecay *= 1.1; // Minds are active
+                if (this.dominantArchetype === "Intellectual") energyDecay *= 1.1;
                 break;
         }
-
 
         this.stats.hunger -= hungerDecay;
         this.stats.energy -= energyDecay;
         this.stats.happiness += happinessChange;
 
-        // Ensure stats do not fall below zero.
         if (this.stats.hunger < 0) this.stats.hunger = 0;
         if (this.stats.energy < 0) this.stats.energy = 0;
         if (this.stats.happiness < 0) this.stats.happiness = 0;
+        if (this.stats.happiness > 100) this.stats.happiness = 100;
 
-        // Section 2: Mood Calculation
-        // The Nadagotchi's mood is a direct consequence of its current needs.
-        // This creates a clear feedback loop for the player.
-
-        // --- BUG FIX ---
-        // The conditional logic has been re-ordered to check for the most critical
-        // state ('angry') first, as the previous logic would never allow it to be reached.
         if (this.stats.hunger < 10) {
-            // If needs are critically low, the pet becomes angry.
             this.mood = 'angry';
         } else if (this.stats.hunger < 30 || this.stats.energy < 20) {
-            // If needs are low, the pet becomes sad.
             this.mood = 'sad';
         } else if (this.stats.hunger > 80 && this.stats.energy > 80) {
-            // If needs are high, the pet is happy.
             this.mood = 'happy';
         } else {
-            // Otherwise, the pet is in a neutral state.
             this.mood = 'neutral';
         }
 
-        // Section 3: Aging
-        // The pet's age gradually increases.
         this.age += 0.001;
-
-        // NEW: Check for legacy readiness
-        if (this.age > 50 && !this.isLegacyReady) { // 50 is an example age
+        if (this.age > 50 && !this.isLegacyReady) {
             this.isLegacyReady = true;
         }
     }
 
     /**
-     * Handles a player-initiated action.
-     * This method updates the Nadagotchi's state based on the action performed.
-     * The 'STUDY' action includes a mood-based multiplier for skill gain, making
-     * the Nadagotchi's emotional state a critical factor in its development.
+     * Handles a player-initiated action, updating the Nadagotchi's state accordingly.
      * @param {string} actionType - The type of action (e.g., 'FEED', 'PLAY', 'STUDY').
-     * @param {any} [item=null] - An optional item used in the action.
+     * @param {*} [item=null] - An optional item or data used in the action.
      */
     handleAction(actionType, item = null) {
-        // --- BUG FIX ---
-        // The moodMultiplier is now calculated *inside* each action that needs it.
-        // This ensures that any mood changes from the action itself are accounted for
-        // *before* calculating skill gains, which was the source of the bug.
         let moodMultiplier;
 
         switch (actionType.toUpperCase()) {
             case 'FEED':
-                // Feeding replenishes hunger and provides a small amount of happiness.
-                this.stats.hunger += 15;
-                if (this.stats.hunger > 100) this.stats.hunger = 100; // Cap hunger at 100
-                this.stats.happiness += 5;
-                if (this.stats.happiness > 100) this.stats.happiness = 100; // Cap happiness at 100
-
-                // Personality hook: Nurturers gain personality points from being cared for.
-                if (this.dominantArchetype === 'Nurturer') {
-                    this.personalityPoints.Nurturer++;
-                }
+                this.stats.hunger = Math.min(100, this.stats.hunger + 15);
+                this.stats.happiness = Math.min(100, this.stats.happiness + 5);
+                if (this.dominantArchetype === 'Nurturer') this.personalityPoints.Nurturer++;
                 break;
 
             case 'PLAY':
-                // Playing costs energy but increases happiness.
-                this.stats.energy -= 10;
-                if (this.stats.energy < 0) this.stats.energy = 0; // Prevent negative energy
-                this.stats.happiness += 10;
-                if (this.stats.happiness > 100) this.stats.happiness = 100;
-
-                // Personality hook: Different archetypes react uniquely to play.
+                this.stats.energy = Math.max(0, this.stats.energy - 10);
+                this.stats.happiness = Math.min(100, this.stats.happiness + 10);
                 if (['Adventurer', 'Mischievous'].includes(this.dominantArchetype)) {
-                    // These archetypes enjoy playing.
                     this.mood = 'happy';
                     this.personalityPoints[this.dominantArchetype]++;
                 } else if (this.dominantArchetype === 'Recluse') {
-                    // Recluses dislike playing, which makes them sad and unhappy.
                     this.mood = 'sad';
-                    this.stats.happiness -= 15; // More significant happiness drop
+                    this.stats.happiness -= 15;
                 }
                 break;
 
             case 'STUDY':
-                this.stats.energy -= 5;
-                if (this.stats.energy < 0) this.stats.energy = 0;
-                this.stats.happiness -= 5;
-                if (this.stats.happiness < 0) this.stats.happiness = 0;
+                this.stats.energy = Math.max(0, this.stats.energy - 5);
+                this.stats.happiness = Math.max(0, this.stats.happiness - 5);
+                moodMultiplier = this._getMoodMultiplier();
+                this.skills.logic += (0.1 * moodMultiplier);
 
                 if (this.dominantArchetype === 'Intellectual') {
                     this.mood = 'happy';
                     this.personalityPoints.Intellectual++;
-                    // Recalculate multiplier *after* mood change
-                    moodMultiplier = this._getMoodMultiplier();
-                    this.skills.logic += (0.1 * moodMultiplier);
                     this.stats.happiness += 15;
                 } else {
                     this.personalityPoints.Intellectual++;
-                    moodMultiplier = this._getMoodMultiplier();
-                    this.skills.logic += (0.1 * moodMultiplier);
                 }
 
                 if (this.dominantArchetype === 'Adventurer') {
-                    moodMultiplier = this._getMoodMultiplier();
                     this.skills.navigation += (0.05 * moodMultiplier);
                 }
 
-                // Chance to discover a recipe
-                if (Math.random() < 0.05) { // 5% chance
-                    this.discoverRecipe("Logic-Boosting Snack");
-                }
+                if (Math.random() < 0.05) this.discoverRecipe("Logic-Boosting Snack");
                 break;
 
             case 'INTERACT_BOOKSHELF':
                 this.stats.energy -= 5;
                 this.stats.happiness -= 5;
-
-                // Set mood first, then calculate multiplier
                 if (this.dominantArchetype === 'Intellectual') {
-                    this.stats.happiness += 20; // Big happiness boost for Intellectuals
+                    this.stats.happiness += 20;
                     this.mood = 'happy';
                 }
-
                 moodMultiplier = this._getMoodMultiplier();
-                this.skills.logic += (0.15 * moodMultiplier); // Slightly more effective
+                this.skills.logic += (0.15 * moodMultiplier);
                 this.personalityPoints.Intellectual++;
                 break;
 
             case 'INTERACT_PLANT':
                 this.stats.energy -= 5;
                 this.stats.happiness += 10;
-
-                // Set mood first, then calculate multiplier
                 if (this.dominantArchetype === 'Nurturer') {
-                    this.stats.happiness += 20; // Big happiness boost for Nurturers
+                    this.stats.happiness += 20;
                     this.mood = 'happy';
                 }
-
                 moodMultiplier = this._getMoodMultiplier();
-                this.skills.empathy += (0.15 * moodMultiplier); // Slightly more effective
+                this.skills.empathy += (0.15 * moodMultiplier);
                 this.personalityPoints.Nurturer++;
                 break;
 
             case 'EXPLORE':
-                this.stats.energy -= 15;
-                if (this.stats.energy < 0) this.stats.energy = 0;
-
+                this.stats.energy = Math.max(0, this.stats.energy - 15);
                 if (this.dominantArchetype === 'Adventurer') {
                     this.mood = 'happy';
                     this.stats.happiness += 20;
                     this.personalityPoints.Adventurer += 2;
                     this.skills.navigation += 0.1;
-
-                    // Chance to discover a recipe
-                    if (Math.random() < 0.1) { // 10% chance
-                        this.discoverRecipe("Stamina-Up Tea");
-                    }
+                    if (Math.random() < 0.1) this.discoverRecipe("Stamina-Up Tea");
                 } else if (this.dominantArchetype === 'Recluse') {
                     this.mood = 'sad';
                     this.stats.happiness -= 20;
@@ -299,14 +243,11 @@ class Nadagotchi {
                 break;
 
             case "MEDITATE":
-                this.stats.energy += 5;
-                if (this.stats.energy > 100) this.stats.energy = 100;
+                this.stats.energy = Math.min(100, this.stats.energy + 5);
                 this.stats.happiness += 5;
                 moodMultiplier = this._getMoodMultiplier();
                 this.skills.focus += (0.1 * moodMultiplier);
-                if (this.dominantArchetype === "Recluse") {
-                    this.personalityPoints.Recluse += 2;
-                }
+                if (this.dominantArchetype === "Recluse") this.personalityPoints.Recluse += 2;
                 break;
 
             case "CRAFT_ITEM":
@@ -314,34 +255,30 @@ class Nadagotchi {
                 moodMultiplier = this._getMoodMultiplier();
                 this.skills.crafting += (0.1 * moodMultiplier);
                 this.inventory.push("Simple Widget");
-                if (this.dominantArchetype === "Recluse") {
-                    this.stats.happiness += 10;
-                }
+                if (this.dominantArchetype === "Recluse") this.stats.happiness += 10;
                 break;
+
             case 'PRACTICE_HOBBY':
-                this.practiceHobby(item); // e.g., item = 'painting'
+                this.practiceHobby(item);
                 break;
+
             case 'FORAGE':
                 this.forage();
                 break;
+
             case 'INTERACT_NPC':
-                this.interact('friend', item); // e.g., item = 'GIFT'
+                this.interact('friend', item);
                 break;
         }
-        // Final check to ensure happiness stat stays within the 0-100 bounds after any action.
-        if (this.stats.happiness > 100) this.stats.happiness = 100;
-        if (this.stats.happiness < 0) this.stats.happiness = 0;
 
-        // After any action that might affect personality, check if the dominant archetype needs to be updated.
+        this.stats.happiness = Math.max(0, Math.min(100, this.stats.happiness));
         this.updateDominantArchetype();
-
-        // After updating the archetype, check if a new career has been unlocked.
         this.updateCareer();
     }
 
     /**
-     * Increases the level of a specific hobby.
-     * @param {string} hobbyName - The name of the hobby to practice.
+     * Increases the level of a specific hobby and updates stats.
+     * @param {string} hobbyName - The name of the hobby to practice (e.g., 'painting').
      */
     practiceHobby(hobbyName) {
         if (this.hobbies.hasOwnProperty(hobbyName)) {
@@ -353,10 +290,10 @@ class Nadagotchi {
     }
 
     /**
-     * Simulates foraging for items, adding them to the inventory.
+     * Simulates foraging for items, changing location, updating stats, and adding items to inventory.
      */
     forage() {
-        this.location = 'Forest'; // Change location
+        this.location = 'Forest';
         this.stats.energy -= 10;
         const moodMultiplier = this._getMoodMultiplier();
         this.skills.navigation += (0.2 * moodMultiplier);
@@ -364,13 +301,13 @@ class Nadagotchi {
         const foundItem = Phaser.Utils.Array.GetRandom(['Berries', 'Sticks', 'Shiny Stone']);
         this.inventory.push(foundItem);
         this.addJournalEntry(`I went foraging in the ${this.location} and found ${foundItem}.`);
-        this.location = 'Home'; // Return home
+        this.location = 'Home';
     }
 
     /**
-     * Manages interaction with an NPC.
-     * @param {string} npcName - The name of the NPC.
-     * @param {string} interactionType - The type of interaction.
+     * Manages interaction with an NPC, updating relationship status and stats.
+     * @param {string} npcName - The name of the NPC being interacted with.
+     * @param {string} interactionType - The type of interaction (e.g., 'GIFT').
      */
     interact(npcName, interactionType) {
         if (this.relationships.hasOwnProperty(npcName)) {
@@ -391,20 +328,20 @@ class Nadagotchi {
 
     /**
      * Calculates the skill gain multiplier based on the pet's current mood.
-     * @returns {number} The calculated mood multiplier.
+     * @returns {number} The calculated mood multiplier (e.g., 1.5 for happy, 0.5 for sad).
      * @private
      */
     _getMoodMultiplier() {
         switch (this.mood) {
-            case 'happy': return 1.5; // A happy pet is a fast learner.
-            case 'sad': return 0.5;   // A sad pet struggles to focus.
-            case 'angry': return 0.2; // An angry pet barely learns at all.
-            default: return 1.0;      // Neutral is the baseline.
+            case 'happy': return 1.5;
+            case 'sad': return 0.5;
+            case 'angry': return 0.2;
+            default: return 1.0;
         }
     }
 
     /**
-     * Adds a new entry to the journal and saves it.
+     * Adds a new entry to the journal and saves it to persistence.
      * @param {string} text - The content of the journal entry.
      */
     addJournalEntry(text) {
@@ -414,8 +351,8 @@ class Nadagotchi {
     }
 
     /**
-     * Adds a new recipe to the list if it's not already discovered and saves.
-     * @param {string} recipeName - The name of the recipe.
+     * Adds a new recipe to the list if it's not already discovered and saves to persistence.
+     * @param {string} recipeName - The name of the recipe to add.
      */
     discoverRecipe(recipeName) {
         if (!this.discoveredRecipes.includes(recipeName)) {
@@ -427,13 +364,13 @@ class Nadagotchi {
 
     /**
      * Updates the dominant archetype based on which personality has the most points.
+     * In case of a tie, the existing dominant archetype is preferred to prevent rapid switching.
      * @private
      */
     updateDominantArchetype() {
         let maxPoints = -1;
         let potentialDominantArchetypes = [];
 
-        // First, find the maximum score.
         for (const archetype in this.personalityPoints) {
             if (this.personalityPoints.hasOwnProperty(archetype)) {
                 if (this.personalityPoints[archetype] > maxPoints) {
@@ -442,7 +379,6 @@ class Nadagotchi {
             }
         }
 
-        // Next, find all archetypes that have that maximum score.
         for (const archetype in this.personalityPoints) {
             if (this.personalityPoints.hasOwnProperty(archetype)) {
                 if (this.personalityPoints[archetype] === maxPoints) {
@@ -457,16 +393,17 @@ class Nadagotchi {
             return; // No change needed
         } else {
             this.dominantArchetype = Phaser.Utils.Array.GetRandom(potentialDominantArchetypes);
+        if (!potentialDominantArchetypes.includes(this.dominantArchetype)) {
+            this.dominantArchetype = potentialDominantArchetypes[0];
         }
     }
 
     /**
-     * Checks and updates the Nadagotchi's career based on its skills and archetype.
-     * This is the logic specified in the v0.6 roadmap.
+     * Checks skill and archetype requirements to unlock a new career.
+     * If a career is unlocked, it updates the pet's state and logs a journal entry.
      * @private
      */
     updateCareer() {
-        // Only check for a new career if the Nadagotchi doesn't have one.
         if (this.currentCareer === null) {
             let newlyUnlockedCareer = null;
 
