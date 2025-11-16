@@ -429,7 +429,7 @@ class Nadagotchi {
      * @private
      */
     updateDominantArchetype() {
-        let maxPoints = this.personalityPoints[this.dominantArchetype];
+        let maxPoints = -1; // Start with -1 to ensure the first archetype always becomes the initial max
         let newDominantArchetype = this.dominantArchetype;
 
         // Iterate through all personality archetypes to find the one with the highest score.
