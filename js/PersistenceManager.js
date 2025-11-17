@@ -97,5 +97,22 @@ class PersistenceManager {
         const data = localStorage.getItem("nadagotchi_calendar");
         return data ? JSON.parse(data) : null;
     }
+
+    /**
+     * Saves the placed furniture data to localStorage.
+     * @param {Array<object>} furnitureData - The array of placed furniture objects.
+     */
+    saveFurniture(furnitureData) {
+        localStorage.setItem("nadagotchi_furniture", JSON.stringify(furnitureData));
+    }
+
+    /**
+     * Loads the placed furniture data from localStorage.
+     * @returns {Array<object>|null} The array of placed furniture objects, or null if no save exists.
+     */
+    loadFurniture() {
+        const data = localStorage.getItem("nadagotchi_furniture");
+        return data ? JSON.parse(data) : null;
+    }
 }
 

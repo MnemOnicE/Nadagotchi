@@ -9,6 +9,9 @@
 class MainScene extends Phaser.Scene {
     constructor() {
         super({ key: 'MainScene' });
+        this.isPlacementMode = false;
+        this.selectedFurniture = null;
+        this.placedFurniture = [];
     }
 
     /**
@@ -21,6 +24,7 @@ class MainScene extends Phaser.Scene {
         this.load.image('explore_bubble', 'https://placehold.co/32x32/ffffff/000000.png?text=🔎');
         this.load.image('pixel', 'https://placehold.co/1x1/ffffff/ffffff.png');
         this.load.image('bookshelf', 'https://placehold.co/64x64/8B4513/ffffff.png?text=Books');
+        this.load.image('fancy_bookshelf', 'https://placehold.co/64x64/D2691E/ffffff.png?text=Fancy+Books');
         this.load.image('plant', 'https://placehold.co/64x64/228B22/ffffff.png?text=Plant');
         this.load.image('crafting_table', 'https://placehold.co/64x64/A0522D/ffffff.png?text=Craft');
         this.load.image('npc_scout', 'https://placehold.co/48x48/704214/ffffff.png?text=Scout');
@@ -102,6 +106,7 @@ class MainScene extends Phaser.Scene {
         this.resize({ width: this.scale.width, height: this.scale.height });
         this.updateDateText();
         this.drawSky();
+        this.loadFurniture();
     }
 
     /**
@@ -136,6 +141,22 @@ class MainScene extends Phaser.Scene {
      * @param {string} actionType - The type of action to handle (e.g., 'FEED', 'WORK', 'RETIRE').
      * @param {any} [payload] - Optional data associated with the action.
      */
+    handleUIAction(actionType, data) {
+        if (this.isPlacementMode && actionType !== 'PLACE_FURNITURE') {
+            this.togglePlacementMode(null); // Exit placement mode if another action is taken
+        }
+
+        if (actionType === 'WORK') {
+            this.startWorkMinigame();
+        } else if (actionType === 'RETIRE') {
+            this.scene.stop('UIScene');
+            this.scene.start('BreedingScene', this.nadagotchi);
+        } else if (actionType === 'DECORATE') {
+            this.togglePlacementMode(data);
+        } else if (actionType === 'PLACE_FURNITURE') {
+            this.placeFurniture(data.x, data.y);
+        } else {
+            this.nadagotchi.handleAction(actionType, data);
     handleUIAction(actionType, payload) {
         switch (actionType) {
             case 'WORK':
@@ -165,6 +186,7 @@ class MainScene extends Phaser.Scene {
      * @param {object} data - The result data from the mini-game scene.
      * @param {boolean} data.success - Whether the mini-game was completed successfully.
      * @param {string} data.career - The career associated with the mini-game.
+     * @param {string} [data.craftedItem] - The item that was crafted, if any.
      */
     handleWorkResult(data) {
         let skillUp = '';
@@ -174,7 +196,13 @@ class MainScene extends Phaser.Scene {
                 case 'Innovator': skillUp = 'logic'; this.nadagotchi.skills.logic += 1.5; break;
                 case 'Scout': skillUp = 'navigation'; this.nadagotchi.skills.navigation += 1.5; break;
                 case 'Healer': skillUp = 'empathy'; this.nadagotchi.skills.empathy += 1.5; break;
-                case 'Artisan': skillUp = 'crafting'; this.nadagotchi.skills.crafting += 1.5; break;
+                case 'Artisan':
+                    skillUp = 'crafting';
+                    this.nadagotchi.skills.crafting += 1.5;
+                    if (data.craftedItem) {
+                        this.nadagotchi.handleAction('CRAFT_ITEM', data.craftedItem);
+                    }
+                    break;
             }
             this.nadagotchi.addJournalEntry(`I had a successful day at my ${data.career} job! My ${skillUp} skill increased.`);
         } else {
@@ -314,5 +342,55 @@ class MainScene extends Phaser.Scene {
             this.exploreBubble.setVisible(true);
             this.time.delayedCall(2000, () => this.exploreBubble.setVisible(false));
         }
+    }
+
+    togglePlacementMode(item) {
+        this.isPlacementMode = !this.isPlacementMode;
+        this.selectedFurniture = this.isPlacementMode ? item : null;
+
+        if (this.isPlacementMode) {
+            this.placementIndicator = this.add.graphics();
+            this.placementIndicator.lineStyle(2, 0xff0000, 1);
+            this.placementIndicator.strokeRect(0, 0, 64, 64);
+            this.input.on('pointermove', (pointer) => {
+                this.placementIndicator.setPosition(pointer.x - 32, pointer.y - 32);
+            });
+            this.input.on('pointerdown', (pointer) => {
+                this.game.events.emit('uiAction', 'PLACE_FURNITURE', { x: pointer.x, y: pointer.y });
+            });
+        } else {
+            if (this.placementIndicator) {
+                this.placementIndicator.destroy();
+                this.placementIndicator = null;
+            }
+            this.input.off('pointermove');
+            this.input.off('pointerdown');
+        }
+    }
+
+    placeFurniture(x, y) {
+        if (!this.isPlacementMode || !this.selectedFurniture) return;
+
+        const furnitureKey = this.selectedFurniture.toLowerCase().replace(' ', '_');
+        const newFurniture = this.add.sprite(x, y, furnitureKey).setInteractive({ useHandCursor: true });
+        newFurniture.on('pointerdown', () => this.game.events.emit('uiAction', `INTERACT_${this.selectedFurniture.toUpperCase().replace(' ', '_')}`));
+
+        this.placedFurniture.push({ key: this.selectedFurniture, x: x, y: y });
+        this.saveFurniture();
+
+        this.togglePlacementMode(null);
+    }
+
+    saveFurniture() {
+        this.persistence.saveFurniture(this.placedFurniture);
+    }
+
+    loadFurniture() {
+        this.placedFurniture = this.persistence.loadFurniture() || [];
+        this.placedFurniture.forEach(furniture => {
+            const furnitureKey = furniture.key.toLowerCase().replace(' ', '_');
+            const newFurniture = this.add.sprite(furniture.x, furniture.y, furnitureKey).setInteractive({ useHandCursor: true });
+            newFurniture.on('pointerdown', () => this.game.events.emit('uiAction', `INTERACT_${furniture.key.toUpperCase().replace(' ', '_')}`));
+        });
     }
 }

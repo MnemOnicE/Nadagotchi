@@ -24,8 +24,8 @@ class Nadagotchi {
             this.skills = loadedData.skills;
             /** @type {?string} The pet's current career, if any. */
             this.currentCareer = loadedData.currentCareer;
-            /** @type {Array<string>} The items the pet is currently holding. */
-            this.inventory = loadedData.inventory || [];
+            /** @type {Object.<string, number>} The items the pet is currently holding. */
+            this.inventory = loadedData.inventory || {};
             /** @type {number} The pet's age. */
             this.age = loadedData.age;
             /** @type {number} The generation number of the pet. */
@@ -52,7 +52,7 @@ class Nadagotchi {
                 empathy: 0, logic: 0, focus: 0, crafting: 0
             };
             this.currentCareer = null;
-            this.inventory = [];
+            this.inventory = {};
             this.age = 0;
             this.generation = 1;
             this.isLegacyReady = false;
@@ -69,6 +69,13 @@ class Nadagotchi {
         this.journal = this.persistence.loadJournal();
         /** @type {Array<string>} A list of crafting recipes the pet has discovered. */
         this.discoveredRecipes = this.persistence.loadRecipes();
+        /** @type {Object.<string, {materials: Object.<string, number>, description: string}>} */
+        this.recipes = {
+            "Fancy Bookshelf": {
+                materials: { "Sticks": 5, "Shiny Stone": 1 },
+                description: "A beautiful bookshelf that makes studying more effective."
+            }
+        };
 
         /** @type {{painting: number, music: number}} A map of hobby levels. */
         this.hobbies = loadedData ? loadedData.hobbies : { painting: 0, music: 0 };
@@ -230,6 +237,19 @@ class Nadagotchi {
                 this.personalityPoints.Nurturer++;
                 break;
 
+            case 'INTERACT_FANCY_BOOKSHELF':
+                this.stats.energy -= 5;
+                this.stats.happiness += 10; // It's a nice bookshelf!
+                if (this.dominantArchetype === 'Intellectual') {
+                    this.stats.happiness += 25; // Even better for intellectuals
+                    this.mood = 'happy';
+                }
+                moodMultiplier = this._getMoodMultiplier();
+                this.skills.logic += (0.25 * moodMultiplier); // Higher buff
+                this.personalityPoints.Intellectual += 2;
+                this.addJournalEntry("I spent some time studying at my beautiful new bookshelf. I feel so smart!");
+                break;
+
             case 'EXPLORE':
                 this.stats.energy = Math.max(0, this.stats.energy - 15);
                 if (this.dominantArchetype === 'Adventurer') {
@@ -255,11 +275,7 @@ class Nadagotchi {
                 break;
 
             case "CRAFT_ITEM":
-                this.stats.energy -= 10;
-                moodMultiplier = this._getMoodMultiplier();
-                this.skills.crafting += (0.1 * moodMultiplier);
-                this.inventory.push("Simple Widget");
-                if (this.dominantArchetype === "Recluse") this.stats.happiness += 10;
+                this.craftItem(item);
                 break;
 
             case 'PRACTICE_HOBBY':
@@ -290,6 +306,42 @@ class Nadagotchi {
     }
 
     /**
+     * Attempts to craft a specified item. Checks for required materials, consumes them, and adds the item to inventory.
+     * @param {string} itemName - The name of the item to craft from the `this.recipes` object.
+     */
+    craftItem(itemName) {
+        const recipe = this.recipes[itemName];
+        if (!recipe) {
+            this.addJournalEntry(`I tried to craft '${itemName}', but I don't know the recipe.`);
+            return;
+        }
+
+        // Check if pet has all required materials
+        for (const material in recipe.materials) {
+            const requiredAmount = recipe.materials[material];
+            const hasAmount = this.inventory[material] || 0;
+            if (hasAmount < requiredAmount) {
+                this.addJournalEntry(`I don't have enough ${material} to craft a ${itemName}.`);
+                this.stats.happiness -= 5; // Frustration
+                return;
+            }
+        }
+
+        // Consume materials
+        for (const material in recipe.materials) {
+            this._removeItem(material, recipe.materials[material]);
+        }
+
+        // Add crafted item to inventory
+        this._addItem(itemName, 1);
+        this.stats.energy -= 15;
+        this.stats.happiness += 20;
+        const moodMultiplier = this._getMoodMultiplier();
+        this.skills.crafting += (0.5 * moodMultiplier);
+        this.addJournalEntry(`I successfully crafted a ${itemName}!`);
+    }
+
+    /**
      * Simulates foraging for items, changing location, updating stats, and adding items to inventory.
      */
     forage() {
@@ -299,8 +351,8 @@ class Nadagotchi {
         this.skills.navigation += (0.2 * moodMultiplier);
 
         const foundItem = Phaser.Utils.Array.GetRandom(['Berries', 'Sticks', 'Shiny Stone']);
-        this.inventory.push(foundItem);
-        this.addJournalEntry(`I went foraging in the ${this.location} and found ${foundItem}.`);
+        this._addItem(foundItem, 1);
+        this.addJournalEntry(`I went foraging in the ${this.location} and found a ${foundItem}.`);
         this.location = 'Home';
     }
 
@@ -308,7 +360,18 @@ class Nadagotchi {
      * Manages interaction with an NPC, updating relationship status and stats.
      * @param {string} npcName - The name of the NPC being interacted with.
      * @param {string} [interactionType='CHAT'] - The type of interaction (e.g., 'CHAT', 'GIFT').
-     */
+     */    interact(npcName, interactionType) {
+        if (this.relationships.hasOwnProperty(npcName)) {
+            if (interactionType === 'GIFT' && this.inventory['Berries'] > 0) {
+                this._removeItem('Berries', 1);
+                this.relationships[npcName].level += 5;
+                this.stats.happiness += 10;
+                this.skills.empathy += 0.2;
+                this.addJournalEntry(`I gave Berries to ${npcName}. They seemed to like it!`);
+            } else {
+                this.relationships[npcName].level += 1;
+                this.stats.happiness += 2;
+                this.skills.communication += 0.1;
     interact(npcName, interactionType = 'CHAT') {
         if (!this.relationships.hasOwnProperty(npcName)) {
             return;
@@ -435,6 +498,34 @@ class Nadagotchi {
                 this.currentCareer = newlyUnlockedCareer;
                 this.newCareerUnlocked = newlyUnlockedCareer;
                 this.addJournalEntry(`I became a ${this.currentCareer}!`);
+            }
+        }
+    }
+
+    /**
+     * Adds a specified quantity of an item to the inventory.
+     * @param {string} itemName - The name of the item to add.
+     * @param {number} quantity - The number of items to add.
+     * @private
+     */
+    _addItem(itemName, quantity) {
+        if (!this.inventory[itemName]) {
+            this.inventory[itemName] = 0;
+        }
+        this.inventory[itemName] += quantity;
+    }
+
+    /**
+     * Removes a specified quantity of an item from the inventory.
+     * @param {string} itemName - The name of the item to remove.
+     * @param {number} quantity - The number of items to remove.
+     * @private
+     */
+    _removeItem(itemName, quantity) {
+        if (this.inventory[itemName]) {
+            this.inventory[itemName] -= quantity;
+            if (this.inventory[itemName] <= 0) {
+                delete this.inventory[itemName];
             }
         }
     }

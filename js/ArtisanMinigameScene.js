@@ -128,7 +128,12 @@ class ArtisanMinigameScene extends Phaser.Scene {
      * @private
      */
     endGame(isSuccess) {
-        this.game.events.emit('workResult', { success: isSuccess, career: 'Artisan' });
+        const result = { success: isSuccess, career: 'Artisan' };
+        if (isSuccess) {
+            // On success, the artisan crafts a specific item.
+            result.craftedItem = "Fancy Bookshelf";
+        }
+        this.game.events.emit('workResult', result);
         this.scene.stop();
         this.scene.resume('MainScene');
     }
