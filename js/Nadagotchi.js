@@ -80,7 +80,11 @@ class Nadagotchi {
         /** @type {{painting: number, music: number}} A map of hobby levels. */
         this.hobbies = loadedData ? loadedData.hobbies : { painting: 0, music: 0 };
         /** @type {Object.<string, {level: number}>} A map of relationships with NPCs. */
-        this.relationships = loadedData ? loadedData.relationships : { friend: { level: 0 } };
+        this.relationships = loadedData ? loadedData.relationships : {
+            'Grizzled Scout': { level: 0 },
+            'Master Artisan': { level: 0 },
+            'Sickly Villager': { level: 0 }
+        };
         /** @type {string} The pet's current location. */
         this.location = loadedData ? loadedData.location : 'Home';
     }
@@ -281,10 +285,6 @@ class Nadagotchi {
             case 'FORAGE':
                 this.forage();
                 break;
-
-            case 'INTERACT_NPC':
-                this.interact('friend', item);
-                break;
         }
 
         this.stats.happiness = Math.max(0, Math.min(100, this.stats.happiness));
@@ -359,9 +359,8 @@ class Nadagotchi {
     /**
      * Manages interaction with an NPC, updating relationship status and stats.
      * @param {string} npcName - The name of the NPC being interacted with.
-     * @param {string} interactionType - The type of interaction (e.g., 'GIFT').
-     */
-    interact(npcName, interactionType) {
+     * @param {string} [interactionType='CHAT'] - The type of interaction (e.g., 'CHAT', 'GIFT').
+     */    interact(npcName, interactionType) {
         if (this.relationships.hasOwnProperty(npcName)) {
             if (interactionType === 'GIFT' && this.inventory['Berries'] > 0) {
                 this._removeItem('Berries', 1);
@@ -373,8 +372,32 @@ class Nadagotchi {
                 this.relationships[npcName].level += 1;
                 this.stats.happiness += 2;
                 this.skills.communication += 0.1;
+    interact(npcName, interactionType = 'CHAT') {
+        if (!this.relationships.hasOwnProperty(npcName)) {
+            return;
+        }
+
+        const moodMultiplier = this._getMoodMultiplier();
+        this.relationships[npcName].level += 1;
+        this.stats.happiness += 3;
+        this.skills.communication += 0.1;
+
+        switch (npcName) {
+            case 'Grizzled Scout':
+                this.skills.navigation += 0.15 * moodMultiplier;
+                this.addJournalEntry("The Grizzled Scout shared a story about a hidden grove. I learned a little about navigating the woods.");
+                break;
+            case 'Master Artisan':
+                this.skills.crafting += 0.15 * moodMultiplier;
+                this.addJournalEntry("The Master Artisan showed me a clever technique for joining wood. My crafting skill improved.");
+                break;
+            case 'Sickly Villager':
+                this.skills.empathy += 0.15 * moodMultiplier;
+                this.addJournalEntry("I spent some time with the Sickly Villager. It felt good to offer some comfort.");
+                break;
+            default:
                 this.addJournalEntry(`I had a nice chat with ${npcName}.`);
-            }
+                break;
         }
     }
 

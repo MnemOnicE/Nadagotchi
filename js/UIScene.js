@@ -166,8 +166,16 @@ class UIScene extends Phaser.Scene {
      */
     openJournal() {
         const entries = new PersistenceManager().loadJournal();
-        const text = entries.map(e => `${e.date}: ${e.text}`).join('\n') || "No entries yet.";
-        this.journalModal.content.setText(text);
+        if (entries.length === 0) {
+            this.journalModal.content.setText("No entries yet.");
+        } else {
+            const formattedEntries = entries
+                .slice() // Create a shallow copy to avoid reversing the original array
+                .reverse() // Show most recent first
+                .map(e => `[${e.date}]\n${e.text}`)
+                .join('\n\n---\n\n'); // Add a separator
+            this.journalModal.content.setText(formattedEntries);
+        }
         this.journalModal.setVisible(true);
         this.scene.pause('MainScene');
     }
@@ -177,7 +185,12 @@ class UIScene extends Phaser.Scene {
      */
     openRecipeBook() {
         const recipes = new PersistenceManager().loadRecipes();
-        const text = recipes.join('\n') || "No recipes discovered.";
+        let text;
+        if (recipes.length === 0) {
+            text = "No recipes discovered yet. Keep exploring and studying!";
+        } else {
+            text = "Discovered Recipes:\n\n" + recipes.map(r => `• ${r}`).join('\n');
+        }
         this.recipeModal.content.setText(text);
         this.recipeModal.setVisible(true);
         this.scene.pause('MainScene');
