@@ -39,7 +39,9 @@ class Scene {
             fillStyle: jest.fn(),
             fillRect: jest.fn(),
             lineStyle: jest.fn(),
-            strokeRect: jest.fn()
+            strokeRect: jest.fn(),
+            generateTexture: jest.fn(),
+            fillCircle: jest.fn()
         };
 
         const addMock = {
@@ -82,7 +84,8 @@ class Scene {
         this.textures = {
             createCanvas: jest.fn().mockReturnValue(gameObjectMock),
             addDynamicTexture: jest.fn().mockReturnValue(gameObjectMock),
-            generateTexture: jest.fn()
+            generateTexture: jest.fn(),
+            get: jest.fn().mockReturnValue({ get: jest.fn(), getFrameNames: jest.fn().mockReturnValue([]), add: jest.fn() })
         };
         this.make = { graphics: jest.fn(() => gameObjectMock) };
         this.tweens = { add: jest.fn() };

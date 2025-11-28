@@ -71,8 +71,7 @@ class Scene {
                 setBackgroundColor: jest.fn(),
                 setSize: jest.fn(),
                 setViewport: jest.fn()
-            }
-            main: { width: 800, height: 600, setBackgroundColor: jest.fn(), setSize: jest.fn() },
+            },
             resize: jest.fn()
         };
         this.game = { events: { on: jest.fn(), emit: jest.fn() } };

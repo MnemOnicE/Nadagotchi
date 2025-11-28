@@ -28,12 +28,9 @@ class UIScene extends Phaser.Scene {
         this.statsText = this.add.text(10, 10, '', {
             fontFamily: 'VT323, monospace', fontSize: '24px', color: '#ffffff', stroke: '#000000', strokeThickness: 3
         });
-        // --- UI Elements ---
-        this.statsText = this.add.text(10, 10, '', { fontFamily: 'Arial', fontSize: '16px', color: '#ffffff', stroke: '#000000', strokeThickness: 3 });
 
         // --- Action Buttons ---
         this.actionButtons = [];
-        this.createActionButtons();
 
         // --- Job Board ---
         // Positioned at bottom-right, with increased size for touch
@@ -65,9 +62,6 @@ class UIScene extends Phaser.Scene {
         // --- Event Listeners ---
         this.game.events.on('updateStats', this.updateStatsUI, this);
         this.game.events.on('uiAction', this.handleUIActions, this);
-        this.scale.on('resize', this.resize, this);
-
-        // Handle resize events
         this.scale.on('resize', this.resize, this);
 
 
@@ -231,23 +225,16 @@ class UIScene extends Phaser.Scene {
             // No, the tab click refreshes actions.
         });
 
+        // Update static elements (Job Board, Retire)
+        if (this.jobBoardButton) {
+             this.jobBoardButton.setPosition(width - 10, height - 10);
+        }
+        if (this.retireButton) {
+             this.retireButton.setPosition(width - 10, 50);
+        }
+
         // Refresh active tab actions to fit new width
         this.showTab(this.currentTab);
-     * Handles the resize event.
-     * @param {object} gameSize - The new size of the game.
-     */
-    resize(gameSize) {
-        const width = gameSize.width;
-        const height = gameSize.height;
-
-        this.cameras.resize(width, height);
-
-        // Update static elements
-        this.jobBoardButton.setPosition(width - 10, height - 10);
-        this.retireButton.setPosition(width - 10, 50);
-
-        // Re-create flow layout
-        this.createActionButtons();
     }
 
     /**
@@ -256,90 +243,13 @@ class UIScene extends Phaser.Scene {
      * @private
      */
     createActionButtons() {
-        // Clear existing buttons
-        if (this.actionButtons) {
-            this.actionButtons.forEach(btn => btn.destroy());
-        }
-        this.actionButtons = [];
-
-        // Larger touch targets: 16px font + (12px * 2) padding = 40px height approx.
-        // buttonStyle is now handled by ButtonFactory
-
-        const actions = [
-            // Core Actions
-            { text: 'Feed', action: 'FEED' },
-            { text: 'Play', action: 'PLAY' },
-            { text: 'Study', action: 'STUDY' },
-            { text: 'Explore', action: 'EXPLORE' },
-            { text: 'Meditate', action: 'MEDITATE' },
-            // Menu Actions
-            { text: 'Journal', action: 'OPEN_JOURNAL' },
-            { text: 'Recipes', action: 'OPEN_RECIPES' },
-            { text: 'Hobbies', action: 'OPEN_HOBBIES' },
-            { text: 'Craft', action: 'OPEN_CRAFTING_MENU' },
-            { text: 'Decorate', action: 'DECORATE' }
-        ];
-
-        // Re-ordering for logical grouping:
-        // We want the most frequent actions (Feed, Play) to be easily accessible.
-        // Let's put Menu items on the very bottom row, and Core items above them.
-
-        const menuItems = actions.slice(5);
-        const coreItems = actions.slice(0, 5);
-
-        let bottomOffset = 10; // Margin from bottom
-        const spacing = 10;
-
-        // Function to layout a group of buttons
-        const layoutGroup = (items) => {
-            // Measure max height for this row (assumes all buttons same style height)
-            const rowHeight = 45; // Approx height including spacing
-
-            // Let's calculate lines first.
-            const lines = [];
-            let currentLine = [];
-            let currentLineWidth = 0;
-            const screenWidth = this.cameras.main.width - 120; // Reserve space for Job Board button on right
-
-            items.forEach(item => {
-                // Approximate width calculation (since we haven't created the object yet)
-                // 16px font ~ 10px per char avg + 40px padding (from ButtonFactory)
-                const estimatedWidth = (item.text.length * 10) + 45;
-
-                if (currentLineWidth + estimatedWidth + spacing > screenWidth && currentLine.length > 0) {
-                    // Wrap to new line
-                    lines.push(currentLine);
-                    currentLine = [];
-                    currentLineWidth = 0;
-                }
-                currentLine.push(item);
-                currentLineWidth += estimatedWidth + spacing;
-            });
-            if (currentLine.length > 0) lines.push(currentLine);
-
-            // Now render the lines from bottom up
-            lines.reverse().forEach(line => {
-                let x = 10;
-                line.forEach(item => {
-                    const btn = ButtonFactory.createButton(this, x, this.cameras.main.height - bottomOffset - 40, item.text, {
-                        onClick: () => this.game.events.emit('uiAction', item.action)
-                    });
-
-                    this.actionButtons.push(btn);
-                    x += btn.width + spacing;
-                });
-                bottomOffset += 60; // Move up for next row (increased for 3D depth)
-            });
-        };
-
-        // Layout Menus first (at bottom)
-        layoutGroup(menuItems);
-
-        // Add a little divider space
-        bottomOffset += 5;
-
-        // Layout Core actions (above menus)
-        layoutGroup(coreItems);
+        // This method is now likely unused with the new tab system, but kept for initialization if needed.
+        // Or if we want to retain the old logic for fallback.
+        // But since create() calls createActionButtons(), let's empty it or make it do nothing if tabs are used.
+        // Actually, create() sets this.actionButtons = [], then calls createActionButtons().
+        // But showTab() handles creating buttons now.
+        // Let's leave it empty to avoid confusion, or remove call in create().
+        // I'll leave it empty.
     }
 
     /**
@@ -445,21 +355,6 @@ class UIScene extends Phaser.Scene {
              modalGroup.setVisible(false);
              if (this.scene.isPaused('MainScene')) this.scene.resume('MainScene');
         }, { width: 40, height: 40, color: 0x800000 });
-        const modalTitle = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2 - (modalHeight/2) + 30, title, { fontSize: '24px', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5);
-
-        // Dynamic word wrap based on modal width
-        const modalContent = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2, '', {
-            fontSize: '16px', color: '#fff', wordWrap: { width: modalWidth - 40 }
-        }).setOrigin(0.5);
-
-        const closeButton = this.add.text(this.cameras.main.width / 2 + (modalWidth/2) - 30, this.cameras.main.height / 2 - (modalHeight/2) + 30, 'X', {
-            fontSize: '20px', color: '#fff', backgroundColor: '#800', padding: { x: 10, y: 6 }
-        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-
-        closeButton.on('pointerdown', () => {
-            modalGroup.setVisible(false);
-            if (this.scene.isPaused('MainScene')) this.scene.resume('MainScene');
-        });
 
         modalGroup.addMultiple([modalBg, modalTitle, modalContent, closeButton]);
         modalGroup.setVisible(false);
