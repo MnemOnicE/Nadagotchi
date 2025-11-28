@@ -263,9 +263,7 @@ class UIScene extends Phaser.Scene {
         this.actionButtons = [];
 
         // Larger touch targets: 16px font + (12px * 2) padding = 40px height approx.
-        const buttonStyle = {
-            fontFamily: 'Arial', fontSize: '16px', color: '#ffffff', backgroundColor: '#4a4a4a', padding: { x: 16, y: 12 }
-        };
+        // buttonStyle is now handled by ButtonFactory
 
         const actions = [
             // Core Actions
@@ -305,8 +303,8 @@ class UIScene extends Phaser.Scene {
 
             items.forEach(item => {
                 // Approximate width calculation (since we haven't created the object yet)
-                // 16px font ~ 10px per char avg + 32px padding
-                const estimatedWidth = (item.text.length * 10) + 32;
+                // 16px font ~ 10px per char avg + 40px padding (from ButtonFactory)
+                const estimatedWidth = (item.text.length * 10) + 45;
 
                 if (currentLineWidth + estimatedWidth + spacing > screenWidth && currentLine.length > 0) {
                     // Wrap to new line
@@ -323,16 +321,14 @@ class UIScene extends Phaser.Scene {
             lines.reverse().forEach(line => {
                 let x = 10;
                 line.forEach(item => {
-                    const btn = this.add.text(x, this.cameras.main.height - bottomOffset - 40, item.text, buttonStyle)
-                        .setInteractive({ useHandCursor: true })
-                        .on('pointerdown', () => this.game.events.emit('uiAction', item.action))
-                        .on('pointerover', () => btn.setStyle({ fill: '#ff0' }))
-                        .on('pointerout', () => btn.setStyle({ fill: '#fff' }));
+                    const btn = ButtonFactory.createButton(this, x, this.cameras.main.height - bottomOffset - 40, item.text, {
+                        onClick: () => this.game.events.emit('uiAction', item.action)
+                    });
 
                     this.actionButtons.push(btn);
                     x += btn.width + spacing;
                 });
-                bottomOffset += 50; // Move up for next row
+                bottomOffset += 60; // Move up for next row (increased for 3D depth)
             });
         };
 

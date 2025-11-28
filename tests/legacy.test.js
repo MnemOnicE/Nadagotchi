@@ -56,7 +56,10 @@ class Scene {
             setStyle: jest.fn(() => addMock),
             destroy: jest.fn(),
             addMultiple: jest.fn(),
-            content: { setText: jest.fn() }
+            content: { setText: jest.fn() },
+            add: jest.fn(),
+            setSize: jest.fn().mockReturnThis(),
+            setPosition: jest.fn().mockReturnThis()
         };
         this.add = addMock;
         this.input = { on: jest.fn() };
