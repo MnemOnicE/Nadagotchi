@@ -158,7 +158,7 @@ export class BreedingScene extends Phaser.Scene {
      * @private
      */
     calculateAndDisplayEgg() {
-        const newPetData = this.calculateLegacy();
+        const newPetData = this.parentData.calculateOffspring(this.selectedItems);
         this.tweens.add({
             targets: [this.parentContainer, this.itemSelectionPanel, this.initiateButton],
             alpha: 0,
@@ -189,40 +189,6 @@ export class BreedingScene extends Phaser.Scene {
         eggContainer.add([eggGraphic, eggPattern, eggTitle, eggSubtitle]).setSize(160, 200).setInteractive();
         eggContainer.on('pointerdown', () => this.finalizeLegacy(newPetData));
         this.tweens.add({ targets: eggContainer, alpha: 1, duration: 500 });
-    }
-
-    /**
-     * Calculates the new pet's data based on the parent's traits and selected environmental influences.
-     * @returns {object} The complete data object for the new Nadagotchi.
-     * @private
-     */
-    calculateLegacy() {
-        const { dominantArchetype, personalityPoints, generation, moodSensitivity, legacyTraits } = this.parentData;
-
-        let secondArchetype = Object.keys(personalityPoints).filter(a => a !== dominantArchetype).reduce((a, b) => personalityPoints[a] > personalityPoints[b] ? a : b);
-
-        const newPetData = {
-            mood: 'neutral', dominantArchetype: dominantArchetype,
-            personalityPoints: { [dominantArchetype]: 5, [secondArchetype]: 2 },
-            stats: { hunger: 100, energy: 100, happiness: 70 },
-            skills: { communication: 1, resilience: 1, navigation: 0, empathy: 0, logic: 0, focus: 0, crafting: 0 },
-            currentCareer: null, inventory: [], age: 0,
-            generation: generation + 1, isLegacyReady: false,
-            legacyTraits: legacyTraits.filter(() => Math.random() < 0.3), // 30% chance to inherit each trait
-            moodSensitivity: Phaser.Math.Clamp(moodSensitivity + Phaser.Math.Between(-1, 1), 1, 10),
-            hobbies: { painting: 0, music: 0 }, relationships: { friend: { level: 0 } }, location: 'Home'
-        };
-
-        if (this.selectedItems.includes('logic')) newPetData.personalityPoints.Intellectual = (newPetData.personalityPoints.Intellectual || 0) + 5;
-        if (this.selectedItems.includes('empathy')) newPetData.personalityPoints.Nurturer = (newPetData.personalityPoints.Nurturer || 0) + 5;
-        if (this.selectedItems.includes('creativity')) {
-            newPetData.personalityPoints.Mischievous = (newPetData.personalityPoints.Mischievous || 0) + 3;
-            newPetData.hobbies.painting += 10;
-        }
-
-        if (Math.random() < 0.05) newPetData.legacyTraits.push(Phaser.Utils.Array.GetRandom(["Quick Learner", "Resilient Spirit", "Charming"]));
-
-        return newPetData;
     }
 
     /**

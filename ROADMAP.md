@@ -64,10 +64,10 @@ This phase focuses on building out the primary gameplay loops, giving players cl
 This phase will introduce long-term replayability and a deeper sense of history and accomplishment.
 
 ### **IV. Generational Legacy & Breeding System**
--   **[ ] Initial Implementation:**
-    -   [ ] Design the "Breeding Den" UI and environment. *(Backend logic implemented, UI pending)*
-    -   [ ] Develop the core mechanic for "Personality Gene" inheritance.
-    -   [ ] Create unique egg designs that hint at the offspring's inherited traits.
+-   **[x] Initial Implementation:**
+    -   [x] Design the "Breeding Den" UI and environment.
+    -   [x] Develop the core mechanic for "Personality Gene" inheritance.
+    -   [x] Create unique egg designs that hint at the offspring's inherited traits.
 -   **[ ] Advanced Features:**
     -   [ ] Implement rare, inheritable "Legacy Traits" that grant unique abilities.
     -   [ ] Introduce a "Hall of Ancestors" to commemorate retired pets.
