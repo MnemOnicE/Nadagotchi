@@ -108,6 +108,12 @@ export class Nadagotchi {
             this.genome.phenotype = this.genome.calculatePhenotype();
         }
 
+        /** @type {{hunger: number, energy: number, happiness: number}} Maximum values for stats. */
+        this.maxStats = { hunger: 100, energy: 100, happiness: 100 };
+        if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousMetabolism) {
+            this.maxStats.energy += 5;
+        }
+
         /** @type {?string} A flag used by the UI to show a one-time notification when a career is unlocked. */
         this.newCareerUnlocked = null;
 
@@ -307,29 +313,20 @@ export class Nadagotchi {
         if (this.stats.hunger < 0) this.stats.hunger = 0;
         if (this.stats.energy < 0) this.stats.energy = 0;
         if (this.stats.happiness < 0) this.stats.happiness = 0;
-        if (this.stats.happiness > 100) this.stats.happiness = 100;
+        if (this.stats.happiness > this.maxStats.happiness) this.stats.happiness = this.maxStats.happiness;
 
         // Mood Calculation - Use moodSensitivity from phenotype
-        const sensitivity = (this.genome && this.genome.phenotype) ? this.genome.phenotype.moodSensitivity : 5;
-        // Sensitivity 1-10.
-        // Higher sensitivity = wider range of "emotional" states or easier to get angry/sad?
-        // Logic below uses fixed thresholds. Let's adjust thresholds by sensitivity?
-        // Or keep logic simple: Sensitivity doesn't change thresholds, but maybe intensity?
-        // For now, I'll stick to basic thresholds but maybe 'sad' triggers earlier if sensitive?
-
-        // Let's implement sensitivity by modifying the effective check value?
-        // "Mood Sensitivity" usually implies how easily mood changes.
-        // The prompt says "moodSensitivity: [5, 5]".
-        // I will leave the threshold logic as is for now to avoid breaking tests, unless explicitly asked to change logic details.
-        // The prompt only asked to "Wire the metabolism phenotype...". It didn't explicitly ask for mood sensitivity logic changes,
-        // but it is part of the Genome. `Nadagotchi` already had `moodSensitivity` property.
-        // I'll leave the mood logic standard for now.
+        // Homozygous MoodSensitivity Bonus: Faster recovery (lower threshold for happiness)
+        let happyThreshold = 80;
+        if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousMoodSensitivity) {
+            happyThreshold = 75;
+        }
 
         if (this.stats.hunger < 10) {
             this.mood = 'angry';
         } else if (this.stats.hunger < 30 || this.stats.energy < 20) {
             this.mood = 'sad';
-        } else if (this.stats.hunger > 80 && this.stats.energy > 80) {
+        } else if (this.stats.hunger > happyThreshold && this.stats.energy > happyThreshold) {
             this.mood = 'happy';
         } else {
             this.mood = 'neutral';
@@ -384,14 +381,14 @@ export class Nadagotchi {
 
         switch (actionType.toUpperCase()) {
             case 'FEED':
-                this.stats.hunger = Math.min(100, this.stats.hunger + 15);
-                this.stats.happiness = Math.min(100, this.stats.happiness + 5);
+                this.stats.hunger = Math.min(this.maxStats.hunger, this.stats.hunger + 15);
+                this.stats.happiness = Math.min(this.maxStats.happiness, this.stats.happiness + 5);
                 if (this.dominantArchetype === 'Nurturer') this.personalityPoints.Nurturer++;
                 break;
 
             case 'PLAY':
                 this.stats.energy = Math.max(0, this.stats.energy - 10);
-                this.stats.happiness = Math.min(100, this.stats.happiness + 10);
+                this.stats.happiness = Math.min(this.maxStats.happiness, this.stats.happiness + 10);
                 if (['Adventurer', 'Mischievous'].includes(this.dominantArchetype)) {
                     this.mood = 'happy';
                     this.personalityPoints[this.dominantArchetype]++;
@@ -476,7 +473,7 @@ export class Nadagotchi {
                 break;
 
             case "MEDITATE":
-                this.stats.energy = Math.min(100, this.stats.energy + 5);
+                this.stats.energy = Math.min(this.maxStats.energy, this.stats.energy + 5);
                 this.stats.happiness += 5;
                 moodMultiplier = this._getMoodMultiplier();
                 this.skills.focus += (0.1 * moodMultiplier);
@@ -496,7 +493,7 @@ export class Nadagotchi {
                 break;
         }
 
-        this.stats.happiness = Math.max(0, Math.min(100, this.stats.happiness));
+        this.stats.happiness = Math.max(0, Math.min(this.maxStats.happiness, this.stats.happiness));
         this.updateDominantArchetype();
         this.updateCareer();
     }

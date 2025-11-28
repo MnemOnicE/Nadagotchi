@@ -13,6 +13,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Crafting-Genetics Integration:** The "Metabolism-Slowing Tonic" can now be used in the `BreedingScene` (if in inventory) to significantly lower the offspring's metabolism (gene value: 2), creating a direct gameplay link between crafting and the genetics engine.
 - **Season Tracking:** Updated `MainScene.js` and `Nadagotchi.js` to correctly propagate the current season from the `Calendar` to the pet's brain logic.
 - **Unit Tests:** Added `tests/SeasonalCrafting.test.js` to verify seasonal drops, recipe existence, and genetic effects.
+- **Hall of Ancestors:** Implemented the "Hall of Ancestors" system to commemorate retired pets.
+  - Added a new "ANCESTORS" tab to the `UIScene`.
+  - The tab displays a list of retired pets (from `PersistenceManager`).
+  - Clicking an ancestor opens a modal with their detailed stats and a unique "Ancestral Advice" quote based on their dominant archetype.
+  - Implemented `NarrativeSystem.getAdvice()` to generate wisdom from ancestors.
+- **Homozygous Trait Bonuses:** Implemented gameplay rewards for pets with consistent genetic traits, adding strategic depth to breeding.
+  - **Enhanced Metabolism:** Pets with a homozygous `metabolism` gene (two identical alleles) now possess a higher maximum energy capacity (+5 Max Energy, total 105).
+  - **Emotional Resilience:** Pets with a homozygous `moodSensitivity` gene recover their 'Happy' mood more easily, requiring lower stats (75% instead of 80%) to reach that state.
+- **Unit Tests:** Added `tests/HomozygousBonuses.test.js` to verify the detection and application of these genetic bonuses.
+### Changed
+- **Astronomical Festivals:** Aligned seasonal festivals with astronomical concepts (Equinoxes and Solstices). All festivals now occur on the 14th day of the season (Mid-Season) to reflect the "Clock Rigor" concept.
+  - Spring: Spring Equinox Festival
+  - Summer: Summer Solstice Celebration
+  - Autumn: Autumn Equinox Feast
+  - Winter: Winter Solstice Festival
 
 ## [1.11.2] - 2025-12-05
 

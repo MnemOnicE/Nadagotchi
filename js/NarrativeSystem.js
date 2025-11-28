@@ -42,8 +42,56 @@ export class NarrativeSystem {
         return template;
     }
 
+    /**
+     * Retrieves a piece of advice based on the ancestor's archetype.
+     * @param {string} archetype - The ancestor's archetype.
+     * @returns {string} A random piece of advice.
+     */
+    static getAdvice(archetype) {
+        const templates = NarrativeSystem.getTemplates();
+        const adviceList = templates['ADVICE'][archetype] || templates['ADVICE']['Default'];
+        return adviceList[Math.floor(Math.random() * adviceList.length)];
+    }
+
     static getTemplates() {
         return {
+            'ADVICE': {
+                'Default': [
+                    "Listen to your heart.",
+                    "Time flies, use it well.",
+                    "Every generation has its own challenges."
+                ],
+                'Adventurer': [
+                    "Don't stay in one place too long. The world is vast!",
+                    "If you're scared, that just means it's worth doing.",
+                    "Always check under the rocks. You never know what you'll find.",
+                    "Rain or shine, the journey must go on."
+                ],
+                'Nurturer': [
+                    "Kindness is a seed that always bears fruit.",
+                    "Take care of your friends, and they will take care of you.",
+                    "A well-fed pet is a happy pet.",
+                    "Patience is the most important skill."
+                ],
+                'Intellectual': [
+                    "Knowledge is the only treasure that multiplies when shared.",
+                    "Always analyze the situation before acting.",
+                    "A puzzle solved is a mind sharpened.",
+                    "There is a logical solution to every problem."
+                ],
+                'Mischievous': [
+                    "Rules are more like... guidelines.",
+                    "A little prank never hurt anyone (much).",
+                    "Surprise is your best weapon.",
+                    "Why walk when you can sneak?"
+                ],
+                'Recluse': [
+                    "Silence is golden.",
+                    "Sometimes the best company is your own.",
+                    "Crowds drain you; solitude recharges you.",
+                    "Observe from the shadows. You see more that way."
+                ]
+            },
             'Default': {
                 'MOOD_CHANGE': {
                     'happy': "I'm feeling good today!",
