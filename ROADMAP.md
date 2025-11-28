@@ -79,9 +79,9 @@ This phase will introduce long-term replayability and a deeper sense of history 
     -   [ ] Implement specific bonuses for "Homozygous" trait combinations.
 
 ### **V. Meta-Game & Community Features**
--   **[ ] Initial Implementation:**
-    -   [ ] Create the "Tamagotchi Journal" to automatically log significant events and create a personal narrative.
-    -   [ ] Develop a "Recipe/Crafting Book" to collect and reference discovered recipes.
+-   **[x] Initial Implementation:**
+    -   [x] Create the "Tamagotchi Journal" to automatically log significant events and create a personal narrative.
+    -   [x] Develop a "Recipe/Crafting Book" to collect and reference discovered recipes.
 -   **[ ] Advanced Features:**
     -   [ ] Implement an in-game achievement and milestone system.
     -   [ ] Introduce a "Showcase System" for sharing pet snapshots and achievements.
