@@ -659,17 +659,12 @@ export class Nadagotchi {
         }
 
         // If the current dominant archetype is one of the tied contenders, it remains dominant.
-        // Otherwise, a new dominant archetype is chosen randomly from the contenders.
+        // Otherwise, a new dominant archetype is chosen deterministically from the contenders.
         // This prevents the pet's core personality from flipping back and forth unpredictably.
         if (potentialDominantArchetypes.length > 0 && !potentialDominantArchetypes.includes(this.dominantArchetype)) {
-            // In a Phaser environment, we can use the random utility.
-            if (typeof Phaser !== 'undefined' && Phaser.Utils && Phaser.Utils.Array) {
-                this.dominantArchetype = Phaser.Utils.Array.GetRandom(potentialDominantArchetypes);
-            } else {
-                // In a non-Phaser environment (like testing), we fall back to a deterministic choice
-                // to ensure tests are repeatable.
-                this.dominantArchetype = potentialDominantArchetypes[0];
-            }
+            // FIX: Always use a deterministic choice (the first one) to prevent unpredictable personality flipping.
+            // This aligns with the intended fix described in BUGS.md.
+            this.dominantArchetype = potentialDominantArchetypes[0];
         }
     }
 
