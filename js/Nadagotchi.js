@@ -69,6 +69,13 @@ class Nadagotchi {
         this.journal = this.persistence.loadJournal();
         /** @type {Array<string>} A list of crafting recipes the pet has discovered. */
         this.discoveredRecipes = this.persistence.loadRecipes();
+
+        // Ensure default recipes are discovered for new games
+        if (this.discoveredRecipes.length === 0) {
+            this.discoveredRecipes.push("Fancy Bookshelf");
+            this.persistence.saveRecipes(this.discoveredRecipes);
+        }
+
         /** @type {Object.<string, {materials: Object.<string, number>, description: string}>} */
         this.recipes = {
             "Fancy Bookshelf": {
@@ -311,7 +318,8 @@ class Nadagotchi {
      */
     craftItem(itemName) {
         const recipe = this.recipes[itemName];
-        if (!recipe) {
+        // Check if recipe exists and is discovered
+        if (!recipe || !this.discoveredRecipes.includes(itemName)) {
             this.addJournalEntry(`I tried to craft '${itemName}', but I don't know the recipe.`);
             return;
         }

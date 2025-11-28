@@ -23,3 +23,10 @@
 **Line:** 160
 **Description:** Syntax error and duplicate/conflicting method definition for `handleUIAction`. One implementation uses `if/else` and handles furniture placement, while the other uses `switch` and handles NPC interactions. The first implementation is not closed properly.
 **Fix:** Merged the logic from both conflicting definitions into a single, unified `handleUIAction` method that uses a `switch` statement for action types and handles furniture placement correctly.
+
+---
+
+**File:** `js/Nadagotchi.js`
+**Line:** 318
+**Description:** The `craftItem` method allows crafting items defined in `this.recipes` even if the recipe has not been added to `this.discoveredRecipes`. This allows players to craft items they haven't learned yet.
+**Fix:** Add a check in `craftItem` to verify that `itemName` is present in `this.discoveredRecipes`. Additionally, ensure default recipes (like "Fancy Bookshelf") are added to `discoveredRecipes` upon initialization.
