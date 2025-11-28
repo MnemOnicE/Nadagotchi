@@ -30,3 +30,10 @@
 **Line:** 318
 **Description:** The `craftItem` method allows crafting items defined in `this.recipes` even if the recipe has not been added to `this.discoveredRecipes`. This allows players to craft items they haven't learned yet.
 **Fix:** Add a check in `craftItem` to verify that `itemName` is present in `this.discoveredRecipes`. Additionally, ensure default recipes (like "Fancy Bookshelf") are added to `discoveredRecipes` upon initialization.
+
+---
+
+**File:** `js/Nadagotchi.js`
+**Line:** 127
+**Description:** The game logic allows players to discover recipes ("Logic-Boosting Snack" and "Stamina-Up Tea") through actions, but these recipes are not defined in the `this.recipes` object. As a result, even after discovery, players cannot craft these items, receiving a "I don't know the recipe" error.
+**Fix:** Add definitions for "Logic-Boosting Snack" and "Stamina-Up Tea" to `this.recipes` in the `Nadagotchi` constructor, using available materials.
