@@ -72,7 +72,8 @@ export class MainScene extends Phaser.Scene {
         this.worldState = {
             time: this.worldClock.getCurrentPeriod(),
             weather: this.weatherSystem.getCurrentWeather(),
-            activeEvent: this.eventManager.getActiveEvent()
+            activeEvent: this.eventManager.getActiveEvent(),
+            season: this.calendar.season
         };
 
         this.stars = Array.from({ length: 100 }, () => ({ x: Math.random(), y: Math.random() }));
@@ -135,6 +136,7 @@ export class MainScene extends Phaser.Scene {
 
         this.worldState.time = this.worldClock.getCurrentPeriod();
         this.worldState.weather = this.weatherSystem.getCurrentWeather();
+        this.worldState.season = this.calendar.season;
         this.drawSky();
 
         this.nadagotchi.live(this.worldState);

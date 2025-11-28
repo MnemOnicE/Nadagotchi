@@ -74,10 +74,19 @@ export class Genome {
                 // Metabolism: Average of the two alleles
                 const sum = alleles.reduce((a, b) => a + b, 0);
                 phenotype[trait] = sum / alleles.length;
+                if (alleles[0] === alleles[1]) {
+                    phenotype.isHomozygousMetabolism = true;
+                }
 
             } else {
                 // Numeric Stats (Personality, MoodSensitivity): The Higher of the two alleles is Dominant
                 phenotype[trait] = Math.max(...alleles);
+
+                // Check for Homozygous state for numeric stats
+                const capitalizedTrait = trait.charAt(0).toUpperCase() + trait.slice(1);
+                if (alleles[0] === alleles[1]) {
+                    phenotype[`isHomozygous${capitalizedTrait}`] = true;
+                }
             }
         }
         return phenotype;
@@ -107,6 +116,7 @@ export class GeneticsSystem {
             'Nutrient Bar': { gene: 'metabolism', value: 8 },
             'Espresso': { gene: 'metabolism', value: 9 },
             'Chamomile': { gene: 'metabolism', value: 2 },
+            'Metabolism-Slowing Tonic': { gene: 'metabolism', value: 2 },
             'book': { gene: 'Intellectual', value: 80 }          // Generic Book (for tests/flexibility)
         };
 

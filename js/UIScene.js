@@ -1,5 +1,6 @@
 import { ButtonFactory } from './ButtonFactory.js';
 import { PersistenceManager } from './PersistenceManager.js';
+import { NarrativeSystem } from './NarrativeSystem.js';
 
 /**
  * @class UIScene
@@ -88,6 +89,7 @@ export class UIScene extends Phaser.Scene {
         this.relationshipModal = this.createModal("Relationships");
         this.decorateModal = this.createModal("Decorate");
         this.scannerModal = this.createModal("Genetic Scanner");
+        this.ancestorModal = this.createModal("Hall of Ancestors");
 
         // --- Initial Layout ---
         this.createTabs();
@@ -103,7 +105,8 @@ export class UIScene extends Phaser.Scene {
         const tabs = [
             { label: '❤️ CARE', id: 'CARE' },
             { label: '🎒 ACTION', id: 'ACTION' },
-            { label: '⚙️ SYSTEM', id: 'SYSTEM' }
+            { label: '⚙️ SYSTEM', id: 'SYSTEM' },
+            { label: '🏺 ANCESTORS', id: 'ANCESTORS' }
         ];
 
         tabs.forEach(tab => {
@@ -155,6 +158,19 @@ export class UIScene extends Phaser.Scene {
                 { text: 'Decorate', action: 'DECORATE' },
                 { text: 'Retire', action: 'RETIRE', condition: () => this.nadagotchiData && this.nadagotchiData.isLegacyReady }
             ];
+        } else if (tabId === 'ANCESTORS') {
+            const ancestors = new PersistenceManager().loadHallOfFame();
+            if (ancestors.length === 0) {
+                 actions = [{ text: 'No Ancestors Yet', action: 'NONE', condition: () => true }];
+            } else {
+                ancestors.forEach((ancestor) => {
+                    actions.push({
+                        text: `Gen ${ancestor.generation}: ${ancestor.dominantArchetype}`,
+                        action: 'OPEN_ANCESTOR_MODAL',
+                        data: ancestor
+                    });
+                });
+            }
         }
 
         // Create buttons
@@ -188,7 +204,7 @@ export class UIScene extends Phaser.Scene {
             }
 
             const btn = ButtonFactory.createButton(this, currentX, currentY, item.text, () => {
-                this.game.events.emit('uiAction', item.action);
+                this.game.events.emit('uiAction', item.action, item.data);
             }, { width: btnWidth, height: btnHeight, color: 0x6A0DAD, fontSize: '24px', textColor: '#FFFFFF' }); // Different color for actions?
 
             // Override color for specific types?
@@ -222,7 +238,7 @@ export class UIScene extends Phaser.Scene {
         this.dashboardBorder.setSize(width, 4); // Top border line
 
         // Layout Tabs (Top of dashboard)
-        const tabWidth = Math.min(120, (width - 40) / 3);
+        const tabWidth = Math.min(120, (width - 40) / 4);
         const tabSpacing = 10;
         let tabX = 20;
         const tabY = dashboardY + 10; // Padding from top of dashboard
@@ -273,11 +289,12 @@ export class UIScene extends Phaser.Scene {
     }
 
     /**
-     * Handles specific UI actions that open modals.
+     * Handles specific UI actions that open modals, extended to support data payload.
      * @param {string} action - The UI action to handle.
+     * @param {any} [data] - Optional data payload.
      * @private
      */
-    handleUIActions(action) {
+    handleUIActions(action, data) {
         switch (action) {
             case 'OPEN_JOURNAL': this.openJournal(); break;
             case 'OPEN_RECIPES': this.openRecipeBook(); break;
@@ -285,6 +302,7 @@ export class UIScene extends Phaser.Scene {
             case 'OPEN_CRAFTING_MENU': this.openCraftingMenu(); break;
             case 'DECORATE': this.openDecorateMenu(); break;
             case 'INTERACT_NPC': this.openRelationshipMenu(); break;
+            case 'OPEN_ANCESTOR_MODAL': this.openAncestorModal(data); break;
         }
     }
 
@@ -569,6 +587,31 @@ export class UIScene extends Phaser.Scene {
 
         this.decorateModal.content.setText(text);
         this.decorateModal.setVisible(true);
+        this.scene.pause('MainScene');
+    }
+
+    /**
+     * Populates and displays the Hall of Ancestors modal for a specific ancestor.
+     * @param {object} ancestorData - The data of the retired pet.
+     */
+    openAncestorModal(ancestorData) {
+        if (!ancestorData) return;
+
+        const advice = NarrativeSystem.getAdvice(ancestorData.dominantArchetype);
+
+        let text = `Name: Generation ${ancestorData.generation}\n`;
+        text += `Archetype: ${ancestorData.dominantArchetype}\n`;
+        text += `Career: ${ancestorData.currentCareer || 'Unemployed'}\n\n`;
+
+        text += `Stats at Retirement:\n`;
+        text += `- Happiness: ${Math.floor(ancestorData.stats.happiness)}\n`;
+        text += `- Logic: ${ancestorData.skills.logic.toFixed(1)}\n`;
+        text += `- Empathy: ${ancestorData.skills.empathy.toFixed(1)}\n\n`;
+
+        text += `Ancestral Advice:\n"${advice}"`;
+
+        this.ancestorModal.content.setText(text);
+        this.ancestorModal.setVisible(true);
         this.scene.pause('MainScene');
     }
 }
