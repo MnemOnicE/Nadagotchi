@@ -82,6 +82,7 @@ This phase will introduce long-term replayability and a deeper sense of history 
 -   **[x] Initial Implementation:**
     -   [x] Create the "Tamagotchi Journal" to automatically log significant events and create a personal narrative.
     -   [x] Develop a "Recipe/Crafting Book" to collect and reference discovered recipes.
+    -   [x] **Genetics Loop:** Connected crafting and seasons to genetics via specific items (e.g., "Metabolism-Slowing Tonic").
 -   **[ ] Advanced Features:**
     -   [ ] Implement an in-game achievement and milestone system.
     -   [ ] Introduce a "Showcase System" for sharing pet snapshots and achievements.

@@ -107,6 +107,7 @@ export class GeneticsSystem {
             'Nutrient Bar': { gene: 'metabolism', value: 8 },
             'Espresso': { gene: 'metabolism', value: 9 },
             'Chamomile': { gene: 'metabolism', value: 2 },
+            'Metabolism-Slowing Tonic': { gene: 'metabolism', value: 2 },
             'book': { gene: 'Intellectual', value: 80 }          // Generic Book (for tests/flexibility)
         };
 
