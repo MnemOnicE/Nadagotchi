@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.3] - 2025-11-16
+
+### Fixed
+- **Test Suite Setup Order:** Fixed an issue in `tests/legacy.test.js` where the game object was being accessed before it was fully initialized in the test setup. Swapped the order of operations to inject mocks before calling `create()`, ensuring tests run against a correctly configured environment.
+
 ## [1.5.2] - 2025-11-16
 
 ### Fixed

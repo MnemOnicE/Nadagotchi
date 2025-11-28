@@ -133,20 +133,20 @@ describe('Legacy Loop Integration', () => {
         mainScene = new MainScene();
         uiScene = new UIScene();
 
-        // Manually call the create method to initialize scene properties like retireButton
-        uiScene.create();
-
         // Inject the mock event emitter and scene manager
-        mainScene.game.events = gameEvents;
-        uiScene.game.events = gameEvents;
+        mainScene.game = { events: gameEvents };
+        uiScene.game = { events: gameEvents };
         mainScene.scene = { start: jest.fn(), stop: jest.fn(), launch: jest.fn() };
         uiScene.scene = { pause: jest.fn(), resume: jest.fn() };
+
+        // Manually call the create method to initialize scene properties like retireButton
+        uiScene.create();
 
         // Spy on the retireButton's setVisible method
         jest.spyOn(uiScene.retireButton, 'setVisible');
 
         // Manually establish the event listeners between the two scenes
-        gameEvents.on('updateStats', uiScene.updateStatsUI, uiScene);
+        // gameEvents.on('updateStats', uiScene.updateStatsUI, uiScene); // Registered in uiScene.create()
         gameEvents.on('uiAction', mainScene.handleUIAction, mainScene);
     });
 
