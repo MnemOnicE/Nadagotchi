@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.5.5] - 2025-11-29
 
 ### Changed
+- **UI Overhaul ("The Physical Shell"):** Completely redesigned the interface to resemble a physical device dashboard.
+  - **Zero Overlap:** The game world viewport is resized to reserve the bottom 25% of the screen for a dedicated UI Control Deck, ensuring controls never obscure gameplay.
+  - **Neo-Retro Aesthetics:** Introduced a new "Chunky 3D" visual style for buttons using the 'VT323' pixel font and a specific color palette (#A3B8A2 shell, #D8A373 accents).
+  - **Categorized Controls:** Actions are now organized into three tabs: "CARE", "ACTION", and "SYSTEM", reducing screen clutter while maintaining accessibility.
+  - **Responsive Dashboard:** The UI layout and game viewport dynamically adapt to screen resize events.
 - **Responsive UI:** Completely overhauled the `UIScene` to use a responsive, touch-friendly interface.
   - Buttons are now larger and use a "wrapping" layout that anchors to the bottom of the screen to fit any device orientation.
   - Action buttons are dynamically arranged to prevent overlap and ensure accessibility on smaller screens.
