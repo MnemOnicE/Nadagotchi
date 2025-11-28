@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] - 2025-11-16
+
+### Fixed
+- **Syntax Error in Core Logic:** Fixed a duplicated and conflicting method definition in `js/Nadagotchi.js` that caused syntax errors and potential logic bugs in NPC interactions.
+- **Test Suite Syntax Error:** Fixed missing closing braces in `tests/Nadagotchi.test.js`, restoring the integrity of the test suite and ensuring all tests run correctly.
+
 ## [1.5.0] - 2025-11-16
 
 ### Added
@@ -15,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.4.1] - 2025-11-16
 
 ### Fixed
-- **Incorrect Tie-Breaking Logic:** Fixed a bug in `updateDominantArchetype` where a tie for the dominant archetype was not handled correctly. The logic now correctly uses a random selection from the tied archetypes if the incumbent is not part of the tie.
+- **Incorrect Tie-Breaking Logic:** Fixed a bug in `updateDominantArchetype` where a tie for the dominant archetype was not correctly handling the incumbent. The logic now correctly prioritizes the existing archetype in a tie, or chooses randomly if the incumbent is not involved.
 
 ## [1.4.0] - 2025-11-16
 
@@ -27,7 +33,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **Unpredictable Personality Tie-Breaking:** Fixed a logical flaw in `Nadagotchi.js`'s `updateDominantArchetype` method that caused unpredictable behavior when handling ties for the dominant archetype.
-- **Flawed Tie-Breaking Logic:** Fixed a bug in `updateDominantArchetype` where a tie in personality points was not handled correctly, causing the new dominant archetype to be selected unpredictably. The logic now ensures that a new archetype is chosen randomly from the tied contenders.
 
 ## [1.3.2] - 2025-11-16
 
