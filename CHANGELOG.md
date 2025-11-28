@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2025-11-30
+
+### Added
+- **Comprehensive Minigame Test Coverage:** Implemented a robust test suite (`tests/Minigames.test.js`) covering the Artisan, Healer, and Scout career mini-games.
+  - Achieved ~98% test coverage for all three mini-game scenes.
+  - Verified critical game loops, win/loss conditions, input handling, and event emission logic.
+  - Added mocks for Phaser's `Scene`, `Time`, and `Input` systems to ensure reliable, deterministic testing.
+
 ## [1.5.6] - 2025-11-29
 
 ### Fixed
