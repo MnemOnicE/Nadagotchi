@@ -105,13 +105,13 @@ describe('GeneticsSystem', () => {
         });
 
         test('Environmental Dominance: Book should give high Intellectual', () => {
-            // Pass 'book' or 'logic'
-            const child = GeneticsSystem.breed(parentGenome, ['logic']);
+            // Pass 'book' or 'Ancient Tome'
+            const child = GeneticsSystem.breed(parentGenome, ['Ancient Tome']);
             expect(child.phenotype.Intellectual).toBeGreaterThanOrEqual(65);
         });
 
         test('Environmental Dominance: Nutrient Bar should affect Metabolism', () => {
-            const child = GeneticsSystem.breed(parentGenome, ['nutrient']);
+            const child = GeneticsSystem.breed(parentGenome, ['Nutrient Bar']);
             // Nutrient Bar -> Metabolism 8.
             // We check if at least one allele is >= 7 (allowing for -1 mutation)
             const hasHighAllele = child.genotype.metabolism.some(allele => allele >= 7);
@@ -119,7 +119,7 @@ describe('GeneticsSystem', () => {
         });
 
         test('Environmental Dominance: Espresso should affect Metabolism', () => {
-            const child = GeneticsSystem.breed(parentGenome, ['espresso']);
+            const child = GeneticsSystem.breed(parentGenome, ['Espresso']);
             // Espresso -> Metabolism 9.
             // Check genotype has high value (allowing for -1 mutation)
             const hasHighAllele = child.genotype.metabolism.some(allele => allele >= 8);

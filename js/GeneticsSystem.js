@@ -101,11 +101,12 @@ export class GeneticsSystem {
         // Environment Mapping
         // Maps item IDs (from BreedingScene) to Gene targets and values.
         const envMap = {
-            'logic': { gene: 'Intellectual', value: 70 },        // Ancient Tome
-            'empathy': { gene: 'Nurturer', value: 70 },          // Heart Amulet
-            'creativity': { gene: 'Mischievous', value: 70 },    // Muse Flower
-            'nutrient': { gene: 'metabolism', value: 8 },        // Nutrient Bar
-            'espresso': { gene: 'metabolism', value: 9 },        // Espresso
+            'Ancient Tome': { gene: 'Intellectual', value: 70 },
+            'Heart Amulet': { gene: 'Nurturer', value: 70 },
+            'Muse Flower': { gene: 'Mischievous', value: 70 },
+            'Nutrient Bar': { gene: 'metabolism', value: 8 },
+            'Espresso': { gene: 'metabolism', value: 9 },
+            'Chamomile': { gene: 'metabolism', value: 2 },
             'book': { gene: 'Intellectual', value: 80 }          // Generic Book (for tests/flexibility)
         };
 

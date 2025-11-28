@@ -70,8 +70,9 @@ This phase will introduce long-term replayability and a deeper sense of history 
     -   [x] Create unique egg designs that hint at the offspring's inherited traits.
 -   **[x] Advanced Features (Genetics Engine):**
     -   [x] **GeneticsSystem:** Implemented a backend logic layer (Genotype/Phenotype) supporting Mendelian-inspired inheritance.
-    -   [x] **Traits & Metabolism:** Added support for inheritable "Legacy Traits" (e.g., Night Owl) and variable metabolism rates.
-    -   [x] **Environmental Influence:** Integrated item-based gene modification (e.g., "Espresso" boosts metabolism) into the breeding process.
+    -   [x] **Traits & Metabolism:** Wired passive traits (Night Owl/Photosynthetic) and Metabolism to directly affect the `live()` simulation loop (stats decay).
+    -   [x] **Environmental Influence:** Integrated item-based gene modification (e.g., "Espresso", "Chamomile") into the breeding process.
+    -   [x] **Genetic Scanner:** Implemented a UI tool to allow players to inspect the raw Genotype (alleles) of their pet.
     -   [x] **Randomness & Mutation:** Added mutation logic and random "wild" gene generation for deeper variety.
 -   **[ ] Future Work:**
     -   [ ] Introduce a "Hall of Ancestors" to commemorate retired pets.
