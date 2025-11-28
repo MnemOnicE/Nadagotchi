@@ -69,8 +69,12 @@ describe('Quest System - Masterwork Crafting', () => {
         pet.quests = { masterwork_crafting: { stage: 2 } };
         pet.discoveredRecipes.push("Masterwork Chair");
 
-        // Craft/Have the chair
-        pet.inventory["Masterwork Chair"] = 1;
+        // Give materials
+        pet.inventory["Sticks"] = 10;
+        pet.inventory["Shiny Stone"] = 2;
+
+        // Legitimate craft
+        pet.craftItem("Masterwork Chair");
 
         pet.interact('Master Artisan');
 

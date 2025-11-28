@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.0] - 2025-12-05
+
+### Fixed
+- **Work Reward Exploit:** Implemented diminishing returns for skill and happiness gains in work minigames. Skill gain now scales inversely with the current skill level (preventing easy mastery), and happiness gain decreases as the pet approaches maximum happiness.
+- **Save Scumming Exploit:** Enhanced the `PersistenceManager` to obfuscate save data using Base64 encoding and added a hash integrity check to detect tampering. Legacy plain JSON saves are still supported for backward compatibility.
+- **Quest Logic Bypass:** Fixed a logic flaw in the Artisan "Masterwork Crafting" quest. The quest stage 2 completion now strictly requires the "Masterwork Chair" to be crafted while the quest is active (tracking a `hasCraftedChair` flag), preventing players from bypassing the requirement by cheating the item into their inventory.
 ## [1.12.1] - 2025-12-05
 
 ### Added
