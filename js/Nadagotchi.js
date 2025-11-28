@@ -137,7 +137,28 @@ export class Nadagotchi {
         }
 
         /** @type {Object.<string, {materials: Object.<string, number>, description: string}>} */
-        this.recipes = Recipes;
+        this.recipes = {
+            "Fancy Bookshelf": {
+                materials: { "Sticks": 5, "Shiny Stone": 1 },
+                description: "A beautiful bookshelf that makes studying more effective."
+            },
+            "Logic-Boosting Snack": {
+                materials: { "Berries": 3 },
+                description: "A tasty snack that fuels the mind."
+            },
+            "Stamina-Up Tea": {
+                materials: { "Berries": 1, "Sticks": 1 },
+                description: "A warm tea that restores energy."
+            },
+            "Masterwork Chair": {
+                materials: { "Sticks": 10, "Shiny Stone": 2 },
+                description: "A chair of unparalleled craftsmanship."
+            },
+            "Metabolism-Slowing Tonic": {
+                materials: { "Frostbloom": 1, "Sticks": 2 },
+                description: "A tonic that slows metabolism, helping to conserve energy."
+            }
+        };
 
         /** @type {{painting: number, music: number}} A map of hobby levels. */
         this.hobbies = loadedData ? loadedData.hobbies : { painting: 0, music: 0 };
@@ -383,6 +404,14 @@ export class Nadagotchi {
             case 'PLAY':
                 this.stats.energy = Math.max(0, this.stats.energy - Config.ACTIONS.PLAY.ENERGY_COST);
                 this.stats.happiness = Math.min(this.maxStats.happiness, this.stats.happiness + Config.ACTIONS.PLAY.HAPPINESS_RESTORE);
+                this.stats.energy = Math.max(0, this.stats.energy - 10);
+                this.stats.happiness = Math.min(this.maxStats.happiness, this.stats.happiness + 10);
+
+                // Homozygous Mischievous Bonus: "Energy Recovery" (Refund half energy)
+                if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousMischievous) {
+                     this.stats.energy = Math.min(this.maxStats.energy, this.stats.energy + 5);
+                }
+
                 if (['Adventurer', 'Mischievous'].includes(this.dominantArchetype)) {
                     this.mood = 'happy';
                     this.personalityPoints[this.dominantArchetype]++;
@@ -398,6 +427,11 @@ export class Nadagotchi {
                 moodMultiplier = this._getMoodMultiplier();
                 this.skills.logic += (Config.ACTIONS.STUDY.SKILL_GAIN * moodMultiplier);
                 this.skills.research += (Config.ACTIONS.STUDY.SKILL_GAIN * moodMultiplier);
+
+                // Homozygous Intellectual Bonus: Slight boost to mood recovery (Happiness)
+                if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousIntellectual) {
+                    this.stats.happiness += 5;
+                }
 
                 if (this.dominantArchetype === 'Intellectual') {
                     this.mood = 'happy';
@@ -436,6 +470,13 @@ export class Nadagotchi {
                 }
                 moodMultiplier = this._getMoodMultiplier();
                 this.skills.empathy += (Config.ACTIONS.INTERACT_PLANT.SKILL_GAIN * moodMultiplier);
+                this.skills.empathy += (0.15 * moodMultiplier);
+
+                // Homozygous Nurturer Bonus: Boost Empathy Gain
+                if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousNurturer) {
+                    this.skills.empathy += 0.2;
+                }
+
                 this.personalityPoints.Nurturer++;
                 break;
 
@@ -455,6 +496,13 @@ export class Nadagotchi {
 
             case 'EXPLORE':
                 this.stats.energy = Math.max(0, this.stats.energy - Config.ACTIONS.EXPLORE.ENERGY_COST);
+                this.stats.energy = Math.max(0, this.stats.energy - 15);
+
+                // Homozygous Adventurer Bonus: Boost Happiness Gain
+                if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousAdventurer) {
+                    this.stats.happiness += 10;
+                }
+
                 if (this.dominantArchetype === 'Adventurer') {
                     this.mood = 'happy';
                     this.stats.happiness += Config.ACTIONS.EXPLORE.HAPPINESS_RESTORE_ADVENTURER;
@@ -475,6 +523,14 @@ export class Nadagotchi {
                 moodMultiplier = this._getMoodMultiplier();
                 this.skills.focus += (Config.ACTIONS.MEDITATE.SKILL_GAIN * moodMultiplier);
                 if (this.dominantArchetype === "Recluse") this.personalityPoints.Recluse += Config.ACTIONS.MEDITATE.PERSONALITY_GAIN_RECLUSE;
+                this.skills.focus += (0.1 * moodMultiplier);
+
+                // Homozygous Recluse Bonus: Boost Focus Gain
+                if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousRecluse) {
+                    this.skills.focus += 0.2;
+                }
+
+                if (this.dominantArchetype === "Recluse") this.personalityPoints.Recluse += 2;
                 break;
 
             case "CRAFT_ITEM":
@@ -540,6 +596,16 @@ export class Nadagotchi {
         this._addItem(itemName, 1);
         this.stats.energy -= Config.ACTIONS.CRAFT.ENERGY_COST;
         this.stats.happiness += Config.ACTIONS.CRAFT.HAPPINESS_RESTORE;
+
+        // Update Quest Progress
+        if (itemName === 'Masterwork Chair' &&
+            this.quests['masterwork_crafting'] &&
+            this.quests['masterwork_crafting'].stage === 2) {
+            this.quests['masterwork_crafting'].hasCraftedChair = true;
+        }
+
+        this.stats.energy -= 15;
+        this.stats.happiness += 20;
         const moodMultiplier = this._getMoodMultiplier();
         this.skills.crafting += (Config.ACTIONS.CRAFT.SKILL_GAIN * moodMultiplier);
         this.addJournalEntry(`I successfully crafted a ${itemName}!`);
@@ -640,7 +706,7 @@ export class Nadagotchi {
                 this.addJournalEntry("The Master Artisan is waiting for 5 Sticks.");
             }
         } else if (quest.stage === 2) {
-            if (this.inventory['Masterwork Chair'] && this.inventory['Masterwork Chair'] > 0) {
+            if (quest.hasCraftedChair && this.inventory['Masterwork Chair'] && this.inventory['Masterwork Chair'] > 0) {
                 this._removeItem('Masterwork Chair', 1);
                 quest.stage = 3;
                 this.skills.crafting += Config.ACTIONS.INTERACT_NPC.QUEST_CRAFTING_GAIN;
@@ -717,12 +783,38 @@ export class Nadagotchi {
         }
 
         // If the current dominant archetype is one of the tied contenders, it remains dominant.
-        // Otherwise, a new dominant archetype is chosen deterministically from the contenders.
-        // This prevents the pet's core personality from flipping back and forth unpredictably.
+        // Otherwise, we break ties based on relevant skills.
         if (potentialDominantArchetypes.length > 0 && !potentialDominantArchetypes.includes(this.dominantArchetype)) {
-            // FIX: Always use a deterministic choice (the first one) to prevent unpredictable personality flipping.
-            // This aligns with the intended fix described in BUGS.md.
-            this.dominantArchetype = potentialDominantArchetypes[0];
+            let bestCandidate = potentialDominantArchetypes[0];
+            let highestSkillScore = -1;
+
+            potentialDominantArchetypes.forEach(archetype => {
+                let score = 0;
+                switch (archetype) {
+                    case 'Adventurer':
+                        score = this.skills.navigation;
+                        break;
+                    case 'Nurturer':
+                        score = this.skills.empathy;
+                        break;
+                    case 'Intellectual':
+                        score = this.skills.logic + this.skills.research;
+                        break;
+                    case 'Recluse':
+                        score = this.skills.focus + this.skills.crafting;
+                        break;
+                    case 'Mischievous':
+                        score = this.skills.communication;
+                        break;
+                }
+
+                if (score > highestSkillScore) {
+                    highestSkillScore = score;
+                    bestCandidate = archetype;
+                }
+            });
+
+            this.dominantArchetype = bestCandidate;
         }
     }
 

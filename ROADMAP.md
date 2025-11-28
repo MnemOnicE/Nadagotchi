@@ -13,7 +13,7 @@ This foundational phase focused on bringing the Nadagotchi to life with a dynami
 -   **[x] Version 0.3: Basic Interaction & Growth:** Introduced early actions ('Explore', 'Study') to influence personality and skills.
 -   **[x] Version 0.5: UI Refactoring:** Separated UI into a dedicated `UIScene` for better scalability and implemented a responsive, mobile-first design.
 -   **[x] Version 1.2: Core Test Coverage:** Added crucial unit tests for `PersistenceManager.js` and `Nadagotchi.js` to ensure stability.
-    -   [x] Fixed a bug in the personality system's tie-breaking logic to ensure predictable behavior.
+    -   [x] Refined the personality system's tie-breaking logic to be skill-based and deterministic.
 
 ---
 
@@ -34,6 +34,7 @@ This phase focuses on building out the primary gameplay loops, giving players cl
 -   **[x] Hybrid Career System:**
     -   [x] Developed a "multi-classing" system to allow for hybrid careers.
     -   [x] Implemented the "Archaeologist" career (Adventurer + Intellectual).
+    -   [x] Implemented the "Research" skill and integrated it into study loops.
 -   **[ ] Future Work:**
     -   [ ] Introduce NPC "mentors" in career-specific guilds to guide skill development.
 
@@ -53,6 +54,7 @@ This phase focuses on building out the primary gameplay loops, giving players cl
     -   [ ] Allow for deeper home customization with player-placed furniture.
     -   [x] Expand NPC interactions with more complex dialogues and relationship-based events.
         -   [x] Implemented multi-stage quest system (e.g., Masterwork Crafting).
+        -   [x] Hardened quest logic to prevent progression exploits.
 
 ### **III. Technical Foundation & Architecture**
 -   **[x] Modern Tooling & Architecture:**
@@ -61,6 +63,9 @@ This phase focuses on building out the primary gameplay loops, giving players cl
     -   [x] Centralized asset management in a dedicated `PreloaderScene`.
     -   [x] Standardized unit testing with Jest and Babel.
     -   [x] Refactored codebase to use centralized Configuration and Event Keys for better maintainability.
+-   **[x] Security & Balance:**
+    -   [x] Implemented save data obfuscation and integrity verification to prevent tampering.
+    -   [x] Implemented diminishing returns logic for minigame rewards to ensure long-term progression balance.
 
 ---
 
@@ -77,16 +82,13 @@ This phase will introduce long-term replayability and a deeper sense of history 
     -   [x] **GeneticsSystem:** Implemented a backend logic layer (Genotype/Phenotype) supporting Mendelian-inspired inheritance.
     -   [x] **Traits & Metabolism:** Wired passive traits (Night Owl/Photosynthetic) and Metabolism to directly affect the `live()` simulation loop (stats decay).
     -   [x] **Environmental Influence:** Integrated item-based gene modification (e.g., "Espresso", "Chamomile") into the breeding process.
+        -   [x] Expanded influence to include crafted items and resources.
     -   [x] **Genetic Scanner:** Implemented a UI tool to allow players to inspect the raw Genotype (alleles), highlighting heterozygous traits.
     -   [x] **Randomness & Mutation:** Added mutation logic and random "wild" gene generation for deeper variety.
+    -   [x] **Homozygous Bonuses:** Implemented specific stat and gameplay bonuses for pets with homozygous genes (Personality & Physio).
 -   **[x] Hall of Ancestors:**
     -   [x] Introduce a "Hall of Ancestors" to commemorate retired pets.
     -   [x] Ancestors offer advice based on their personality.
--   **[ ] Future Work:**
-    -   [ ] Implement specific bonuses for "Homozygous" trait combinations.
-    -   [x] **Homozygous Bonuses:** Implemented specific stat bonuses (Max Energy, Mood Recovery) for pets with homozygous genes.
--   **[ ] Future Work:**
-    -   [ ] Introduce a "Hall of Ancestors" to commemorate retired pets.
 
 ### **V. Meta-Game & Community Features**
 -   **[x] Initial Implementation:**

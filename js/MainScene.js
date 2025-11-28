@@ -211,19 +211,40 @@ export class MainScene extends Phaser.Scene {
     handleWorkResult(data) {
         let skillUp = '';
         if (data.success) {
-            this.nadagotchi.stats.happiness += 25;
+            // Calculate happiness gain with diminishing returns based on current happiness
+            const maxHappiness = this.nadagotchi.maxStats.happiness;
+            const currentHappiness = this.nadagotchi.stats.happiness;
+            // 25 base, scales down as you get closer to max. Min gain of 5.
+            const happinessGain = Math.max(5, 25 * (1 - (currentHappiness / maxHappiness)));
+            this.nadagotchi.stats.happiness += happinessGain;
+
+            const calculateSkillGain = (currentLevel, baseGain) => {
+                // Diminishing returns: Gain decreases as level increases.
+                // Formula: Base * (20 / (20 + Level))
+                return baseGain * (20 / (20 + currentLevel));
+            };
+
             switch (data.career) {
-                case 'Innovator': skillUp = 'logic'; this.nadagotchi.skills.logic += 1.5; break;
-                case 'Scout': skillUp = 'navigation'; this.nadagotchi.skills.navigation += 1.5; break;
+                case 'Innovator':
+                    skillUp = 'logic';
+                    this.nadagotchi.skills.logic += calculateSkillGain(this.nadagotchi.skills.logic, 1.5);
+                    break;
+                case 'Scout':
+                    skillUp = 'navigation';
+                    this.nadagotchi.skills.navigation += calculateSkillGain(this.nadagotchi.skills.navigation, 1.5);
+                    break;
                 case 'Archaeologist':
                     skillUp = 'research & navigation';
-                    this.nadagotchi.skills.research += 1.0;
-                    this.nadagotchi.skills.navigation += 1.0;
+                    this.nadagotchi.skills.research += calculateSkillGain(this.nadagotchi.skills.research, 1.0);
+                    this.nadagotchi.skills.navigation += calculateSkillGain(this.nadagotchi.skills.navigation, 1.0);
                     break;
-                case 'Healer': skillUp = 'empathy'; this.nadagotchi.skills.empathy += 1.5; break;
+                case 'Healer':
+                    skillUp = 'empathy';
+                    this.nadagotchi.skills.empathy += calculateSkillGain(this.nadagotchi.skills.empathy, 1.5);
+                    break;
                 case 'Artisan':
                     skillUp = 'crafting';
-                    this.nadagotchi.skills.crafting += 1.5;
+                    this.nadagotchi.skills.crafting += calculateSkillGain(this.nadagotchi.skills.crafting, 1.5);
                     if (data.craftedItem) {
                         this.nadagotchi.handleAction(EventKeys.CRAFT_ITEM, data.craftedItem);
                     }
