@@ -16,21 +16,28 @@ export class Genome {
      */
     constructor(genes = null) {
         // Genotype: The hidden DNA (Pairs of [Allele1, Allele2])
-        this.genotype = genes || {
-            // Personality Potentials (0-100)
-            Adventurer: [10, 10],
-            Nurturer: [10, 10],
-            Mischievous: [10, 10],
-            Intellectual: [10, 10],
-            Recluse: [10, 10],
+        if (genes) {
+            this.genotype = genes;
+        } else {
+            // Helper to generate a wild personality gene (10-30)
+            const randomGene = () => Math.floor(Math.random() * 21) + 10;
 
-            // Physiological Traits
-            metabolism: [5, 5],   // 1=Slow, 10=Fast
-            moodSensitivity: [5, 5],
+            this.genotype = {
+                // Personality Potentials (0-100)
+                Adventurer: [randomGene(), randomGene()],
+                Nurturer: [randomGene(), randomGene()],
+                Mischievous: [randomGene(), randomGene()],
+                Intellectual: [randomGene(), randomGene()],
+                Recluse: [randomGene(), randomGene()],
 
-            // Legacy Traits (Strings or null)
-            specialAbility: [null, null]
-        };
+                // Physiological Traits
+                metabolism: [5, 5],   // 1=Slow, 10=Fast
+                moodSensitivity: [5, 5],
+
+                // Legacy Traits (Strings or null)
+                specialAbility: [null, null]
+            };
+        }
 
         // Phenotype: The expressed stats used by the game
         this.phenotype = this.calculatePhenotype();
@@ -52,8 +59,24 @@ export class Genome {
                 } else {
                     phenotype[trait] = null;
                 }
+
+                // Check for Homozygous state
+                // Only consider it homozygous if both alleles are the same non-null trait.
+                // If both are null, it's effectively homozygous null, but that doesn't trigger the flag usually.
+                // But for "Active + Bonus Effect", we care about the trait.
+                if (alleles[0] !== null && alleles[0] === alleles[1]) {
+                    phenotype.isHomozygous = true;
+                } else {
+                    phenotype.isHomozygous = false;
+                }
+
+            } else if (trait === 'metabolism') {
+                // Metabolism: Average of the two alleles
+                const sum = alleles.reduce((a, b) => a + b, 0);
+                phenotype[trait] = sum / alleles.length;
+
             } else {
-                // Numeric Stats: The Higher of the two alleles is Dominant
+                // Numeric Stats (Personality, MoodSensitivity): The Higher of the two alleles is Dominant
                 phenotype[trait] = Math.max(...alleles);
             }
         }
@@ -82,6 +105,7 @@ export class GeneticsSystem {
             'empathy': { gene: 'Nurturer', value: 70 },          // Heart Amulet
             'creativity': { gene: 'Mischievous', value: 70 },    // Muse Flower
             'nutrient': { gene: 'metabolism', value: 8 },        // Nutrient Bar
+            'espresso': { gene: 'metabolism', value: 9 },        // Espresso
             'book': { gene: 'Intellectual', value: 80 }          // Generic Book (for tests/flexibility)
         };
 
@@ -112,8 +136,8 @@ export class GeneticsSystem {
                     // Physio: Wild values are typically average/random (1-10)
                     envAllele = Math.floor(Math.random() * 10) + 1;
                 } else {
-                    // Personality: Wild values are low (1-20)
-                    envAllele = Math.floor(Math.random() * 20) + 1;
+                    // Personality: Wild values are low (10-30) as per new requirement
+                    envAllele = Math.floor(Math.random() * 21) + 10;
                 }
             }
 

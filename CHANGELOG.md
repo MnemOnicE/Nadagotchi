@@ -5,20 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.8.0] - 2025-11-30
+## [1.9.0] - 2025-12-01
 
 ### Added
-- **Genetics System:** Implemented a backend logic layer for the Generational Legacy system in `js/GeneticsSystem.js`.
-  - **Genome:** Defined a new `GeneticsSystem` class to encapsulate a pet's genetic makeup, including personality genes, mood sensitivity, and legacy traits.
-  - **Inheritance Algorithm:** Implemented robust inheritance logic where offspring derive personality potential from their parent's dominant and secondary archetypes, with mutation and environmental variance.
-  - **Environmental Influence:** Breeding outcomes are now influenced by items present in the breeding den (e.g., "Ancient Tome" boosts "Intellectual" genes).
-- **Unit Tests:** Added `tests/Genetics.test.js` to verify inheritance, mutation, and environmental influence logic.
+- **Refined Genetics System:** Implemented advanced Mendelian-inspired logic in `js/GeneticsSystem.js`.
+  - **Random Defaults:** New Genomes (Generation 1) are now initialized with random "Wild" genes (value 10-30) instead of static values, creating more variety.
+  - **Metabolism Averaging:** The `metabolism` phenotype is now calculated as the average of its two alleles, allowing for nuanced physiological traits.
+  - **Homozygous Traits:** Added logic to detect homozygous traits (two identical alleles), flagging them in the phenotype (`isHomozygous: true`) for future bonus effects.
+  - **New Breeding Item:** Added "Espresso" (☕) to the breeding item selection, which specifically targets and boosts the `metabolism` gene.
+- **Unit Tests:** Updated `tests/Genetics.test.js` to verify random default generation, average calculation for metabolism, homozygous detection, and the new item logic.
 
 ### Changed
-- **Nadagotchi Core:** Updated `js/Nadagotchi.js` to include a `genome` property and use `GeneticsSystem` for calculating offspring data.
-  - Added `calculateOffspring(environmentalFactors)` method to `Nadagotchi` class.
-  - Constructor now initializes a genome for new pets and handles backward compatibility for legacy saves.
-- **Breeding Scene:** Refactored `js/BreedingScene.js` to delegate the complex legacy calculation to the `Nadagotchi` instance's new `calculateOffspring` method, removing hardcoded logic from the UI layer.
+- **Nadagotchi Initialization:** Updated `js/Nadagotchi.js` to utilize the new random default generation for Genomes. The "starter pet" bias is now applied as a boost on top of this random wild background, ensuring the player's choice remains significant but organic.
+- **Breeding Scene UI:** Updated `js/BreedingScene.js` to include the "Espresso" item in the selection panel and improved the layout spacing to accommodate the new option.
 
 ## [1.8.0] - 2025-11-30
 
@@ -245,7 +244,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Career-Specific Job Board:** Implemented a new "Job Board" UI element.
   - The button is initially disabled and becomes active only when the Nadagotchi achieves a career (`currentCareer` is not null).
   - Clicking the button triggers a career-specific action. Currently, it logs a message to the console for the 'Innovator' career.
-- **Career Display in UI:** The Nadagotchi's current career is now displayed in the stats panel, making it easy for the player to see their progress.
+  - **Career Display in UI:** The Nadagotchi's current career is now displayed in the stats panel, making it easy for the player to see their progress.
 
 ### Changed
 - Modified `js/MainScene.js` to add the Job Board button, its activation logic in the `update` loop, and the new `openJobBoard()` method.
