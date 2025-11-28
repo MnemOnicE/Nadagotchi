@@ -40,7 +40,7 @@ class MainScene extends Phaser.Scene {
      */
     create(data) {
         // --- Environment Setup ---
-        this.skyTexture = this.textures.addDynamicTexture('sky', this.cameras.main.width, this.cameras.main.height);
+        this.skyTexture = this.textures.createCanvas('sky', this.cameras.main.width, this.cameras.main.height);
         this.add.image(0, 0, 'sky').setOrigin(0);
         const ground = this.add.graphics();
         ground.fillStyle(0x228B22, 1);
@@ -139,25 +139,13 @@ class MainScene extends Phaser.Scene {
     /**
      * Handles actions dispatched from the UIScene.
      * @param {string} actionType - The type of action to handle (e.g., 'FEED', 'WORK', 'RETIRE').
-     * @param {any} [payload] - Optional data associated with the action.
+     * @param {any} [data] - Optional data associated with the action.
      */
     handleUIAction(actionType, data) {
         if (this.isPlacementMode && actionType !== 'PLACE_FURNITURE') {
             this.togglePlacementMode(null); // Exit placement mode if another action is taken
         }
 
-        if (actionType === 'WORK') {
-            this.startWorkMinigame();
-        } else if (actionType === 'RETIRE') {
-            this.scene.stop('UIScene');
-            this.scene.start('BreedingScene', this.nadagotchi);
-        } else if (actionType === 'DECORATE') {
-            this.togglePlacementMode(data);
-        } else if (actionType === 'PLACE_FURNITURE') {
-            this.placeFurniture(data.x, data.y);
-        } else {
-            this.nadagotchi.handleAction(actionType, data);
-    handleUIAction(actionType, payload) {
         switch (actionType) {
             case 'WORK':
                 this.startWorkMinigame();
@@ -165,6 +153,12 @@ class MainScene extends Phaser.Scene {
             case 'RETIRE':
                 this.scene.stop('UIScene');
                 this.scene.start('BreedingScene', this.nadagotchi);
+                break;
+            case 'DECORATE':
+                this.togglePlacementMode(data);
+                break;
+            case 'PLACE_FURNITURE':
+                this.placeFurniture(data.x, data.y);
                 break;
             case 'INTERACT_SCOUT':
                 this.nadagotchi.interact('Grizzled Scout');
@@ -176,7 +170,7 @@ class MainScene extends Phaser.Scene {
                 this.nadagotchi.interact('Sickly Villager');
                 break;
             default:
-                this.nadagotchi.handleAction(actionType);
+                this.nadagotchi.handleAction(actionType, data);
                 break;
         }
     }

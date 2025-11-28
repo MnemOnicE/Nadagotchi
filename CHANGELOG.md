@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.2] - 2025-11-16
+
+### Fixed
+- **Syntax Error in MainScene:** Fixed a duplicated and conflicting `handleUIAction` method definition in `js/MainScene.js` that caused syntax errors and prevented tests from running.
+- **Runtime Error (Black Screen):** Fixed a crash caused by using `addDynamicTexture` (a Phaser 3.60+ feature) in an environment using an older Phaser version. Replaced it with `createCanvas`, restoring correct rendering of the sky and game scene.
+
 ## [1.5.1] - 2025-11-16
 
 ### Fixed
