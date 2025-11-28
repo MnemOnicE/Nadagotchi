@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.12.0] - 2025-12-05
 
 ### Added
+- **Hybrid Career System:** Introduced the concept of "Hybrid Careers" which require high levels in multiple personality traits and skills, rewarding diverse playstyles.
+  - **"Archaeologist" Career:** The first hybrid career, requiring high 'Adventurer' AND 'Intellectual' personality points, plus high 'Navigation' and 'Research' skills.
+  - **"Research" Skill:** A new skill that is developed alongside Logic when studying or interacting with bookshelves.
+- **Dynamic Work System:** Updated the `ScoutMinigameScene` to support dynamic career contexts. It can now be reused for the "Archaeologist" career (representing fieldwork/digs) with appropriate text updates.
+- **Unit Tests:** Added `tests/HybridCareer.test.js` to verify the unlocking conditions and skill progression for the new hybrid system.
+
+### Changed
+- **Nadagotchi Logic:** Updated `js/Nadagotchi.js` to initialize the 'Research' skill (with legacy migration) and included it in the `STUDY` and bookshelf interaction loops.
+- **MainScene:** Updated `startWorkMinigame` and `handleWorkResult` to correctly route the Archaeologist career to the Scout minigame and award dual skill gains (Navigation + Research) upon success.
+- **UI:** Updated `js/UIScene.js` to display the 'Research' skill in the stats dashboard.
 - **Seasonal Foraging & Crafting:** Enhanced the `forage` system in `js/Nadagotchi.js` to be season-aware. Players can now find "Frostbloom" exclusively during the "Winter" season.
 - **Genetic Crafting Loop:** Introduced a new recipe, "Metabolism-Slowing Tonic", which requires the seasonal "Frostbloom" to craft.
 - **Crafting-Genetics Integration:** The "Metabolism-Slowing Tonic" can now be used in the `BreedingScene` (if in inventory) to significantly lower the offspring's metabolism (gene value: 2), creating a direct gameplay link between crafting and the genetics engine.

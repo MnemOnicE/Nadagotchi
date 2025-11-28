@@ -323,7 +323,7 @@ export class UIScene extends Phaser.Scene {
                      `Hunger: ${Math.floor(stats.hunger)}\n` +
                      `Energy: ${Math.floor(stats.energy)}\n` +
                      `Happiness: ${Math.floor(stats.happiness)}\n` +
-                     `Logic: ${skills.logic.toFixed(2)} | Nav: ${skills.navigation.toFixed(2)} | Empathy: ${skills.empathy.toFixed(2)}`;
+                     `Logic: ${skills.logic.toFixed(2)} | Nav: ${skills.navigation.toFixed(2)} | Research: ${skills.research.toFixed(2)}`;
         this.statsText.setText(text);
 
         // Refresh tab if conditional buttons changed state (like Work or Retire)
