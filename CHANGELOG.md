@@ -20,6 +20,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Constructor now initializes a genome for new pets and handles backward compatibility for legacy saves.
 - **Breeding Scene:** Refactored `js/BreedingScene.js` to delegate the complex legacy calculation to the `Nadagotchi` instance's new `calculateOffspring` method, removing hardcoded logic from the UI layer.
 
+## [1.8.0] - 2025-11-30
+
+### Added
+- **Genetics System Backend:** Implemented `GeneticsSystem.js` with a Mendelian-inspired inheritance model using `Genome` class (Genotype/Phenotype).
+- **Metabolism & Traits:** Integrated `metabolism` stat and Legacy Traits ("Night Owl", "Photosynthetic") into `Nadagotchi.js` life cycle.
+- **Environmental Influence:** Updated breeding logic to allow items like "Nutrient Bar" and "Ancient Tome" to influence specific genes.
+- **Unit Tests:** Added `tests/Genetics.test.js` covering recessive inheritance, mutation, and environmental dominance.
+
+### Changed
+- **Nadagotchi Integration:** Updated `Nadagotchi` constructor to use the new `Genome` class and support legacy save migration.
+- **Breeding Scene:** Added "Nutrient Bar" to the breeding item selection to support metabolism modification.
+
 ## [1.7.0] - 2025-11-30
 
 ### Changed

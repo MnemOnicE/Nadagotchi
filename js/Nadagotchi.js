@@ -1,5 +1,5 @@
 import { PersistenceManager } from './PersistenceManager.js';
-import { GeneticsSystem } from './GeneticsSystem.js';
+import { Genome, GeneticsSystem } from './GeneticsSystem.js';
 
 /**
  * Represents the core Nadagotchi entity, its "Brain".
@@ -42,14 +42,34 @@ export class Nadagotchi {
 
             // Initialize Genome
             if (loadedData.genome) {
-                this.genome = new GeneticsSystem(
-                    loadedData.genome.personalityGenes,
-                    loadedData.genome.moodSensitivity,
-                    loadedData.genome.legacyTraits
-                );
+                if (loadedData.genome.genotype) {
+                     // New Genome format
+                     this.genome = new Genome(loadedData.genome.genotype);
+                } else {
+                    // Legacy migration: Create homozygous genotype from old data
+                    const migratedGenotype = {};
+                    // Personality
+                    ['Adventurer', 'Nurturer', 'Mischievous', 'Intellectual', 'Recluse'].forEach(trait => {
+                         const val = loadedData.genome.personalityGenes ? (loadedData.genome.personalityGenes[trait] || 0) : 0;
+                         migratedGenotype[trait] = [val, val];
+                    });
+                    // Physio
+                    const moodSens = loadedData.genome.moodSensitivity || 5;
+                    migratedGenotype.moodSensitivity = [moodSens, moodSens];
+                    migratedGenotype.metabolism = [5, 5]; // Default
+                    migratedGenotype.specialAbility = [null, null];
+
+                    // Attempt to preserve legacy trait
+                    if (loadedData.genome.legacyTraits && loadedData.genome.legacyTraits.length > 0) {
+                        const trait = loadedData.genome.legacyTraits[0];
+                        migratedGenotype.specialAbility = [trait, trait];
+                    }
+
+                    this.genome = new Genome(migratedGenotype);
+                }
             } else {
-                // Legacy save support: Create a default genome
-                this.genome = new GeneticsSystem();
+                // Should not happen for valid saves, but fallback
+                this.genome = new Genome();
             }
 
         } else {
@@ -76,12 +96,14 @@ export class Nadagotchi {
             this.moodSensitivity = 5;
 
             // Initialize Genome for new game
-            const initialGenes = {
-                Adventurer: 0, Nurturer: 0, Mischievous: 0,
-                Intellectual: 0, Recluse: 0
+            // Biased towards the chosen starter
+            const initialGenotype = {
+                Adventurer: [10, 10], Nurturer: [10, 10], Mischievous: [10, 10],
+                Intellectual: [10, 10], Recluse: [10, 10],
+                metabolism: [5, 5], moodSensitivity: [5, 5], specialAbility: [null, null]
             };
-            initialGenes[initialArchetype] = 5; // Genetic bias for chosen starter
-            this.genome = new GeneticsSystem(initialGenes, 5, []);
+            initialGenotype[initialArchetype] = [20, 20];
+            this.genome = new Genome(initialGenotype);
         }
 
         /** @type {?string} A flag used by the UI to show a one-time notification when a career is unlocked. */
@@ -127,31 +149,34 @@ export class Nadagotchi {
      * @returns {object} The data object for the new Nadagotchi.
      */
     calculateOffspring(environmentalFactors) {
-        const childGenome = GeneticsSystem.inherit(this, environmentalFactors);
+        const childGenome = GeneticsSystem.breed(this.genome, environmentalFactors);
+        const childPhenotype = childGenome.phenotype;
 
-        // Determine dominant archetype from the new genes
-        let maxGene = -1;
-        let dominant = 'Adventurer'; // Default fallback
-        const geneKeys = Object.keys(childGenome.personalityGenes);
+        // Determine dominant archetype from the phenotype
+        let maxScore = -1;
+        let dominant = 'Adventurer'; // Default
+        const personalityKeys = ['Adventurer', 'Nurturer', 'Mischievous', 'Intellectual', 'Recluse'];
 
-        // Find max value
-        for (const type of geneKeys) {
-            if (childGenome.personalityGenes[type] > maxGene) {
-                maxGene = childGenome.personalityGenes[type];
+        for (const type of personalityKeys) {
+            if (childPhenotype[type] > maxScore) {
+                maxScore = childPhenotype[type];
             }
         }
 
-        // Find all types matching max value
-        const contenders = geneKeys.filter(type => childGenome.personalityGenes[type] === maxGene);
-
-        // Pick one randomly if tie
+        const contenders = personalityKeys.filter(type => childPhenotype[type] === maxScore);
         if (contenders.length > 0) {
-            // Simple random pick
             dominant = contenders[Math.floor(Math.random() * contenders.length)];
         }
 
-        // Initialize personality points based on genes
-        const initialPoints = { ...childGenome.personalityGenes };
+        // Initialize personality points based on phenotype
+        const initialPoints = {};
+        personalityKeys.forEach(key => initialPoints[key] = childPhenotype[key]);
+
+        // Legacy Traits from Phenotype
+        const newLegacyTraits = [];
+        if (childPhenotype.specialAbility) {
+            newLegacyTraits.push(childPhenotype.specialAbility);
+        }
 
         return {
             mood: 'neutral',
@@ -164,8 +189,8 @@ export class Nadagotchi {
             age: 0,
             generation: this.generation + 1,
             isLegacyReady: false,
-            legacyTraits: childGenome.legacyTraits,
-            moodSensitivity: childGenome.moodSensitivity,
+            legacyTraits: newLegacyTraits,
+            moodSensitivity: childPhenotype.moodSensitivity,
             hobbies: { painting: 0, music: 0 },
             relationships: {
                 'Grizzled Scout': { level: 0 },
@@ -186,9 +211,18 @@ export class Nadagotchi {
      * @param {?object} worldState.activeEvent - The currently active world event, if any.
      */
     live(worldState = { weather: "Sunny", time: "Day", activeEvent: null }) {
+        // Base decay rates
         let hungerDecay = 0.05;
         let energyDecay = 0.02;
         let happinessChange = 0;
+
+        // Apply Genetic Metabolism (Phenotype)
+        // Metabolism range 1-10. 5 is neutral.
+        // Higher metabolism = Faster hunger decay.
+        // Factor: (Metabolism / 5). 10 -> 2x decay. 1 -> 0.2x decay.
+        if (this.genome && this.genome.phenotype && this.genome.phenotype.metabolism) {
+            hungerDecay *= (this.genome.phenotype.metabolism / 5);
+        }
 
         if (worldState.activeEvent && worldState.activeEvent.name.includes('Festival')) {
             this.stats.happiness += 0.02;
@@ -218,6 +252,11 @@ export class Nadagotchi {
                 hungerDecay *= 0.5;
                 if (this.dominantArchetype === "Recluse") happinessChange += 0.01;
                 if (this.dominantArchetype === "Adventurer") energyDecay *= 1.1;
+
+                // Legacy Trait: Night Owl
+                if (this.legacyTraits.includes("Night Owl")) {
+                    energyDecay *= 0.5; // Decays slower at night
+                }
                 break;
             case "Dusk":
             case "Dawn":
@@ -225,6 +264,11 @@ export class Nadagotchi {
                 break;
             case "Day":
                 if (this.dominantArchetype === "Intellectual") energyDecay *= 1.1;
+
+                // Legacy Trait: Photosynthetic
+                if (this.legacyTraits.includes("Photosynthetic")) {
+                    energyDecay *= 0.5; // Decays slower during day
+                }
                 break;
         }
 
@@ -236,6 +280,22 @@ export class Nadagotchi {
         if (this.stats.energy < 0) this.stats.energy = 0;
         if (this.stats.happiness < 0) this.stats.happiness = 0;
         if (this.stats.happiness > 100) this.stats.happiness = 100;
+
+        // Mood Calculation - Use moodSensitivity from phenotype
+        const sensitivity = (this.genome && this.genome.phenotype) ? this.genome.phenotype.moodSensitivity : 5;
+        // Sensitivity 1-10.
+        // Higher sensitivity = wider range of "emotional" states or easier to get angry/sad?
+        // Logic below uses fixed thresholds. Let's adjust thresholds by sensitivity?
+        // Or keep logic simple: Sensitivity doesn't change thresholds, but maybe intensity?
+        // For now, I'll stick to basic thresholds but maybe 'sad' triggers earlier if sensitive?
+
+        // Let's implement sensitivity by modifying the effective check value?
+        // "Mood Sensitivity" usually implies how easily mood changes.
+        // The prompt says "moodSensitivity: [5, 5]".
+        // I will leave the threshold logic as is for now to avoid breaking tests, unless explicitly asked to change logic details.
+        // The prompt only asked to "Wire the metabolism phenotype...". It didn't explicitly ask for mood sensitivity logic changes,
+        // but it is part of the Genome. `Nadagotchi` already had `moodSensitivity` property.
+        // I'll leave the mood logic standard for now.
 
         if (this.stats.hunger < 10) {
             this.mood = 'angry';

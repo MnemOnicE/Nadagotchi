@@ -59,7 +59,7 @@ This phase focuses on building out the primary gameplay loops, giving players cl
 
 ---
 
-## **Phase 3: Generational & Meta-Game Systems (Upcoming)**
+## **Phase 3: Generational & Meta-Game Systems (In Progress)**
 
 This phase will introduce long-term replayability and a deeper sense of history and accomplishment.
 
@@ -69,9 +69,9 @@ This phase will introduce long-term replayability and a deeper sense of history 
     -   [x] Develop the core mechanic for "Personality Gene" inheritance.
     -   [x] Create unique egg designs that hint at the offspring's inherited traits.
 -   **[ ] Advanced Features:**
-    -   [ ] Implement rare, inheritable "Legacy Traits" that grant unique abilities.
+    -   [x] Implement rare, inheritable "Legacy Traits" that grant unique abilities.
     -   [ ] Introduce a "Hall of Ancestors" to commemorate retired pets.
-    -   [ ] Allow player actions to influence offspring traits ("Nurture over Nature").
+    -   [x] Allow player actions to influence offspring traits ("Nurture over Nature").
 
 ### **V. Meta-Game & Community Features**
 -   **[ ] Initial Implementation:**
