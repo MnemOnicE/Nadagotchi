@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.5] - 2025-11-29
+
+### Changed
+- **UI Overhaul ("The Physical Shell"):** Completely redesigned the interface to resemble a physical device dashboard.
+  - **Zero Overlap:** The game world viewport is resized to reserve the bottom 25% of the screen for a dedicated UI Control Deck, ensuring controls never obscure gameplay.
+  - **Neo-Retro Aesthetics:** Introduced a new "Chunky 3D" visual style for buttons using the 'VT323' pixel font and a specific color palette (#A3B8A2 shell, #D8A373 accents).
+  - **Categorized Controls:** Actions are now organized into three tabs: "CARE", "ACTION", and "SYSTEM", reducing screen clutter while maintaining accessibility.
+  - **Responsive Dashboard:** The UI layout and game viewport dynamically adapt to screen resize events.
+
 ## [1.5.4] - 2025-11-28
 
 ### Fixed
