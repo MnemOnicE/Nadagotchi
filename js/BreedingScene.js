@@ -87,11 +87,17 @@ export class BreedingScene extends Phaser.Scene {
             { name: 'logic', emoji: '🧠', description: 'Ancient Tome' },
             { name: 'empathy', emoji: '💖', description: 'Heart Amulet' },
             { name: 'creativity', emoji: '🎨', description: 'Muse Flower' },
-            { name: 'nutrient', emoji: '🍎', description: 'Nutrient Bar' }
+            { name: 'nutrient', emoji: '🍎', description: 'Nutrient Bar' },
+            { name: 'espresso', emoji: '☕', description: 'Espresso' }
         ];
 
+        // Adjust spacing to fit more items
+        const spacing = 120;
+        const totalWidth = (items.length - 1) * spacing;
+        const startX = -totalWidth / 2;
+
         items.forEach((item, index) => {
-            const itemContainer = this.add.container(-150 + (index * 150), 20);
+            const itemContainer = this.add.container(startX + (index * spacing), 20);
             const itemSprite = this.add.text(0, 0, item.emoji, { fontSize: '48px' }).setOrigin(0.5).setInteractive();
             this.interactiveItems.push(itemSprite);
             const itemText = this.add.text(0, 35, item.description, { fontSize: '12px', fontFamily: 'Arial' }).setOrigin(0.5);

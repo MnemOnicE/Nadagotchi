@@ -96,14 +96,15 @@ export class Nadagotchi {
             this.moodSensitivity = 5;
 
             // Initialize Genome for new game
-            // Biased towards the chosen starter
-            const initialGenotype = {
-                Adventurer: [10, 10], Nurturer: [10, 10], Mischievous: [10, 10],
-                Intellectual: [10, 10], Recluse: [10, 10],
-                metabolism: [5, 5], moodSensitivity: [5, 5], specialAbility: [null, null]
-            };
-            initialGenotype[initialArchetype] = [20, 20];
-            this.genome = new Genome(initialGenotype);
+            // Start with random defaults, then bias towards the chosen starter
+            this.genome = new Genome(); // Random "Wild" defaults
+            // Boost the dominant archetype to ensure it wins against the wild traits (10-30)
+            // Setting to [40, 40] guarantees it's > 30.
+            if (this.genome.genotype[initialArchetype]) {
+                this.genome.genotype[initialArchetype] = [40, 40];
+            }
+            // Recalculate phenotype after manual genotype modification
+            this.genome.phenotype = this.genome.calculatePhenotype();
         }
 
         /** @type {?string} A flag used by the UI to show a one-time notification when a career is unlocked. */

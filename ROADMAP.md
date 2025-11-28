@@ -68,10 +68,14 @@ This phase will introduce long-term replayability and a deeper sense of history 
     -   [x] Design the "Breeding Den" UI and environment.
     -   [x] Develop the core mechanic for "Personality Gene" inheritance.
     -   [x] Create unique egg designs that hint at the offspring's inherited traits.
--   **[ ] Advanced Features:**
-    -   [x] Implement rare, inheritable "Legacy Traits" that grant unique abilities.
+-   **[x] Advanced Features (Genetics Engine):**
+    -   [x] **GeneticsSystem:** Implemented a backend logic layer (Genotype/Phenotype) supporting Mendelian-inspired inheritance.
+    -   [x] **Traits & Metabolism:** Added support for inheritable "Legacy Traits" (e.g., Night Owl) and variable metabolism rates.
+    -   [x] **Environmental Influence:** Integrated item-based gene modification (e.g., "Espresso" boosts metabolism) into the breeding process.
+    -   [x] **Randomness & Mutation:** Added mutation logic and random "wild" gene generation for deeper variety.
+-   **[ ] Future Work:**
     -   [ ] Introduce a "Hall of Ancestors" to commemorate retired pets.
-    -   [x] Allow player actions to influence offspring traits ("Nurture over Nature").
+    -   [ ] Implement specific bonuses for "Homozygous" trait combinations.
 
 ### **V. Meta-Game & Community Features**
 -   **[ ] Initial Implementation:**
