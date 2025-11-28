@@ -16,6 +16,7 @@ class Scene {
         const textMock = {
             setText: jest.fn(),
             setInteractive: jest.fn().mockReturnThis(),
+            disableInteractive: jest.fn().mockReturnThis(),
             on: jest.fn().mockReturnThis(),
             setVisible: jest.fn().mockReturnThis(),
             setAlpha: jest.fn().mockReturnThis(),
@@ -54,7 +55,10 @@ class Scene {
         this.add = addMock;
         this.input = { on: jest.fn() };
         this.time = { addEvent: jest.fn(), delayedCall: jest.fn() };
-        this.cameras = { main: { width: 800, height: 600, setBackgroundColor: jest.fn(), setSize: jest.fn() } };
+        this.cameras = {
+            main: { width: 800, height: 600, setBackgroundColor: jest.fn(), setSize: jest.fn() },
+            resize: jest.fn()
+        };
         this.game = { events: { on: jest.fn(), emit: jest.fn() } };
         this.scale = { on: jest.fn() };
         this.textures = {

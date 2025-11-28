@@ -16,24 +16,45 @@ class UIScene extends Phaser.Scene {
      */
     create() {
         // --- UI Elements ---
-        this.statsText = this.add.text(10, 10, '', { fontFamily: 'Arial', fontSize: '16px', color: '#ffffff' });
+        this.statsText = this.add.text(10, 10, '', { fontFamily: 'Arial', fontSize: '16px', color: '#ffffff', stroke: '#000000', strokeThickness: 3 });
 
         // --- Action Buttons ---
+        this.actionButtons = [];
         this.createActionButtons();
 
         // --- Job Board ---
-        this.jobBoardButton = this.add.text(this.cameras.main.width - 120, this.cameras.main.height - 40, 'Job Board', { padding: { x: 10, y: 5 }, backgroundColor: '#6A0DAD' })
-            .setInteractive(false).setAlpha(0.5)
-            .on('pointerdown', () => this.game.events.emit('uiAction', 'WORK'));
+        // Positioned at bottom-right, with increased size for touch
+        this.jobBoardButton = this.add.text(this.cameras.main.width - 10, this.cameras.main.height - 10, 'Job Board', {
+            fontFamily: 'Arial', fontSize: '16px', padding: { x: 15, y: 10 }, backgroundColor: '#6A0DAD', color: '#ffffff'
+        })
+            .setOrigin(1, 1) // Anchor to bottom-right
+            .setInteractive({ useHandCursor: true })
+            .setAlpha(0.5) // Initially disabled
+            .on('pointerdown', () => {
+                if (this.jobBoardButton.alpha === 1) { // Check if enabled
+                    this.game.events.emit('uiAction', 'WORK');
+                }
+            });
+
+        // Initial interactive state check
+        this.jobBoardButton.disableInteractive();
 
         // --- Retire Button ---
-        this.retireButton = this.add.text(this.cameras.main.width - 120, 10, 'Retire', { padding: { x: 10, y: 5 }, backgroundColor: '#ff00ff' })
-            .setInteractive().setVisible(false)
+        // Positioned at top-right, below the date (managed by MainScene, but we'll keep this simple)
+        this.retireButton = this.add.text(this.cameras.main.width - 10, 50, 'Retire', {
+            fontFamily: 'Arial', fontSize: '16px', padding: { x: 15, y: 10 }, backgroundColor: '#ff00ff', color: '#ffffff'
+        })
+            .setOrigin(1, 0) // Anchor to top-right
+            .setInteractive({ useHandCursor: true })
+            .setVisible(false)
             .on('pointerdown', () => this.game.events.emit('uiAction', 'RETIRE'));
 
         // --- Event Listeners ---
         this.game.events.on('updateStats', this.updateStatsUI, this);
         this.game.events.on('uiAction', this.handleUIActions, this);
+
+        // Handle resize events
+        this.scale.on('resize', this.resize, this);
 
 
         // --- Modals ---
@@ -46,37 +67,117 @@ class UIScene extends Phaser.Scene {
     }
 
     /**
-     * Creates and positions the main action buttons in two rows to avoid clutter.
+     * Handles the resize event.
+     * @param {object} gameSize - The new size of the game.
+     */
+    resize(gameSize) {
+        const width = gameSize.width;
+        const height = gameSize.height;
+
+        this.cameras.resize(width, height);
+
+        // Update static elements
+        this.jobBoardButton.setPosition(width - 10, height - 10);
+        this.retireButton.setPosition(width - 10, 50);
+
+        // Re-create flow layout
+        this.createActionButtons();
+    }
+
+    /**
+     * Creates and positions the main action buttons using a responsive flow layout.
+     * Buttons wrap upwards from the bottom-left to ensure they fit on mobile screens.
      * @private
      */
     createActionButtons() {
-        const buttonStyle = { fontFamily: 'Arial', fontSize: '14px', color: '#ffffff', backgroundColor: '#4a4a4a', padding: { x: 10, y: 5 } };
+        // Clear existing buttons
+        if (this.actionButtons) {
+            this.actionButtons.forEach(btn => btn.destroy());
+        }
+        this.actionButtons = [];
 
-        let startX = 10;
-        const row1Y = this.cameras.main.height - 75; // Top row for core actions
-        const row2Y = this.cameras.main.height - 35; // Bottom row for menus
-
-        const addButton = (text, action, y) => {
-            const button = this.add.text(startX, y, text, buttonStyle)
-                .setInteractive({ useHandCursor: true })
-                .on('pointerdown', () => this.game.events.emit('uiAction', action))
-                .on('pointerover', () => button.setStyle({ fill: '#ff0' }))
-                .on('pointerout', () => button.setStyle({ fill: '#fff' }));
-            startX += button.width + 10;
+        // Larger touch targets: 16px font + (12px * 2) padding = 40px height approx.
+        const buttonStyle = {
+            fontFamily: 'Arial', fontSize: '16px', color: '#ffffff', backgroundColor: '#4a4a4a', padding: { x: 16, y: 12 }
         };
 
-        // Row 1: Core Needs & Interactions
-        ['Feed', 'Play', 'Study', 'Explore', 'Meditate'].forEach(action => addButton(action, action.toUpperCase(), row1Y));
+        const actions = [
+            // Core Actions
+            { text: 'Feed', action: 'FEED' },
+            { text: 'Play', action: 'PLAY' },
+            { text: 'Study', action: 'STUDY' },
+            { text: 'Explore', action: 'EXPLORE' },
+            { text: 'Meditate', action: 'MEDITATE' },
+            // Menu Actions
+            { text: 'Journal', action: 'OPEN_JOURNAL' },
+            { text: 'Recipes', action: 'OPEN_RECIPES' },
+            { text: 'Hobbies', action: 'OPEN_HOBBIES' },
+            { text: 'Craft', action: 'OPEN_CRAFTING_MENU' },
+            { text: 'Decorate', action: 'DECORATE' }
+        ];
 
-        // Reset X for Row 2
-        startX = 10;
+        // Re-ordering for logical grouping:
+        // We want the most frequent actions (Feed, Play) to be easily accessible.
+        // Let's put Menu items on the very bottom row, and Core items above them.
 
-        // Row 2: Menus & Management
-        addButton('Journal', 'OPEN_JOURNAL', row2Y);
-        addButton('Recipes', 'OPEN_RECIPES', row2Y);
-        addButton('Hobbies', 'OPEN_HOBBIES', row2Y);
-        addButton('Craft', 'OPEN_CRAFTING_MENU', row2Y);
-        addButton('Decorate', 'DECORATE', row2Y);
+        const menuItems = actions.slice(5);
+        const coreItems = actions.slice(0, 5);
+
+        let bottomOffset = 10; // Margin from bottom
+        const spacing = 10;
+
+        // Function to layout a group of buttons
+        const layoutGroup = (items) => {
+            // Measure max height for this row (assumes all buttons same style height)
+            const rowHeight = 45; // Approx height including spacing
+
+            // Let's calculate lines first.
+            const lines = [];
+            let currentLine = [];
+            let currentLineWidth = 0;
+            const screenWidth = this.cameras.main.width - 120; // Reserve space for Job Board button on right
+
+            items.forEach(item => {
+                // Approximate width calculation (since we haven't created the object yet)
+                // 16px font ~ 10px per char avg + 32px padding
+                const estimatedWidth = (item.text.length * 10) + 32;
+
+                if (currentLineWidth + estimatedWidth + spacing > screenWidth && currentLine.length > 0) {
+                    // Wrap to new line
+                    lines.push(currentLine);
+                    currentLine = [];
+                    currentLineWidth = 0;
+                }
+                currentLine.push(item);
+                currentLineWidth += estimatedWidth + spacing;
+            });
+            if (currentLine.length > 0) lines.push(currentLine);
+
+            // Now render the lines from bottom up
+            lines.reverse().forEach(line => {
+                let x = 10;
+                line.forEach(item => {
+                    const btn = this.add.text(x, this.cameras.main.height - bottomOffset - 40, item.text, buttonStyle)
+                        .setInteractive({ useHandCursor: true })
+                        .on('pointerdown', () => this.game.events.emit('uiAction', item.action))
+                        .on('pointerover', () => btn.setStyle({ fill: '#ff0' }))
+                        .on('pointerout', () => btn.setStyle({ fill: '#fff' }));
+
+                    this.actionButtons.push(btn);
+                    x += btn.width + spacing;
+                });
+                bottomOffset += 50; // Move up for next row
+            });
+        };
+
+        // Layout Menus first (at bottom)
+        layoutGroup(menuItems);
+
+        // Add a little divider space
+        bottomOffset += 5;
+
+        // Layout Core actions (above menus)
+        layoutGroup(coreItems);
     }
 
     /**
@@ -116,7 +217,14 @@ class UIScene extends Phaser.Scene {
         this.statsText.setText(text);
 
         // Update interactive element states
-        this.jobBoardButton.setInteractive(!!currentCareer).setAlpha(currentCareer ? 1.0 : 0.5);
+        if (currentCareer) {
+            this.jobBoardButton.setInteractive();
+            this.jobBoardButton.setAlpha(1.0);
+        } else {
+            this.jobBoardButton.disableInteractive();
+            this.jobBoardButton.setAlpha(0.5);
+        }
+
         this.retireButton.setVisible(isLegacyReady);
 
         if (newCareerUnlocked) {
@@ -153,10 +261,21 @@ class UIScene extends Phaser.Scene {
      */
     createModal(title) {
         const modalGroup = this.add.group();
-        const modalBg = this.add.rectangle(this.cameras.main.width / 2, this.cameras.main.height / 2, 500, 400, 0x1a1a1a, 0.9).setStrokeStyle(2, 0xffffff);
-        const modalTitle = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2 - 170, title, { fontSize: '28px', color: '#fff' }).setOrigin(0.5);
-        const modalContent = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2, '', { fontSize: '16px', color: '#fff', wordWrap: { width: 480 } }).setOrigin(0.5);
-        const closeButton = this.add.text(this.cameras.main.width / 2 + 220, this.cameras.main.height / 2 - 170, 'X', { fontSize: '20px', color: '#fff', backgroundColor: '#800' , padding: { x: 8, y: 4 }}).setOrigin(0.5).setInteractive();
+        // Responsive modal sizing
+        const modalWidth = Math.min(500, this.cameras.main.width - 40);
+        const modalHeight = Math.min(400, this.cameras.main.height - 100);
+
+        const modalBg = this.add.rectangle(this.cameras.main.width / 2, this.cameras.main.height / 2, modalWidth, modalHeight, 0x1a1a1a, 0.95).setStrokeStyle(2, 0xffffff);
+        const modalTitle = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2 - (modalHeight/2) + 30, title, { fontSize: '24px', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5);
+
+        // Dynamic word wrap based on modal width
+        const modalContent = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2, '', {
+            fontSize: '16px', color: '#fff', wordWrap: { width: modalWidth - 40 }
+        }).setOrigin(0.5);
+
+        const closeButton = this.add.text(this.cameras.main.width / 2 + (modalWidth/2) - 30, this.cameras.main.height / 2 - (modalHeight/2) + 30, 'X', {
+            fontSize: '20px', color: '#fff', backgroundColor: '#800', padding: { x: 10, y: 6 }
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
         closeButton.on('pointerdown', () => {
             modalGroup.setVisible(false);

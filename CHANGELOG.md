@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.5] - 2025-11-29
+
+### Changed
+- **Responsive UI:** Completely overhauled the `UIScene` to use a responsive, touch-friendly interface.
+  - Buttons are now larger and use a "wrapping" layout that anchors to the bottom of the screen to fit any device orientation.
+  - Action buttons are dynamically arranged to prevent overlap and ensure accessibility on smaller screens.
+  - Modals are now sized relative to the screen dimensions (`this.cameras.main.width/height`) to ensure they fit within the viewport.
+
 ## [1.5.4] - 2025-11-28
 
 ### Fixed
