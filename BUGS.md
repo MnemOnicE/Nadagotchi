@@ -37,3 +37,24 @@
 **Line:** 127
 **Description:** The game logic allows players to discover recipes ("Logic-Boosting Snack" and "Stamina-Up Tea") through actions, but these recipes are not defined in the `this.recipes` object. As a result, even after discovery, players cannot craft these items, receiving a "I don't know the recipe" error.
 **Fix:** Add definitions for "Logic-Boosting Snack" and "Stamina-Up Tea" to `this.recipes` in the `Nadagotchi` constructor, using available materials.
+
+---
+
+**File:** `js/Nadagotchi.js`
+**Line:** 400
+**Description:** Although the `Genome` class calculates `isHomozygous<Archetype>` flags, they are not used in `Nadagotchi.js`, resulting in missing gameplay bonuses for pure-bred pets.
+**Fix:** Implemented specific stat bonuses in `handleAction` for each homozygous personality trait (e.g., refunds energy for Mischievous, happiness boost for Adventurer).
+
+---
+
+**File:** `js/GeneticsSystem.js`
+**Line:** 110
+**Description:** The `envMap` used for determining environmental influence on breeding is too sparse, ignoring most inventory items and limiting player agency.
+**Fix:** Expanded `envMap` to include high-value crafted items (e.g., 'Fancy Bookshelf') and raw resources, mapping them to relevant genes.
+
+---
+
+**File:** `js/Nadagotchi.js`
+**Line:** 770
+**Description:** Tie-breaking for the dominant archetype relies on internal list order (deterministic but arbitrary), which can feel non-intuitive to players who expect their pet's skills to matter.
+**Fix:** Updated `updateDominantArchetype` to break ties by comparing the relevant skills associated with each archetype (e.g., Logic+Research for Intellectual) before falling back to list order.
