@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.12.0] - 2025-12-05
 
 ### Added
+- **Hall of Ancestors:** Implemented the "Hall of Ancestors" system to commemorate retired pets.
+  - Added a new "ANCESTORS" tab to the `UIScene`.
+  - The tab displays a list of retired pets (from `PersistenceManager`).
+  - Clicking an ancestor opens a modal with their detailed stats and a unique "Ancestral Advice" quote based on their dominant archetype.
+  - Implemented `NarrativeSystem.getAdvice()` to generate wisdom from ancestors.
 - **Homozygous Trait Bonuses:** Implemented gameplay rewards for pets with consistent genetic traits, adding strategic depth to breeding.
   - **Enhanced Metabolism:** Pets with a homozygous `metabolism` gene (two identical alleles) now possess a higher maximum energy capacity (+5 Max Energy, total 105).
   - **Emotional Resilience:** Pets with a homozygous `moodSensitivity` gene recover their 'Happy' mood more easily, requiring lower stats (75% instead of 80%) to reach that state.
