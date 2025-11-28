@@ -263,10 +263,11 @@ describe('Nadagotchi', () => {
             pet.interact('Grizzled Scout');
             expect(pet.relationships['Grizzled Scout'].level).toBe(6);
             expect(pet.skills.navigation).toBeGreaterThan(1);
+        });
 
         test('interact with GIFT should use an inventory item and have a greater effect', () => {
             pet.inventory['Berries'] = 1;
-            pet.relationships.friend.level = 5;
+            pet.relationships.friend = { level: 5 };
             pet.skills.empathy = 1;
             pet.interact('friend', 'GIFT');
             expect(pet.inventory['Berries']).toBeUndefined();

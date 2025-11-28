@@ -360,20 +360,18 @@ class Nadagotchi {
      * Manages interaction with an NPC, updating relationship status and stats.
      * @param {string} npcName - The name of the NPC being interacted with.
      * @param {string} [interactionType='CHAT'] - The type of interaction (e.g., 'CHAT', 'GIFT').
-     */    interact(npcName, interactionType) {
-        if (this.relationships.hasOwnProperty(npcName)) {
-            if (interactionType === 'GIFT' && this.inventory['Berries'] > 0) {
-                this._removeItem('Berries', 1);
-                this.relationships[npcName].level += 5;
-                this.stats.happiness += 10;
-                this.skills.empathy += 0.2;
-                this.addJournalEntry(`I gave Berries to ${npcName}. They seemed to like it!`);
-            } else {
-                this.relationships[npcName].level += 1;
-                this.stats.happiness += 2;
-                this.skills.communication += 0.1;
+     */
     interact(npcName, interactionType = 'CHAT') {
         if (!this.relationships.hasOwnProperty(npcName)) {
+            return;
+        }
+
+        if (interactionType === 'GIFT' && this.inventory['Berries'] > 0) {
+            this._removeItem('Berries', 1);
+            this.relationships[npcName].level += 5;
+            this.stats.happiness += 10;
+            this.skills.empathy += 0.2;
+            this.addJournalEntry(`I gave Berries to ${npcName}. They seemed to like it!`);
             return;
         }
 
