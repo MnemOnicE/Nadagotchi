@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.0] - 2025-12-05
+
+### Changed
+- **Astronomical Festivals:** Aligned seasonal festivals with astronomical concepts (Equinoxes and Solstices). All festivals now occur on the 14th day of the season (Mid-Season) to reflect the "Clock Rigor" concept.
+  - Spring: Spring Equinox Festival
+  - Summer: Summer Solstice Celebration
+  - Autumn: Autumn Equinox Feast
+  - Winter: Winter Solstice Festival
+
 ## [1.11.2] - 2025-12-05
 
 ### Fixed
