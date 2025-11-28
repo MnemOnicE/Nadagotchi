@@ -117,7 +117,16 @@ export class GeneticsSystem {
             'Espresso': { gene: 'metabolism', value: 9 },
             'Chamomile': { gene: 'metabolism', value: 2 },
             'Metabolism-Slowing Tonic': { gene: 'metabolism', value: 2 },
-            'book': { gene: 'Intellectual', value: 80 }          // Generic Book (for tests/flexibility)
+            'book': { gene: 'Intellectual', value: 80 },          // Generic Book (for tests/flexibility)
+
+            // Expanded Environment Influence (Crafted Items & Resources)
+            'Fancy Bookshelf': { gene: 'Intellectual', value: 75 },
+            'Masterwork Chair': { gene: 'Recluse', value: 75 },
+            'Logic-Boosting Snack': { gene: 'Intellectual', value: 60 },
+            'Stamina-Up Tea': { gene: 'Adventurer', value: 65 },
+            'Shiny Stone': { gene: 'Mischievous', value: 60 },
+            'Frostbloom': { gene: 'Recluse', value: 70 },
+            'Berries': { gene: 'Nurturer', value: 50 }
         };
 
         for (const geneKey in parentGenotype) {

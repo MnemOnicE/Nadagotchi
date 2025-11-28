@@ -153,6 +153,7 @@ export class Nadagotchi {
             "Masterwork Chair": {
                 materials: { "Sticks": 10, "Shiny Stone": 2 },
                 description: "A chair of unparalleled craftsmanship."
+            },
             "Metabolism-Slowing Tonic": {
                 materials: { "Frostbloom": 1, "Sticks": 2 },
                 description: "A tonic that slows metabolism, helping to conserve energy."
@@ -403,6 +404,12 @@ export class Nadagotchi {
             case 'PLAY':
                 this.stats.energy = Math.max(0, this.stats.energy - 10);
                 this.stats.happiness = Math.min(this.maxStats.happiness, this.stats.happiness + 10);
+
+                // Homozygous Mischievous Bonus: "Energy Recovery" (Refund half energy)
+                if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousMischievous) {
+                     this.stats.energy = Math.min(this.maxStats.energy, this.stats.energy + 5);
+                }
+
                 if (['Adventurer', 'Mischievous'].includes(this.dominantArchetype)) {
                     this.mood = 'happy';
                     this.personalityPoints[this.dominantArchetype]++;
@@ -418,6 +425,11 @@ export class Nadagotchi {
                 moodMultiplier = this._getMoodMultiplier();
                 this.skills.logic += (0.1 * moodMultiplier);
                 this.skills.research += (0.1 * moodMultiplier);
+
+                // Homozygous Intellectual Bonus: Slight boost to mood recovery (Happiness)
+                if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousIntellectual) {
+                    this.stats.happiness += 5;
+                }
 
                 if (this.dominantArchetype === 'Intellectual') {
                     this.mood = 'happy';
@@ -456,6 +468,12 @@ export class Nadagotchi {
                 }
                 moodMultiplier = this._getMoodMultiplier();
                 this.skills.empathy += (0.15 * moodMultiplier);
+
+                // Homozygous Nurturer Bonus: Boost Empathy Gain
+                if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousNurturer) {
+                    this.skills.empathy += 0.2;
+                }
+
                 this.personalityPoints.Nurturer++;
                 break;
 
@@ -475,6 +493,12 @@ export class Nadagotchi {
 
             case 'EXPLORE':
                 this.stats.energy = Math.max(0, this.stats.energy - 15);
+
+                // Homozygous Adventurer Bonus: Boost Happiness Gain
+                if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousAdventurer) {
+                    this.stats.happiness += 10;
+                }
+
                 if (this.dominantArchetype === 'Adventurer') {
                     this.mood = 'happy';
                     this.stats.happiness += 20;
@@ -494,6 +518,12 @@ export class Nadagotchi {
                 this.stats.happiness += 5;
                 moodMultiplier = this._getMoodMultiplier();
                 this.skills.focus += (0.1 * moodMultiplier);
+
+                // Homozygous Recluse Bonus: Boost Focus Gain
+                if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousRecluse) {
+                    this.skills.focus += 0.2;
+                }
+
                 if (this.dominantArchetype === "Recluse") this.personalityPoints.Recluse += 2;
                 break;
 
@@ -737,12 +767,38 @@ export class Nadagotchi {
         }
 
         // If the current dominant archetype is one of the tied contenders, it remains dominant.
-        // Otherwise, a new dominant archetype is chosen deterministically from the contenders.
-        // This prevents the pet's core personality from flipping back and forth unpredictably.
+        // Otherwise, we break ties based on relevant skills.
         if (potentialDominantArchetypes.length > 0 && !potentialDominantArchetypes.includes(this.dominantArchetype)) {
-            // FIX: Always use a deterministic choice (the first one) to prevent unpredictable personality flipping.
-            // This aligns with the intended fix described in BUGS.md.
-            this.dominantArchetype = potentialDominantArchetypes[0];
+            let bestCandidate = potentialDominantArchetypes[0];
+            let highestSkillScore = -1;
+
+            potentialDominantArchetypes.forEach(archetype => {
+                let score = 0;
+                switch (archetype) {
+                    case 'Adventurer':
+                        score = this.skills.navigation;
+                        break;
+                    case 'Nurturer':
+                        score = this.skills.empathy;
+                        break;
+                    case 'Intellectual':
+                        score = this.skills.logic + this.skills.research;
+                        break;
+                    case 'Recluse':
+                        score = this.skills.focus + this.skills.crafting;
+                        break;
+                    case 'Mischievous':
+                        score = this.skills.communication;
+                        break;
+                }
+
+                if (score > highestSkillScore) {
+                    highestSkillScore = score;
+                    bestCandidate = archetype;
+                }
+            });
+
+            this.dominantArchetype = bestCandidate;
         }
     }
 
