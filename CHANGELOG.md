@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.14.0] - 2025-12-06
+
+### Changed
+- **Roadmap Update:** Updated `ROADMAP.md` to include new milestones for Phase 2 and Phase 3, addressing user feedback on missing QOL and inventory features.
+  - **In-Game Settings/Options:** Added a future work item for persistent sound, music, and gameplay speed settings (Phase 2).
+  - **Inventory/Item Management UI:** Added a future work item for a dedicated inventory modal to view item details and quantities (Phase 2).
+  - **Achievement Tracking System:** Refined the "Meta-Game" section to explicitly mention backend logic for tracking specific milestones like "Breed 5 Generations" (Phase 3).
 ## [1.13.1] - 2025-12-06
 
 ### Added
@@ -24,12 +31,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Event Key Management:** Introduced `js/EventKeys.js` to manage all event strings as constants, eliminating "magic strings" and preventing silent failures in scene communication.
   - **Data Decoupling:** Moved recipe and item definitions from the `Nadagotchi` constructor to a static `js/ItemData.js` file.
   - **Scene Updates:** Updated `MainScene.js`, `UIScene.js`, and all minigame scenes to utilize the new `EventKeys` for robust event handling.
+
 ## [1.13.0] - 2025-12-05
 
 ### Fixed
 - **Work Reward Exploit:** Implemented diminishing returns for skill and happiness gains in work minigames. Skill gain now scales inversely with the current skill level (preventing easy mastery), and happiness gain decreases as the pet approaches maximum happiness.
 - **Save Scumming Exploit:** Enhanced the `PersistenceManager` to obfuscate save data using Base64 encoding and added a hash integrity check to detect tampering. Legacy plain JSON saves are still supported for backward compatibility.
 - **Quest Logic Bypass:** Fixed a logic flaw in the Artisan "Masterwork Crafting" quest. The quest stage 2 completion now strictly requires the "Masterwork Chair" to be crafted while the quest is active (tracking a `hasCraftedChair` flag), preventing players from bypassing the requirement by cheating the item into their inventory.
+
 ## [1.12.1] - 2025-12-05
 
 ### Added
@@ -130,7 +139,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Unit Tests:** Updated `tests/Genetics.test.js` to verify random default generation, average calculation for metabolism, homozygous detection, and the new item logic.
 
 ### Changed
-- **Nadagotchi Initialization:** Updated `js/Nadagotchi.js` to utilize the new random default generation for Genomes. The "starter pet" bias is now applied as a boost on top of this random wild background, ensuring the player's choice remains significant but organic.
+- **Nadagotchi Integration:** Updated `js/Nadagotchi.js` to utilize the new random default generation for Genomes. The "starter pet" bias is now applied as a boost on top of this random wild background, ensuring the player's choice remains significant but organic.
 - **Breeding Scene UI:** Updated `js/BreedingScene.js` to include the "Espresso" item in the selection panel and improved the layout spacing to accommodate the new option.
 
 ## [1.8.0] - 2025-11-30

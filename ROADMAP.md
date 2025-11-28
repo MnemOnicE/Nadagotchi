@@ -52,6 +52,7 @@ This phase focuses on building out the primary gameplay loops, giving players cl
         -   [x] Refined festival timing to align with astronomical events (Equinoxes/Solstices) for "Clock Rigor".
 -   **[ ] Future Work:**
     -   [ ] Allow for deeper home customization with player-placed furniture.
+    -   [ ] **Inventory/Item Management UI:** Develop a dedicated UI modal for viewing all items, quantities, and descriptions, which is currently missing but required.
     -   [x] Expand NPC interactions with more complex dialogues and relationship-based events.
         -   [x] Implemented multi-stage quest system (e.g., Masterwork Crafting).
         -   [x] Hardened quest logic to prevent progression exploits.
@@ -67,6 +68,8 @@ This phase focuses on building out the primary gameplay loops, giving players cl
 -   **[x] Security & Balance:**
     -   [x] Implemented save data obfuscation and integrity verification to prevent tampering.
     -   [x] Implemented diminishing returns logic for minigame rewards to ensure long-term progression balance.
+-   **[ ] Future Work:**
+    -   [ ] **In-Game Settings/Options:** Implement persistent settings for sound, music volume, and gameplay speed. This is crucial for user experience and accessibility.
 
 ---
 
@@ -97,6 +100,6 @@ This phase will introduce long-term replayability and a deeper sense of history 
     -   [x] Develop a "Recipe/Crafting Book" to collect and reference discovered recipes.
     -   [x] **Genetics Loop:** Connected crafting and seasons to genetics via specific items (e.g., "Metabolism-Slowing Tonic").
 -   **[ ] Advanced Features:**
-    -   [ ] Implement an in-game achievement and milestone system.
+    -   [ ] **Achievement Tracking System:** Implement backend logic to track milestones (e.g., "Breed 5 Generations," "Master a Career"), serving as the next logical step after stabilizing the core game loop.
     -   [ ] Introduce a "Showcase System" for sharing pet snapshots and achievements.
     -   [ ] Develop the "Mystery Egg Exchange" for asynchronous sharing of genetic data with friends.
