@@ -72,7 +72,8 @@ export class MainScene extends Phaser.Scene {
         this.worldState = {
             time: this.worldClock.getCurrentPeriod(),
             weather: this.weatherSystem.getCurrentWeather(),
-            activeEvent: this.eventManager.getActiveEvent()
+            activeEvent: this.eventManager.getActiveEvent(),
+            season: this.calendar.season
         };
 
         this.stars = Array.from({ length: 100 }, () => ({ x: Math.random(), y: Math.random() }));
@@ -135,6 +136,7 @@ export class MainScene extends Phaser.Scene {
 
         this.worldState.time = this.worldClock.getCurrentPeriod();
         this.worldState.weather = this.weatherSystem.getCurrentWeather();
+        this.worldState.season = this.calendar.season;
         this.drawSky();
 
         this.nadagotchi.live(this.worldState);
@@ -212,6 +214,11 @@ export class MainScene extends Phaser.Scene {
             switch (data.career) {
                 case 'Innovator': skillUp = 'logic'; this.nadagotchi.skills.logic += 1.5; break;
                 case 'Scout': skillUp = 'navigation'; this.nadagotchi.skills.navigation += 1.5; break;
+                case 'Archaeologist':
+                    skillUp = 'research & navigation';
+                    this.nadagotchi.skills.research += 1.0;
+                    this.nadagotchi.skills.navigation += 1.0;
+                    break;
                 case 'Healer': skillUp = 'empathy'; this.nadagotchi.skills.empathy += 1.5; break;
                 case 'Artisan':
                     skillUp = 'crafting';
@@ -234,15 +241,16 @@ export class MainScene extends Phaser.Scene {
     startWorkMinigame() {
         if (!this.nadagotchi.currentCareer) return;
         const careerToSceneMap = {
-            'Innovator': 'LogicPuzzleScene',
-            'Scout': 'ScoutMinigameScene',
-            'Healer': 'HealerMinigameScene',
-            'Artisan': 'ArtisanMinigameScene'
+            'Innovator': { key: 'LogicPuzzleScene' },
+            'Scout': { key: 'ScoutMinigameScene' },
+            'Archaeologist': { key: 'ScoutMinigameScene', data: { careerName: 'Archaeologist' } },
+            'Healer': { key: 'HealerMinigameScene' },
+            'Artisan': { key: 'ArtisanMinigameScene' }
         };
-        const sceneKey = careerToSceneMap[this.nadagotchi.currentCareer];
-        if (sceneKey) {
+        const sceneConfig = careerToSceneMap[this.nadagotchi.currentCareer];
+        if (sceneConfig) {
             this.scene.pause();
-            this.scene.launch(sceneKey);
+            this.scene.launch(sceneConfig.key, sceneConfig.data || {});
         }
     }
 

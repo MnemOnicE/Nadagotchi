@@ -31,8 +31,10 @@ This phase focuses on building out the primary gameplay loops, giving players cl
 -   **[x] Career Mini-Games:**
     -   [x] Designed and implemented unique, engaging mini-games for the Scout, Healer, and Artisan careers.
      -   [x] Implemented comprehensive test coverage for all career mini-games.
+-   **[x] Hybrid Career System:**
+    -   [x] Developed a "multi-classing" system to allow for hybrid careers.
+    -   [x] Implemented the "Archaeologist" career (Adventurer + Intellectual).
 -   **[ ] Future Work:**
-    -   [ ] Develop a "multi-classing" system to allow for hybrid careers (e.g., Archaeologist from Adventurer + Intellectual skills).
     -   [ ] Introduce NPC "mentors" in career-specific guilds to guide skill development.
 
 ### **II. Dynamic World Events & Environmental Interaction**
@@ -46,6 +48,7 @@ This phase focuses on building out the primary gameplay loops, giving players cl
 -   **[x] Dynamic World System:**
     -   [x] Implemented a full Day/Night cycle and dynamic Weather System that affects mood and activities.
     -   [x] Introduced seasonal festivals and rare, spontaneous events (e.g., 'Traveling Merchant').
+        -   [x] Refined festival timing to align with astronomical events (Equinoxes/Solstices) for "Clock Rigor".
 -   **[ ] Future Work:**
     -   [ ] Allow for deeper home customization with player-placed furniture.
     -   [x] Expand NPC interactions with more complex dialogues and relationship-based events.
@@ -73,16 +76,22 @@ This phase will introduce long-term replayability and a deeper sense of history 
     -   [x] **GeneticsSystem:** Implemented a backend logic layer (Genotype/Phenotype) supporting Mendelian-inspired inheritance.
     -   [x] **Traits & Metabolism:** Wired passive traits (Night Owl/Photosynthetic) and Metabolism to directly affect the `live()` simulation loop (stats decay).
     -   [x] **Environmental Influence:** Integrated item-based gene modification (e.g., "Espresso", "Chamomile") into the breeding process.
-    -   [x] **Genetic Scanner:** Implemented a UI tool to allow players to inspect the raw Genotype (alleles) of their pet.
+    -   [x] **Genetic Scanner:** Implemented a UI tool to allow players to inspect the raw Genotype (alleles), highlighting heterozygous traits.
     -   [x] **Randomness & Mutation:** Added mutation logic and random "wild" gene generation for deeper variety.
+-   **[x] Hall of Ancestors:**
+    -   [x] Introduce a "Hall of Ancestors" to commemorate retired pets.
+    -   [x] Ancestors offer advice based on their personality.
+-   **[ ] Future Work:**
+    -   [ ] Implement specific bonuses for "Homozygous" trait combinations.
+    -   [x] **Homozygous Bonuses:** Implemented specific stat bonuses (Max Energy, Mood Recovery) for pets with homozygous genes.
 -   **[ ] Future Work:**
     -   [ ] Introduce a "Hall of Ancestors" to commemorate retired pets.
-    -   [ ] Implement specific bonuses for "Homozygous" trait combinations.
 
 ### **V. Meta-Game & Community Features**
 -   **[x] Initial Implementation:**
     -   [x] Create the "Tamagotchi Journal" to automatically log significant events and create a personal narrative.
     -   [x] Develop a "Recipe/Crafting Book" to collect and reference discovered recipes.
+    -   [x] **Genetics Loop:** Connected crafting and seasons to genetics via specific items (e.g., "Metabolism-Slowing Tonic").
 -   **[ ] Advanced Features:**
     -   [ ] Implement an in-game achievement and milestone system.
     -   [ ] Introduce a "Showcase System" for sharing pet snapshots and achievements.

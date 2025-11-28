@@ -92,6 +92,15 @@ export class BreedingScene extends Phaser.Scene {
             { name: 'Chamomile', emoji: '🍵', description: 'Decreases Metabolism (Calm)' }
         ];
 
+        // Check parent inventory for special crafted items
+        if (this.parentData.inventory && this.parentData.inventory['Metabolism-Slowing Tonic'] > 0) {
+            items.push({
+                name: 'Metabolism-Slowing Tonic',
+                emoji: '🧪',
+                description: 'Slows Metabolism (Efficient)'
+            });
+        }
+
         // Adjust spacing to fit more items
         const spacing = 120;
         const totalWidth = (items.length - 1) * spacing;

@@ -216,6 +216,7 @@ describe('Minigames Test Suite', () => {
         beforeEach(() => {
             scene = new ScoutMinigameScene();
             Object.assign(scene, mockContext);
+            scene.init(); // Initialize defaults
         });
 
         test('create() sets up grid and timer', () => {
