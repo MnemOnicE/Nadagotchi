@@ -116,7 +116,13 @@ class MainScene extends Phaser.Scene {
      * @param {number} delta - The time in milliseconds since the last frame.
      */
     update(time, delta) {
-        this.worldClock.update(delta);
+        const dayPassed = this.worldClock.update(delta);
+        if (dayPassed) {
+            this.calendar.advanceDay();
+            this.eventManager.update();
+            this.updateDateText();
+        }
+
         this.worldState.time = this.worldClock.getCurrentPeriod();
         this.worldState.weather = this.weatherSystem.getCurrentWeather();
         this.drawSky();

@@ -29,6 +29,7 @@ class WorldClock {
      * Updates the in-game time.
      * This should be called from the main scene's update loop.
      * @param {number} delta - The time elapsed since the last frame in milliseconds.
+     * @returns {boolean} True if a new day has started (midnight crossed), false otherwise.
      */
     update(delta) {
         // Increment the time based on the real-world time that has passed
@@ -37,7 +38,9 @@ class WorldClock {
         // Wrap around at the end of the day
         if (this.time >= 1) {
             this.time -= 1;
+            return true;
         }
+        return false;
     }
 
     /**
