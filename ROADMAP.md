@@ -46,6 +46,7 @@ This phase focuses on building out the primary gameplay loops, giving players cl
 -   **[x] Dynamic World System:**
     -   [x] Implemented a full Day/Night cycle and dynamic Weather System that affects mood and activities.
     -   [x] Introduced seasonal festivals and rare, spontaneous events (e.g., 'Traveling Merchant').
+        -   [x] Refined festival timing to align with astronomical events (Equinoxes/Solstices) for "Clock Rigor".
 -   **[ ] Future Work:**
     -   [ ] Allow for deeper home customization with player-placed furniture.
     -   [ ] Expand NPC interactions with more complex dialogues and relationship-based events.
@@ -79,6 +80,9 @@ This phase will introduce long-term replayability and a deeper sense of history 
     -   [x] Ancestors offer advice based on their personality.
 -   **[ ] Future Work:**
     -   [ ] Implement specific bonuses for "Homozygous" trait combinations.
+    -   [x] **Homozygous Bonuses:** Implemented specific stat bonuses (Max Energy, Mood Recovery) for pets with homozygous genes.
+-   **[ ] Future Work:**
+    -   [ ] Introduce a "Hall of Ancestors" to commemorate retired pets.
 
 ### **V. Meta-Game & Community Features**
 -   **[x] Initial Implementation:**

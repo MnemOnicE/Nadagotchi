@@ -13,27 +13,27 @@ export class EventManager {
         // In a larger game, this could be loaded from a JSON file.
         this.eventDefinitions = {
             // --- SEASONAL FESTIVALS ---
-            'SpringBloomFestival': {
+            'SpringEquinoxFestival': {
                 type: 'festival',
-                // This festival happens on the 5th day of Spring.
-                trigger: (date) => date.season === 'Spring' && date.day === 5,
+                // This festival happens on the 14th day of Spring.
+                trigger: (date) => date.season === 'Spring' && date.day === 14,
                 // A description to be shown to the player.
-                description: 'The Spring Bloom Festival is today! The air is filled with pollen and joy.'
+                description: 'The Spring Equinox Festival is today! The day and night are in perfect balance.'
             },
-            'SummerSandcastleContest': {
+            'SummerSolsticeCelebration': {
                 type: 'festival',
-                trigger: (date) => date.season === 'Summer' && date.day === 15,
-                description: 'The annual Summer Sandcastle Contest is happening at the beach!'
+                trigger: (date) => date.season === 'Summer' && date.day === 14,
+                description: 'The Summer Solstice Celebration! The longest day of the year brings endless fun.'
             },
-            'AutumnHarvestFair': {
+            'AutumnEquinoxFeast': {
                 type: 'festival',
-                trigger: (date) => date.season === 'Autumn' && date.day === 10,
-                description: 'Visit the Autumn Harvest Fair for pumpkin carving and delicious treats.'
+                trigger: (date) => date.season === 'Autumn' && date.day === 14,
+                description: 'The Autumn Equinox Feast. A time to reflect as the nights grow longer.'
             },
-            'WinterLightParade': {
+            'WinterSolsticeFestival': {
                 type: 'festival',
-                trigger: (date) => date.season === 'Winter' && date.day === 20,
-                description: 'The magical Winter Light Parade is tonight!'
+                trigger: (date) => date.season === 'Winter' && date.day === 14,
+                description: 'The Winter Solstice Festival. Celebrating the return of the light on the darkest day.'
             },
 
             // --- RARE, SPONTANEOUS EVENTS ---
