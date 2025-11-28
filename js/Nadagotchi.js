@@ -150,6 +150,9 @@ export class Nadagotchi {
                 materials: { "Berries": 1, "Sticks": 1 },
                 description: "A warm tea that restores energy."
             },
+            "Masterwork Chair": {
+                materials: { "Sticks": 10, "Shiny Stone": 2 },
+                description: "A chair of unparalleled craftsmanship."
             "Metabolism-Slowing Tonic": {
                 materials: { "Frostbloom": 1, "Sticks": 2 },
                 description: "A tonic that slows metabolism, helping to conserve energy."
@@ -164,6 +167,9 @@ export class Nadagotchi {
             'Master Artisan': { level: 0 },
             'Sickly Villager': { level: 0 }
         };
+        /** @type {Object.<string, object>} A map of active quests. */
+        this.quests = (loadedData && loadedData.quests) ? loadedData.quests : {};
+
         /** @type {string} The pet's current location. */
         this.location = loadedData ? loadedData.location : 'Home';
 
@@ -231,6 +237,7 @@ export class Nadagotchi {
                 'Master Artisan': { level: 0 },
                 'Sickly Villager': { level: 0 }
             },
+            quests: {}, // Quests reset for new generation
             location: 'Home',
             genome: childGenome
         };
@@ -322,6 +329,7 @@ export class Nadagotchi {
         if (this.stats.happiness > this.maxStats.happiness) this.stats.happiness = this.maxStats.happiness;
 
         // Mood Calculation - Use moodSensitivity from phenotype
+        const sensitivity = (this.genome && this.genome.phenotype) ? this.genome.phenotype.moodSensitivity : 5;
         // Homozygous MoodSensitivity Bonus: Faster recovery (lower threshold for happiness)
         let happyThreshold = 80;
         if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousMoodSensitivity) {
@@ -612,8 +620,12 @@ export class Nadagotchi {
                 this.addJournalEntry("The Grizzled Scout shared a story about a hidden grove. I learned a little about navigating the woods.");
                 break;
             case 'Master Artisan':
-                this.skills.crafting += 0.15 * moodMultiplier;
-                this.addJournalEntry("The Master Artisan showed me a clever technique for joining wood. My crafting skill improved.");
+                if (this.relationships['Master Artisan'].level >= 5) {
+                    this._handleArtisanQuest();
+                } else {
+                    this.skills.crafting += 0.15 * moodMultiplier;
+                    this.addJournalEntry("The Master Artisan showed me a clever technique for joining wood. My crafting skill improved.");
+                }
                 break;
             case 'Sickly Villager':
                 this.skills.empathy += 0.15 * moodMultiplier;
@@ -622,6 +634,46 @@ export class Nadagotchi {
             default:
                 this.addJournalEntry(`I had a nice chat with ${npcName}.`);
                 break;
+        }
+    }
+
+    /**
+     * Handles the logic for the Master Artisan's quest line.
+     * @private
+     */
+    _handleArtisanQuest() {
+        if (!this.quests['masterwork_crafting']) {
+            this.quests['masterwork_crafting'] = { stage: 1, name: 'Masterwork Crafting' };
+            this.addJournalEntry("The Master Artisan sees potential in me. He asked for 5 Sticks to prove my dedication.");
+            return;
+        }
+
+        const quest = this.quests['masterwork_crafting'];
+
+        if (quest.stage === 1) {
+            if ((this.inventory['Sticks'] || 0) >= 5) {
+                this._removeItem('Sticks', 5);
+                this.discoverRecipe("Masterwork Chair");
+                quest.stage = 2;
+                this.addJournalEntry("I gave the Sticks to the Artisan. He taught me how to make a Masterwork Chair! I need to craft one to show him.");
+            } else {
+                this.addJournalEntry("The Master Artisan is waiting for 5 Sticks.");
+            }
+        } else if (quest.stage === 2) {
+            if (this.inventory['Masterwork Chair'] && this.inventory['Masterwork Chair'] > 0) {
+                this._removeItem('Masterwork Chair', 1);
+                quest.stage = 3;
+                this.skills.crafting += 2;
+                this.stats.happiness += 20;
+                this.addJournalEntry("The Master Artisan was impressed by my chair! He declared me a true craftsman.");
+            } else {
+                this.addJournalEntry("I need to craft a Masterwork Chair to show the Artisan.");
+            }
+        } else {
+            // Completed
+            const moodMultiplier = this._getMoodMultiplier();
+            this.skills.crafting += 0.2 * moodMultiplier;
+            this.addJournalEntry("The Master Artisan greeted me warmly as a fellow master. We discussed advanced crafting theory.");
         }
     }
 

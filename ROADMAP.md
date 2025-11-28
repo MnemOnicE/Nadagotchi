@@ -51,7 +51,8 @@ This phase focuses on building out the primary gameplay loops, giving players cl
         -   [x] Refined festival timing to align with astronomical events (Equinoxes/Solstices) for "Clock Rigor".
 -   **[ ] Future Work:**
     -   [ ] Allow for deeper home customization with player-placed furniture.
-    -   [ ] Expand NPC interactions with more complex dialogues and relationship-based events.
+    -   [x] Expand NPC interactions with more complex dialogues and relationship-based events.
+        -   [x] Implemented multi-stage quest system (e.g., Masterwork Crafting).
 
 ### **III. Technical Foundation & Architecture**
 -   **[x] Modern Tooling & Architecture:**

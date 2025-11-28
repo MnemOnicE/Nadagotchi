@@ -271,10 +271,10 @@ describe('Nadagotchi', () => {
             expect(pet.inventory['Berries']).toBeUndefined();
             expect(pet.relationships.friend.level).toBe(10);
             expect(pet.skills.empathy).toBeGreaterThan(1);
-            pet.relationships['Master Artisan'].level = 5;
+            pet.relationships['Master Artisan'].level = 3;
             pet.skills.crafting = 1;
             pet.interact('Master Artisan');
-            expect(pet.relationships['Master Artisan'].level).toBe(6);
+            expect(pet.relationships['Master Artisan'].level).toBe(4);
             expect(pet.skills.crafting).toBeGreaterThan(1);
         });
 

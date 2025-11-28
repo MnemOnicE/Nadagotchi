@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.12.0] - 2025-12-05
 
 ### Added
+- **NPC Quest System:** Introduced a new quest system framework in `js/Nadagotchi.js`.
+- **Masterwork Crafting Quest:** Implemented a unique, multi-stage quest for the "Master Artisan" NPC.
+  - Reaching relationship level 5 triggers the "Masterwork Crafting" quest line.
+  - Players must gather materials ("Sticks") to learn a new recipe ("Masterwork Chair").
+  - Crafting and delivering the "Masterwork Chair" completes the quest, granting "Master Artisan" recognition and a permanent skill boost to future interactions.
+- **New Recipe:** Added "Masterwork Chair" to the recipe definitions.
 - **Hybrid Career System:** Introduced the concept of "Hybrid Careers" which require high levels in multiple personality traits and skills, rewarding diverse playstyles.
   - **"Archaeologist" Career:** The first hybrid career, requiring high 'Adventurer' AND 'Intellectual' personality points, plus high 'Navigation' and 'Research' skills.
   - **"Research" Skill:** A new skill that is developed alongside Logic when studying or interacting with bookshelves.
