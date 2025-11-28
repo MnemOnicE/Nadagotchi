@@ -8,7 +8,7 @@ global.Phaser = {
     }
 };
 
-const LogicPuzzleScene = require('../js/LogicPuzzleScene');
+const { LogicPuzzleScene } = require('../js/LogicPuzzleScene');
 
 // Mock Phaser Scene and related functionality
 const mockScene = {

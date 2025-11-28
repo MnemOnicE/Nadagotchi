@@ -50,13 +50,20 @@ This phase focuses on building out the primary gameplay loops, giving players cl
     -   [ ] Allow for deeper home customization with player-placed furniture.
     -   [ ] Expand NPC interactions with more complex dialogues and relationship-based events.
 
+### **III. Technical Foundation & Architecture**
+-   **[x] Modern Tooling & Architecture:**
+    -   [x] Migrated codebase to ES6 Modules with `import`/`export`.
+    -   [x] Implemented Vite for development and building.
+    -   [x] Centralized asset management in a dedicated `PreloaderScene`.
+    -   [x] Standardized unit testing with Jest and Babel.
+
 ---
 
 ## **Phase 3: Generational & Meta-Game Systems (Upcoming)**
 
 This phase will introduce long-term replayability and a deeper sense of history and accomplishment.
 
-### **III. Generational Legacy & Breeding System**
+### **IV. Generational Legacy & Breeding System**
 -   **[ ] Initial Implementation:**
     -   [ ] Design the "Breeding Den" UI and environment. *(Backend logic implemented, UI pending)*
     -   [ ] Develop the core mechanic for "Personality Gene" inheritance.
@@ -66,11 +73,11 @@ This phase will introduce long-term replayability and a deeper sense of history 
     -   [ ] Introduce a "Hall of Ancestors" to commemorate retired pets.
     -   [ ] Allow player actions to influence offspring traits ("Nurture over Nature").
 
-### **IV. Meta-Game & Community Features**
+### **V. Meta-Game & Community Features**
 -   **[ ] Initial Implementation:**
     -   [ ] Create the "Tamagotchi Journal" to automatically log significant events and create a personal narrative.
     -   [ ] Develop a "Recipe/Crafting Book" to collect and reference discovered recipes.
 -   **[ ] Advanced Features:**
     -   [ ] Implement an in-game achievement and milestone system.
     -   [ ] Introduce a "Showcase System" for sharing pet snapshots and achievements.
-    -   [ ] Develop the "Mystery Egg Exchange" for asynchronous sharing of genetic data with other players.
+    -   [ ] Develop the "Mystery Egg Exchange" for asynchronous sharing of genetic data with friends.

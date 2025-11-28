@@ -1,5 +1,5 @@
-const EventManager = require('../js/EventManager');
-const Calendar = require('../js/Calendar');
+import { EventManager } from '../js/EventManager';
+import { Calendar } from '../js/Calendar';
 
 describe('EventManager', () => {
     let eventManager;

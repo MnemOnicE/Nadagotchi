@@ -3,7 +3,7 @@
  * @classdesc
  * A utility class to generate consistent, "Neo-Retro" style 3D buttons.
  */
-class ButtonFactory {
+export class ButtonFactory {
     /**
      * Creates a 3D beveled button.
      * @param {Phaser.Scene} scene - The scene to add the button to.

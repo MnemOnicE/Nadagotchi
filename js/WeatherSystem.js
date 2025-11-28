@@ -1,7 +1,7 @@
 /**
  * WeatherSystem: Manages the in-game weather, transitions, and effects.
  */
-class WeatherSystem {
+export class WeatherSystem {
     /**
      * @param {Phaser.Scene} scene - The Phaser scene this system is attached to.
      */

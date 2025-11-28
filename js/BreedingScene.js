@@ -1,3 +1,5 @@
+import { PersistenceManager } from './PersistenceManager.js';
+
 /**
  * @class BreedingScene
  * @extends Phaser.Scene
@@ -5,7 +7,7 @@
  * A Phaser Scene for the Generational Legacy system.
  * It provides a graphical environment for retiring a pet and influencing the creation of a new generation.
  */
-class BreedingScene extends Phaser.Scene {
+export class BreedingScene extends Phaser.Scene {
     constructor() {
         super({ key: 'BreedingScene' });
         /** @type {Array<Phaser.GameObjects.GameObject>} */

@@ -1,7 +1,7 @@
 /**
  * Manages the in-game date, seasons, and time.
  */
-class Calendar {
+export class Calendar {
     /**
      * Initializes the calendar.
      * @param {object} [loadedData=null] - Optional saved data to load from.

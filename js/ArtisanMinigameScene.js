@@ -5,7 +5,7 @@
  * A mini-game for the 'Artisan' career path.
  * The player must memorize and replicate a pattern shown on a grid.
  */
-class ArtisanMinigameScene extends Phaser.Scene {
+export class ArtisanMinigameScene extends Phaser.Scene {
     constructor() {
         super({ key: 'ArtisanMinigameScene' });
         /** @type {number} The size of the grid (e.g., 3 for a 3x3 grid). */

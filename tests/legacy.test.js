@@ -130,16 +130,11 @@ global.localStorage = new LocalStorageMock();
 
 // Since the JS files are not modules, we require a transform to make them testable.
 // This is handled by jest.config.js, so we can use require here.
-const Nadagotchi = require('../js/Nadagotchi.js');
-const MainScene = require('../js/MainScene.js');
-const UIScene = require('../js/UIScene.js');
-const PersistenceManager = require('../js/PersistenceManager.js');
-const ButtonFactory = require('../js/ButtonFactory.js');
-
-// Assign to global scope for dependencies that might expect it
-global.Nadagotchi = Nadagotchi;
-global.PersistenceManager = PersistenceManager;
-global.ButtonFactory = ButtonFactory;
+const { Nadagotchi } = require('../js/Nadagotchi.js');
+const { MainScene } = require('../js/MainScene.js');
+const { UIScene } = require('../js/UIScene.js');
+const { PersistenceManager } = require('../js/PersistenceManager.js');
+const { ButtonFactory } = require('../js/ButtonFactory.js');
 
 
 describe('Legacy Loop Integration', () => {
@@ -208,7 +203,7 @@ describe('Legacy Loop Integration', () => {
     });
 });
 
-const BreedingScene = require('../js/BreedingScene.js');
+const { BreedingScene } = require('../js/BreedingScene.js');
 
 describe('BreedingScene', () => {
     let breedingScene;

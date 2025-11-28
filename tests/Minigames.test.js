@@ -18,9 +18,9 @@ global.Phaser = {
 };
 
 // 2. Import Scenes
-const ArtisanMinigameScene = require('../js/ArtisanMinigameScene');
-const HealerMinigameScene = require('../js/HealerMinigameScene');
-const ScoutMinigameScene = require('../js/ScoutMinigameScene');
+const { ArtisanMinigameScene } = require('../js/ArtisanMinigameScene');
+const { HealerMinigameScene } = require('../js/HealerMinigameScene');
+const { ScoutMinigameScene } = require('../js/ScoutMinigameScene');
 
 // 3. Helper to create a mock rectangle with data capability
 const createMockRectangle = () => {
