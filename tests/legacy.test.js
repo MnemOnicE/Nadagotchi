@@ -22,6 +22,9 @@ class Scene {
             setAlpha: jest.fn().mockReturnThis(),
             setStyle: jest.fn().mockReturnThis(),
             setOrigin: jest.fn().mockReturnThis(),
+            setPosition: jest.fn().mockReturnThis(),
+            width: 100,
+            height: 20
         };
         const addMock = {
             text: jest.fn(() => textMock),
@@ -37,7 +40,12 @@ class Scene {
                     setOrigin: jest.fn(() => ({
                         setInteractive: jest.fn()
                     }))
-                }))
+                })),
+                setOrigin: jest.fn().mockReturnThis(),
+                setPosition: jest.fn().mockReturnThis(),
+                setInteractive: jest.fn().mockReturnThis(),
+                on: jest.fn().mockReturnThis(),
+                setFillStyle: jest.fn().mockReturnThis()
             })),
             setInteractive: jest.fn(() => addMock),
             on: jest.fn(() => addMock),
@@ -50,7 +58,10 @@ class Scene {
             setStyle: jest.fn(() => addMock),
             destroy: jest.fn(),
             addMultiple: jest.fn(),
-            content: { setText: jest.fn() }
+            content: { setText: jest.fn() },
+            add: jest.fn(),
+            setSize: jest.fn().mockReturnThis(),
+            setPosition: jest.fn().mockReturnThis()
         };
         this.add = addMock;
         this.input = { on: jest.fn() };
@@ -106,10 +117,12 @@ const Nadagotchi = require('../js/Nadagotchi.js');
 const MainScene = require('../js/MainScene.js');
 const UIScene = require('../js/UIScene.js');
 const PersistenceManager = require('../js/PersistenceManager.js');
+const ButtonFactory = require('../js/ButtonFactory.js');
 
 // Assign to global scope for dependencies that might expect it
 global.Nadagotchi = Nadagotchi;
 global.PersistenceManager = PersistenceManager;
+global.ButtonFactory = ButtonFactory;
 
 
 describe('Legacy Loop Integration', () => {
