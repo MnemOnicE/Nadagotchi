@@ -19,17 +19,48 @@ class MainScene extends Phaser.Scene {
      * Used to load all necessary assets like images, spritesheets, and audio.
      */
     preload() {
-        this.load.spritesheet('pet', 'https://placehold.co/64x16/000000/ffffff.png?text=^_^', { frameWidth: 16, frameHeight: 16 });
-        this.load.image('thought_bubble', 'https://placehold.co/32x32/ffffff/000000.png?text=!');
-        this.load.image('explore_bubble', 'https://placehold.co/32x32/ffffff/000000.png?text=🔎');
-        this.load.image('pixel', 'https://placehold.co/1x1/ffffff/ffffff.png');
-        this.load.image('bookshelf', 'https://placehold.co/64x64/8B4513/ffffff.png?text=Books');
-        this.load.image('fancy_bookshelf', 'https://placehold.co/64x64/D2691E/ffffff.png?text=Fancy+Books');
-        this.load.image('plant', 'https://placehold.co/64x64/228B22/ffffff.png?text=Plant');
-        this.load.image('crafting_table', 'https://placehold.co/64x64/A0522D/ffffff.png?text=Craft');
-        this.load.image('npc_scout', 'https://placehold.co/48x48/704214/ffffff.png?text=Scout');
-        this.load.image('npc_artisan', 'https://placehold.co/48x48/4682B4/ffffff.png?text=Artisan');
-        this.load.image('npc_villager', 'https://placehold.co/48x48/6B8E23/ffffff.png?text=Villager');
+        // Generate textures programmatically to avoid external dependency issues
+        const graphics = this.make.graphics({ x: 0, y: 0, add: false });
+
+        // Helper to create simple colored box textures
+        const createBox = (key, color, size) => {
+            graphics.clear();
+            graphics.fillStyle(color);
+            graphics.fillRect(0, 0, size, size);
+            graphics.generateTexture(key, size, size);
+        };
+
+        createBox('bookshelf', 0x8B4513, 64);
+        createBox('fancy_bookshelf', 0xD2691E, 64);
+        createBox('plant', 0x228B22, 64);
+        createBox('crafting_table', 0xA0522D, 64);
+        createBox('npc_scout', 0x704214, 48);
+        createBox('npc_artisan', 0x4682B4, 48);
+        createBox('npc_villager', 0x6B8E23, 48);
+
+        // Bubbles
+        graphics.clear();
+        graphics.fillStyle(0xFFFFFF); graphics.fillCircle(16, 16, 14);
+        graphics.generateTexture('thought_bubble', 32, 32);
+
+        graphics.clear();
+        graphics.fillStyle(0xADD8E6); graphics.fillCircle(16, 16, 14);
+        graphics.generateTexture('explore_bubble', 32, 32);
+
+        // Pixel
+        graphics.clear();
+        graphics.fillStyle(0xFFFFFF); graphics.fillRect(0, 0, 1, 1);
+        graphics.generateTexture('pixel', 1, 1);
+
+        // Pet Spritesheet (64x16) - 4 frames of 16x16
+        graphics.clear();
+        graphics.fillStyle(0xFFFF00); graphics.fillRect(0, 0, 16, 16); // Happy (Yellow)
+        graphics.fillStyle(0xFFFFFF); graphics.fillRect(16, 0, 16, 16); // Neutral (White)
+        graphics.fillStyle(0x0000FF); graphics.fillRect(32, 0, 16, 16); // Sad (Blue)
+        graphics.fillStyle(0xFF0000); graphics.fillRect(48, 0, 16, 16); // Angry (Red)
+        graphics.generateTexture('pet', 64, 16);
+
+        graphics.destroy();
     }
 
     /**
@@ -39,6 +70,15 @@ class MainScene extends Phaser.Scene {
      * @param {object} [data.newPetData] - Data for creating a new pet, typically from the BreedingScene.
      */
     create(data) {
+        // Define frames for the generated pet texture
+        const petTexture = this.textures.get('pet');
+        if (petTexture && !petTexture.getFrameNames().includes('0')) {
+             petTexture.add(0, 0, 0, 0, 16, 16);
+             petTexture.add(1, 0, 16, 0, 16, 16);
+             petTexture.add(2, 0, 32, 0, 16, 16);
+             petTexture.add(3, 0, 48, 0, 16, 16);
+        }
+
         // --- Environment Setup ---
         this.skyTexture = this.textures.createCanvas('sky', this.cameras.main.width, this.cameras.main.height);
         this.add.image(0, 0, 'sky').setOrigin(0);
