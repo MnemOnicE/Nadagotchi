@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.0] - 2025-12-05
+
+### Added
+- **Hybrid Career System:** Introduced the concept of "Hybrid Careers" which require high levels in multiple personality traits and skills, rewarding diverse playstyles.
+  - **"Archaeologist" Career:** The first hybrid career, requiring high 'Adventurer' AND 'Intellectual' personality points, plus high 'Navigation' and 'Research' skills.
+  - **"Research" Skill:** A new skill that is developed alongside Logic when studying or interacting with bookshelves.
+- **Dynamic Work System:** Updated the `ScoutMinigameScene` to support dynamic career contexts. It can now be reused for the "Archaeologist" career (representing fieldwork/digs) with appropriate text updates.
+- **Unit Tests:** Added `tests/HybridCareer.test.js` to verify the unlocking conditions and skill progression for the new hybrid system.
+
+### Changed
+- **Nadagotchi Logic:** Updated `js/Nadagotchi.js` to initialize the 'Research' skill (with legacy migration) and included it in the `STUDY` and bookshelf interaction loops.
+- **MainScene:** Updated `startWorkMinigame` and `handleWorkResult` to correctly route the Archaeologist career to the Scout minigame and award dual skill gains (Navigation + Research) upon success.
+- **UI:** Updated `js/UIScene.js` to display the 'Research' skill in the stats dashboard.
+
 ## [1.11.2] - 2025-12-05
 
 ### Fixed

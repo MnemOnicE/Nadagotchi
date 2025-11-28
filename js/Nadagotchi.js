@@ -26,6 +26,11 @@ export class Nadagotchi {
             this.stats = loadedData.stats;
             /** @type {Object.<string, number>} A map of the pet's skills and their levels. */
             this.skills = loadedData.skills;
+            // Legacy migration for Research skill
+            if (this.skills.research === undefined) {
+                this.skills.research = 0;
+            }
+
             /** @type {?string} The pet's current career, if any. */
             this.currentCareer = loadedData.currentCareer;
             /** @type {Object.<string, number>} The items the pet is currently holding. */
@@ -86,7 +91,8 @@ export class Nadagotchi {
             this.stats = { hunger: 100, energy: 100, happiness: 70 };
             this.skills = {
                 communication: 1, resilience: 1, navigation: 0,
-                empathy: 0, logic: 0, focus: 0, crafting: 0
+                empathy: 0, logic: 0, focus: 0, crafting: 0,
+                research: 0
             };
             this.currentCareer = null;
             this.inventory = {};
@@ -199,7 +205,7 @@ export class Nadagotchi {
             dominantArchetype: dominant,
             personalityPoints: initialPoints,
             stats: { hunger: 100, energy: 100, happiness: 70 },
-            skills: { communication: 1, resilience: 1, navigation: 0, empathy: 0, logic: 0, focus: 0, crafting: 0 },
+            skills: { communication: 1, resilience: 1, navigation: 0, empathy: 0, logic: 0, focus: 0, crafting: 0, research: 0 },
             currentCareer: null,
             inventory: {},
             age: 0,
@@ -396,6 +402,7 @@ export class Nadagotchi {
                 this.stats.happiness = Math.max(0, this.stats.happiness - 5);
                 moodMultiplier = this._getMoodMultiplier();
                 this.skills.logic += (0.1 * moodMultiplier);
+                this.skills.research += (0.1 * moodMultiplier);
 
                 if (this.dominantArchetype === 'Intellectual') {
                     this.mood = 'happy';
@@ -421,6 +428,7 @@ export class Nadagotchi {
                 }
                 moodMultiplier = this._getMoodMultiplier();
                 this.skills.logic += (0.15 * moodMultiplier);
+                this.skills.research += (0.15 * moodMultiplier);
                 this.personalityPoints.Intellectual++;
                 break;
 
@@ -445,6 +453,7 @@ export class Nadagotchi {
                 }
                 moodMultiplier = this._getMoodMultiplier();
                 this.skills.logic += (0.25 * moodMultiplier); // Higher buff
+                this.skills.research += (0.25 * moodMultiplier);
                 this.personalityPoints.Intellectual += 2;
                 this.addJournalEntry("I spent some time studying at my beautiful new bookshelf. I feel so smart!");
                 break;
@@ -677,7 +686,16 @@ export class Nadagotchi {
         if (this.currentCareer === null) {
             let newlyUnlockedCareer = null;
 
-            if (this.dominantArchetype === 'Intellectual' && this.skills.logic > 10) {
+            // Check Hybrid Careers First (Prioritize over standard paths)
+            // Archaeologist: High Adventurer & Intellectual, Research & Navigation
+            if (this.personalityPoints['Adventurer'] >= 10 &&
+                this.personalityPoints['Intellectual'] >= 10 &&
+                this.skills.navigation > 10 &&
+                this.skills.research > 10) {
+                newlyUnlockedCareer = 'Archaeologist';
+            }
+            // Standard Careers
+            else if (this.dominantArchetype === 'Intellectual' && this.skills.logic > 10) {
                 newlyUnlockedCareer = 'Innovator';
             } else if (this.dominantArchetype === 'Adventurer' && this.skills.navigation > 10) {
                 newlyUnlockedCareer = 'Scout';

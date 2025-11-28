@@ -25,12 +25,20 @@ export class ScoutMinigameScene extends Phaser.Scene {
     }
 
     /**
+     * Phaser lifecycle method. Called before create.
+     * @param {object} data - Data passed from the launching scene.
+     */
+    init(data) {
+        this.careerName = (data && data.careerName) ? data.careerName : 'Scout';
+    }
+
+    /**
      * Phaser lifecycle method. Called once when the scene is created.
      * Sets up the background, text, timer, and game grid.
      */
     create() {
         this.cameras.main.setBackgroundColor('#2E8B57'); // Forest green
-        this.add.text(this.cameras.main.width / 2, 50, 'Scout Mission: Match the Pairs!', { fontSize: '24px', fill: '#FFF' }).setOrigin(0.5);
+        this.add.text(this.cameras.main.width / 2, 50, `${this.careerName} Mission: Match the Pairs!`, { fontSize: '24px', fill: '#FFF' }).setOrigin(0.5);
         this.timerText = this.add.text(this.cameras.main.width - 150, 50, `Time: ${this.timeLeft}`, { fontSize: '20px', fill: '#FFF' }).setOrigin(0.5);
 
         this.setupGrid();
@@ -144,7 +152,7 @@ export class ScoutMinigameScene extends Phaser.Scene {
      */
     endGame(isSuccess) {
         if (this.timer) this.timer.destroy();
-        this.game.events.emit('workResult', { success: isSuccess, career: 'Scout' });
+        this.game.events.emit('workResult', { success: isSuccess, career: this.careerName });
         this.scene.stop();
         this.scene.resume('MainScene');
     }

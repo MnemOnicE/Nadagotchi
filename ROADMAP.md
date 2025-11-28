@@ -31,8 +31,10 @@ This phase focuses on building out the primary gameplay loops, giving players cl
 -   **[x] Career Mini-Games:**
     -   [x] Designed and implemented unique, engaging mini-games for the Scout, Healer, and Artisan careers.
      -   [x] Implemented comprehensive test coverage for all career mini-games.
+-   **[x] Hybrid Career System:**
+    -   [x] Developed a "multi-classing" system to allow for hybrid careers.
+    -   [x] Implemented the "Archaeologist" career (Adventurer + Intellectual).
 -   **[ ] Future Work:**
-    -   [ ] Develop a "multi-classing" system to allow for hybrid careers (e.g., Archaeologist from Adventurer + Intellectual skills).
     -   [ ] Introduce NPC "mentors" in career-specific guilds to guide skill development.
 
 ### **II. Dynamic World Events & Environmental Interaction**
@@ -72,7 +74,7 @@ This phase will introduce long-term replayability and a deeper sense of history 
     -   [x] **GeneticsSystem:** Implemented a backend logic layer (Genotype/Phenotype) supporting Mendelian-inspired inheritance.
     -   [x] **Traits & Metabolism:** Wired passive traits (Night Owl/Photosynthetic) and Metabolism to directly affect the `live()` simulation loop (stats decay).
     -   [x] **Environmental Influence:** Integrated item-based gene modification (e.g., "Espresso", "Chamomile") into the breeding process.
-    -   [x] **Genetic Scanner:** Implemented a UI tool to allow players to inspect the raw Genotype (alleles) of their pet.
+    -   [x] **Genetic Scanner:** Implemented a UI tool to allow players to inspect the raw Genotype (alleles), highlighting heterozygous traits.
     -   [x] **Randomness & Mutation:** Added mutation logic and random "wild" gene generation for deeper variety.
 -   **[ ] Future Work:**
     -   [ ] Introduce a "Hall of Ancestors" to commemorate retired pets.
