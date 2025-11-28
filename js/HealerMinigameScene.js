@@ -1,9 +1,11 @@
+import { EventKeys } from './EventKeys.js';
+
 /**
  * @class HealerMinigameScene
  * @extends Phaser.Scene
  * @classdesc
  * A mini-game for the 'Healer' career path.
- * The player must diagnose a symptom and choose the correct remedy from a list of options.
+ * The player must diagnose a patient's symptom and select the correct remedy from a list of options.
  */
 export class HealerMinigameScene extends Phaser.Scene {
     constructor() {
@@ -97,7 +99,7 @@ export class HealerMinigameScene extends Phaser.Scene {
      * @private
      */
     endGame(isSuccess) {
-        this.game.events.emit('workResult', { success: isSuccess, career: 'Healer' });
+        this.game.events.emit(EventKeys.WORK_RESULT, { success: isSuccess, career: 'Healer' });
         this.scene.stop();
         this.scene.resume('MainScene');
     }

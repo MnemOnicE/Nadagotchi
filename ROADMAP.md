@@ -60,6 +60,7 @@ This phase focuses on building out the primary gameplay loops, giving players cl
     -   [x] Implemented Vite for development and building.
     -   [x] Centralized asset management in a dedicated `PreloaderScene`.
     -   [x] Standardized unit testing with Jest and Babel.
+    -   [x] Refactored codebase to use centralized Configuration and Event Keys for better maintainability.
 
 ---
 

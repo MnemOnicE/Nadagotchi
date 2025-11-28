@@ -1,6 +1,7 @@
 import { ButtonFactory } from './ButtonFactory.js';
 import { PersistenceManager } from './PersistenceManager.js';
 import { NarrativeSystem } from './NarrativeSystem.js';
+import { EventKeys } from './EventKeys.js';
 
 /**
  * @class UIScene
@@ -46,7 +47,7 @@ export class UIScene extends Phaser.Scene {
             .setAlpha(0.5) // Initially disabled
             .on('pointerdown', () => {
                 if (this.jobBoardButton.alpha === 1) { // Check if enabled
-                    this.game.events.emit('uiAction', 'WORK');
+                    this.game.events.emit(EventKeys.UI_ACTION, EventKeys.WORK);
                 }
             });
 
@@ -61,7 +62,7 @@ export class UIScene extends Phaser.Scene {
             .setOrigin(1, 0) // Anchor to top-right
             .setInteractive({ useHandCursor: true })
             .setVisible(false)
-            .on('pointerdown', () => this.game.events.emit('uiAction', 'RETIRE'));
+            .on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, EventKeys.RETIRE));
 
         // --- Genetic Scanner Button ---
         // Hidden by default, revealed if item is owned
@@ -76,8 +77,8 @@ export class UIScene extends Phaser.Scene {
         this.scannerButton.setVisible(false);
 
         // --- Event Listeners ---
-        this.game.events.on('updateStats', this.updateStatsUI, this);
-        this.game.events.on('uiAction', this.handleUIActions, this);
+        this.game.events.on(EventKeys.UPDATE_STATS, this.updateStatsUI, this);
+        this.game.events.on(EventKeys.UI_ACTION, this.handleUIActions, this);
         this.scale.on('resize', this.resize, this);
 
 
@@ -139,34 +140,34 @@ export class UIScene extends Phaser.Scene {
         let actions = [];
         if (tabId === 'CARE') {
             actions = [
-                { text: 'Feed', action: 'FEED' },
-                { text: 'Play', action: 'PLAY' },
-                { text: 'Meditate', action: 'MEDITATE' }
+                { text: 'Feed', action: EventKeys.FEED },
+                { text: 'Play', action: EventKeys.PLAY },
+                { text: 'Meditate', action: EventKeys.MEDITATE }
             ];
         } else if (tabId === 'ACTION') {
             actions = [
-                { text: 'Explore', action: 'EXPLORE' },
-                { text: 'Study', action: 'STUDY' },
-                { text: 'Work', action: 'WORK', condition: () => this.nadagotchiData && this.nadagotchiData.currentCareer },
-                { text: 'Craft', action: 'OPEN_CRAFTING_MENU' }
+                { text: 'Explore', action: EventKeys.EXPLORE },
+                { text: 'Study', action: EventKeys.STUDY },
+                { text: 'Work', action: EventKeys.WORK, condition: () => this.nadagotchiData && this.nadagotchiData.currentCareer },
+                { text: 'Craft', action: EventKeys.OPEN_CRAFTING_MENU }
             ];
         } else if (tabId === 'SYSTEM') {
             actions = [
-                { text: 'Journal', action: 'OPEN_JOURNAL' },
-                { text: 'Recipes', action: 'OPEN_RECIPES' },
-                { text: 'Hobbies', action: 'OPEN_HOBBIES' },
-                { text: 'Decorate', action: 'DECORATE' },
-                { text: 'Retire', action: 'RETIRE', condition: () => this.nadagotchiData && this.nadagotchiData.isLegacyReady }
+                { text: 'Journal', action: EventKeys.OPEN_JOURNAL },
+                { text: 'Recipes', action: EventKeys.OPEN_RECIPES },
+                { text: 'Hobbies', action: EventKeys.OPEN_HOBBIES },
+                { text: 'Decorate', action: EventKeys.DECORATE },
+                { text: 'Retire', action: EventKeys.RETIRE, condition: () => this.nadagotchiData && this.nadagotchiData.isLegacyReady }
             ];
         } else if (tabId === 'ANCESTORS') {
             const ancestors = new PersistenceManager().loadHallOfFame();
             if (ancestors.length === 0) {
-                 actions = [{ text: 'No Ancestors Yet', action: 'NONE', condition: () => true }];
+                 actions = [{ text: 'No Ancestors Yet', action: EventKeys.NONE, condition: () => true }];
             } else {
                 ancestors.forEach((ancestor) => {
                     actions.push({
                         text: `Gen ${ancestor.generation}: ${ancestor.dominantArchetype}`,
-                        action: 'OPEN_ANCESTOR_MODAL',
+                        action: EventKeys.OPEN_ANCESTOR_MODAL,
                         data: ancestor
                     });
                 });
@@ -204,7 +205,7 @@ export class UIScene extends Phaser.Scene {
             }
 
             const btn = ButtonFactory.createButton(this, currentX, currentY, item.text, () => {
-                this.game.events.emit('uiAction', item.action, item.data);
+                this.game.events.emit(EventKeys.UI_ACTION, item.action, item.data);
             }, { width: btnWidth, height: btnHeight, color: 0x6A0DAD, fontSize: '24px', textColor: '#FFFFFF' }); // Different color for actions?
 
             // Override color for specific types?
@@ -296,13 +297,13 @@ export class UIScene extends Phaser.Scene {
      */
     handleUIActions(action, data) {
         switch (action) {
-            case 'OPEN_JOURNAL': this.openJournal(); break;
-            case 'OPEN_RECIPES': this.openRecipeBook(); break;
-            case 'OPEN_HOBBIES': this.openHobbyMenu(); break;
-            case 'OPEN_CRAFTING_MENU': this.openCraftingMenu(); break;
-            case 'DECORATE': this.openDecorateMenu(); break;
-            case 'INTERACT_NPC': this.openRelationshipMenu(); break;
-            case 'OPEN_ANCESTOR_MODAL': this.openAncestorModal(data); break;
+            case EventKeys.OPEN_JOURNAL: this.openJournal(); break;
+            case EventKeys.OPEN_RECIPES: this.openRecipeBook(); break;
+            case EventKeys.OPEN_HOBBIES: this.openHobbyMenu(); break;
+            case EventKeys.OPEN_CRAFTING_MENU: this.openCraftingMenu(); break;
+            case EventKeys.DECORATE: this.openDecorateMenu(); break;
+            case EventKeys.INTERACT_NPC: this.openRelationshipMenu(); break;
+            case EventKeys.OPEN_ANCESTOR_MODAL: this.openAncestorModal(data); break;
         }
     }
 
@@ -525,7 +526,7 @@ export class UIScene extends Phaser.Scene {
 
             if (canCraft) {
                 const craftButton = ButtonFactory.createButton(this, this.cameras.main.width / 2 + 150, yPos, 'Craft', () => {
-                    this.game.events.emit('uiAction', 'CRAFT_ITEM', recipeName);
+                    this.game.events.emit(EventKeys.UI_ACTION, EventKeys.CRAFT_ITEM, recipeName);
                     this.craftingModal.setVisible(false);
                     this.scene.resume('MainScene');
                 }, { width: 80, height: 30, color: 0x228B22 });
@@ -575,7 +576,7 @@ export class UIScene extends Phaser.Scene {
             text += `- ${itemName}: ${count}\n`;
 
             const placeButton = ButtonFactory.createButton(this, this.cameras.main.width / 2 + 150, yPos, 'Place', () => {
-                this.game.events.emit('uiAction', 'DECORATE', itemName);
+                this.game.events.emit(EventKeys.UI_ACTION, EventKeys.DECORATE, itemName);
                 this.decorateModal.setVisible(false);
                 this.scene.resume('MainScene');
             }, { width: 80, height: 30, color: 0x228B22 });

@@ -4,6 +4,7 @@ import { Calendar } from './Calendar.js';
 import { EventManager } from './EventManager.js';
 import { WorldClock } from './WorldClock.js';
 import { WeatherSystem } from './WeatherSystem.js';
+import { EventKeys } from './EventKeys.js';
 
 /**
  * @class MainScene
@@ -86,19 +87,19 @@ export class MainScene extends Phaser.Scene {
         // --- Interactive Objects ---
         // Initial positions; will be updated in resize
         this.bookshelf = this.add.sprite(80, 80, 'bookshelf').setInteractive({ useHandCursor: true })
-            .on('pointerdown', () => this.game.events.emit('uiAction', 'INTERACT_BOOKSHELF'));
+            .on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, EventKeys.INTERACT_BOOKSHELF));
         this.plant = this.add.sprite(this.scale.width - 80, 80, 'plant').setInteractive({ useHandCursor: true })
-            .on('pointerdown', () => this.game.events.emit('uiAction', 'INTERACT_PLANT'));
+            .on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, EventKeys.INTERACT_PLANT));
         this.craftingTable = this.add.sprite(80, this.scale.height - 150, 'crafting_table').setInteractive({ useHandCursor: true })
-            .on('pointerdown', () => this.game.events.emit('uiAction', 'OPEN_CRAFTING_MENU'));
+            .on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, EventKeys.OPEN_CRAFTING_MENU));
 
         // Add NPCs to the scene
         this.npcScout = this.add.sprite(this.scale.width - 150, this.scale.height - 150, 'npc_scout').setInteractive({ useHandCursor: true })
-            .on('pointerdown', () => this.game.events.emit('uiAction', 'INTERACT_SCOUT', 'Grizzled Scout'));
+            .on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, EventKeys.INTERACT_SCOUT, 'Grizzled Scout'));
         this.npcArtisan = this.add.sprite(this.scale.width / 2 + 100, 80, 'npc_artisan').setInteractive({ useHandCursor: true })
-            .on('pointerdown', () => this.game.events.emit('uiAction', 'INTERACT_ARTISAN', 'Master Artisan'));
+            .on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, EventKeys.INTERACT_ARTISAN, 'Master Artisan'));
         this.npcVillager = this.add.sprite(150, this.scale.height / 2, 'npc_villager').setInteractive({ useHandCursor: true })
-            .on('pointerdown', () => this.game.events.emit('uiAction', 'INTERACT_VILLAGER', 'Sickly Villager'));
+            .on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, EventKeys.INTERACT_VILLAGER, 'Sickly Villager'));
 
         // --- Post-FX & UI ---
         this.lightTexture = this.textures.createCanvas('light', this.scale.width, this.scale.height);
@@ -109,8 +110,8 @@ export class MainScene extends Phaser.Scene {
 
         // --- Timers and Event Listeners ---
         this.time.addEvent({ delay: 5000, callback: () => this.persistence.savePet(this.nadagotchi), loop: true });
-        this.game.events.on('uiAction', this.handleUIAction, this);
-        this.game.events.on('workResult', this.handleWorkResult, this);
+        this.game.events.on(EventKeys.UI_ACTION, this.handleUIAction, this);
+        this.game.events.on(EventKeys.WORK_RESULT, this.handleWorkResult, this);
         this.scale.on('resize', this.resize, this);
 
         // --- Final Setup ---
@@ -140,7 +141,7 @@ export class MainScene extends Phaser.Scene {
         this.drawSky();
 
         this.nadagotchi.live(this.worldState);
-        this.game.events.emit('updateStats', this.nadagotchi);
+        this.game.events.emit(EventKeys.UPDATE_STATS, this.nadagotchi);
 
         this.updateSpriteMood();
         this.checkProactiveBehaviors();
@@ -160,37 +161,37 @@ export class MainScene extends Phaser.Scene {
      * @param {any} [data] - Optional data associated with the action.
      */
     handleUIAction(actionType, data) {
-        if (this.isPlacementMode && actionType !== 'PLACE_FURNITURE') {
+        if (this.isPlacementMode && actionType !== EventKeys.PLACE_FURNITURE) {
             this.togglePlacementMode(null); // Exit placement mode if another action is taken
         }
 
         // FIX: Merged duplicate handleUIAction definitions and unified logic
         switch (actionType) {
-            case 'WORK':
+            case EventKeys.WORK:
                 this.startWorkMinigame();
                 break;
-            case 'RETIRE':
+            case EventKeys.RETIRE:
                 this.scene.stop('UIScene');
                 this.scene.start('BreedingScene', this.nadagotchi);
                 break;
-            case 'DECORATE':
+            case EventKeys.DECORATE:
                 this.togglePlacementMode(data);
                 break;
-            case 'PLACE_FURNITURE':
+            case EventKeys.PLACE_FURNITURE:
                 this.placeFurniture(data.x, data.y);
                 break;
-            case 'INTERACT_SCOUT':
+            case EventKeys.INTERACT_SCOUT:
                 this.nadagotchi.interact('Grizzled Scout');
                 break;
-            case 'INTERACT_ARTISAN':
+            case EventKeys.INTERACT_ARTISAN:
                 this.nadagotchi.interact('Master Artisan');
                 break;
-            case 'INTERACT_VILLAGER':
+            case EventKeys.INTERACT_VILLAGER:
                 this.nadagotchi.interact('Sickly Villager');
                 break;
-            case 'INTERACT_BOOKSHELF':
-            case 'INTERACT_PLANT':
-            case 'OPEN_CRAFTING_MENU':
+            case EventKeys.INTERACT_BOOKSHELF:
+            case EventKeys.INTERACT_PLANT:
+            case EventKeys.OPEN_CRAFTING_MENU:
                 // These specific cases fall through to default handler or are handled by sprite events directly emitting specific actions
                 this.nadagotchi.handleAction(actionType, data);
                 break;
@@ -224,7 +225,7 @@ export class MainScene extends Phaser.Scene {
                     skillUp = 'crafting';
                     this.nadagotchi.skills.crafting += 1.5;
                     if (data.craftedItem) {
-                        this.nadagotchi.handleAction('CRAFT_ITEM', data.craftedItem);
+                        this.nadagotchi.handleAction(EventKeys.CRAFT_ITEM, data.craftedItem);
                     }
                     break;
             }
@@ -424,7 +425,7 @@ export class MainScene extends Phaser.Scene {
                 this.placementIndicator.setPosition(pointer.x - 32, pointer.y - 32);
             });
             this.input.on('pointerdown', (pointer) => {
-                this.game.events.emit('uiAction', 'PLACE_FURNITURE', { x: pointer.x, y: pointer.y });
+                this.game.events.emit(EventKeys.UI_ACTION, EventKeys.PLACE_FURNITURE, { x: pointer.x, y: pointer.y });
             });
         } else {
             if (this.placementIndicator) {
@@ -441,7 +442,7 @@ export class MainScene extends Phaser.Scene {
 
         const furnitureKey = this.selectedFurniture.toLowerCase().replace(' ', '_');
         const newFurniture = this.add.sprite(x, y, furnitureKey).setInteractive({ useHandCursor: true });
-        newFurniture.on('pointerdown', () => this.game.events.emit('uiAction', `INTERACT_${this.selectedFurniture.toUpperCase().replace(' ', '_')}`));
+        newFurniture.on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, `INTERACT_${this.selectedFurniture.toUpperCase().replace(' ', '_')}`));
 
         this.placedFurniture.push({ key: this.selectedFurniture, x: x, y: y });
         this.saveFurniture();
@@ -458,7 +459,7 @@ export class MainScene extends Phaser.Scene {
         this.placedFurniture.forEach(furniture => {
             const furnitureKey = furniture.key.toLowerCase().replace(' ', '_');
             const newFurniture = this.add.sprite(furniture.x, furniture.y, furnitureKey).setInteractive({ useHandCursor: true });
-            newFurniture.on('pointerdown', () => this.game.events.emit('uiAction', `INTERACT_${furniture.key.toUpperCase().replace(' ', '_')}`));
+            newFurniture.on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, `INTERACT_${furniture.key.toUpperCase().replace(' ', '_')}`));
         });
     }
 }

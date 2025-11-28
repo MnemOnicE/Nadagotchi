@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.0] - 2025-12-06
+
+### Changed
+- **Codebase Refactoring:** Extensive refactoring to improve maintainability and reduce fragility.
+  - **Centralized Configuration:** Extracted all magic numbers and balance constants from `js/Nadagotchi.js` to a new `js/Config.js` file.
+  - **Event Key Management:** Introduced `js/EventKeys.js` to manage all event strings as constants, eliminating "magic strings" and preventing silent failures in scene communication.
+  - **Data Decoupling:** Moved recipe and item definitions from the `Nadagotchi` constructor to a static `js/ItemData.js` file.
+  - **Scene Updates:** Updated `MainScene.js`, `UIScene.js`, and all minigame scenes to utilize the new `EventKeys` for robust event handling.
+
 ## [1.12.0] - 2025-12-05
 
 ### Added

@@ -1,3 +1,5 @@
+import { EventKeys } from './EventKeys.js';
+
 /**
  * @class ArtisanMinigameScene
  * @extends Phaser.Scene
@@ -133,7 +135,7 @@ export class ArtisanMinigameScene extends Phaser.Scene {
             // On success, the artisan crafts a specific item.
             result.craftedItem = "Fancy Bookshelf";
         }
-        this.game.events.emit('workResult', result);
+        this.game.events.emit(EventKeys.WORK_RESULT, result);
         this.scene.stop();
         this.scene.resume('MainScene');
     }
