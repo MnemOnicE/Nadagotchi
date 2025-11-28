@@ -80,11 +80,12 @@ class MainScene extends Phaser.Scene {
         }
 
         // --- Environment Setup ---
-        this.skyTexture = this.textures.createCanvas('sky', this.cameras.main.width, this.cameras.main.height);
+        // Initialize textures with full size initially; resize will adjust them
+        this.skyTexture = this.textures.createCanvas('sky', this.scale.width, this.scale.height);
         this.add.image(0, 0, 'sky').setOrigin(0);
-        const ground = this.add.graphics();
-        ground.fillStyle(0x228B22, 1);
-        ground.fillRect(0, this.cameras.main.height - 100, this.cameras.main.width, 100);
+
+        this.ground = this.add.graphics();
+        // Drawing handled in resize
 
         // --- Pet Initialization ---
         this.persistence = new PersistenceManager();
@@ -111,30 +112,31 @@ class MainScene extends Phaser.Scene {
         this.stars = Array.from({ length: 100 }, () => ({ x: Math.random(), y: Math.random() }));
 
         // --- Game Objects ---
-        this.sprite = this.add.sprite(this.cameras.main.width / 2, this.cameras.main.height / 2, 'pet').setScale(4);
+        this.sprite = this.add.sprite(this.scale.width / 2, this.scale.height / 2, 'pet').setScale(4);
         this.thoughtBubble = this.add.sprite(this.sprite.x, this.sprite.y - 40, 'thought_bubble').setVisible(false);
         this.exploreBubble = this.add.sprite(this.sprite.x, this.sprite.y - 40, 'explore_bubble').setVisible(false);
 
         // --- Interactive Objects ---
-        this.add.sprite(80, 80, 'bookshelf').setInteractive({ useHandCursor: true })
+        // Initial positions; will be updated in resize
+        this.bookshelf = this.add.sprite(80, 80, 'bookshelf').setInteractive({ useHandCursor: true })
             .on('pointerdown', () => this.game.events.emit('uiAction', 'INTERACT_BOOKSHELF'));
-        this.add.sprite(this.cameras.main.width - 80, 80, 'plant').setInteractive({ useHandCursor: true })
+        this.plant = this.add.sprite(this.scale.width - 80, 80, 'plant').setInteractive({ useHandCursor: true })
             .on('pointerdown', () => this.game.events.emit('uiAction', 'INTERACT_PLANT'));
-        this.add.sprite(80, this.cameras.main.height - 150, 'crafting_table').setInteractive({ useHandCursor: true })
+        this.craftingTable = this.add.sprite(80, this.scale.height - 150, 'crafting_table').setInteractive({ useHandCursor: true })
             .on('pointerdown', () => this.game.events.emit('uiAction', 'OPEN_CRAFTING_MENU'));
 
         // Add NPCs to the scene
-        this.add.sprite(this.cameras.main.width - 150, this.cameras.main.height - 150, 'npc_scout').setInteractive({ useHandCursor: true })
+        this.npcScout = this.add.sprite(this.scale.width - 150, this.scale.height - 150, 'npc_scout').setInteractive({ useHandCursor: true })
             .on('pointerdown', () => this.game.events.emit('uiAction', 'INTERACT_SCOUT', 'Grizzled Scout'));
-        this.add.sprite(this.cameras.main.width / 2 + 100, 80, 'npc_artisan').setInteractive({ useHandCursor: true })
+        this.npcArtisan = this.add.sprite(this.scale.width / 2 + 100, 80, 'npc_artisan').setInteractive({ useHandCursor: true })
             .on('pointerdown', () => this.game.events.emit('uiAction', 'INTERACT_ARTISAN', 'Master Artisan'));
-        this.add.sprite(150, this.cameras.main.height / 2, 'npc_villager').setInteractive({ useHandCursor: true })
+        this.npcVillager = this.add.sprite(150, this.scale.height / 2, 'npc_villager').setInteractive({ useHandCursor: true })
             .on('pointerdown', () => this.game.events.emit('uiAction', 'INTERACT_VILLAGER', 'Sickly Villager'));
 
         // --- Post-FX & UI ---
-        this.lightTexture = this.add.renderTexture(0, 0, this.cameras.main.width, this.cameras.main.height).setBlendMode('MULTIPLY').setVisible(false);
+        this.lightTexture = this.add.renderTexture(0, 0, this.scale.width, this.scale.height).setBlendMode('MULTIPLY').setVisible(false);
         // FIX: Moved dateText to the top-right corner (origin 1,0) to avoid overlap with stats
-        this.dateText = this.add.text(this.cameras.main.width - 10, 10, '', { fontFamily: 'Arial', fontSize: '16px', color: '#ffffff', backgroundColor: 'rgba(0,0,0,0.5)', padding: { x: 5, y: 3 } }).setOrigin(1, 0);
+        this.dateText = this.add.text(this.scale.width - 10, 10, '', { fontFamily: 'VT323, Arial', fontSize: '20px', color: '#ffffff', backgroundColor: 'rgba(0,0,0,0.5)', padding: { x: 5, y: 3 } }).setOrigin(1, 0);
         this.scene.launch('UIScene');
 
         // --- Timers and Event Listeners ---
@@ -281,6 +283,7 @@ class MainScene extends Phaser.Scene {
      * Procedurally draws the sky gradient and stars to a dynamic texture based on the time of day.
      */
     drawSky() {
+        if (!this.skyTexture || !this.skyTexture.context) return;
         const daylightFactor = this.worldClock.getDaylightFactor();
         const nightTop = new Phaser.Display.Color(0, 0, 51);
         const nightBottom = new Phaser.Display.Color(0, 0, 0);
@@ -302,16 +305,20 @@ class MainScene extends Phaser.Scene {
             bottomColor = (daylightFactor === 1) ? dayBottom : nightBottom;
         }
 
+        // Use the current size of the texture which matches the game viewport
+        const width = this.skyTexture.width;
+        const height = this.skyTexture.height;
+
         this.skyTexture.clear();
-        const gradient = this.skyTexture.context.createLinearGradient(0, 0, 0, this.cameras.main.height);
+        const gradient = this.skyTexture.context.createLinearGradient(0, 0, 0, height);
         gradient.addColorStop(0, `rgba(${topColor.r}, ${topColor.g}, ${topColor.b}, 1)`);
         gradient.addColorStop(1, `rgba(${bottomColor.r}, ${bottomColor.g}, ${bottomColor.b}, 1)`);
         this.skyTexture.context.fillStyle = gradient;
-        this.skyTexture.context.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height);
+        this.skyTexture.context.fillRect(0, 0, width, height);
 
         if (daylightFactor < 0.5) {
             this.skyTexture.context.fillStyle = `rgba(255, 255, 255, ${1 - (daylightFactor * 2)})`;
-            this.stars.forEach(star => this.skyTexture.context.fillRect(star.x * this.cameras.main.width, star.y * this.cameras.main.height * 0.7, 1, 1));
+            this.stars.forEach(star => this.skyTexture.context.fillRect(star.x * width, star.y * height * 0.7, 1, 1));
         }
 
         this.skyTexture.refresh();
@@ -321,12 +328,17 @@ class MainScene extends Phaser.Scene {
      * Draws a radial gradient to a render texture to create a spotlight effect around the pet.
      */
     drawLight() {
+        if (!this.lightTexture) return;
         this.lightTexture.clear();
+        // Use the current size
+        const width = this.lightTexture.width;
+        const height = this.lightTexture.height;
+
         const gradient = this.lightTexture.context.createRadialGradient(this.sprite.x, this.sprite.y, 50, this.sprite.x, this.sprite.y, 150);
         gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
         gradient.addColorStop(1, 'rgba(0, 0, 0, 1)');
         this.lightTexture.context.fillStyle = gradient;
-        this.lightTexture.context.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height);
+        this.lightTexture.context.fillRect(0, 0, width, height);
         this.lightTexture.refresh();
     }
 
@@ -338,13 +350,43 @@ class MainScene extends Phaser.Scene {
      */
     resize(gameSize) {
         const { width, height } = gameSize;
-        this.cameras.main.setSize(width, height);
-        this.sprite.setPosition(width / 2, height / 2);
-        this.lightTexture.setSize(width, height);
-        this.skyTexture.setSize(width, height);
-        this.drawSky();
-        // FIX: Ensure text stays pinned to the right on resize
+
+        // --- VIEWPORT ADJUSTMENT FOR DASHBOARD ---
+        // Reserve bottom 25% for the UI Shell (matches UIScene layout)
+        const dashboardHeight = Math.floor(height * 0.25);
+        const gameHeight = height - dashboardHeight;
+
+        // Resize the Main Camera to only render in the top portion
+        this.cameras.main.setSize(width, gameHeight);
+        this.cameras.main.setViewport(0, 0, width, gameHeight);
+
+        // Update elements to fit within the new gameHeight
+        this.sprite.setPosition(width / 2, gameHeight / 2);
+
+        // Resize dynamic textures to match the game view
+        if (this.lightTexture) this.lightTexture.setSize(width, gameHeight);
+        if (this.skyTexture) this.skyTexture.setSize(width, gameHeight);
+
+        // Redraw Ground relative to new gameHeight
+        if (this.ground) {
+             this.ground.clear();
+             this.ground.fillStyle(0x228B22, 1);
+             this.ground.fillRect(0, gameHeight - 100, width, 100);
+        }
+
+        // Reposition Interactive Objects relative to new gameHeight
+        if (this.craftingTable) this.craftingTable.setPosition(80, gameHeight - 150);
+        if (this.npcScout) this.npcScout.setPosition(width - 150, gameHeight - 150);
+        if (this.npcVillager) this.npcVillager.setPosition(150, gameHeight / 2);
+
+        // Update Plant/Bookshelf (pinned to top/corners, mostly fine but check X)
+        if (this.plant) this.plant.setPosition(width - 80, 80);
+
+        // Update Date Text
         this.dateText.setPosition(width - 10, 10);
+
+        this.drawSky();
+        this.drawLight();
     }
 
     /**
@@ -364,8 +406,10 @@ class MainScene extends Phaser.Scene {
     checkCareerUnlock() {
         if (this.nadagotchi.newCareerUnlocked && !this.careerUnlockedNotified) {
             this.careerUnlockedNotified = true;
-            const notificationText = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2 - 50, `Career Unlocked: ${this.nadagotchi.newCareerUnlocked}!`,
-                { fontFamily: 'Arial', fontSize: '20px', color: '#FFD700', backgroundColor: 'rgba(0,0,0,0.7)', padding: { x: 15, y: 10 } }
+            // Center in game view
+            const gameHeight = this.cameras.main.height;
+            const notificationText = this.add.text(this.cameras.main.width / 2, gameHeight / 2 - 50, `Career Unlocked: ${this.nadagotchi.newCareerUnlocked}!`,
+                { fontFamily: 'VT323, Arial', fontSize: '24px', color: '#FFD700', backgroundColor: 'rgba(0,0,0,0.7)', padding: { x: 15, y: 10 } }
             ).setOrigin(0.5);
 
             this.tweens.add({ targets: notificationText, alpha: { from: 0, to: 1 }, duration: 500, yoyo: true, hold: 2500, onComplete: () => notificationText.destroy() });

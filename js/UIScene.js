@@ -3,7 +3,7 @@
  * @extends Phaser.Scene
  * @classdesc
  * A dedicated Phaser Scene for managing and displaying all UI elements.
- * It runs in parallel with the MainScene and communicates with it via global events.
+ * It implements the "Physical Shell" dashboard layout using a Neo-Retro aesthetic.
  */
 class UIScene extends Phaser.Scene {
     constructor() {
@@ -12,9 +12,22 @@ class UIScene extends Phaser.Scene {
 
     /**
      * Phaser lifecycle method called once, after `preload`.
-     * Used to set up the initial state of the UI scene, create UI elements, and register event listeners.
      */
     create() {
+        // --- State ---
+        this.currentTab = 'CARE';
+        this.tabButtons = [];
+        this.actionButtons = [];
+
+        // --- Dashboard Background ---
+        this.dashboardBg = this.add.rectangle(0, 0, 1, 1, 0xA3B8A2).setOrigin(0); // Soft Olive Green
+        this.dashboardBorder = this.add.rectangle(0, 0, 1, 1, 0x4A4A4A).setOrigin(0); // Border line
+
+        // --- Stats Display ---
+        // Stats overlay on top of the game view (top left)
+        this.statsText = this.add.text(10, 10, '', {
+            fontFamily: 'VT323, monospace', fontSize: '24px', color: '#ffffff', stroke: '#000000', strokeThickness: 3
+        });
         // --- UI Elements ---
         this.statsText = this.add.text(10, 10, '', { fontFamily: 'Arial', fontSize: '16px', color: '#ffffff', stroke: '#000000', strokeThickness: 3 });
 
@@ -52,6 +65,7 @@ class UIScene extends Phaser.Scene {
         // --- Event Listeners ---
         this.game.events.on('updateStats', this.updateStatsUI, this);
         this.game.events.on('uiAction', this.handleUIActions, this);
+        this.scale.on('resize', this.resize, this);
 
         // Handle resize events
         this.scale.on('resize', this.resize, this);
@@ -64,9 +78,161 @@ class UIScene extends Phaser.Scene {
         this.craftingModal = this.createModal("Crafting");
         this.relationshipModal = this.createModal("Relationships");
         this.decorateModal = this.createModal("Decorate");
+
+        // --- Initial Layout ---
+        this.createTabs();
+        this.resize(this.scale);
+        this.showTab('CARE');
     }
 
     /**
+     * Creates the permanent category tabs (Care, Action, System).
+     */
+    createTabs() {
+        // We create them once, layout them in resize
+        const tabs = [
+            { label: '❤️ CARE', id: 'CARE' },
+            { label: '🎒 ACTION', id: 'ACTION' },
+            { label: '⚙️ SYSTEM', id: 'SYSTEM' }
+        ];
+
+        tabs.forEach(tab => {
+            const btn = ButtonFactory.createButton(this, 0, 0, tab.label, () => {
+                this.showTab(tab.id);
+            }, { width: 100, height: 35, color: 0xD8A373, fontSize: '24px' });
+            btn.tabId = tab.id;
+            this.tabButtons.push(btn);
+        });
+    }
+
+    /**
+     * Switches the active tab and populates the dashboard with relevant actions.
+     * @param {string} tabId
+     */
+    showTab(tabId) {
+        this.currentTab = tabId;
+
+        // Update Tab Visuals (Highlight active)
+        this.tabButtons.forEach(btn => {
+            const isSelected = btn.tabId === tabId;
+            btn.setAlpha(isSelected ? 1.0 : 0.7);
+        });
+
+        // Clear existing action buttons
+        this.actionButtons.forEach(btn => btn.destroy());
+        this.actionButtons = [];
+
+        // Define Actions per Tab
+        let actions = [];
+        if (tabId === 'CARE') {
+            actions = [
+                { text: 'Feed', action: 'FEED' },
+                { text: 'Play', action: 'PLAY' },
+                { text: 'Meditate', action: 'MEDITATE' }
+            ];
+        } else if (tabId === 'ACTION') {
+            actions = [
+                { text: 'Explore', action: 'EXPLORE' },
+                { text: 'Study', action: 'STUDY' },
+                { text: 'Work', action: 'WORK', condition: () => this.nadagotchiData && this.nadagotchiData.currentCareer },
+                { text: 'Craft', action: 'OPEN_CRAFTING_MENU' }
+            ];
+        } else if (tabId === 'SYSTEM') {
+            actions = [
+                { text: 'Journal', action: 'OPEN_JOURNAL' },
+                { text: 'Recipes', action: 'OPEN_RECIPES' },
+                { text: 'Hobbies', action: 'OPEN_HOBBIES' },
+                { text: 'Decorate', action: 'DECORATE' },
+                { text: 'Retire', action: 'RETIRE', condition: () => this.nadagotchiData && this.nadagotchiData.isLegacyReady }
+            ];
+        }
+
+        // Create buttons
+        const dashboardHeight = Math.floor(this.cameras.main.height * 0.25);
+        const dashboardY = this.cameras.main.height - dashboardHeight;
+
+        this.layoutActionButtons(actions, dashboardY + 50); // Start below tabs
+    }
+
+    /**
+     * Lays out the action buttons in a responsive grid within the dashboard body.
+     */
+    layoutActionButtons(actions, startY) {
+        const width = this.cameras.main.width;
+        let currentX = 20;
+        let currentY = startY;
+        const spacing = 15;
+        const btnHeight = 40;
+
+        actions.forEach(item => {
+            // Check condition if exists
+            if (item.condition && !item.condition()) return;
+
+            // Estimate width
+            const btnWidth = (item.text.length * 12) + 40; // Approx width
+
+            // Wrap if needed
+            if (currentX + btnWidth > width - 20) {
+                currentX = 20;
+                currentY += btnHeight + spacing;
+            }
+
+            const btn = ButtonFactory.createButton(this, currentX, currentY, item.text, () => {
+                this.game.events.emit('uiAction', item.action);
+            }, { width: btnWidth, height: btnHeight, color: 0x6A0DAD, fontSize: '24px', textColor: '#FFFFFF' }); // Different color for actions?
+
+            // Override color for specific types?
+            // Let's keep them consistent "Neo-Retro" style. Maybe different base colors?
+            // User spec: Active Elements: #D8A373.
+            // Let's use #D8A373 for tabs, and maybe a variation for actions?
+            // Let's stick to user palette.
+
+            this.actionButtons.push(btn);
+            currentX += btnWidth + spacing;
+        });
+    }
+
+    /**
+     * Handles the resize event.
+     * @param {object} gameSize - The new size of the game.
+     */
+    resize(gameSize) {
+        const width = gameSize.width;
+        const height = gameSize.height;
+        const dashboardHeight = Math.floor(height * 0.25);
+        const dashboardY = height - dashboardHeight;
+
+        this.cameras.main.setSize(width, height);
+
+        // Update Background
+        this.dashboardBg.setPosition(0, dashboardY);
+        this.dashboardBg.setSize(width, dashboardHeight);
+
+        this.dashboardBorder.setPosition(0, dashboardY);
+        this.dashboardBorder.setSize(width, 4); // Top border line
+
+        // Layout Tabs (Top of dashboard)
+        const tabWidth = Math.min(120, (width - 40) / 3);
+        const tabSpacing = 10;
+        let tabX = 20;
+        const tabY = dashboardY + 10; // Padding from top of dashboard
+
+        this.tabButtons.forEach(btn => {
+            // ButtonFactory returns a container, we can't easily resize it via a method unless we add one
+            // We can destroy and recreate or just set position.
+            // Since width is baked in, ideally we recreate.
+            // For now, let's just move them. If screen gets too narrow, they might overlap.
+            // TODO: Ideally ButtonFactory should support setSize or we recreate.
+            // Let's just set position for now.
+            btn.setPosition(tabX, tabY);
+            tabX += tabWidth + tabSpacing;
+
+            // Update the click handler to refresh layout?
+            // No, the tab click refreshes actions.
+        });
+
+        // Refresh active tab actions to fit new width
+        this.showTab(this.currentTab);
      * Handles the resize event.
      * @param {object} gameSize - The new size of the game.
      */
@@ -212,6 +378,12 @@ class UIScene extends Phaser.Scene {
                      `Logic: ${skills.logic.toFixed(2)} | Nav: ${skills.navigation.toFixed(2)} | Empathy: ${skills.empathy.toFixed(2)}`;
         this.statsText.setText(text);
 
+        // Refresh tab if conditional buttons changed state (like Work or Retire)
+        // Optimization: check if state actually changed before redraw?
+        // For now, simple redraw to ensure buttons appear/disappear correctly
+        if (this.currentTab === 'ACTION' || this.currentTab === 'SYSTEM') {
+            this.showTab(this.currentTab);
+        }
         // Update interactive element states
         if (currentCareer) {
             this.jobBoardButton.setInteractive();
@@ -245,7 +417,7 @@ class UIScene extends Phaser.Scene {
      */
     showCareerNotification(message) {
         const notificationText = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2 - 30, `Career Unlocked: ${message}!`,
-            { fontFamily: 'Arial', fontSize: '18px', color: '#000', backgroundColor: '#fff', padding: { x: 10, y: 5 }, align: 'center' }
+            { fontFamily: 'VT323, Arial', fontSize: '32px', color: '#000', backgroundColor: '#fff', padding: { x: 10, y: 5 }, align: 'center' }
         ).setOrigin(0.5);
         this.time.delayedCall(3000, () => notificationText.destroy());
     }
@@ -262,6 +434,17 @@ class UIScene extends Phaser.Scene {
         const modalHeight = Math.min(400, this.cameras.main.height - 100);
 
         const modalBg = this.add.rectangle(this.cameras.main.width / 2, this.cameras.main.height / 2, modalWidth, modalHeight, 0x1a1a1a, 0.95).setStrokeStyle(2, 0xffffff);
+        const modalTitle = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2 - (modalHeight/2) + 30, title, { fontFamily: 'VT323, Arial', fontSize: '36px', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5);
+
+        // Dynamic word wrap based on modal width
+        const modalContent = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2, '', {
+            fontSize: '24px', fontFamily: 'VT323, Arial', color: '#fff', wordWrap: { width: modalWidth - 40 }
+        }).setOrigin(0.5);
+
+        const closeButton = ButtonFactory.createButton(this, this.cameras.main.width / 2 + (modalWidth/2) - 40, this.cameras.main.height / 2 - (modalHeight/2) + 30, 'X', () => {
+             modalGroup.setVisible(false);
+             if (this.scene.isPaused('MainScene')) this.scene.resume('MainScene');
+        }, { width: 40, height: 40, color: 0x800000 });
         const modalTitle = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2 - (modalHeight/2) + 30, title, { fontSize: '24px', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5);
 
         // Dynamic word wrap based on modal width
@@ -363,17 +546,15 @@ class UIScene extends Phaser.Scene {
             });
 
             if (canCraft) {
-                const craftButton = this.add.text(this.cameras.main.width / 2 + 100, yPos, 'Craft', {
-                    padding: { x: 8, y: 4 },
-                    backgroundColor: '#008000'
-                }).setInteractive({ useHandCursor: true }).on('pointerdown', () => {
+                const craftButton = ButtonFactory.createButton(this, this.cameras.main.width / 2 + 150, yPos, 'Craft', () => {
                     this.game.events.emit('uiAction', 'CRAFT_ITEM', recipeName);
                     this.craftingModal.setVisible(false);
                     this.scene.resume('MainScene');
-                });
+                }, { width: 80, height: 30, color: 0x228B22 });
+
                 this.craftingModal.add(craftButton);
                 this.craftingButtons.push(craftButton);
-                yPos += 30;
+                yPos += 35;
             }
         }
 
@@ -414,17 +595,16 @@ class UIScene extends Phaser.Scene {
 
         furniture.forEach(([itemName, count]) => {
             text += `- ${itemName}: ${count}\n`;
-            const placeButton = this.add.text(this.cameras.main.width / 2 + 100, yPos, 'Place', {
-                padding: { x: 8, y: 4 },
-                backgroundColor: '#008000'
-            }).setInteractive({ useHandCursor: true }).on('pointerdown', () => {
+
+            const placeButton = ButtonFactory.createButton(this, this.cameras.main.width / 2 + 150, yPos, 'Place', () => {
                 this.game.events.emit('uiAction', 'DECORATE', itemName);
                 this.decorateModal.setVisible(false);
                 this.scene.resume('MainScene');
-            });
+            }, { width: 80, height: 30, color: 0x228B22 });
+
             this.decorateModal.add(placeButton);
             this.decorateButtons.push(placeButton);
-            yPos += 30;
+            yPos += 35;
         });
 
         this.decorateModal.content.setText(text);

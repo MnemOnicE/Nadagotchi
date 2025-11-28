@@ -13,7 +13,7 @@ class Scene {
             isPaused: jest.fn().mockReturnValue(false),
         };
         // Mocking chainable methods on 'add'
-        const textMock = {
+        const gameObjectMock = {
             setText: jest.fn(),
             setInteractive: jest.fn().mockReturnThis(),
             on: jest.fn().mockReturnThis(),
@@ -21,25 +21,37 @@ class Scene {
             setAlpha: jest.fn().mockReturnThis(),
             setStyle: jest.fn().mockReturnThis(),
             setOrigin: jest.fn().mockReturnThis(),
-            destroy: jest.fn(),
             setPosition: jest.fn().mockReturnThis(),
+            setFrame: jest.fn().mockReturnThis(),
+            setScale: jest.fn().mockReturnThis(),
+            setBlendMode: jest.fn().mockReturnThis(),
+            setSize: jest.fn().mockReturnThis(),
+            destroy: jest.fn(),
+            clear: jest.fn(),
+            context: {
+                createRadialGradient: jest.fn(() => ({ addColorStop: jest.fn() })),
+                createLinearGradient: jest.fn(() => ({ addColorStop: jest.fn() })),
+                fillStyle: '',
+                fillRect: jest.fn()
+            },
+            refresh: jest.fn(),
+            fill: jest.fn(),
+            fillStyle: jest.fn(),
+            fillRect: jest.fn(),
+            lineStyle: jest.fn(),
+            strokeRect: jest.fn()
         };
+
         const addMock = {
-            text: jest.fn(() => textMock),
-            sprite: jest.fn(() => ({ ...addMock, setScale: jest.fn().mockReturnThis(), setVisible: jest.fn().mockReturnThis(), setPosition: jest.fn().mockReturnThis(), setFrame: jest.fn().mockReturnThis() })),
-            container: jest.fn(() => addMock),
-            graphics: jest.fn(() => ({ fillStyle: jest.fn(), fillRect: jest.fn(), lineStyle: jest.fn(), strokeRect: jest.fn(), destroy: jest.fn() })),
-            particles: jest.fn(() => addMock),
-            renderTexture: jest.fn(() => ({ ...addMock, setBlendMode: jest.fn().mockReturnThis(), setVisible: jest.fn().mockReturnThis(), clear: jest.fn(), context: { createRadialGradient: jest.fn(() => ({ addColorStop: jest.fn() })), fillStyle: '', fillRect: jest.fn() }, refresh: jest.fn(), setSize: jest.fn() })),
-            image: jest.fn(() => ({ ...addMock, setOrigin: jest.fn().mockReturnThis() })),
+            text: jest.fn(() => gameObjectMock),
+            sprite: jest.fn(() => gameObjectMock),
+            container: jest.fn(() => gameObjectMock),
+            graphics: jest.fn(() => gameObjectMock),
+            particles: jest.fn(() => gameObjectMock),
+            renderTexture: jest.fn(() => gameObjectMock),
+            image: jest.fn(() => gameObjectMock),
             group: jest.fn(() => addMock),
-            rectangle: jest.fn(() => ({
-                setStrokeStyle: jest.fn(() => ({
-                    setOrigin: jest.fn(() => ({
-                        setInteractive: jest.fn()
-                    }))
-                }))
-            })),
+            rectangle: jest.fn(() => gameObjectMock),
             setInteractive: jest.fn(() => addMock),
             on: jest.fn(() => addMock),
             setOrigin: jest.fn(() => addMock),
@@ -56,35 +68,23 @@ class Scene {
         this.add = addMock;
         this.input = { on: jest.fn(), off: jest.fn() };
         this.time = { addEvent: jest.fn(), delayedCall: jest.fn() };
-        this.cameras = { main: { width: 800, height: 600, setBackgroundColor: jest.fn(), setSize: jest.fn() } };
+        this.cameras = {
+            main: {
+                width: 800,
+                height: 600,
+                setBackgroundColor: jest.fn(),
+                setSize: jest.fn(),
+                setViewport: jest.fn()
+            }
+        };
         this.game = { events: { on: jest.fn(), emit: jest.fn() } };
         this.scale = { on: jest.fn(), width: 800, height: 600 };
         this.textures = {
-            createCanvas: jest.fn().mockReturnValue({
-                context: {
-                    createLinearGradient: jest.fn(() => ({ addColorStop: jest.fn() })),
-                    createRadialGradient: jest.fn(() => ({ addColorStop: jest.fn() })),
-                    fillStyle: '',
-                    fillRect: jest.fn(),
-                },
-                clear: jest.fn(),
-                refresh: jest.fn(),
-                setSize: jest.fn(),
-            }),
-            addDynamicTexture: jest.fn().mockReturnValue({
-                context: {
-                    createLinearGradient: jest.fn(() => ({ addColorStop: jest.fn() })),
-                    createRadialGradient: jest.fn(() => ({ addColorStop: jest.fn() })),
-                    fillStyle: '',
-                    fillRect: jest.fn(),
-                },
-                clear: jest.fn(),
-                refresh: jest.fn(),
-                setSize: jest.fn(),
-            }),
+            createCanvas: jest.fn().mockReturnValue(gameObjectMock),
+            addDynamicTexture: jest.fn().mockReturnValue(gameObjectMock),
             generateTexture: jest.fn()
         };
-        this.make = { graphics: jest.fn(() => ({ fillStyle: jest.fn(() => ({ fillRect: jest.fn(() => ({ generateTexture: jest.fn(), destroy: jest.fn() })) })) })) };
+        this.make = { graphics: jest.fn(() => gameObjectMock) };
         this.tweens = { add: jest.fn() };
         this.load = {
             spritesheet: jest.fn(),

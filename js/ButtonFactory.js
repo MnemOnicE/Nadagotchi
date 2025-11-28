@@ -1,80 +1,82 @@
 /**
- * Factory class for creating consistent, 3D-style interactive buttons.
+ * @class ButtonFactory
+ * @classdesc
+ * A utility class to generate consistent, "Neo-Retro" style 3D buttons.
  */
 class ButtonFactory {
     /**
-     * Creates a 3D-style button container.
-     * @param {Phaser.Scene} scene - The scene to which the button belongs.
-     * @param {number} x - The x coordinate (top-left).
-     * @param {number} y - The y coordinate (top-left).
-     * @param {string} label - The text label for the button.
-     * @param {object} [options] - Configuration options.
-     * @param {Function} [options.onClick] - The callback to execute on click.
-     * @returns {Phaser.GameObjects.Container} The button container.
+     * Creates a 3D beveled button.
+     * @param {Phaser.Scene} scene - The scene to add the button to.
+     * @param {number} x - The x position.
+     * @param {number} y - The y position.
+     * @param {string} text - The text to display.
+     * @param {function} callback - The function to call on click.
+     * @param {object} [options] - styling options.
+     * @returns {Phaser.GameObjects.Container} The created button container.
      */
-    static createButton(scene, x, y, label, options = {}) {
-        const padding = { x: 20, y: 12 };
-        const depth = 4;
-        const mainColor = 0x4a4a4a;
-        const hoverColor = 0x666666;
-        const shadowColor = 0x222222;
-
-        // Measure text first
-        const textObj = scene.add.text(0, 0, label, {
-            fontFamily: 'Arial',
-            fontSize: '16px',
-            color: '#ffffff'
-        }).setOrigin(0.5);
-
-        const width = textObj.width + (padding.x * 2);
-        const height = textObj.height + (padding.y * 2);
+    static createButton(scene, x, y, text, callback, options = {}) {
+        const width = options.width || 100;
+        const height = options.height || 40;
+        const baseColor = options.color !== undefined ? options.color : 0xD8A373; // Muted Terracotta
+        const textColor = options.textColor || '#4A4A4A'; // Deep Warm Gray
+        const fontSize = options.fontSize || '24px';
+        const fontFamily = 'VT323';
 
         const container = scene.add.container(x, y);
 
-        // Explicitly set size for layout managers
-        container.setSize(width, height + depth);
-        // Note: Phaser 3 Containers don't automatically update their 'width' property based on content,
-        // so we manually set it to ensure external layout logic works.
-        container.width = width;
-        container.height = height + depth;
+        // Shadow (Simulates height, renders behind the button)
+        const shadow = scene.add.rectangle(4, 4, width, height, 0x000000, 0.3).setOrigin(0);
 
-        // Shadow (bottom layer)
-        const shadow = scene.add.rectangle(width / 2, height / 2 + depth, width, height, shadowColor);
+        // Base Background
+        const bg = scene.add.rectangle(0, 0, width, height, baseColor).setOrigin(0);
 
-        // Face (top layer)
-        const face = scene.add.rectangle(width / 2, height / 2, width, height, mainColor);
+        // Bevel Highlights (Top/Left)
+        const highlightTop = scene.add.rectangle(0, 0, width, 3, 0xFFFFFF, 0.5).setOrigin(0);
+        const highlightLeft = scene.add.rectangle(0, 0, 3, height, 0xFFFFFF, 0.5).setOrigin(0);
 
-        // Center text on face
-        textObj.setPosition(width / 2, height / 2);
+        // Bevel Shadows (Bottom/Right)
+        const shadeBottom = scene.add.rectangle(0, height - 3, width, 3, 0x000000, 0.2).setOrigin(0);
+        const shadeRight = scene.add.rectangle(width - 3, 0, 3, height, 0x000000, 0.2).setOrigin(0);
 
-        container.add([shadow, face, textObj]);
+        // Text
+        const btnText = scene.add.text(width / 2, height / 2, text, {
+            fontFamily: fontFamily,
+            fontSize: fontSize,
+            color: textColor
+        }).setOrigin(0.5);
 
-        // Interactivity
-        face.setInteractive({ useHandCursor: true });
+        // Interactive Zone (Transparent)
+        const hitZone = scene.add.zone(width / 2, height / 2, width, height)
+            .setOrigin(0.5)
+            .setInteractive({ useHandCursor: true });
 
-        face.on('pointerover', () => {
-            face.setFillStyle(hoverColor);
+        // Add everything to container
+        container.add([shadow, bg, highlightTop, highlightLeft, shadeBottom, shadeRight, btnText, hitZone]);
+
+        // Input Handling
+        hitZone.on('pointerdown', () => {
+            // Press effect: Move button down-right to cover shadow
+            container.x += 2;
+            container.y += 2;
+            shadow.setVisible(false);
+
+            if (callback) callback();
         });
 
-        face.on('pointerout', () => {
-            face.setFillStyle(mainColor);
-            // Reset position if we dragged out
-            face.y = height / 2;
-            textObj.y = height / 2;
-        });
-
-        face.on('pointerdown', () => {
-            face.y += depth;
-            textObj.y += depth;
-            if (options.onClick) {
-                options.onClick();
+        const resetState = () => {
+            if (!shadow.visible) {
+                container.x -= 2;
+                container.y -= 2;
+                shadow.setVisible(true);
             }
-        });
+        };
 
-        face.on('pointerup', () => {
-            face.y = height / 2;
-            textObj.y = height / 2;
-        });
+        hitZone.on('pointerup', resetState);
+        hitZone.on('pointerout', resetState);
+
+        // Store size for layout calculations
+        container.width = width;
+        container.height = height;
 
         return container;
     }
