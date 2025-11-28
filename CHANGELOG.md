@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.0] - 2025-12-05
+
+### Added
+- **Tamagotchi Journal:** Implemented an automated narrative system in `js/NarrativeSystem.js` and `js/Nadagotchi.js`.
+  - Significant events such as mood changes, weather shifts, and age milestones now automatically generate personalized journal entries based on the pet's archetype.
+- **Enhanced Recipe Book:** Updated `js/UIScene.js` to display detailed information for discovered recipes.
+  - The Recipe Book now shows the description and required materials for each recipe, serving as a functional reference for the player.
+
 ## [1.10.0] - 2025-12-01
 
 ### Added

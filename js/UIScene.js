@@ -432,13 +432,31 @@ export class UIScene extends Phaser.Scene {
      * Populates and displays the recipe book modal.
      */
     openRecipeBook() {
-        const recipes = new PersistenceManager().loadRecipes();
-        let text;
-        if (recipes.length === 0) {
+        const discovered = (this.nadagotchiData && this.nadagotchiData.discoveredRecipes) || new PersistenceManager().loadRecipes();
+        const allRecipes = (this.nadagotchiData && this.nadagotchiData.recipes) || {};
+
+        let text = "";
+
+        if (!discovered || discovered.length === 0) {
             text = "No recipes discovered yet. Keep exploring and studying!";
         } else {
-            text = "Discovered Recipes:\n\n" + recipes.map(r => `• ${r}`).join('\n');
+            text = "Discovered Recipes:\n\n";
+            discovered.forEach(recipeName => {
+                const recipeDef = allRecipes[recipeName];
+
+                text += `• ${recipeName}\n`;
+                if (recipeDef) {
+                    text += `  "${recipeDef.description}"\n`;
+                    const materials = Object.entries(recipeDef.materials)
+                        .map(([mat, count]) => `${count} ${mat}`)
+                        .join(', ');
+                    text += `  Requires: ${materials}\n\n`;
+                } else {
+                    text += "  (Details unknown)\n\n";
+                }
+            });
         }
+
         this.recipeModal.content.setText(text);
         this.recipeModal.setVisible(true);
         this.scene.pause('MainScene');

@@ -1,5 +1,6 @@
 import { PersistenceManager } from './PersistenceManager.js';
 import { Genome, GeneticsSystem } from './GeneticsSystem.js';
+import { NarrativeSystem } from './NarrativeSystem.js';
 
 /**
  * Represents the core Nadagotchi entity, its "Brain".
@@ -141,6 +142,12 @@ export class Nadagotchi {
         };
         /** @type {string} The pet's current location. */
         this.location = loadedData ? loadedData.location : 'Home';
+
+        // --- Runtime State Tracking (Not persisted) ---
+        /** @type {?string} Tracks the last known weather to detect changes. */
+        this.lastWeather = null;
+        /** @type {number} Tracks the integer age to detect milestones. */
+        this.previousAge = Math.floor(this.age);
     }
 
     /**
@@ -212,6 +219,8 @@ export class Nadagotchi {
      * @param {?object} worldState.activeEvent - The currently active world event, if any.
      */
     live(worldState = { weather: "Sunny", time: "Day", activeEvent: null }) {
+        const oldMood = this.mood;
+
         // 1. Setup Base Decay Rates
         let hungerDecay = 0.05;
         let energyDecay = 0.02;
@@ -311,6 +320,39 @@ export class Nadagotchi {
         this.age += 0.001;
         if (this.age > 50 && !this.isLegacyReady) {
             this.isLegacyReady = true;
+        }
+
+        // --- Automated Journal Logging ---
+
+        // 1. Mood Change
+        if (this.mood !== oldMood) {
+            this._logAutoEntry('MOOD_CHANGE', { newMood: this.mood });
+        }
+
+        // 2. Weather Change
+        // Only log if we have a previous weather state (prevents logging on game load)
+        if (this.lastWeather !== null && this.lastWeather !== worldState.weather) {
+            this._logAutoEntry('WEATHER_CHANGE', { weather: worldState.weather });
+        }
+        this.lastWeather = worldState.weather;
+
+        // 3. Age Milestone (Integer increments)
+        if (Math.floor(this.age) > this.previousAge) {
+            this._logAutoEntry('AGE_MILESTONE', { age: Math.floor(this.age) });
+            this.previousAge = Math.floor(this.age);
+        }
+    }
+
+    /**
+     * Helper to generate and add an automated journal entry.
+     * @param {string} type - The event type.
+     * @param {object} context - Context data for the event.
+     * @private
+     */
+    _logAutoEntry(type, context) {
+        const text = NarrativeSystem.generateEntry(this.dominantArchetype, type, context);
+        if (text) {
+            this.addJournalEntry(text);
         }
     }
 
