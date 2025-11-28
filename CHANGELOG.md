@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.15.0] - 2025-12-06
+
+### Added
+- **Inventory System:** Implemented a comprehensive Inventory/Item Management system.
+  - **Item Definitions:** Created `js/ItemData.js` with metadata (description, type, emoji) for all game items.
+  - **Inventory UI:** Added a dedicated "Inventory" button to the `SYSTEM` tab in `js/UIScene.js`, opening a modal that lists all owned items with descriptions.
+  - **Consumable Items:** Implemented functionality to "Use" consumable items directly from the inventory.
+    - **Berries:** Restore hunger and energy.
+    - **Logic-Boosting Snack:** Boosts energy, happiness, and Logic skill.
+    - **Stamina-Up Tea:** Restores a large amount of energy.
+    - **Metabolism-Slowing Tonic:** Permanently reduces the pet's metabolism gene (gene therapy).
+
 ## [1.14.0] - 2025-12-06
 
 ### Changed

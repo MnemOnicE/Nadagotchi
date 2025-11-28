@@ -511,6 +511,10 @@ export class Nadagotchi {
                 this.craftItem(item);
                 break;
 
+            case "CONSUME_ITEM":
+                this.consumeItem(item);
+                break;
+
             case 'PRACTICE_HOBBY':
                 this.practiceHobby(item);
                 break;
@@ -535,6 +539,57 @@ export class Nadagotchi {
             this.stats.happiness += Config.ACTIONS.PRACTICE_HOBBY.HAPPINESS_RESTORE;
             this.stats.energy -= Config.ACTIONS.PRACTICE_HOBBY.ENERGY_COST;
             this.addJournalEntry(`I spent some time practicing ${hobbyName}.`);
+        }
+    }
+
+    /**
+     * Consumes an item, applying its effects to the Nadagotchi.
+     * @param {string} itemName - The name of the item to consume.
+     */
+    consumeItem(itemName) {
+        if (!this.inventory[itemName] || this.inventory[itemName] <= 0) return;
+
+        let consumed = false;
+
+        switch (itemName) {
+            case 'Berries':
+                // Berries provide a small amount of food and energy
+                this.stats.hunger = Math.min(this.maxStats.hunger, this.stats.hunger + 10);
+                this.stats.energy = Math.min(this.maxStats.energy, this.stats.energy + 2);
+                this.addJournalEntry("I ate some Berries. Yummy!");
+                consumed = true;
+                break;
+            case 'Logic-Boosting Snack':
+                this.stats.energy = Math.min(this.maxStats.energy, this.stats.energy + 10);
+                this.stats.happiness = Math.min(this.maxStats.happiness, this.stats.happiness + 5);
+                this.skills.logic += 0.5;
+                this.addJournalEntry("I ate a Logic-Boosting Snack. I feel smarter!");
+                consumed = true;
+                break;
+            case 'Stamina-Up Tea':
+                this.stats.energy = Math.min(this.maxStats.energy, this.stats.energy + 30);
+                this.addJournalEntry("I drank some Stamina-Up Tea. I feel refreshed!");
+                consumed = true;
+                break;
+            case 'Metabolism-Slowing Tonic':
+                // Gene Therapy: Reduces metabolism gene values permanently (for this life/lineage)
+                if (this.genome && this.genome.genotype && this.genome.genotype.metabolism) {
+                    const old = this.genome.genotype.metabolism;
+                    // Decrease both alleles by 1, min 1
+                    this.genome.genotype.metabolism = [Math.max(1, old[0] - 1), Math.max(1, old[1] - 1)];
+                    this.genome.phenotype = this.genome.calculatePhenotype(); // Recalculate
+                    this.addJournalEntry("I drank the tonic. I feel... slower. My metabolism has decreased.");
+                    consumed = true;
+                }
+                break;
+            default:
+                // Item is not consumable
+                break;
+        }
+
+        if (consumed) {
+            this._removeItem(itemName, 1);
+            // Stats will be updated in UI on next tick/event
         }
     }
 
