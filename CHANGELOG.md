@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.2] - 2025-12-05
+
+### Fixed
+- **Determinism in Personality:** Fixed a regression in `js/Nadagotchi.js` where the `updateDominantArchetype` method was using random selection for tie-breaking in production environments, contradicting the intended deterministic design. Removed the `Phaser.Utils.Array.GetRandom` call to ensure consistent behavior across all environments.
+
 ## [1.11.1] - 2025-12-05
 
 ### Fixed
