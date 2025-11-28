@@ -18,21 +18,21 @@ describe('EventManager', () => {
     });
 
     test('should activate a seasonal festival on the correct date', () => {
-        calendar.day = 5;
+        calendar.day = 14;
         calendar.season = 'Spring';
         eventManager.update();
         const activeEvent = eventManager.getActiveEvent();
         expect(activeEvent).not.toBeNull();
-        expect(activeEvent.name).toBe('SpringBloomFestival');
+        expect(activeEvent.name).toBe('SpringEquinoxFestival');
     });
 
     test('should deactivate an event on the following day', () => {
-        calendar.day = 5;
+        calendar.day = 14;
         calendar.season = 'Spring';
         eventManager.update();
         expect(eventManager.getActiveEvent()).not.toBeNull();
 
-        calendar.advanceDay(); // Move to day 6
+        calendar.advanceDay(); // Move to day 15
         eventManager.update();
         expect(eventManager.getActiveEvent()).toBeNull();
     });
@@ -61,8 +61,8 @@ describe('EventManager', () => {
     });
 
     test('should only activate one event per day', () => {
-        calendar.day = 5;
-        calendar.season = 'Spring'; // This will trigger the SpringBloomFestival
+        calendar.day = 14;
+        calendar.season = 'Spring'; // This will trigger the SpringEquinoxFestival
 
         // Mock Math.random to also trigger a spontaneous event
         const originalRandom = Math.random;
@@ -70,7 +70,7 @@ describe('EventManager', () => {
 
         eventManager.update();
         const activeEvent = eventManager.getActiveEvent();
-        expect(activeEvent.name).toBe('SpringBloomFestival'); // The seasonal event should take precedence
+        expect(activeEvent.name).toBe('SpringEquinoxFestival'); // The seasonal event should take precedence
 
         Math.random = originalRandom;
     });

@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Enhanced Metabolism:** Pets with a homozygous `metabolism` gene (two identical alleles) now possess a higher maximum energy capacity (+5 Max Energy, total 105).
   - **Emotional Resilience:** Pets with a homozygous `moodSensitivity` gene recover their 'Happy' mood more easily, requiring lower stats (75% instead of 80%) to reach that state.
 - **Unit Tests:** Added `tests/HomozygousBonuses.test.js` to verify the detection and application of these genetic bonuses.
+### Changed
+- **Astronomical Festivals:** Aligned seasonal festivals with astronomical concepts (Equinoxes and Solstices). All festivals now occur on the 14th day of the season (Mid-Season) to reflect the "Clock Rigor" concept.
+  - Spring: Spring Equinox Festival
+  - Summer: Summer Solstice Celebration
+  - Autumn: Autumn Equinox Feast
+  - Winter: Winter Solstice Festival
 
 ## [1.11.2] - 2025-12-05
 
