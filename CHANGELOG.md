@@ -11,6 +11,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Work Reward Exploit:** Implemented diminishing returns for skill and happiness gains in work minigames. Skill gain now scales inversely with the current skill level (preventing easy mastery), and happiness gain decreases as the pet approaches maximum happiness.
 - **Save Scumming Exploit:** Enhanced the `PersistenceManager` to obfuscate save data using Base64 encoding and added a hash integrity check to detect tampering. Legacy plain JSON saves are still supported for backward compatibility.
 - **Quest Logic Bypass:** Fixed a logic flaw in the Artisan "Masterwork Crafting" quest. The quest stage 2 completion now strictly requires the "Masterwork Chair" to be crafted while the quest is active (tracking a `hasCraftedChair` flag), preventing players from bypassing the requirement by cheating the item into their inventory.
+## [1.12.1] - 2025-12-05
+
+### Added
+- **Homozygous Personality Bonuses:** Implemented passive gameplay bonuses for pets with homozygous personality genes, deepening the genetic strategy.
+  - **Intellectual:** Grants a happiness boost when studying.
+  - **Adventurer:** Grants additional happiness when exploring.
+  - **Nurturer:** Increases empathy gain when caring for plants.
+  - **Mischievous:** Refunds energy when playing.
+  - **Recluse:** Boosts focus gain when meditating.
+- **Expanded Breeding Influence:** Significantly expanded the `GeneticsSystem` environment map (`envMap`) to allow a wider range of items to influence offspring traits.
+  - **Crafted Items:** 'Fancy Bookshelf' (Intellectual), 'Masterwork Chair' (Recluse), 'Logic-Boosting Snack' (Intellectual), 'Stamina-Up Tea' (Adventurer).
+  - **Resources:** 'Shiny Stone' (Mischievous), 'Frostbloom' (Recluse), 'Berries' (Nurturer).
+- **Unit Tests:** Added `tests/FeatureEnhancements.test.js` covering the new bonuses, expanded breeding logic, and tie-breaking rules.
+
+### Changed
+- **Personality Tie-Breaking:** Refined the `updateDominantArchetype` logic in `Nadagotchi.js`. Instead of falling back to a deterministic list order, ties for the dominant archetype are now broken by comparing the pet's relevant skills (e.g., Logic + Research for Intellectual vs. Navigation for Adventurer). This makes personality shifts feel more earned and logical.
 
 ## [1.12.0] - 2025-12-05
 

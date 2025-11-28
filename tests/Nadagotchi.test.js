@@ -135,9 +135,13 @@ describe('Nadagotchi', () => {
             pet.personalityPoints.Nurturer = 20;
             pet.personalityPoints.Mischievous = 20;
 
+            // Equalize skills to test deterministic fallback
+            pet.skills.communication = 0;
+            // Adventurer (Nav: 0), Nurturer (Emp: 0), Mischievous (Comm: 0)
+
             pet.updateDominantArchetype();
 
-            // The first in the list of tied archetypes should be chosen.
+            // The first in the list of tied archetypes should be chosen (Adventurer).
             expect(pet.dominantArchetype).toBe('Adventurer');
         });
     });
@@ -185,7 +189,8 @@ describe('Nadagotchi', () => {
             pet.skills.logic = 1;
             pet.handleAction('STUDY');
             expect(pet.stats.energy).toBe(45);
-            expect(pet.stats.happiness).toBe(60);
+            // 50 - 5 (cost) + 15 (Intellectual) + 5 (Homozygous Bonus) = 65
+            expect(pet.stats.happiness).toBe(65);
             expect(pet.skills.logic).toBeGreaterThan(1);
         });
 
@@ -194,7 +199,8 @@ describe('Nadagotchi', () => {
             adventurerPet.stats.happiness = 50;
             adventurerPet.handleAction('EXPLORE');
             expect(adventurerPet.mood).toBe('happy');
-            expect(adventurerPet.stats.happiness).toBe(70);
+            // 50 + 20 (Adventurer) + 10 (Homozygous Bonus) = 80
+            expect(adventurerPet.stats.happiness).toBe(80);
 
             const reclusePet = new Nadagotchi('Recluse');
             reclusePet.stats.happiness = 50;

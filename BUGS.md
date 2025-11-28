@@ -51,6 +51,17 @@
 **Line:** 9
 **Description:** Game data is saved to `localStorage` as plain JSON, allowing trivial modification (save scumming) by editing the stored string.
 **Fix:** Updated `PersistenceManager` to encode save data using Base64 and append a simple hash for integrity verification. The loader now validates the hash and decodes the data, while maintaining backward compatibility for legacy plain JSON saves.
+**File:** `js/Nadagotchi.js`
+**Line:** 400
+**Description:** Although the `Genome` class calculates `isHomozygous<Archetype>` flags, they are not used in `Nadagotchi.js`, resulting in missing gameplay bonuses for pure-bred pets.
+**Fix:** Implemented specific stat bonuses in `handleAction` for each homozygous personality trait (e.g., refunds energy for Mischievous, happiness boost for Adventurer).
+
+---
+
+**File:** `js/GeneticsSystem.js`
+**Line:** 110
+**Description:** The `envMap` used for determining environmental influence on breeding is too sparse, ignoring most inventory items and limiting player agency.
+**Fix:** Expanded `envMap` to include high-value crafted items (e.g., 'Fancy Bookshelf') and raw resources, mapping them to relevant genes.
 
 ---
 
@@ -58,3 +69,6 @@
 **Line:** 660
 **Description:** The Artisan quest stage 2 check ("Masterwork Crafting") only verifies the presence of a "Masterwork Chair" in the inventory. This allows players to bypass the crafting requirement by acquiring the item through other means (e.g., cheats or future rewards).
 **Fix:** Modified `craftItem` to set a specific flag (`hasCraftedChair`) on the quest object when the required item is crafted during the active quest stage. Updated `_handleArtisanQuest` to check for this flag instead of just inventory presence.
+**Line:** 770
+**Description:** Tie-breaking for the dominant archetype relies on internal list order (deterministic but arbitrary), which can feel non-intuitive to players who expect their pet's skills to matter.
+**Fix:** Updated `updateDominantArchetype` to break ties by comparing the relevant skills associated with each archetype (e.g., Logic+Research for Intellectual) before falling back to list order.
