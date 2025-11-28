@@ -46,16 +46,18 @@ class UIScene extends Phaser.Scene {
     }
 
     /**
-     * Creates and positions the main action buttons.
+     * Creates and positions the main action buttons in two rows to avoid clutter.
      * @private
      */
     createActionButtons() {
-        const buttonY = this.cameras.main.height - 40;
         const buttonStyle = { fontFamily: 'Arial', fontSize: '14px', color: '#ffffff', backgroundColor: '#4a4a4a', padding: { x: 10, y: 5 } };
-        let startX = 10;
 
-        const addButton = (text, action) => {
-            const button = this.add.text(startX, buttonY, text, buttonStyle)
+        let startX = 10;
+        const row1Y = this.cameras.main.height - 75; // Top row for core actions
+        const row2Y = this.cameras.main.height - 35; // Bottom row for menus
+
+        const addButton = (text, action, y) => {
+            const button = this.add.text(startX, y, text, buttonStyle)
                 .setInteractive({ useHandCursor: true })
                 .on('pointerdown', () => this.game.events.emit('uiAction', action))
                 .on('pointerover', () => button.setStyle({ fill: '#ff0' }))
@@ -63,12 +65,18 @@ class UIScene extends Phaser.Scene {
             startX += button.width + 10;
         };
 
-        ['Feed', 'Play', 'Study', 'Explore', 'Meditate'].forEach(action => addButton(action, action.toUpperCase()));
-        addButton('Journal', 'OPEN_JOURNAL');
-        addButton('Recipes', 'OPEN_RECIPES');
-        addButton('Hobbies', 'OPEN_HOBBIES');
-        addButton('Craft', 'OPEN_CRAFTING_MENU');
-        addButton('Decorate', 'DECORATE');
+        // Row 1: Core Needs & Interactions
+        ['Feed', 'Play', 'Study', 'Explore', 'Meditate'].forEach(action => addButton(action, action.toUpperCase(), row1Y));
+
+        // Reset X for Row 2
+        startX = 10;
+
+        // Row 2: Menus & Management
+        addButton('Journal', 'OPEN_JOURNAL', row2Y);
+        addButton('Recipes', 'OPEN_RECIPES', row2Y);
+        addButton('Hobbies', 'OPEN_HOBBIES', row2Y);
+        addButton('Craft', 'OPEN_CRAFTING_MENU', row2Y);
+        addButton('Decorate', 'DECORATE', row2Y);
     }
 
     /**

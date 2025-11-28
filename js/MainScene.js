@@ -93,7 +93,8 @@ class MainScene extends Phaser.Scene {
 
         // --- Post-FX & UI ---
         this.lightTexture = this.add.renderTexture(0, 0, this.cameras.main.width, this.cameras.main.height).setBlendMode('MULTIPLY').setVisible(false);
-        this.dateText = this.add.text(10, 10, '', { fontFamily: 'Arial', fontSize: '16px', color: '#ffffff', backgroundColor: 'rgba(0,0,0,0.5)', padding: { x: 5, y: 3 } });
+        // FIX: Moved dateText to the top-right corner (origin 1,0) to avoid overlap with stats
+        this.dateText = this.add.text(this.cameras.main.width - 10, 10, '', { fontFamily: 'Arial', fontSize: '16px', color: '#ffffff', backgroundColor: 'rgba(0,0,0,0.5)', padding: { x: 5, y: 3 } }).setOrigin(1, 0);
         this.scene.launch('UIScene');
 
         // --- Timers and Event Listeners ---
@@ -152,6 +153,7 @@ class MainScene extends Phaser.Scene {
             this.togglePlacementMode(null); // Exit placement mode if another action is taken
         }
 
+        // FIX: Merged duplicate handleUIAction definitions and unified logic
         switch (actionType) {
             case 'WORK':
                 this.startWorkMinigame();
@@ -174,6 +176,12 @@ class MainScene extends Phaser.Scene {
                 break;
             case 'INTERACT_VILLAGER':
                 this.nadagotchi.interact('Sickly Villager');
+                break;
+            case 'INTERACT_BOOKSHELF':
+            case 'INTERACT_PLANT':
+            case 'OPEN_CRAFTING_MENU':
+                // These specific cases fall through to default handler or are handled by sprite events directly emitting specific actions
+                this.nadagotchi.handleAction(actionType, data);
                 break;
             default:
                 this.nadagotchi.handleAction(actionType, data);
@@ -295,7 +303,8 @@ class MainScene extends Phaser.Scene {
         this.lightTexture.setSize(width, height);
         this.skyTexture.setSize(width, height);
         this.drawSky();
-        this.dateText.setPosition(10, 10);
+        // FIX: Ensure text stays pinned to the right on resize
+        this.dateText.setPosition(width - 10, 10);
     }
 
     /**
