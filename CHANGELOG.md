@@ -5,15 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.5.4] - 2025-11-16
+## [1.5.3] - 2025-11-27
 
 ### Fixed
-- **Stuck Calendar Date:** Fixed a critical bug where the in-game calendar would never advance past "Spring, Day 1". The `WorldClock` now correctly signals the start of a new day, triggering the `Calendar` to advance and world events to update.
-
-## [1.5.3] - 2025-11-16
-
-### Fixed
-- **Test Suite Setup Order:** Fixed an issue in `tests/legacy.test.js` where the game object was being accessed before it was fully initialized in the test setup. Swapped the order of operations to inject mocks before calling `create()`, ensuring tests run against a correctly configured environment.
+- **UI Overlap Issues:**
+  - Resolved overlapping text in the top-left corner by moving the Date/Time display to the top-right corner.
+  - Resolved button overlap in the bottom action bar by splitting the action buttons into two distinct rows (Core Actions and Menus), ensuring they no longer conflict with the "Job Board" button on smaller screens.
+- **Critical Syntax Error:** Fixed a mangled and duplicated `handleUIAction` method in `js/MainScene.js` that was preventing the game from running correctly.
 
 ## [1.5.2] - 2025-11-16
 

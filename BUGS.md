@@ -22,4 +22,4 @@
 **File:** `js/MainScene.js`
 **Line:** 160
 **Description:** Syntax error and duplicate/conflicting method definition for `handleUIAction`. One implementation uses `if/else` and handles furniture placement, while the other uses `switch` and handles NPC interactions. The first implementation is not closed properly.
-**Fix:** N/A (Reported only).
+**Fix:** Merged the logic from both conflicting definitions into a single, unified `handleUIAction` method that uses a `switch` statement for action types and handles furniture placement correctly.
