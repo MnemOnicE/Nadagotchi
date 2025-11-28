@@ -1,3 +1,6 @@
+import { ButtonFactory } from './ButtonFactory.js';
+import { PersistenceManager } from './PersistenceManager.js';
+
 /**
  * @class UIScene
  * @extends Phaser.Scene
@@ -5,7 +8,7 @@
  * A dedicated Phaser Scene for managing and displaying all UI elements.
  * It implements the "Physical Shell" dashboard layout using a Neo-Retro aesthetic.
  */
-class UIScene extends Phaser.Scene {
+export class UIScene extends Phaser.Scene {
     constructor() {
         super({ key: 'UIScene' });
     }

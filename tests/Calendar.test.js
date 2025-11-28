@@ -1,4 +1,4 @@
-const Calendar = require('../js/Calendar');
+import { Calendar } from '../js/Calendar';
 
 describe('Calendar', () => {
     let calendar;

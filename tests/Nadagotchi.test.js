@@ -1,6 +1,6 @@
 // tests/Nadagotchi.test.js
-const Nadagotchi = require('../js/Nadagotchi');
-const PersistenceManager = require('../js/PersistenceManager');
+import { Nadagotchi } from '../js/Nadagotchi';
+import { PersistenceManager } from '../js/PersistenceManager';
 
 // Mock localStorage
 class LocalStorageMock {
@@ -11,8 +11,6 @@ class LocalStorageMock {
     removeItem(key) { delete this.store[key]; }
 }
 global.localStorage = new LocalStorageMock();
-global.PersistenceManager = PersistenceManager;
-
 
 // Mock Phaser since it's not available in the Node.js test environment
 const Phaser = {

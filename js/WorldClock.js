@@ -2,7 +2,7 @@
  * WorldClock: Manages the in-game 24-hour clock and time-of-day transitions.
  * This class provides a more granular and controllable time system than a simple timer.
  */
-class WorldClock {
+export class WorldClock {
     /**
      * @param {Phaser.Scene} scene - The Phaser scene this clock is attached to.
      * @param {number} dayDurationInSeconds - The total duration of a 24-hour in-game day in real-world seconds.

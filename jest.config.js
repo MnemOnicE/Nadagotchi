@@ -3,7 +3,8 @@ module.exports = {
   collectCoverageFrom: ['js/**/*.js'],
   coverageDirectory: 'coverage/',
   coverageReporters: ['text', 'lcov'],
+  testEnvironment: 'jsdom',
   transform: {
-    '^.+\\/js\\/(?!game).+\\.js$': './jest.transformer.js'
+    '^.+\\.js$': 'babel-jest',
   },
 };

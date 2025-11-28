@@ -1,7 +1,5 @@
-const PersistenceManager = require('../js/PersistenceManager');
-global.PersistenceManager = PersistenceManager;
-
-const Nadagotchi = require('../js/Nadagotchi');
+import { PersistenceManager } from '../js/PersistenceManager';
+import { Nadagotchi } from '../js/Nadagotchi';
 
 // Mock localStorage
 class LocalStorageMock {

@@ -122,21 +122,14 @@ class LocalStorageMock {
 global.localStorage = new LocalStorageMock();
 
 // Load classes
-const Nadagotchi = require('../js/Nadagotchi.js');
-const MainScene = require('../js/MainScene.js');
-const PersistenceManager = require('../js/PersistenceManager.js');
-const Calendar = require('../js/Calendar.js');
-const WorldClock = require('../js/WorldClock.js');
-const EventManager = require('../js/EventManager.js');
-const WeatherSystem = require('../js/WeatherSystem.js');
+const { Nadagotchi } = require('../js/Nadagotchi.js');
+const { MainScene } = require('../js/MainScene.js');
+const { PersistenceManager } = require('../js/PersistenceManager.js');
+const { Calendar } = require('../js/Calendar.js');
+const { WorldClock } = require('../js/WorldClock.js');
+const { EventManager } = require('../js/EventManager.js');
+const { WeatherSystem } = require('../js/WeatherSystem.js');
 
-// Assign to global scope
-global.Nadagotchi = Nadagotchi;
-global.PersistenceManager = PersistenceManager;
-global.Calendar = Calendar;
-global.WorldClock = WorldClock;
-global.EventManager = EventManager;
-global.WeatherSystem = WeatherSystem;
 
 describe('Day Cycle Integration', () => {
     let mainScene;

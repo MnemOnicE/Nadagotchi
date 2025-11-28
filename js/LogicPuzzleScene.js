@@ -5,7 +5,7 @@
  * A mini-game for the 'Innovator' career path, functioning as a "Simon Says" memory game.
  * The player must memorize and repeat an ever-increasing sequence of colors.
  */
-class LogicPuzzleScene extends Phaser.Scene {
+export class LogicPuzzleScene extends Phaser.Scene {
     constructor() {
         super({ key: 'LogicPuzzleScene' });
         /** @type {Array<string>} The correct sequence of colors. */

@@ -12,11 +12,11 @@ Nadagotchi is a virtual pet game inspired by Tamagotchi, built with the Phaser.j
 
 ## Getting Started
 
-To run the Nadagotchi prototype locally, you need a simple local web server. Python's built-in HTTP server is a great option.
+To run the Nadagotchi prototype locally, you need to use the modern build tools (Vite).
 
 ### Prerequisites
 
-*   [Python 3](https://www.python.org/downloads/) installed on your system.
+*   [Node.js](https://nodejs.org/) installed on your system.
 
 ### Running the Game
 
@@ -26,22 +26,30 @@ To run the Nadagotchi prototype locally, you need a simple local web server. Pyt
     cd nadagotchi
     ```
 
-2.  **Start the local web server:**
+2.  **Install dependencies:**
     ```bash
-    python -m http.server
+    npm install
     ```
-    This command will start a server, typically on port 8000.
 
-3.  **Open the game in your browser:**
-    Navigate to `http://localhost:8000` in your web browser. The game should load and start.
+3.  **Start the development server:**
+    ```bash
+    npm run dev
+    ```
+    This will start a Vite server, typically on `http://localhost:5173`. Open this URL in your browser.
+
+4.  **Run Tests:**
+    ```bash
+    npm test
+    ```
 
 ## Code Structure
 
-The game's source code is located in the `js/` directory.
+The game's source code is located in the `js/` directory and uses ES6 Modules.
 
 *   **`game.js`**: The main entry point. It initializes the Phaser game instance and registers all the scenes.
 *   **`Nadagotchi.js`**: The "brain" of the pet. This class manages all of the pet's internal state, including stats, mood, personality, skills, and career. It is not tied to Phaser and contains only pure game logic.
 *   **`PersistenceManager.js`**: A utility class for saving and loading all game data to and from `localStorage`.
+*   **`PreloaderScene.js`**: The first scene loaded, responsible for generating or loading assets and displaying a loading bar.
 
 ### Scenes (`js/*Scene.js`)
 
@@ -64,4 +72,3 @@ These classes manage the dynamic world the pet lives in.
 *   **`EventManager.js`**: Triggers seasonal festivals and rare, spontaneous events.
 *   **`WorldClock.js`**: Manages the 24-hour day/night cycle.
 *   **`WeatherSystem.js`**: Manages weather changes and their effects.
-"

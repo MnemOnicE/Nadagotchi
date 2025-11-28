@@ -1,7 +1,7 @@
 /**
  * Manages all dynamic and seasonal events in the game.
  */
-class EventManager {
+export class EventManager {
     /**
      * @param {Calendar} calendar - A reference to the game's calendar instance.
      */

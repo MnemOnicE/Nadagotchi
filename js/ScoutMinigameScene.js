@@ -5,7 +5,7 @@
  * A memory matching mini-game for the 'Scout' career path.
  * The player must find and match pairs of icons on a grid within a time limit.
  */
-class ScoutMinigameScene extends Phaser.Scene {
+export class ScoutMinigameScene extends Phaser.Scene {
     constructor() {
         super({ key: 'ScoutMinigameScene' });
         /** @type {Array<string>} The set of unique icons to be matched. */

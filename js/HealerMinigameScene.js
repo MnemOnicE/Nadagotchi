@@ -5,7 +5,7 @@
  * A mini-game for the 'Healer' career path.
  * The player must diagnose a symptom and choose the correct remedy from a list of options.
  */
-class HealerMinigameScene extends Phaser.Scene {
+export class HealerMinigameScene extends Phaser.Scene {
     constructor() {
         super({ key: 'HealerMinigameScene' });
         /**

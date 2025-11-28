@@ -1,9 +1,11 @@
+import { PersistenceManager } from './PersistenceManager.js';
+
 /**
  * Represents the core Nadagotchi entity, its "Brain".
  * This class holds the Nadagotchi's state, including its personality, stats, skills, and more.
  * @class Nadagotchi
  */
-class Nadagotchi {
+export class Nadagotchi {
     /**
      * Creates a new Nadagotchi.
      * @param {string} initialArchetype - The initial archetype of the Nadagotchi.

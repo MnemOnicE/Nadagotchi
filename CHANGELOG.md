@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2025-11-30
+
+### Changed
+- **Modern Architecture (Vite & ES Modules):** Migrated the entire codebase from vanilla JavaScript (global scope) to modern ES6 Modules bundled with Vite.
+  - Replaced `<script>` tags in `index.html` with a single module entry point.
+  - Converted all classes (`Nadagotchi`, `MainScene`, etc.) to use `export class` and explicit `import` statements.
+  - Configured Vite for development and production builds (`npm run dev`, `npm run build`).
+  - Updated Jest configuration to use `babel-jest` for testing ES modules, removing the custom transformer hack.
+- **Centralized Asset Management:** Implemented a dedicated `PreloaderScene` to handle asset generation and loading.
+  - Moved procedural texture generation logic from `MainScene.preload()` to `PreloaderScene`.
+  - Added a visual loading bar to `PreloaderScene` to provide feedback during initialization.
+  - `MainScene` now focuses purely on gameplay logic and rendering.
+
 ## [1.6.0] - 2025-11-30
 
 ### Added

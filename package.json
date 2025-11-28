@@ -2,11 +2,14 @@
   "name": "app",
   "version": "1.0.0",
   "description": "A Tamagotchi-like game with a deep, emergent personality system.",
-  "main": "index.js",
+  "main": "js/game.js",
   "directories": {
     "test": "tests"
   },
   "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "test": "jest"
   },
   "repository": {
@@ -16,12 +19,16 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "bugs": {
     "url": "https://github.com/MnemOnicE/Nadagotchi/issues"
   },
   "homepage": "https://github.com/MnemOnicE/Nadagotchi#readme",
   "devDependencies": {
-    "jest": "^30.2.0"
+    "@babel/core": "^7.28.5",
+    "@babel/preset-env": "^7.28.5",
+    "babel-jest": "^30.2.0",
+    "jest": "^30.2.0",
+    "jest-environment-jsdom": "^30.2.0",
+    "vite": "^6.2.0"
   }
 }

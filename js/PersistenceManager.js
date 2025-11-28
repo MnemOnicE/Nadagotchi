@@ -2,7 +2,7 @@
  * PersistenceManager is a utility class for handling game state saving and loading via localStorage.
  * This allows the game to remember the pet's state, retired pets, and other meta-game data across browser sessions.
  */
-class PersistenceManager {
+export class PersistenceManager {
     /**
      * Saves the active Nadagotchi's data to localStorage.
      * @param {object} nadagotchiData - The Nadagotchi object to save.
@@ -115,4 +115,3 @@ class PersistenceManager {
         return data ? JSON.parse(data) : null;
     }
 }
-

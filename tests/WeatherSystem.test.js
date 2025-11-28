@@ -11,7 +11,7 @@ global.Phaser = {
     }
 };
 
-const WeatherSystem = require('../js/WeatherSystem');
+import { WeatherSystem } from '../js/WeatherSystem';
 
 // Mock Phaser Scene and related functionality
 const mockScene = {

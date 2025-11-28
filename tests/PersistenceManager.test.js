@@ -1,5 +1,5 @@
 // tests/PersistenceManager.test.js
-const PersistenceManager = require('../js/PersistenceManager');
+import { PersistenceManager } from '../js/PersistenceManager';
 
 // Mock localStorage
 class LocalStorageMock {
