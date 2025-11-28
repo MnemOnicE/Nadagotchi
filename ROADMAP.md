@@ -30,6 +30,7 @@ This phase focuses on building out the primary gameplay loops, giving players cl
     -   [x] Designed and implemented the 'Logic Puzzle' mini-game for the Innovator career.
 -   **[x] Career Mini-Games:**
     -   [x] Designed and implemented unique, engaging mini-games for the Scout, Healer, and Artisan careers.
+     -   [x] Implemented comprehensive test coverage for all career mini-games.
 -   **[ ] Future Work:**
     -   [ ] Develop a "multi-classing" system to allow for hybrid careers (e.g., Archaeologist from Adventurer + Intellectual skills).
     -   [ ] Introduce NPC "mentors" in career-specific guilds to guide skill development.
