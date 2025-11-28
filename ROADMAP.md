@@ -48,7 +48,8 @@ This phase focuses on building out the primary gameplay loops, giving players cl
     -   [x] Introduced seasonal festivals and rare, spontaneous events (e.g., 'Traveling Merchant').
 -   **[ ] Future Work:**
     -   [ ] Allow for deeper home customization with player-placed furniture.
-    -   [ ] Expand NPC interactions with more complex dialogues and relationship-based events.
+    -   [x] Expand NPC interactions with more complex dialogues and relationship-based events.
+        -   [x] Implemented multi-stage quest system (e.g., Masterwork Crafting).
 
 ### **III. Technical Foundation & Architecture**
 -   **[x] Modern Tooling & Architecture:**

@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.0] - 2025-12-05
+
+### Added
+- **NPC Quest System:** Introduced a new quest system framework in `js/Nadagotchi.js`.
+- **Masterwork Crafting Quest:** Implemented a unique, multi-stage quest for the "Master Artisan" NPC.
+  - Reaching relationship level 5 triggers the "Masterwork Crafting" quest line.
+  - Players must gather materials ("Sticks") to learn a new recipe ("Masterwork Chair").
+  - Crafting and delivering the "Masterwork Chair" completes the quest, granting "Master Artisan" recognition and a permanent skill boost to future interactions.
+- **New Recipe:** Added "Masterwork Chair" to the recipe definitions.
+
 ## [1.11.2] - 2025-12-05
 
 ### Fixed
