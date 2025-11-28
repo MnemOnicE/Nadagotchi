@@ -14,6 +14,7 @@ This foundational phase focused on bringing the Nadagotchi to life with a dynami
 -   **[x] Version 0.5: UI Refactoring:** Separated UI into a dedicated `UIScene` for better scalability and implemented a responsive, mobile-first design.
 -   **[x] Version 1.2: Core Test Coverage:** Added crucial unit tests for `PersistenceManager.js` and `Nadagotchi.js` to ensure stability.
     -   [x] Fixed a bug in the personality system's tie-breaking logic to ensure predictable behavior.
+    -   [x] Refactored legacy tests to ensure correct test setup order.
 
 ---
 
