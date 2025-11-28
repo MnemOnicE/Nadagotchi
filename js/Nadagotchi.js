@@ -1,6 +1,8 @@
 import { PersistenceManager } from './PersistenceManager.js';
 import { Genome, GeneticsSystem } from './GeneticsSystem.js';
 import { NarrativeSystem } from './NarrativeSystem.js';
+import { Config } from './Config.js';
+import { Recipes } from './ItemData.js';
 
 /**
  * Represents the core Nadagotchi entity, its "Brain".
@@ -44,7 +46,7 @@ export class Nadagotchi {
             /** @type {Array<string>} Special traits inherited from ancestors. */
             this.legacyTraits = loadedData.legacyTraits || [];
              /** @type {number} A 1-10 scale affecting mood swing intensity. */
-            this.moodSensitivity = loadedData.moodSensitivity || 5;
+            this.moodSensitivity = loadedData.moodSensitivity || Config.INITIAL_STATE.MOOD_SENSITIVITY_DEFAULT;
 
             // Initialize Genome
             if (loadedData.genome) {
@@ -60,9 +62,9 @@ export class Nadagotchi {
                          migratedGenotype[trait] = [val, val];
                     });
                     // Physio
-                    const moodSens = loadedData.genome.moodSensitivity || 5;
+                    const moodSens = loadedData.genome.moodSensitivity || Config.INITIAL_STATE.MOOD_SENSITIVITY_DEFAULT;
                     migratedGenotype.moodSensitivity = [moodSens, moodSens];
-                    migratedGenotype.metabolism = [5, 5]; // Default
+                    migratedGenotype.metabolism = [Config.GENETICS.METABOLISM_NORMALIZER, Config.GENETICS.METABOLISM_NORMALIZER]; // Default 5
                     migratedGenotype.specialAbility = [null, null];
 
                     // Attempt to preserve legacy trait
@@ -86,38 +88,36 @@ export class Nadagotchi {
                 Adventurer: 0, Nurturer: 0, Mischievous: 0,
                 Intellectual: 0, Recluse: 0
             };
-            this.personalityPoints[initialArchetype] = 10;
+            this.personalityPoints[initialArchetype] = Config.INITIAL_STATE.PERSONALITY_POINTS_STARTER;
 
-            this.stats = { hunger: 100, energy: 100, happiness: 70 };
-            this.skills = {
-                communication: 1, resilience: 1, navigation: 0,
-                empathy: 0, logic: 0, focus: 0, crafting: 0,
-                research: 0
-            };
+            // Clone initial stats from Config to avoid reference issues
+            this.stats = { ...Config.INITIAL_STATE.STATS };
+            this.skills = { ...Config.INITIAL_STATE.SKILLS };
+
             this.currentCareer = null;
             this.inventory = {};
             this.age = 0;
             this.generation = 1;
             this.isLegacyReady = false;
             this.legacyTraits = [];
-            this.moodSensitivity = 5;
+            this.moodSensitivity = Config.INITIAL_STATE.MOOD_SENSITIVITY_DEFAULT;
 
             // Initialize Genome for new game
             // Start with random defaults, then bias towards the chosen starter
             this.genome = new Genome(); // Random "Wild" defaults
             // Boost the dominant archetype to ensure it wins against the wild traits (10-30)
-            // Setting to [40, 40] guarantees it's > 30.
             if (this.genome.genotype[initialArchetype]) {
-                this.genome.genotype[initialArchetype] = [40, 40];
+                const val = Config.INITIAL_STATE.GENOME_STARTER_VAL;
+                this.genome.genotype[initialArchetype] = [val, val];
             }
             // Recalculate phenotype after manual genotype modification
             this.genome.phenotype = this.genome.calculatePhenotype();
         }
 
         /** @type {{hunger: number, energy: number, happiness: number}} Maximum values for stats. */
-        this.maxStats = { hunger: 100, energy: 100, happiness: 100 };
+        this.maxStats = { hunger: Config.LIMITS.MAX_STATS, energy: Config.LIMITS.MAX_STATS, happiness: Config.LIMITS.MAX_STATS };
         if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousMetabolism) {
-            this.maxStats.energy += 5;
+            this.maxStats.energy += Config.GENETICS.HOMOZYGOUS_ENERGY_BONUS;
         }
 
         /** @type {?string} A flag used by the UI to show a one-time notification when a career is unlocked. */
@@ -223,8 +223,8 @@ export class Nadagotchi {
             mood: 'neutral',
             dominantArchetype: dominant,
             personalityPoints: initialPoints,
-            stats: { hunger: 100, energy: 100, happiness: 70 },
-            skills: { communication: 1, resilience: 1, navigation: 0, empathy: 0, logic: 0, focus: 0, crafting: 0, research: 0 },
+            stats: { ...Config.INITIAL_STATE.STATS },
+            skills: { ...Config.INITIAL_STATE.SKILLS },
             currentCareer: null,
             inventory: {},
             age: 0,
@@ -260,15 +260,15 @@ export class Nadagotchi {
         }
 
         // 1. Setup Base Decay Rates
-        let hungerDecay = 0.05;
-        let energyDecay = 0.02;
+        let hungerDecay = Config.DECAY.HUNGER;
+        let energyDecay = Config.DECAY.ENERGY;
         let happinessChange = 0;
 
         // 2. Get Metabolism Factor from Genome (Phenotype)
         // Range 1 (Slow) to 10 (Fast). Normalize to 0.2x - 2.0x multiplier.
         let metabolismMult = 1.0;
         if (this.genome && this.genome.phenotype && this.genome.phenotype.metabolism) {
-            metabolismMult = (this.genome.phenotype.metabolism / 5);
+            metabolismMult = (this.genome.phenotype.metabolism / Config.GENETICS.METABOLISM_NORMALIZER);
         }
 
         // 3. Check Passive Traits
@@ -276,46 +276,46 @@ export class Nadagotchi {
         const activeTrait = this.genome && this.genome.phenotype ? this.genome.phenotype.specialAbility : null;
 
         if (activeTrait === "Photosynthetic" && worldState.time === "Day") {
-            traitModifier = 0.5; // 50% less energy drain
+            traitModifier = Config.TRAITS.PHOTOSYNTHETIC_MULT; // 50% less energy drain
         } else if (activeTrait === "Night Owl" && worldState.time === "Night") {
-            traitModifier = 0.8; // 20% less energy drain
+            traitModifier = Config.TRAITS.NIGHT_OWL_MULT; // 20% less energy drain
         }
 
         if (worldState.activeEvent && worldState.activeEvent.name.includes('Festival')) {
-            this.stats.happiness += 0.02;
+            this.stats.happiness += Config.ENV_MODIFIERS.FESTIVAL_HAPPINESS;
         }
 
         switch (worldState.weather) {
             case "Rainy":
-                if (this.dominantArchetype === "Adventurer") happinessChange -= 0.01;
-                if (this.dominantArchetype === "Nurturer") energyDecay *= 0.5;
+                if (this.dominantArchetype === "Adventurer") happinessChange += Config.ENV_MODIFIERS.RAINY.ADVENTURER_HAPPINESS;
+                if (this.dominantArchetype === "Nurturer") energyDecay *= Config.ENV_MODIFIERS.RAINY.NURTURER_ENERGY_MULT;
                 break;
             case "Stormy":
-                if (this.dominantArchetype === "Adventurer") happinessChange -= 0.03;
-                if (this.dominantArchetype === "Recluse") happinessChange += 0.01;
-                energyDecay *= 1.2;
+                if (this.dominantArchetype === "Adventurer") happinessChange += Config.ENV_MODIFIERS.STORMY.ADVENTURER_HAPPINESS;
+                if (this.dominantArchetype === "Recluse") happinessChange += Config.ENV_MODIFIERS.STORMY.RECLUSE_HAPPINESS;
+                energyDecay *= Config.ENV_MODIFIERS.STORMY.ENERGY_MULT;
                 break;
             case "Cloudy":
-                energyDecay *= 0.8;
+                energyDecay *= Config.ENV_MODIFIERS.CLOUDY.ENERGY_MULT;
                 break;
             case "Sunny":
-                if (this.dominantArchetype === "Adventurer") happinessChange += 0.01;
-                energyDecay *= 1.1;
+                if (this.dominantArchetype === "Adventurer") happinessChange += Config.ENV_MODIFIERS.SUNNY.ADVENTURER_HAPPINESS;
+                energyDecay *= Config.ENV_MODIFIERS.SUNNY.ENERGY_MULT;
                 break;
         }
 
         switch (worldState.time) {
             case "Night":
-                hungerDecay *= 0.5;
-                if (this.dominantArchetype === "Recluse") happinessChange += 0.01;
-                if (this.dominantArchetype === "Adventurer") energyDecay *= 1.1;
+                hungerDecay *= Config.ENV_MODIFIERS.NIGHT.HUNGER_MULT;
+                if (this.dominantArchetype === "Recluse") happinessChange += Config.ENV_MODIFIERS.NIGHT.RECLUSE_HAPPINESS;
+                if (this.dominantArchetype === "Adventurer") energyDecay *= Config.ENV_MODIFIERS.NIGHT.ADVENTURER_ENERGY_MULT;
                 break;
             case "Dusk":
             case "Dawn":
-                energyDecay *= 0.9;
+                energyDecay *= Config.ENV_MODIFIERS.TWILIGHT.ENERGY_MULT;
                 break;
             case "Day":
-                if (this.dominantArchetype === "Intellectual") energyDecay *= 1.1;
+                if (this.dominantArchetype === "Intellectual") energyDecay *= Config.ENV_MODIFIERS.DAY.INTELLECTUAL_ENERGY_MULT;
                 break;
         }
 
@@ -330,16 +330,16 @@ export class Nadagotchi {
         if (this.stats.happiness > this.maxStats.happiness) this.stats.happiness = this.maxStats.happiness;
 
         // Mood Calculation - Use moodSensitivity from phenotype
-        const sensitivity = (this.genome && this.genome.phenotype) ? this.genome.phenotype.moodSensitivity : 5;
+        const sensitivity = (this.genome && this.genome.phenotype) ? this.genome.phenotype.moodSensitivity : Config.INITIAL_STATE.MOOD_SENSITIVITY_DEFAULT;
         // Homozygous MoodSensitivity Bonus: Faster recovery (lower threshold for happiness)
-        let happyThreshold = 80;
+        let happyThreshold = Config.THRESHOLDS.HAPPY_MOOD;
         if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousMoodSensitivity) {
-            happyThreshold = 75;
+            happyThreshold = Config.THRESHOLDS.HAPPY_MOOD_HOMOZYGOUS;
         }
 
-        if (this.stats.hunger < 10) {
+        if (this.stats.hunger < Config.THRESHOLDS.HUNGER_ANGRY) {
             this.mood = 'angry';
-        } else if (this.stats.hunger < 30 || this.stats.energy < 20) {
+        } else if (this.stats.hunger < Config.THRESHOLDS.HUNGER_SAD || this.stats.energy < Config.THRESHOLDS.ENERGY_SAD) {
             this.mood = 'sad';
         } else if (this.stats.hunger > happyThreshold && this.stats.energy > happyThreshold) {
             this.mood = 'happy';
@@ -347,8 +347,8 @@ export class Nadagotchi {
             this.mood = 'neutral';
         }
 
-        this.age += 0.001;
-        if (this.age > 50 && !this.isLegacyReady) {
+        this.age += Config.DECAY.AGE_INCREMENT;
+        if (this.age > Config.THRESHOLDS.AGE_LEGACY && !this.isLegacyReady) {
             this.isLegacyReady = true;
         }
 
@@ -396,12 +396,14 @@ export class Nadagotchi {
 
         switch (actionType.toUpperCase()) {
             case 'FEED':
-                this.stats.hunger = Math.min(this.maxStats.hunger, this.stats.hunger + 15);
-                this.stats.happiness = Math.min(this.maxStats.happiness, this.stats.happiness + 5);
+                this.stats.hunger = Math.min(this.maxStats.hunger, this.stats.hunger + Config.ACTIONS.FEED.HUNGER_RESTORE);
+                this.stats.happiness = Math.min(this.maxStats.happiness, this.stats.happiness + Config.ACTIONS.FEED.HAPPINESS_RESTORE);
                 if (this.dominantArchetype === 'Nurturer') this.personalityPoints.Nurturer++;
                 break;
 
             case 'PLAY':
+                this.stats.energy = Math.max(0, this.stats.energy - Config.ACTIONS.PLAY.ENERGY_COST);
+                this.stats.happiness = Math.min(this.maxStats.happiness, this.stats.happiness + Config.ACTIONS.PLAY.HAPPINESS_RESTORE);
                 this.stats.energy = Math.max(0, this.stats.energy - 10);
                 this.stats.happiness = Math.min(this.maxStats.happiness, this.stats.happiness + 10);
 
@@ -415,16 +417,16 @@ export class Nadagotchi {
                     this.personalityPoints[this.dominantArchetype]++;
                 } else if (this.dominantArchetype === 'Recluse') {
                     this.mood = 'sad';
-                    this.stats.happiness -= 15;
+                    this.stats.happiness -= Config.ACTIONS.PLAY.RECLUSE_HAPPINESS_PENALTY;
                 }
                 break;
 
             case 'STUDY':
-                this.stats.energy = Math.max(0, this.stats.energy - 5);
-                this.stats.happiness = Math.max(0, this.stats.happiness - 5);
+                this.stats.energy = Math.max(0, this.stats.energy - Config.ACTIONS.STUDY.ENERGY_COST);
+                this.stats.happiness = Math.max(0, this.stats.happiness - Config.ACTIONS.STUDY.HAPPINESS_COST);
                 moodMultiplier = this._getMoodMultiplier();
-                this.skills.logic += (0.1 * moodMultiplier);
-                this.skills.research += (0.1 * moodMultiplier);
+                this.skills.logic += (Config.ACTIONS.STUDY.SKILL_GAIN * moodMultiplier);
+                this.skills.research += (Config.ACTIONS.STUDY.SKILL_GAIN * moodMultiplier);
 
                 // Homozygous Intellectual Bonus: Slight boost to mood recovery (Happiness)
                 if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousIntellectual) {
@@ -434,39 +436,40 @@ export class Nadagotchi {
                 if (this.dominantArchetype === 'Intellectual') {
                     this.mood = 'happy';
                     this.personalityPoints.Intellectual++;
-                    this.stats.happiness += 15;
+                    this.stats.happiness += Config.ACTIONS.STUDY.HAPPINESS_RESTORE_INTELLECTUAL;
                 } else {
                     this.personalityPoints.Intellectual++;
                 }
 
                 if (this.dominantArchetype === 'Adventurer') {
-                    this.skills.navigation += (0.05 * moodMultiplier);
+                    this.skills.navigation += (Config.ACTIONS.STUDY.NAVIGATION_GAIN_ADVENTURER * moodMultiplier);
                 }
 
                 if (Math.random() < 0.05) this.discoverRecipe("Logic-Boosting Snack");
                 break;
 
             case 'INTERACT_BOOKSHELF':
-                this.stats.energy -= 5;
-                this.stats.happiness -= 5;
+                this.stats.energy -= Config.ACTIONS.INTERACT_BOOKSHELF.ENERGY_COST;
+                this.stats.happiness -= Config.ACTIONS.INTERACT_BOOKSHELF.HAPPINESS_COST;
                 if (this.dominantArchetype === 'Intellectual') {
-                    this.stats.happiness += 20;
+                    this.stats.happiness += Config.ACTIONS.INTERACT_BOOKSHELF.HAPPINESS_RESTORE_INTELLECTUAL;
                     this.mood = 'happy';
                 }
                 moodMultiplier = this._getMoodMultiplier();
-                this.skills.logic += (0.15 * moodMultiplier);
-                this.skills.research += (0.15 * moodMultiplier);
+                this.skills.logic += (Config.ACTIONS.INTERACT_BOOKSHELF.SKILL_GAIN * moodMultiplier);
+                this.skills.research += (Config.ACTIONS.INTERACT_BOOKSHELF.SKILL_GAIN * moodMultiplier);
                 this.personalityPoints.Intellectual++;
                 break;
 
             case 'INTERACT_PLANT':
-                this.stats.energy -= 5;
-                this.stats.happiness += 10;
+                this.stats.energy -= Config.ACTIONS.INTERACT_PLANT.ENERGY_COST;
+                this.stats.happiness += Config.ACTIONS.INTERACT_PLANT.HAPPINESS_RESTORE;
                 if (this.dominantArchetype === 'Nurturer') {
-                    this.stats.happiness += 20;
+                    this.stats.happiness += Config.ACTIONS.INTERACT_PLANT.HAPPINESS_RESTORE_NURTURER;
                     this.mood = 'happy';
                 }
                 moodMultiplier = this._getMoodMultiplier();
+                this.skills.empathy += (Config.ACTIONS.INTERACT_PLANT.SKILL_GAIN * moodMultiplier);
                 this.skills.empathy += (0.15 * moodMultiplier);
 
                 // Homozygous Nurturer Bonus: Boost Empathy Gain
@@ -478,20 +481,21 @@ export class Nadagotchi {
                 break;
 
             case 'INTERACT_FANCY_BOOKSHELF':
-                this.stats.energy -= 5;
-                this.stats.happiness += 10; // It's a nice bookshelf!
+                this.stats.energy -= Config.ACTIONS.INTERACT_FANCY_BOOKSHELF.ENERGY_COST;
+                this.stats.happiness += Config.ACTIONS.INTERACT_FANCY_BOOKSHELF.HAPPINESS_RESTORE; // It's a nice bookshelf!
                 if (this.dominantArchetype === 'Intellectual') {
-                    this.stats.happiness += 25; // Even better for intellectuals
+                    this.stats.happiness += Config.ACTIONS.INTERACT_FANCY_BOOKSHELF.HAPPINESS_RESTORE_INTELLECTUAL; // Even better for intellectuals
                     this.mood = 'happy';
                 }
                 moodMultiplier = this._getMoodMultiplier();
-                this.skills.logic += (0.25 * moodMultiplier); // Higher buff
-                this.skills.research += (0.25 * moodMultiplier);
-                this.personalityPoints.Intellectual += 2;
+                this.skills.logic += (Config.ACTIONS.INTERACT_FANCY_BOOKSHELF.SKILL_GAIN * moodMultiplier); // Higher buff
+                this.skills.research += (Config.ACTIONS.INTERACT_FANCY_BOOKSHELF.SKILL_GAIN * moodMultiplier);
+                this.personalityPoints.Intellectual += Config.ACTIONS.INTERACT_FANCY_BOOKSHELF.PERSONALITY_GAIN;
                 this.addJournalEntry("I spent some time studying at my beautiful new bookshelf. I feel so smart!");
                 break;
 
             case 'EXPLORE':
+                this.stats.energy = Math.max(0, this.stats.energy - Config.ACTIONS.EXPLORE.ENERGY_COST);
                 this.stats.energy = Math.max(0, this.stats.energy - 15);
 
                 // Homozygous Adventurer Bonus: Boost Happiness Gain
@@ -501,22 +505,24 @@ export class Nadagotchi {
 
                 if (this.dominantArchetype === 'Adventurer') {
                     this.mood = 'happy';
-                    this.stats.happiness += 20;
+                    this.stats.happiness += Config.ACTIONS.EXPLORE.HAPPINESS_RESTORE_ADVENTURER;
                     this.personalityPoints.Adventurer += 2;
-                    this.skills.navigation += 0.1;
+                    this.skills.navigation += Config.ACTIONS.EXPLORE.SKILL_GAIN;
                     if (Math.random() < 0.1) this.discoverRecipe("Stamina-Up Tea");
                 } else if (this.dominantArchetype === 'Recluse') {
                     this.mood = 'sad';
-                    this.stats.happiness -= 20;
+                    this.stats.happiness -= Config.ACTIONS.EXPLORE.HAPPINESS_PENALTY_RECLUSE;
                 } else {
-                    this.stats.happiness += 5;
+                    this.stats.happiness += Config.ACTIONS.EXPLORE.HAPPINESS_RESTORE_DEFAULT;
                 }
                 break;
 
             case "MEDITATE":
-                this.stats.energy = Math.min(this.maxStats.energy, this.stats.energy + 5);
-                this.stats.happiness += 5;
+                this.stats.energy = Math.min(this.maxStats.energy, this.stats.energy + Config.ACTIONS.MEDITATE.ENERGY_RESTORE);
+                this.stats.happiness += Config.ACTIONS.MEDITATE.HAPPINESS_RESTORE;
                 moodMultiplier = this._getMoodMultiplier();
+                this.skills.focus += (Config.ACTIONS.MEDITATE.SKILL_GAIN * moodMultiplier);
+                if (this.dominantArchetype === "Recluse") this.personalityPoints.Recluse += Config.ACTIONS.MEDITATE.PERSONALITY_GAIN_RECLUSE;
                 this.skills.focus += (0.1 * moodMultiplier);
 
                 // Homozygous Recluse Bonus: Boost Focus Gain
@@ -552,8 +558,8 @@ export class Nadagotchi {
     practiceHobby(hobbyName) {
         if (this.hobbies.hasOwnProperty(hobbyName)) {
             this.hobbies[hobbyName] += 1;
-            this.stats.happiness += 5;
-            this.stats.energy -= 5;
+            this.stats.happiness += Config.ACTIONS.PRACTICE_HOBBY.HAPPINESS_RESTORE;
+            this.stats.energy -= Config.ACTIONS.PRACTICE_HOBBY.ENERGY_COST;
             this.addJournalEntry(`I spent some time practicing ${hobbyName}.`);
         }
     }
@@ -576,7 +582,7 @@ export class Nadagotchi {
             const hasAmount = this.inventory[material] || 0;
             if (hasAmount < requiredAmount) {
                 this.addJournalEntry(`I don't have enough ${material} to craft a ${itemName}.`);
-                this.stats.happiness -= 5; // Frustration
+                this.stats.happiness -= Config.ACTIONS.CRAFT.HAPPINESS_PENALTY_MISSING_MATS; // Frustration
                 return;
             }
         }
@@ -588,6 +594,8 @@ export class Nadagotchi {
 
         // Add crafted item to inventory
         this._addItem(itemName, 1);
+        this.stats.energy -= Config.ACTIONS.CRAFT.ENERGY_COST;
+        this.stats.happiness += Config.ACTIONS.CRAFT.HAPPINESS_RESTORE;
 
         // Update Quest Progress
         if (itemName === 'Masterwork Chair' &&
@@ -599,7 +607,7 @@ export class Nadagotchi {
         this.stats.energy -= 15;
         this.stats.happiness += 20;
         const moodMultiplier = this._getMoodMultiplier();
-        this.skills.crafting += (0.5 * moodMultiplier);
+        this.skills.crafting += (Config.ACTIONS.CRAFT.SKILL_GAIN * moodMultiplier);
         this.addJournalEntry(`I successfully crafted a ${itemName}!`);
     }
 
@@ -608,9 +616,9 @@ export class Nadagotchi {
      */
     forage() {
         this.location = 'Forest';
-        this.stats.energy -= 10;
+        this.stats.energy -= Config.ACTIONS.FORAGE.ENERGY_COST;
         const moodMultiplier = this._getMoodMultiplier();
-        this.skills.navigation += (0.2 * moodMultiplier);
+        this.skills.navigation += (Config.ACTIONS.FORAGE.SKILL_GAIN * moodMultiplier);
 
         const potentialItems = ['Berries', 'Sticks', 'Shiny Stone'];
         if (this.currentSeason === 'Winter') {
@@ -640,33 +648,33 @@ export class Nadagotchi {
 
         if (interactionType === 'GIFT' && this.inventory['Berries'] > 0) {
             this._removeItem('Berries', 1);
-            this.relationships[npcName].level += 5;
-            this.stats.happiness += 10;
-            this.skills.empathy += 0.2;
+            this.relationships[npcName].level += Config.ACTIONS.INTERACT_NPC.GIFT_RELATIONSHIP;
+            this.stats.happiness += Config.ACTIONS.INTERACT_NPC.GIFT_HAPPINESS;
+            this.skills.empathy += Config.ACTIONS.INTERACT_NPC.GIFT_SKILL_GAIN;
             this.addJournalEntry(`I gave Berries to ${npcName}. They seemed to like it!`);
             return;
         }
 
         const moodMultiplier = this._getMoodMultiplier();
-        this.relationships[npcName].level += 1;
-        this.stats.happiness += 3;
-        this.skills.communication += 0.1;
+        this.relationships[npcName].level += Config.ACTIONS.INTERACT_NPC.CHAT_RELATIONSHIP;
+        this.stats.happiness += Config.ACTIONS.INTERACT_NPC.CHAT_HAPPINESS;
+        this.skills.communication += Config.ACTIONS.INTERACT_NPC.CHAT_SKILL_GAIN;
 
         switch (npcName) {
             case 'Grizzled Scout':
-                this.skills.navigation += 0.15 * moodMultiplier;
+                this.skills.navigation += Config.ACTIONS.INTERACT_NPC.SCOUT_SKILL_GAIN * moodMultiplier;
                 this.addJournalEntry("The Grizzled Scout shared a story about a hidden grove. I learned a little about navigating the woods.");
                 break;
             case 'Master Artisan':
                 if (this.relationships['Master Artisan'].level >= 5) {
                     this._handleArtisanQuest();
                 } else {
-                    this.skills.crafting += 0.15 * moodMultiplier;
+                    this.skills.crafting += Config.ACTIONS.INTERACT_NPC.ARTISAN_SKILL_GAIN * moodMultiplier;
                     this.addJournalEntry("The Master Artisan showed me a clever technique for joining wood. My crafting skill improved.");
                 }
                 break;
             case 'Sickly Villager':
-                this.skills.empathy += 0.15 * moodMultiplier;
+                this.skills.empathy += Config.ACTIONS.INTERACT_NPC.VILLAGER_SKILL_GAIN * moodMultiplier;
                 this.addJournalEntry("I spent some time with the Sickly Villager. It felt good to offer some comfort.");
                 break;
             default:
@@ -701,8 +709,8 @@ export class Nadagotchi {
             if (quest.hasCraftedChair && this.inventory['Masterwork Chair'] && this.inventory['Masterwork Chair'] > 0) {
                 this._removeItem('Masterwork Chair', 1);
                 quest.stage = 3;
-                this.skills.crafting += 2;
-                this.stats.happiness += 20;
+                this.skills.crafting += Config.ACTIONS.INTERACT_NPC.QUEST_CRAFTING_GAIN;
+                this.stats.happiness += Config.ACTIONS.INTERACT_NPC.QUEST_HAPPINESS_GAIN;
                 this.addJournalEntry("The Master Artisan was impressed by my chair! He declared me a true craftsman.");
             } else {
                 this.addJournalEntry("I need to craft a Masterwork Chair to show the Artisan.");
@@ -722,10 +730,10 @@ export class Nadagotchi {
      */
     _getMoodMultiplier() {
         switch (this.mood) {
-            case 'happy': return 1.5;
-            case 'sad': return 0.5;
-            case 'angry': return 0.2;
-            default: return 1.0;
+            case 'happy': return Config.MOOD_MULTIPLIERS.HAPPY;
+            case 'sad': return Config.MOOD_MULTIPLIERS.SAD;
+            case 'angry': return Config.MOOD_MULTIPLIERS.ANGRY;
+            default: return Config.MOOD_MULTIPLIERS.NEUTRAL;
         }
     }
 

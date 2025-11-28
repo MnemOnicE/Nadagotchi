@@ -1,3 +1,5 @@
+import { EventKeys } from './EventKeys.js';
+
 /**
  * @class ScoutMinigameScene
  * @extends Phaser.Scene
@@ -152,7 +154,7 @@ export class ScoutMinigameScene extends Phaser.Scene {
      */
     endGame(isSuccess) {
         if (this.timer) this.timer.destroy();
-        this.game.events.emit('workResult', { success: isSuccess, career: this.careerName });
+        this.game.events.emit(EventKeys.WORK_RESULT, { success: isSuccess, career: this.careerName });
         this.scene.stop();
         this.scene.resume('MainScene');
     }

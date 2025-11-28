@@ -1,3 +1,5 @@
+import { EventKeys } from './EventKeys.js';
+
 /**
  * @class LogicPuzzleScene
  * @extends Phaser.Scene
@@ -120,7 +122,7 @@ export class LogicPuzzleScene extends Phaser.Scene {
      * @private
      */
     endGame(isSuccess) {
-        this.game.events.emit('workResult', { success: isSuccess, career: 'Innovator' });
+        this.game.events.emit(EventKeys.WORK_RESULT, { success: isSuccess, career: 'Innovator' });
         this.scene.stop();
         this.scene.resume('MainScene');
     }
