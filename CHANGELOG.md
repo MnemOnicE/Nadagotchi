@@ -12,6 +12,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **In-Game Settings/Options:** Added a future work item for persistent sound, music, and gameplay speed settings (Phase 2).
   - **Inventory/Item Management UI:** Added a future work item for a dedicated inventory modal to view item details and quantities (Phase 2).
   - **Achievement Tracking System:** Refined the "Meta-Game" section to explicitly mention backend logic for tracking specific milestones like "Breed 5 Generations" (Phase 3).
+## [1.13.1] - 2025-12-06
+
+### Added
+- **Game Guide:** Created `GUIDE.md`, a comprehensive player-facing manual detailing core stats, personality archetypes, careers, and the genetics system.
+- **Integration Tests:** Added `tests/LiveLoopIntegration.test.js` to verify the complex interaction of environmental factors, traits (e.g., Night Owl), and metabolism in the main game loop.
+- **Exploit Tests:** Added `tests/ExploitArtisanQuest.test.js` to strictly verify that quest progression cannot be bypassed by item injection.
+
+### Fixed
+- **Double Stat Application:** Fixed a critical bug in `js/Nadagotchi.js` where certain actions (PLAY, INTERACT_PLANT, EXPLORE, CRAFT) were applying stat changes twice—once using the new `Config` values and again with legacy hardcoded values—resulting in incorrect energy costs and happiness gains.
+- **Code Redundancy:** Removed duplicated recipe definitions from the `Nadagotchi` constructor, fully enforcing the Single Source of Truth principle with `js/ItemData.js`.
 
 ## [1.13.0] - 2025-12-06
 

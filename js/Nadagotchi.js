@@ -137,28 +137,7 @@ export class Nadagotchi {
         }
 
         /** @type {Object.<string, {materials: Object.<string, number>, description: string}>} */
-        this.recipes = {
-            "Fancy Bookshelf": {
-                materials: { "Sticks": 5, "Shiny Stone": 1 },
-                description: "A beautiful bookshelf that makes studying more effective."
-            },
-            "Logic-Boosting Snack": {
-                materials: { "Berries": 3 },
-                description: "A tasty snack that fuels the mind."
-            },
-            "Stamina-Up Tea": {
-                materials: { "Berries": 1, "Sticks": 1 },
-                description: "A warm tea that restores energy."
-            },
-            "Masterwork Chair": {
-                materials: { "Sticks": 10, "Shiny Stone": 2 },
-                description: "A chair of unparalleled craftsmanship."
-            },
-            "Metabolism-Slowing Tonic": {
-                materials: { "Frostbloom": 1, "Sticks": 2 },
-                description: "A tonic that slows metabolism, helping to conserve energy."
-            }
-        };
+        this.recipes = Recipes;
 
         /** @type {{painting: number, music: number}} A map of hobby levels. */
         this.hobbies = loadedData ? loadedData.hobbies : { painting: 0, music: 0 };
@@ -404,8 +383,6 @@ export class Nadagotchi {
             case 'PLAY':
                 this.stats.energy = Math.max(0, this.stats.energy - Config.ACTIONS.PLAY.ENERGY_COST);
                 this.stats.happiness = Math.min(this.maxStats.happiness, this.stats.happiness + Config.ACTIONS.PLAY.HAPPINESS_RESTORE);
-                this.stats.energy = Math.max(0, this.stats.energy - 10);
-                this.stats.happiness = Math.min(this.maxStats.happiness, this.stats.happiness + 10);
 
                 // Homozygous Mischievous Bonus: "Energy Recovery" (Refund half energy)
                 if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousMischievous) {
@@ -470,7 +447,6 @@ export class Nadagotchi {
                 }
                 moodMultiplier = this._getMoodMultiplier();
                 this.skills.empathy += (Config.ACTIONS.INTERACT_PLANT.SKILL_GAIN * moodMultiplier);
-                this.skills.empathy += (0.15 * moodMultiplier);
 
                 // Homozygous Nurturer Bonus: Boost Empathy Gain
                 if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousNurturer) {
@@ -496,7 +472,6 @@ export class Nadagotchi {
 
             case 'EXPLORE':
                 this.stats.energy = Math.max(0, this.stats.energy - Config.ACTIONS.EXPLORE.ENERGY_COST);
-                this.stats.energy = Math.max(0, this.stats.energy - 15);
 
                 // Homozygous Adventurer Bonus: Boost Happiness Gain
                 if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousAdventurer) {
@@ -523,7 +498,6 @@ export class Nadagotchi {
                 moodMultiplier = this._getMoodMultiplier();
                 this.skills.focus += (Config.ACTIONS.MEDITATE.SKILL_GAIN * moodMultiplier);
                 if (this.dominantArchetype === "Recluse") this.personalityPoints.Recluse += Config.ACTIONS.MEDITATE.PERSONALITY_GAIN_RECLUSE;
-                this.skills.focus += (0.1 * moodMultiplier);
 
                 // Homozygous Recluse Bonus: Boost Focus Gain
                 if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousRecluse) {
@@ -604,8 +578,6 @@ export class Nadagotchi {
             this.quests['masterwork_crafting'].hasCraftedChair = true;
         }
 
-        this.stats.energy -= 15;
-        this.stats.happiness += 20;
         const moodMultiplier = this._getMoodMultiplier();
         this.skills.crafting += (Config.ACTIONS.CRAFT.SKILL_GAIN * moodMultiplier);
         this.addJournalEntry(`I successfully crafted a ${itemName}!`);
