@@ -134,7 +134,8 @@ class MainScene extends Phaser.Scene {
             .on('pointerdown', () => this.game.events.emit('uiAction', 'INTERACT_VILLAGER', 'Sickly Villager'));
 
         // --- Post-FX & UI ---
-        this.lightTexture = this.add.renderTexture(0, 0, this.scale.width, this.scale.height).setBlendMode('MULTIPLY').setVisible(false);
+        this.lightTexture = this.textures.createCanvas('light', this.scale.width, this.scale.height);
+        this.lightImage = this.add.image(0, 0, 'light').setOrigin(0).setBlendMode('MULTIPLY').setVisible(false);
         // FIX: Moved dateText to the top-right corner (origin 1,0) to avoid overlap with stats
         this.dateText = this.add.text(this.scale.width - 10, 10, '', { fontFamily: 'VT323, Arial', fontSize: '20px', color: '#ffffff', backgroundColor: 'rgba(0,0,0,0.5)', padding: { x: 5, y: 3 } }).setOrigin(1, 0);
         this.scene.launch('UIScene');
@@ -179,9 +180,9 @@ class MainScene extends Phaser.Scene {
 
         if (this.worldState.time === "Night" || this.worldState.time === "Dusk") {
             this.drawLight();
-            this.lightTexture.setVisible(true);
+            this.lightImage.setVisible(true);
         } else {
-            this.lightTexture.setVisible(false);
+            this.lightImage.setVisible(false);
         }
     }
 
