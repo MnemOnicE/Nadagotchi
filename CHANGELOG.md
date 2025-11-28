@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.12.0] - 2025-12-05
 
 ### Added
+- **Seasonal Foraging & Crafting:** Enhanced the `forage` system in `js/Nadagotchi.js` to be season-aware. Players can now find "Frostbloom" exclusively during the "Winter" season.
+- **Genetic Crafting Loop:** Introduced a new recipe, "Metabolism-Slowing Tonic", which requires the seasonal "Frostbloom" to craft.
+- **Crafting-Genetics Integration:** The "Metabolism-Slowing Tonic" can now be used in the `BreedingScene` (if in inventory) to significantly lower the offspring's metabolism (gene value: 2), creating a direct gameplay link between crafting and the genetics engine.
+- **Season Tracking:** Updated `MainScene.js` and `Nadagotchi.js` to correctly propagate the current season from the `Calendar` to the pet's brain logic.
+- **Unit Tests:** Added `tests/SeasonalCrafting.test.js` to verify seasonal drops, recipe existence, and genetic effects.
 - **Hall of Ancestors:** Implemented the "Hall of Ancestors" system to commemorate retired pets.
   - Added a new "ANCESTORS" tab to the `UIScene`.
   - The tab displays a list of retired pets (from `PersistenceManager`).

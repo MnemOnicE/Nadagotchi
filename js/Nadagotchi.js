@@ -143,6 +143,10 @@ export class Nadagotchi {
             "Stamina-Up Tea": {
                 materials: { "Berries": 1, "Sticks": 1 },
                 description: "A warm tea that restores energy."
+            },
+            "Metabolism-Slowing Tonic": {
+                materials: { "Frostbloom": 1, "Sticks": 2 },
+                description: "A tonic that slows metabolism, helping to conserve energy."
             }
         };
 
@@ -162,6 +166,8 @@ export class Nadagotchi {
         this.lastWeather = null;
         /** @type {number} Tracks the integer age to detect milestones. */
         this.previousAge = Math.floor(this.age);
+        /** @type {string} Tracks the current season for seasonal logic. */
+        this.currentSeason = 'Spring';
     }
 
     /**
@@ -234,6 +240,10 @@ export class Nadagotchi {
      */
     live(worldState = { weather: "Sunny", time: "Day", activeEvent: null }) {
         const oldMood = this.mood;
+
+        if (worldState.season) {
+            this.currentSeason = worldState.season;
+        }
 
         // 1. Setup Base Decay Rates
         let hungerDecay = 0.05;
@@ -547,8 +557,18 @@ export class Nadagotchi {
         const moodMultiplier = this._getMoodMultiplier();
         this.skills.navigation += (0.2 * moodMultiplier);
 
-        const foundItem = Phaser.Utils.Array.GetRandom(['Berries', 'Sticks', 'Shiny Stone']);
+        const potentialItems = ['Berries', 'Sticks', 'Shiny Stone'];
+        if (this.currentSeason === 'Winter') {
+            potentialItems.push('Frostbloom');
+        }
+
+        const foundItem = Phaser.Utils.Array.GetRandom(potentialItems);
         this._addItem(foundItem, 1);
+
+        if (foundItem === 'Frostbloom') {
+            this.discoverRecipe("Metabolism-Slowing Tonic");
+        }
+
         this.addJournalEntry(`I went foraging in the ${this.location} and found a ${foundItem}.`);
         this.location = 'Home';
     }
