@@ -2,6 +2,7 @@ import { ButtonFactory } from './ButtonFactory.js';
 import { PersistenceManager } from './PersistenceManager.js';
 import { NarrativeSystem } from './NarrativeSystem.js';
 import { EventKeys } from './EventKeys.js';
+import { ItemDefinitions } from './ItemData.js';
 
 /**
  * @class UIScene
@@ -91,6 +92,7 @@ export class UIScene extends Phaser.Scene {
         this.decorateModal = this.createModal("Decorate");
         this.scannerModal = this.createModal("Genetic Scanner");
         this.ancestorModal = this.createModal("Hall of Ancestors");
+        this.inventoryModal = this.createModal("Inventory");
 
         // --- Initial Layout ---
         this.createTabs();
@@ -154,6 +156,7 @@ export class UIScene extends Phaser.Scene {
         } else if (tabId === 'SYSTEM') {
             actions = [
                 { text: 'Journal', action: EventKeys.OPEN_JOURNAL },
+                { text: 'Inventory', action: EventKeys.OPEN_INVENTORY },
                 { text: 'Recipes', action: EventKeys.OPEN_RECIPES },
                 { text: 'Hobbies', action: EventKeys.OPEN_HOBBIES },
                 { text: 'Decorate', action: EventKeys.DECORATE },
@@ -304,6 +307,7 @@ export class UIScene extends Phaser.Scene {
             case EventKeys.DECORATE: this.openDecorateMenu(); break;
             case EventKeys.INTERACT_NPC: this.openRelationshipMenu(); break;
             case EventKeys.OPEN_ANCESTOR_MODAL: this.openAncestorModal(data); break;
+            case EventKeys.OPEN_INVENTORY: this.openInventoryMenu(); break;
         }
     }
 
@@ -588,6 +592,67 @@ export class UIScene extends Phaser.Scene {
 
         this.decorateModal.content.setText(text);
         this.decorateModal.setVisible(true);
+        this.scene.pause('MainScene');
+    }
+
+    /**
+     * Populates and displays the inventory menu modal.
+     */
+    openInventoryMenu() {
+        if (!this.nadagotchiData) return;
+
+        // Clear existing buttons
+        if (this.inventoryButtons) {
+            this.inventoryButtons.forEach(btn => btn.destroy());
+        }
+        this.inventoryButtons = [];
+
+        // Clear existing dynamic texts
+        if (this.inventoryTexts) {
+            this.inventoryTexts.forEach(t => t.destroy());
+        }
+        this.inventoryTexts = [];
+
+        const inventory = this.nadagotchiData.inventory || {};
+        const items = Object.entries(inventory);
+
+        this.inventoryModal.content.setText(""); // Clear default text block
+
+        if (items.length === 0) {
+            this.inventoryModal.content.setText("Your inventory is empty.");
+        } else {
+            let currentY = this.cameras.main.height / 2 - 150; // Start higher to fit list
+            const startX = this.cameras.main.width / 2 - 200;
+
+            items.forEach(([itemName, count]) => {
+                const def = ItemDefinitions[itemName] || { description: "Unknown item", emoji: "❓", type: "Misc" };
+
+                const itemStr = `${def.emoji} ${itemName} (x${count})`;
+                const descStr = `${def.description}`;
+
+                const itemText = this.add.text(startX, currentY, itemStr, { font: '20px monospace', color: '#ffffff' });
+                const descText = this.add.text(startX + 20, currentY + 25, descStr, { font: '16px monospace', color: '#aaaaaa', wordWrap: { width: 350 } });
+
+                this.inventoryModal.add(itemText);
+                this.inventoryModal.add(descText);
+                this.inventoryTexts.push(itemText, descText);
+
+                if (def.type === 'Consumable' && count > 0) {
+                     const useButton = ButtonFactory.createButton(this, startX + 350, currentY + 10, 'Use', () => {
+                        this.game.events.emit(EventKeys.UI_ACTION, EventKeys.CONSUME_ITEM, itemName);
+                        this.inventoryModal.setVisible(false);
+                        this.scene.resume('MainScene');
+                    }, { width: 60, height: 30, color: 0x228B22 });
+
+                    this.inventoryModal.add(useButton);
+                    this.inventoryButtons.push(useButton);
+                }
+
+                currentY += 60; // Fixed spacing
+            });
+        }
+
+        this.inventoryModal.setVisible(true);
         this.scene.pause('MainScene');
     }
 
