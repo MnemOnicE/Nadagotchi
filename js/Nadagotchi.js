@@ -1,4 +1,5 @@
 import { PersistenceManager } from './PersistenceManager.js';
+import { GeneticsSystem } from './GeneticsSystem.js';
 
 /**
  * Represents the core Nadagotchi entity, its "Brain".
@@ -38,6 +39,19 @@ export class Nadagotchi {
             this.legacyTraits = loadedData.legacyTraits || [];
              /** @type {number} A 1-10 scale affecting mood swing intensity. */
             this.moodSensitivity = loadedData.moodSensitivity || 5;
+
+            // Initialize Genome
+            if (loadedData.genome) {
+                this.genome = new GeneticsSystem(
+                    loadedData.genome.personalityGenes,
+                    loadedData.genome.moodSensitivity,
+                    loadedData.genome.legacyTraits
+                );
+            } else {
+                // Legacy save support: Create a default genome
+                this.genome = new GeneticsSystem();
+            }
+
         } else {
             // This is a brand new game. Start from defaults.
             this.mood = 'neutral';
@@ -60,6 +74,14 @@ export class Nadagotchi {
             this.isLegacyReady = false;
             this.legacyTraits = [];
             this.moodSensitivity = 5;
+
+            // Initialize Genome for new game
+            const initialGenes = {
+                Adventurer: 0, Nurturer: 0, Mischievous: 0,
+                Intellectual: 0, Recluse: 0
+            };
+            initialGenes[initialArchetype] = 5; // Genetic bias for chosen starter
+            this.genome = new GeneticsSystem(initialGenes, 5, []);
         }
 
         /** @type {?string} A flag used by the UI to show a one-time notification when a career is unlocked. */
@@ -96,6 +118,63 @@ export class Nadagotchi {
         };
         /** @type {string} The pet's current location. */
         this.location = loadedData ? loadedData.location : 'Home';
+    }
+
+    /**
+     * Calculates data for the offspring of this Nadagotchi.
+     * Uses the GeneticsSystem to determine traits and stats.
+     * @param {string[]} environmentalFactors - List of items present during breeding.
+     * @returns {object} The data object for the new Nadagotchi.
+     */
+    calculateOffspring(environmentalFactors) {
+        const childGenome = GeneticsSystem.inherit(this, environmentalFactors);
+
+        // Determine dominant archetype from the new genes
+        let maxGene = -1;
+        let dominant = 'Adventurer'; // Default fallback
+        const geneKeys = Object.keys(childGenome.personalityGenes);
+
+        // Find max value
+        for (const type of geneKeys) {
+            if (childGenome.personalityGenes[type] > maxGene) {
+                maxGene = childGenome.personalityGenes[type];
+            }
+        }
+
+        // Find all types matching max value
+        const contenders = geneKeys.filter(type => childGenome.personalityGenes[type] === maxGene);
+
+        // Pick one randomly if tie
+        if (contenders.length > 0) {
+            // Simple random pick
+            dominant = contenders[Math.floor(Math.random() * contenders.length)];
+        }
+
+        // Initialize personality points based on genes
+        const initialPoints = { ...childGenome.personalityGenes };
+
+        return {
+            mood: 'neutral',
+            dominantArchetype: dominant,
+            personalityPoints: initialPoints,
+            stats: { hunger: 100, energy: 100, happiness: 70 },
+            skills: { communication: 1, resilience: 1, navigation: 0, empathy: 0, logic: 0, focus: 0, crafting: 0 },
+            currentCareer: null,
+            inventory: {},
+            age: 0,
+            generation: this.generation + 1,
+            isLegacyReady: false,
+            legacyTraits: childGenome.legacyTraits,
+            moodSensitivity: childGenome.moodSensitivity,
+            hobbies: { painting: 0, music: 0 },
+            relationships: {
+                'Grizzled Scout': { level: 0 },
+                'Master Artisan': { level: 0 },
+                'Sickly Villager': { level: 0 }
+            },
+            location: 'Home',
+            genome: childGenome
+        };
     }
 
     /**
