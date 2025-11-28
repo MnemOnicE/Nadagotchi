@@ -1,0 +1,16 @@
+127.0.0.1 - - [28/Nov/2025 02:09:39] "GET /index.html HTTP/1.1" 200 -
+127.0.0.1 - - [28/Nov/2025 02:09:40] "GET /style.css HTTP/1.1" 200 -
+127.0.0.1 - - [28/Nov/2025 02:09:40] "GET /js/PersistenceManager.js HTTP/1.1" 200 -
+127.0.0.1 - - [28/Nov/2025 02:09:40] "GET /js/BreedingScene.js HTTP/1.1" 200 -
+127.0.0.1 - - [28/Nov/2025 02:09:40] "GET /js/Nadagotchi.js HTTP/1.1" 200 -
+127.0.0.1 - - [28/Nov/2025 02:09:40] "GET /js/Calendar.js HTTP/1.1" 200 -
+127.0.0.1 - - [28/Nov/2025 02:09:40] "GET /js/UIScene.js HTTP/1.1" 200 -
+127.0.0.1 - - [28/Nov/2025 02:09:40] "GET /js/WorldClock.js HTTP/1.1" 200 -
+127.0.0.1 - - [28/Nov/2025 02:09:40] "GET /js/EventManager.js HTTP/1.1" 200 -
+127.0.0.1 - - [28/Nov/2025 02:09:40] "GET /js/WeatherSystem.js HTTP/1.1" 200 -
+127.0.0.1 - - [28/Nov/2025 02:09:40] "GET /js/LogicPuzzleScene.js HTTP/1.1" 200 -
+127.0.0.1 - - [28/Nov/2025 02:09:40] "GET /js/MainScene.js HTTP/1.1" 200 -
+127.0.0.1 - - [28/Nov/2025 02:09:40] "GET /js/ArtisanMinigameScene.js HTTP/1.1" 200 -
+127.0.0.1 - - [28/Nov/2025 02:09:40] "GET /js/ScoutMinigameScene.js HTTP/1.1" 200 -
+127.0.0.1 - - [28/Nov/2025 02:09:40] "GET /js/HealerMinigameScene.js HTTP/1.1" 200 -
+127.0.0.1 - - [28/Nov/2025 02:09:40] "GET /js/game.js HTTP/1.1" 200 -
