@@ -53,6 +53,7 @@ This phase focuses on building out the primary gameplay loops, giving players cl
     -   [ ] Allow for deeper home customization with player-placed furniture.
     -   [x] Expand NPC interactions with more complex dialogues and relationship-based events.
         -   [x] Implemented multi-stage quest system (e.g., Masterwork Crafting).
+        -   [x] Hardened quest logic to prevent progression exploits.
 
 ### **III. Technical Foundation & Architecture**
 -   **[x] Modern Tooling & Architecture:**
@@ -60,6 +61,9 @@ This phase focuses on building out the primary gameplay loops, giving players cl
     -   [x] Implemented Vite for development and building.
     -   [x] Centralized asset management in a dedicated `PreloaderScene`.
     -   [x] Standardized unit testing with Jest and Babel.
+-   **[x] Security & Balance:**
+    -   [x] Implemented save data obfuscation and integrity verification to prevent tampering.
+    -   [x] Implemented diminishing returns logic for minigame rewards to ensure long-term progression balance.
 
 ---
 

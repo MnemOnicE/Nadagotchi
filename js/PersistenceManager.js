@@ -8,7 +8,7 @@ export class PersistenceManager {
      * @param {object} nadagotchiData - The Nadagotchi object to save.
      */
     savePet(nadagotchiData) {
-        localStorage.setItem("nadagotchi_save", JSON.stringify(nadagotchiData));
+        this._save("nadagotchi_save", nadagotchiData);
     }
 
     /**
@@ -16,8 +16,7 @@ export class PersistenceManager {
      * @returns {object|null} The parsed Nadagotchi data, or null if no save exists.
      */
     loadPet() {
-        const data = localStorage.getItem("nadagotchi_save");
-        return data ? JSON.parse(data) : null;
+        return this._load("nadagotchi_save");
     }
 
     /**
@@ -27,7 +26,7 @@ export class PersistenceManager {
     saveToHallOfFame(nadagotchiData) {
         const fameList = this.loadHallOfFame();
         fameList.push(nadagotchiData);
-        localStorage.setItem("hall_of_fame", JSON.stringify(fameList));
+        this._save("hall_of_fame", fameList);
     }
 
     /**
@@ -35,8 +34,7 @@ export class PersistenceManager {
      * @returns {Array<object>} An array of retired Nadagotchi data objects.
      */
     loadHallOfFame() {
-        const fameList = localStorage.getItem("hall_of_fame");
-        return fameList ? JSON.parse(fameList) : [];
+        return this._load("hall_of_fame") || [];
     }
 
     /**
@@ -52,7 +50,7 @@ export class PersistenceManager {
      * @param {Array<object>} journalEntries - The array of journal entries to save.
      */
     saveJournal(journalEntries) {
-        localStorage.setItem("nadagotchi_journal", JSON.stringify(journalEntries));
+        this._save("nadagotchi_journal", journalEntries);
     }
 
     /**
@@ -60,8 +58,7 @@ export class PersistenceManager {
      * @returns {Array<object>} The array of journal entries.
      */
     loadJournal() {
-        const journal = localStorage.getItem("nadagotchi_journal");
-        return journal ? JSON.parse(journal) : [];
+        return this._load("nadagotchi_journal") || [];
     }
 
     /**
@@ -69,7 +66,7 @@ export class PersistenceManager {
      * @param {Array<string>} recipeList - The array of discovered recipe names.
      */
     saveRecipes(recipeList) {
-        localStorage.setItem("nadagotchi_recipes", JSON.stringify(recipeList));
+        this._save("nadagotchi_recipes", recipeList);
     }
 
     /**
@@ -77,8 +74,7 @@ export class PersistenceManager {
      * @returns {Array<string>} The array of discovered recipe names.
      */
     loadRecipes() {
-        const recipes = localStorage.getItem("nadagotchi_recipes");
-        return recipes ? JSON.parse(recipes) : [];
+        return this._load("nadagotchi_recipes") || [];
     }
 
     /**
@@ -86,7 +82,7 @@ export class PersistenceManager {
      * @param {object} calendarData - The Calendar object to save.
      */
     saveCalendar(calendarData) {
-        localStorage.setItem("nadagotchi_calendar", JSON.stringify(calendarData));
+        this._save("nadagotchi_calendar", calendarData);
     }
 
     /**
@@ -94,8 +90,7 @@ export class PersistenceManager {
      * @returns {object|null} The parsed calendar data, or null if no save exists.
      */
     loadCalendar() {
-        const data = localStorage.getItem("nadagotchi_calendar");
-        return data ? JSON.parse(data) : null;
+        return this._load("nadagotchi_calendar");
     }
 
     /**
@@ -103,7 +98,7 @@ export class PersistenceManager {
      * @param {Array<object>} furnitureData - The array of placed furniture objects.
      */
     saveFurniture(furnitureData) {
-        localStorage.setItem("nadagotchi_furniture", JSON.stringify(furnitureData));
+        this._save("nadagotchi_furniture", furnitureData);
     }
 
     /**
@@ -111,7 +106,82 @@ export class PersistenceManager {
      * @returns {Array<object>|null} The array of placed furniture objects, or null if no save exists.
      */
     loadFurniture() {
-        const data = localStorage.getItem("nadagotchi_furniture");
-        return data ? JSON.parse(data) : null;
+        return this._load("nadagotchi_furniture");
+    }
+
+    /**
+     * Helper method to save data with obfuscation and integrity check.
+     * @param {string} key - The localStorage key.
+     * @param {any} data - The data to save.
+     * @private
+     */
+    _save(key, data) {
+        try {
+            const json = JSON.stringify(data);
+            const encoded = btoa(json);
+            const hash = this._hash(encoded);
+            localStorage.setItem(key, `${encoded}|${hash}`);
+        } catch (e) {
+            console.error(`Failed to save data for key ${key}:`, e);
+        }
+    }
+
+    /**
+     * Helper method to load data with integrity verification.
+     * Supports legacy plain JSON saves.
+     * @param {string} key - The localStorage key.
+     * @returns {any|null} The parsed data, or null if missing/tampered.
+     * @private
+     */
+    _load(key) {
+        const raw = localStorage.getItem(key);
+        if (!raw) return null;
+
+        // Legacy support: check if it looks like JSON
+        if (raw.trim().startsWith('{') || raw.trim().startsWith('[')) {
+            try {
+                return JSON.parse(raw);
+            } catch (e) {
+                console.error(`Failed to parse legacy save for key ${key}:`, e);
+                return null;
+            }
+        }
+
+        const parts = raw.split('|');
+        if (parts.length !== 2) {
+            console.warn(`Save file corrupted or tampered (invalid format) for key ${key}.`);
+            return null;
+        }
+
+        const [encoded, hash] = parts;
+        if (this._hash(encoded) !== hash) {
+            console.warn(`Save file tampered (hash mismatch) for key ${key}.`);
+            return null;
+        }
+
+        try {
+            const json = atob(encoded);
+            return JSON.parse(json);
+        } catch (e) {
+            console.error(`Failed to decode save for key ${key}:`, e);
+            return null;
+        }
+    }
+
+    /**
+     * Simple hash function for integrity checking.
+     * @param {string} str - The string to hash.
+     * @returns {string} The hash value.
+     * @private
+     */
+    _hash(str) {
+        let hash = 0;
+        if (str.length === 0) return hash.toString();
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash |= 0; // Convert to 32bit integer
+        }
+        return hash.toString();
     }
 }

@@ -153,6 +153,7 @@ export class Nadagotchi {
             "Masterwork Chair": {
                 materials: { "Sticks": 10, "Shiny Stone": 2 },
                 description: "A chair of unparalleled craftsmanship."
+            },
             "Metabolism-Slowing Tonic": {
                 materials: { "Frostbloom": 1, "Sticks": 2 },
                 description: "A tonic that slows metabolism, helping to conserve energy."
@@ -558,6 +559,14 @@ export class Nadagotchi {
 
         // Add crafted item to inventory
         this._addItem(itemName, 1);
+
+        // Update Quest Progress
+        if (itemName === 'Masterwork Chair' &&
+            this.quests['masterwork_crafting'] &&
+            this.quests['masterwork_crafting'].stage === 2) {
+            this.quests['masterwork_crafting'].hasCraftedChair = true;
+        }
+
         this.stats.energy -= 15;
         this.stats.happiness += 20;
         const moodMultiplier = this._getMoodMultiplier();
@@ -660,7 +669,7 @@ export class Nadagotchi {
                 this.addJournalEntry("The Master Artisan is waiting for 5 Sticks.");
             }
         } else if (quest.stage === 2) {
-            if (this.inventory['Masterwork Chair'] && this.inventory['Masterwork Chair'] > 0) {
+            if (quest.hasCraftedChair && this.inventory['Masterwork Chair'] && this.inventory['Masterwork Chair'] > 0) {
                 this._removeItem('Masterwork Chair', 1);
                 quest.stage = 3;
                 this.skills.crafting += 2;
