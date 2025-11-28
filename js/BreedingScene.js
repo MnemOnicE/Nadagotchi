@@ -86,7 +86,8 @@ export class BreedingScene extends Phaser.Scene {
         const items = [
             { name: 'logic', emoji: '🧠', description: 'Ancient Tome' },
             { name: 'empathy', emoji: '💖', description: 'Heart Amulet' },
-            { name: 'creativity', emoji: '🎨', description: 'Muse Flower' }
+            { name: 'creativity', emoji: '🎨', description: 'Muse Flower' },
+            { name: 'nutrient', emoji: '🍎', description: 'Nutrient Bar' }
         ];
 
         items.forEach((item, index) => {
