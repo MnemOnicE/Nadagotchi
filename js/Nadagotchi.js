@@ -212,17 +212,26 @@ export class Nadagotchi {
      * @param {?object} worldState.activeEvent - The currently active world event, if any.
      */
     live(worldState = { weather: "Sunny", time: "Day", activeEvent: null }) {
-        // Base decay rates
+        // 1. Setup Base Decay Rates
         let hungerDecay = 0.05;
         let energyDecay = 0.02;
         let happinessChange = 0;
 
-        // Apply Genetic Metabolism (Phenotype)
-        // Metabolism range 1-10. 5 is neutral.
-        // Higher metabolism = Faster hunger decay.
-        // Factor: (Metabolism / 5). 10 -> 2x decay. 1 -> 0.2x decay.
+        // 2. Get Metabolism Factor from Genome (Phenotype)
+        // Range 1 (Slow) to 10 (Fast). Normalize to 0.2x - 2.0x multiplier.
+        let metabolismMult = 1.0;
         if (this.genome && this.genome.phenotype && this.genome.phenotype.metabolism) {
-            hungerDecay *= (this.genome.phenotype.metabolism / 5);
+            metabolismMult = (this.genome.phenotype.metabolism / 5);
+        }
+
+        // 3. Check Passive Traits
+        let traitModifier = 1.0;
+        const activeTrait = this.genome && this.genome.phenotype ? this.genome.phenotype.specialAbility : null;
+
+        if (activeTrait === "Photosynthetic" && worldState.time === "Day") {
+            traitModifier = 0.5; // 50% less energy drain
+        } else if (activeTrait === "Night Owl" && worldState.time === "Night") {
+            traitModifier = 0.8; // 20% less energy drain
         }
 
         if (worldState.activeEvent && worldState.activeEvent.name.includes('Festival')) {
@@ -253,11 +262,6 @@ export class Nadagotchi {
                 hungerDecay *= 0.5;
                 if (this.dominantArchetype === "Recluse") happinessChange += 0.01;
                 if (this.dominantArchetype === "Adventurer") energyDecay *= 1.1;
-
-                // Legacy Trait: Night Owl
-                if (this.legacyTraits.includes("Night Owl")) {
-                    energyDecay *= 0.5; // Decays slower at night
-                }
                 break;
             case "Dusk":
             case "Dawn":
@@ -265,16 +269,12 @@ export class Nadagotchi {
                 break;
             case "Day":
                 if (this.dominantArchetype === "Intellectual") energyDecay *= 1.1;
-
-                // Legacy Trait: Photosynthetic
-                if (this.legacyTraits.includes("Photosynthetic")) {
-                    energyDecay *= 0.5; // Decays slower during day
-                }
                 break;
         }
 
-        this.stats.hunger -= hungerDecay;
-        this.stats.energy -= energyDecay;
+        // 4. Apply Final Decays
+        this.stats.hunger -= (hungerDecay * metabolismMult);
+        this.stats.energy -= (energyDecay * metabolismMult * traitModifier);
         this.stats.happiness += happinessChange;
 
         if (this.stats.hunger < 0) this.stats.hunger = 0;

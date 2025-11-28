@@ -84,11 +84,12 @@ export class BreedingScene extends Phaser.Scene {
         panelContainer.add([panelBg, panelTitle]);
 
         const items = [
-            { name: 'logic', emoji: '🧠', description: 'Ancient Tome' },
-            { name: 'empathy', emoji: '💖', description: 'Heart Amulet' },
-            { name: 'creativity', emoji: '🎨', description: 'Muse Flower' },
-            { name: 'nutrient', emoji: '🍎', description: 'Nutrient Bar' },
-            { name: 'espresso', emoji: '☕', description: 'Espresso' }
+            { name: 'Ancient Tome', emoji: '🧠', description: 'Boosts Intellectual Gene' },
+            { name: 'Heart Amulet', emoji: '💖', description: 'Boosts Nurturer Gene' },
+            { name: 'Muse Flower', emoji: '🎨', description: 'Boosts Mischievous Gene' },
+            { name: 'Nutrient Bar', emoji: '🍎', description: 'Balanced Nutrition' },
+            { name: 'Espresso', emoji: '☕', description: 'Increases Metabolism Speed' },
+            { name: 'Chamomile', emoji: '🍵', description: 'Decreases Metabolism (Calm)' }
         ];
 
         // Adjust spacing to fit more items

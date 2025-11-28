@@ -62,6 +62,18 @@ export class UIScene extends Phaser.Scene {
             .setVisible(false)
             .on('pointerdown', () => this.game.events.emit('uiAction', 'RETIRE'));
 
+        // --- Genetic Scanner Button ---
+        // Hidden by default, revealed if item is owned
+        // Position: width - buttonWidth (100) - padding (10) = width - 110
+        this.scannerButton = ButtonFactory.createButton(this, this.cameras.main.width - 110, 100, "🧬 GENES", () => {
+             this.onClickScanner();
+        }, { width: 100, height: 35, color: 0x008080, fontSize: '16px' });
+        // Manually adjust origin/position since ButtonFactory returns a container centered at x,y usually?
+        // ButtonFactory creates container at x,y. Let's assume x,y is center.
+        // My Retire button is top-right aligned.
+        // I'll leave it as is and check placement. ButtonFactory centers content.
+        this.scannerButton.setVisible(false);
+
         // --- Event Listeners ---
         this.game.events.on('updateStats', this.updateStatsUI, this);
         this.game.events.on('uiAction', this.handleUIActions, this);
@@ -75,6 +87,7 @@ export class UIScene extends Phaser.Scene {
         this.craftingModal = this.createModal("Crafting");
         this.relationshipModal = this.createModal("Relationships");
         this.decorateModal = this.createModal("Decorate");
+        this.scannerModal = this.createModal("Genetic Scanner");
 
         // --- Initial Layout ---
         this.createTabs();
@@ -235,6 +248,10 @@ export class UIScene extends Phaser.Scene {
         if (this.retireButton) {
              this.retireButton.setPosition(width - 10, 50);
         }
+        if (this.scannerButton) {
+            // Reposition scanner button below retire button
+            this.scannerButton.setPosition(width - 110, 100);
+        }
 
         // Refresh active tab actions to fit new width
         this.showTab(this.currentTab);
@@ -308,10 +325,37 @@ export class UIScene extends Phaser.Scene {
 
         this.retireButton.setVisible(isLegacyReady);
 
+        // Check inventory for Genetic Scanner
+        const hasScanner = this.nadagotchiData.inventory && this.nadagotchiData.inventory['Genetic Scanner'] > 0;
+        this.scannerButton.setVisible(hasScanner);
+
         if (newCareerUnlocked) {
             this.showCareerNotification(newCareerUnlocked);
             this.mainScene.nadagotchi.newCareerUnlocked = null; // Reset flag
         }
+    }
+
+    onClickScanner() {
+        if (!this.nadagotchiData || !this.nadagotchiData.genome) return;
+
+        let displayText = "GENETIC ANALYSIS:\n\n";
+        const genotype = this.nadagotchiData.genome.genotype;
+
+        for (const [geneKey, allelePair] of Object.entries(genotype)) {
+             // e.g. "Metabolism: [5, 8]"
+             displayText += `${geneKey}: [${allelePair[0]} | ${allelePair[1]}]`;
+
+             // Check for Heterozygous (different alleles)
+             // Note: Alleles can be numbers or strings (traits) or null.
+             if (allelePair[0] !== allelePair[1]) {
+                 displayText += " (Hetero)";
+             }
+             displayText += "\n";
+        }
+
+        this.scannerModal.content.setText(displayText);
+        this.scannerModal.setVisible(true);
+        this.scene.pause('MainScene');
     }
 
     /**

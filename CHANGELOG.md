@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.0] - 2025-12-01
+
+### Added
+- **Passive Traits Activation:** The `live()` simulation loop in `js/Nadagotchi.js` now actively uses the pet's genetic traits (`specialAbility`) to modify stat decay.
+  - **"Photosynthetic":** Reduces energy decay by 50% during the "Day" cycle.
+  - **"Night Owl":** Reduces energy decay by 20% during the "Night" cycle.
+- **Dynamic Metabolism:** The `metabolism` phenotype now scales both hunger and energy decay rates (from 0.2x to 2.0x), making high-metabolism pets more demanding but energetic.
+- **Genetic Scanner Tool:** Added a "Genetic Scanner" button to the UI (`js/UIScene.js`) which is revealed if the player owns the scanner item. Clicking it displays the pet's raw Genotype (alleles), highlighting heterozygous traits.
+- **Expanded Breeding Options:** Added "Chamomile" to the breeding scene, which lowers metabolism (calming effect).
+
+### Changed
+- **Genetics System Config:** Updated `js/GeneticsSystem.js` and `js/BreedingScene.js` to use descriptive item names (e.g., "Ancient Tome", "Espresso") instead of internal IDs, improving clarity and matching the UI.
+- **Legacy Logic:** Deprecated the old `legacyTraits` array usage in the main simulation loop, replacing it with direct checks against the new `Genome` system.
+
 ## [1.9.0] - 2025-12-01
 
 ### Added
