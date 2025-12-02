@@ -461,14 +461,18 @@ export class MainScene extends Phaser.Scene {
     placeFurniture(x, y) {
         if (!this.isPlacementMode || !this.selectedFurniture) return;
 
-        const furnitureKey = this.selectedFurniture.toLowerCase().replace(' ', '_');
-        const newFurniture = this.add.sprite(x, y, furnitureKey).setInteractive({ useHandCursor: true });
-        newFurniture.on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, `INTERACT_${this.selectedFurniture.toUpperCase().replace(' ', '_')}`));
+        if (this.nadagotchi.placeItem(this.selectedFurniture)) {
+            const furnitureKey = this.selectedFurniture.toLowerCase().replace(' ', '_');
+            const newFurniture = this.add.sprite(x, y, furnitureKey).setInteractive({ useHandCursor: true });
+            newFurniture.on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, `INTERACT_${this.selectedFurniture.toUpperCase().replace(' ', '_')}`));
 
-        this.placedFurniture.push({ key: this.selectedFurniture, x: x, y: y });
-        this.saveFurniture();
+            this.placedFurniture.push({ key: this.selectedFurniture, x: x, y: y });
+            this.saveFurniture();
 
-        this.togglePlacementMode(null);
+            this.togglePlacementMode(null);
+        } else {
+            this.togglePlacementMode(null);
+        }
     }
 
     saveFurniture() {

@@ -51,7 +51,7 @@ This phase focuses on building out the primary gameplay loops, giving players cl
     -   [x] Introduced seasonal festivals and rare, spontaneous events (e.g., 'Traveling Merchant').
         -   [x] Refined festival timing to align with astronomical events (Equinoxes/Solstices) for "Clock Rigor".
 -   **[ ] Future Work:**
-    -   [ ] Allow for deeper home customization with player-placed furniture.
+    -   [x] Allow for deeper home customization with player-placed furniture.
     -   [x] **Inventory/Item Management UI:** Develop a dedicated UI modal for viewing all items, quantities, and descriptions, which is currently missing but required.
     -   [x] Expand NPC interactions with more complex dialogues and relationship-based events.
         -   [x] Implemented multi-stage quest system (e.g., Masterwork Crafting).

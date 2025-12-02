@@ -594,6 +594,19 @@ export class Nadagotchi {
     }
 
     /**
+     * Removes an item from the inventory for placement in the world.
+     * @param {string} itemName - The name of the item to place.
+     * @returns {boolean} True if the item was successfully removed, false otherwise.
+     */
+    placeItem(itemName) {
+        if (this.inventory[itemName] && this.inventory[itemName] > 0) {
+            this._removeItem(itemName, 1);
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Attempts to craft a specified item. Checks for required materials, consumes them, and adds the item to inventory.
      * @param {string} itemName - The name of the item to craft from the `this.recipes` object.
      */
