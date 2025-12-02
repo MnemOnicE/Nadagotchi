@@ -11,10 +11,15 @@ describe('EventManager', () => {
     });
 
     test('should not have an active event on a normal day', () => {
+        const originalRandom = Math.random;
+        Math.random = jest.fn(() => 0.9); // Ensure no spontaneous event triggers
+
         calendar.day = 1;
         calendar.season = 'Spring';
         eventManager.update();
         expect(eventManager.getActiveEvent()).toBeNull();
+
+        Math.random = originalRandom;
     });
 
     test('should activate a seasonal festival on the correct date', () => {
@@ -27,6 +32,9 @@ describe('EventManager', () => {
     });
 
     test('should deactivate an event on the following day', () => {
+        const originalRandom = Math.random;
+        Math.random = jest.fn(() => 0.9); // Ensure no spontaneous event triggers on day 15
+
         calendar.day = 14;
         calendar.season = 'Spring';
         eventManager.update();
@@ -35,6 +43,8 @@ describe('EventManager', () => {
         calendar.advanceDay(); // Move to day 15
         eventManager.update();
         expect(eventManager.getActiveEvent()).toBeNull();
+
+        Math.random = originalRandom;
     });
 
     test('should activate a spontaneous event when its trigger condition is met', () => {

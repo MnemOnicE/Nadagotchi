@@ -203,6 +203,10 @@ describe('Nadagotchi', () => {
             expect(adventurerPet.stats.happiness).toBe(80);
 
             const reclusePet = new Nadagotchi('Recluse');
+            // Force Adventurer genes to be heterozygous to avoid random bonus
+            reclusePet.genome.genotype.Adventurer = [5, 10];
+            reclusePet.genome.phenotype = reclusePet.genome.calculatePhenotype();
+
             reclusePet.stats.happiness = 50;
             reclusePet.handleAction('EXPLORE');
             expect(reclusePet.mood).toBe('sad');
