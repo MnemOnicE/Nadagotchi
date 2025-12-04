@@ -1,3 +1,9 @@
+/**
+ * @fileoverview Registry of all event keys used in the application.
+ * Defines string constants for UI actions, system events, and scene communication.
+ * Using constants prevents typos and facilitates refactoring.
+ */
+
 export const EventKeys = {
     // UI Actions (Event Name)
     UI_ACTION: 'uiAction',

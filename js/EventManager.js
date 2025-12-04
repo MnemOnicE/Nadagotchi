@@ -1,16 +1,27 @@
 /**
+ * @fileoverview Manages dynamic and seasonal events within the game world.
+ * Checks triggers daily to activate festivals or spontaneous events.
+ */
+
+/**
  * Manages all dynamic and seasonal events in the game.
+ * @class EventManager
  */
 export class EventManager {
     /**
-     * @param {Calendar} calendar - A reference to the game's calendar instance.
+     * Creates a new EventManager.
+     * @param {import('./Calendar.js').Calendar} calendar - A reference to the game's calendar instance.
      */
     constructor(calendar) {
+        /** @type {import('./Calendar.js').Calendar} Reference to the calendar system. */
         this.calendar = calendar;
+        /** @type {?object} The currently active event, or null if none. */
         this.activeEvent = null;
 
-        // Define all possible events in the game.
-        // In a larger game, this could be loaded from a JSON file.
+        /**
+         * @type {Object.<string, {type: string, trigger: function(object): boolean, description: string}>}
+         * Definitions of all possible events.
+         */
         this.eventDefinitions = {
             // --- SEASONAL FESTIVALS ---
             'SpringEquinoxFestival': {
@@ -54,7 +65,7 @@ export class EventManager {
 
     /**
      * Checks if any events should be active based on the current date or random chance.
-     * This should be called once per day.
+     * This should be called once per in-game day (e.g., when the calendar advances).
      */
     update() {
         this.activeEvent = null; // Reset the active event each day.
@@ -77,7 +88,7 @@ export class EventManager {
 
     /**
      * Returns the currently active event, if any.
-     * @returns {object|null} The active event object or null if no event is active.
+     * @returns {?object} The active event object containing name and description, or null if no event is active.
      */
     getActiveEvent() {
         return this.activeEvent;

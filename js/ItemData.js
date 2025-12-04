@@ -1,6 +1,12 @@
 /**
+ * @fileoverview Definitions for items and recipes within the game.
+ * Separates data from logic, allowing for easy addition of new items.
+ */
+
+/**
  * Definitions for all items in the game.
  * Includes type, description, and visual representation.
+ * @type {Object.<string, {type: string, description: string, emoji: string}>}
  */
 export const ItemDefinitions = {
     // Raw Materials
@@ -25,6 +31,7 @@ export const ItemDefinitions = {
 /**
  * Recipes for crafting items.
  * Keys match ItemDefinitions.
+ * @type {Object.<string, {materials: Object.<string, number>, description: string}>}
  */
 export const Recipes = {
     "Fancy Bookshelf": {

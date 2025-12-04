@@ -1,6 +1,11 @@
 import { EventKeys } from './EventKeys.js';
 
 /**
+ * @fileoverview A mini-game for the Scout career.
+ * A card matching game where the player must find pairs on a grid.
+ */
+
+/**
  * @class ScoutMinigameScene
  * @extends Phaser.Scene
  * @classdesc
@@ -29,8 +34,10 @@ export class ScoutMinigameScene extends Phaser.Scene {
     /**
      * Phaser lifecycle method. Called before create.
      * @param {object} data - Data passed from the launching scene.
+     * @param {string} [data.careerName='Scout'] - Optional career name override (e.g., 'Archaeologist').
      */
     init(data) {
+        /** @type {string} The career context for this minigame instance. */
         this.careerName = (data && data.careerName) ? data.careerName : 'Scout';
     }
 

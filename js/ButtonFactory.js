@@ -1,4 +1,10 @@
 /**
+ * @fileoverview Utility for creating consistent UI buttons.
+ * Uses Phaser Containers to group visual elements and hit zones into a single interactive object.
+ * Implements a "Neo-Retro" aesthetic with 3D bevels and shadows.
+ */
+
+/**
  * @class ButtonFactory
  * @classdesc
  * A utility class to generate consistent, "Neo-Retro" style 3D buttons.
@@ -7,11 +13,16 @@ export class ButtonFactory {
     /**
      * Creates a 3D beveled button.
      * @param {Phaser.Scene} scene - The scene to add the button to.
-     * @param {number} x - The x position.
-     * @param {number} y - The y position.
-     * @param {string} text - The text to display.
-     * @param {function} callback - The function to call on click.
-     * @param {object} [options] - styling options.
+     * @param {number} x - The x position (center of the button).
+     * @param {number} y - The y position (center of the button).
+     * @param {string} text - The text to display on the button.
+     * @param {function} callback - The function to call when the button is clicked.
+     * @param {object} [options] - Styling options.
+     * @param {number} [options.width=100] - The width of the button.
+     * @param {number} [options.height=40] - The height of the button.
+     * @param {number} [options.color=0xD8A373] - The background color of the button (hex).
+     * @param {string} [options.textColor='#4A4A4A'] - The color of the text string.
+     * @param {string} [options.fontSize='24px'] - The CSS font size for the text.
      * @returns {Phaser.GameObjects.Container} The created button container.
      */
     static createButton(scene, x, y, text, callback, options = {}) {

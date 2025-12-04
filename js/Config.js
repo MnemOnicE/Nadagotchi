@@ -1,3 +1,9 @@
+/**
+ * @fileoverview Configuration constants for the Nadagotchi game.
+ * Contains game balance settings, thresholds, decay rates, and modifier values.
+ * Centralizes magic numbers to allow for easier tuning of the game economy and mechanics.
+ */
+
 export const Config = {
     // Game Start & Genetics
     INITIAL_STATE: {

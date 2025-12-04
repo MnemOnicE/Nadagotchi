@@ -1,6 +1,11 @@
 /**
+ * @fileoverview System for generating dynamic narrative text.
+ * Selects appropriate journal entries and advice based on pet archetype and context.
+ */
+
+/**
+ * Generates contextual narrative text based on the pet's personality and game events.
  * @class NarrativeSystem
- * @description Generates contextual narrative text based on the pet's personality and game events.
  */
 export class NarrativeSystem {
 
@@ -53,6 +58,10 @@ export class NarrativeSystem {
         return adviceList[Math.floor(Math.random() * adviceList.length)];
     }
 
+    /**
+     * Returns the dictionary of narrative templates.
+     * @returns {Object} The complete map of narrative strings.
+     */
     static getTemplates() {
         return {
             'ADVICE': {

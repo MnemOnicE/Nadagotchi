@@ -1,6 +1,11 @@
 import { EventKeys } from './EventKeys.js';
 
 /**
+ * @fileoverview A mini-game for the Healer career.
+ * Involves diagnosing symptoms and selecting the correct remedy.
+ */
+
+/**
  * @class HealerMinigameScene
  * @extends Phaser.Scene
  * @classdesc

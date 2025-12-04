@@ -1,6 +1,11 @@
 import { EventKeys } from './EventKeys.js';
 
 /**
+ * @fileoverview A mini-game for the Innovator career.
+ * A "Simon Says" style memory game requiring pattern repetition.
+ */
+
+/**
  * @class LogicPuzzleScene
  * @extends Phaser.Scene
  * @classdesc
@@ -14,7 +19,7 @@ export class LogicPuzzleScene extends Phaser.Scene {
         this.sequence = [];
         /** @type {Array<string>} The player's input sequence. */
         this.playerSequence = [];
-        /** @type {number} The current length of the sequence. */
+        /** @type {number} The current length of the sequence to generate. */
         this.level = 3;
         /** @type {boolean} Flag to disable player input while the sequence is playing. */
         this.canPlayerClick = false;
