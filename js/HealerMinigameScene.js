@@ -13,6 +13,9 @@ import { EventKeys } from './EventKeys.js';
  * The player must diagnose a patient's symptom and select the correct remedy from a list of options.
  */
 export class HealerMinigameScene extends Phaser.Scene {
+    /**
+     * Creates an instance of HealerMinigameScene.
+     */
     constructor() {
         super({ key: 'HealerMinigameScene' });
         /**

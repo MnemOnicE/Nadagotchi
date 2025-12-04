@@ -13,6 +13,9 @@ import { EventKeys } from './EventKeys.js';
  * The player must memorize and repeat an ever-increasing sequence of colors.
  */
 export class LogicPuzzleScene extends Phaser.Scene {
+    /**
+     * Creates an instance of LogicPuzzleScene.
+     */
     constructor() {
         super({ key: 'LogicPuzzleScene' });
         /** @type {Array<string>} The correct sequence of colors. */

@@ -10,6 +10,9 @@
  * @extends Phaser.Scene
  */
 export class PreloaderScene extends Phaser.Scene {
+    /**
+     * Creates an instance of PreloaderScene.
+     */
     constructor() {
         super({ key: 'PreloaderScene' });
     }

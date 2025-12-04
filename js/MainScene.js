@@ -21,6 +21,9 @@ import { EventKeys } from './EventKeys.js';
  * It works in conjunction with UIScene, which handles all user interface elements.
  */
 export class MainScene extends Phaser.Scene {
+    /**
+     * Creates an instance of MainScene.
+     */
     constructor() {
         super({ key: 'MainScene' });
         /** @type {boolean} Whether the player is currently placing furniture. */

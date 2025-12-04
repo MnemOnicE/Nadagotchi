@@ -13,6 +13,9 @@ import { EventKeys } from './EventKeys.js';
  * The player must memorize and replicate a pattern shown on a grid.
  */
 export class ArtisanMinigameScene extends Phaser.Scene {
+    /**
+     * Creates an instance of ArtisanMinigameScene.
+     */
     constructor() {
         super({ key: 'ArtisanMinigameScene' });
         /** @type {number} The size of the grid (e.g., 3 for a 3x3 grid). */

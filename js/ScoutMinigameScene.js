@@ -13,6 +13,9 @@ import { EventKeys } from './EventKeys.js';
  * The player must find and match pairs of icons on a grid within a time limit.
  */
 export class ScoutMinigameScene extends Phaser.Scene {
+    /**
+     * Creates an instance of ScoutMinigameScene.
+     */
     constructor() {
         super({ key: 'ScoutMinigameScene' });
         /** @type {Array<string>} The set of unique icons to be matched. */

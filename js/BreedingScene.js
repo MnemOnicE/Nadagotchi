@@ -13,6 +13,9 @@ import { PersistenceManager } from './PersistenceManager.js';
  * It provides a graphical environment for retiring a pet and influencing the creation of a new generation.
  */
 export class BreedingScene extends Phaser.Scene {
+    /**
+     * Creates an instance of BreedingScene.
+     */
     constructor() {
         super({ key: 'BreedingScene' });
         /** @type {Array<Phaser.GameObjects.GameObject>} */

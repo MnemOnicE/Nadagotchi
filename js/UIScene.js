@@ -18,6 +18,9 @@ import { ItemDefinitions } from './ItemData.js';
  * It implements the "Physical Shell" dashboard layout using a Neo-Retro aesthetic.
  */
 export class UIScene extends Phaser.Scene {
+    /**
+     * Creates an instance of UIScene.
+     */
     constructor() {
         super({ key: 'UIScene' });
     }
