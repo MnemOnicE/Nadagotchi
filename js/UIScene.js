@@ -5,6 +5,12 @@ import { EventKeys } from './EventKeys.js';
 import { ItemDefinitions } from './ItemData.js';
 
 /**
+ * @fileoverview Manages the "Physical Shell" UI layer of the game.
+ * Handles the HUD, action buttons, modals, and user input mapping.
+ * Renders on top of the MainScene.
+ */
+
+/**
  * @class UIScene
  * @extends Phaser.Scene
  * @classdesc
@@ -12,12 +18,16 @@ import { ItemDefinitions } from './ItemData.js';
  * It implements the "Physical Shell" dashboard layout using a Neo-Retro aesthetic.
  */
 export class UIScene extends Phaser.Scene {
+    /**
+     * Creates an instance of UIScene.
+     */
     constructor() {
         super({ key: 'UIScene' });
     }
 
     /**
      * Phaser lifecycle method called once, after `preload`.
+     * Initializes UI state, creates the dashboard background, action buttons, and all modals.
      */
     create() {
         // --- State ---
@@ -123,7 +133,7 @@ export class UIScene extends Phaser.Scene {
 
     /**
      * Switches the active tab and populates the dashboard with relevant actions.
-     * @param {string} tabId
+     * @param {string} tabId - The ID of the tab to switch to (e.g., 'CARE', 'ACTION').
      */
     showTab(tabId) {
         this.currentTab = tabId;
@@ -186,6 +196,8 @@ export class UIScene extends Phaser.Scene {
 
     /**
      * Lays out the action buttons in a responsive grid within the dashboard body.
+     * @param {Array<object>} actions - List of action definitions.
+     * @param {number} startY - The Y coordinate to start placing buttons.
      */
     layoutActionButtons(actions, startY) {
         const width = this.cameras.main.width;
@@ -224,7 +236,8 @@ export class UIScene extends Phaser.Scene {
 
     /**
      * Handles the resize event.
-     * @param {object} gameSize - The new size of the game.
+     * Repositions UI elements to fit the new game size.
+     * @param {object} gameSize - The new size of the game (width, height).
      */
     resize(gameSize) {
         const width = gameSize.width;
@@ -358,6 +371,9 @@ export class UIScene extends Phaser.Scene {
         }
     }
 
+    /**
+     * Shows the genetic scanner modal with the pet's genotype.
+     */
     onClickScanner() {
         if (!this.nadagotchiData || !this.nadagotchiData.genome) return;
 
@@ -557,6 +573,9 @@ export class UIScene extends Phaser.Scene {
         this.scene.pause('MainScene');
     }
 
+    /**
+     * Populates and displays the decoration/furniture menu modal.
+     */
     openDecorateMenu() {
         if (!this.nadagotchiData) return;
 
@@ -597,6 +616,7 @@ export class UIScene extends Phaser.Scene {
 
     /**
      * Populates and displays the inventory menu modal.
+     * Shows consumable items with a "Use" button.
      */
     openInventoryMenu() {
         if (!this.nadagotchiData) return;

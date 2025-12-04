@@ -1,8 +1,26 @@
+/**
+ * @fileoverview Preloads game assets.
+ * Instead of loading external files which can be slow or flaky,
+ * this scene generates procedural textures and spritesheets at runtime.
+ */
+
+/**
+ * PreloaderScene: Handles asset loading and generation.
+ * @class PreloaderScene
+ * @extends Phaser.Scene
+ */
 export class PreloaderScene extends Phaser.Scene {
+    /**
+     * Creates an instance of PreloaderScene.
+     */
     constructor() {
         super({ key: 'PreloaderScene' });
     }
 
+    /**
+     * Phaser lifecycle method: preload.
+     * Generates graphics and loading UI.
+     */
     preload() {
         // Loading bar implementation
         this.createLoadingBar();
@@ -51,6 +69,10 @@ export class PreloaderScene extends Phaser.Scene {
         graphics.destroy();
     }
 
+    /**
+     * Creates a visual loading bar to indicate progress.
+     * @private
+     */
     createLoadingBar() {
         const width = this.cameras.main.width;
         const height = this.cameras.main.height;
@@ -84,6 +106,10 @@ export class PreloaderScene extends Phaser.Scene {
         });
     }
 
+    /**
+     * Phaser lifecycle method: create.
+     * Transitions to the MainScene once loading is complete.
+     */
     create() {
         // Once loading is done, start MainScene
         this.scene.start('MainScene');

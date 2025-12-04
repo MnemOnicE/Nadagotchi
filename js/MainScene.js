@@ -7,6 +7,12 @@ import { WeatherSystem } from './WeatherSystem.js';
 import { EventKeys } from './EventKeys.js';
 
 /**
+ * @fileoverview The primary game scene.
+ * Manages the main game loop, world rendering, and coordination between systems.
+ * Acts as the controller for the Nadagotchi entity and the environment.
+ */
+
+/**
  * @class MainScene
  * @extends Phaser.Scene
  * @classdesc
@@ -15,10 +21,16 @@ import { EventKeys } from './EventKeys.js';
  * It works in conjunction with UIScene, which handles all user interface elements.
  */
 export class MainScene extends Phaser.Scene {
+    /**
+     * Creates an instance of MainScene.
+     */
     constructor() {
         super({ key: 'MainScene' });
+        /** @type {boolean} Whether the player is currently placing furniture. */
         this.isPlacementMode = false;
+        /** @type {?string} The name of the furniture item currently selected for placement. */
         this.selectedFurniture = null;
+        /** @type {Array<{key: string, x: number, y: number}>} List of furniture placed in the world. */
         this.placedFurniture = [];
     }
 
@@ -165,7 +177,6 @@ export class MainScene extends Phaser.Scene {
             this.togglePlacementMode(null); // Exit placement mode if another action is taken
         }
 
-        // FIX: Merged duplicate handleUIAction definitions and unified logic
         switch (actionType) {
             case EventKeys.WORK:
                 this.startWorkMinigame();
@@ -434,6 +445,10 @@ export class MainScene extends Phaser.Scene {
         }
     }
 
+    /**
+     * Toggles placement mode for furniture items.
+     * @param {?string} item - The name of the item to place, or null to exit placement mode.
+     */
     togglePlacementMode(item) {
         this.isPlacementMode = !this.isPlacementMode;
         this.selectedFurniture = this.isPlacementMode ? item : null;
@@ -458,6 +473,11 @@ export class MainScene extends Phaser.Scene {
         }
     }
 
+    /**
+     * Places the selected furniture item at the specified coordinates.
+     * @param {number} x - The x-coordinate for the furniture.
+     * @param {number} y - The y-coordinate for the furniture.
+     */
     placeFurniture(x, y) {
         if (!this.isPlacementMode || !this.selectedFurniture) return;
 
@@ -475,10 +495,16 @@ export class MainScene extends Phaser.Scene {
         }
     }
 
+    /**
+     * Persists the placed furniture data.
+     */
     saveFurniture() {
         this.persistence.saveFurniture(this.placedFurniture);
     }
 
+    /**
+     * Loads and renders previously placed furniture.
+     */
     loadFurniture() {
         this.placedFurniture = this.persistence.loadFurniture() || [];
         this.placedFurniture.forEach(furniture => {

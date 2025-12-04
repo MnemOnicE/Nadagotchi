@@ -1,13 +1,23 @@
 /**
+ * @fileoverview Manages the in-game weather system.
+ * Rotates between different weather states on a timer to provide dynamic environmental effects.
+ */
+
+/**
  * WeatherSystem: Manages the in-game weather, transitions, and effects.
+ * @class WeatherSystem
  */
 export class WeatherSystem {
     /**
+     * Creates a new WeatherSystem.
      * @param {Phaser.Scene} scene - The Phaser scene this system is attached to.
      */
     constructor(scene) {
+        /** @type {Phaser.Scene} Reference to the Phaser scene. */
         this.scene = scene;
+        /** @type {string[]} List of possible weather types. */
         this.weatherTypes = ["Sunny", "Cloudy", "Rainy", "Stormy"];
+        /** @type {string} The current active weather. */
         this.currentWeather = "Sunny";
 
         // Timer for changing weather
@@ -21,6 +31,7 @@ export class WeatherSystem {
 
     /**
      * Changes the current weather to a new, random type.
+     * Ensures the new weather is different from the current one.
      */
     changeWeather() {
         const newWeather = Phaser.Utils.Array.GetRandom(this.weatherTypes);
@@ -39,8 +50,8 @@ export class WeatherSystem {
     }
 
     /**
-     * Gets the current weather.
-     * @returns {string} The current weather type.
+     * Retrieves the current weather state.
+     * @returns {string} The current weather type (e.g., 'Sunny', 'Rainy').
      */
     getCurrentWeather() {
         return this.currentWeather;

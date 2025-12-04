@@ -1,20 +1,31 @@
 /**
+ * @fileoverview Manages the in-game day-night cycle.
+ * Calculates time progression, periods (Day, Night, Dawn, Dusk), and daylight factors for rendering.
+ */
+
+/**
  * WorldClock: Manages the in-game 24-hour clock and time-of-day transitions.
  * This class provides a more granular and controllable time system than a simple timer.
+ * @class WorldClock
  */
 export class WorldClock {
     /**
+     * Creates a new WorldClock.
      * @param {Phaser.Scene} scene - The Phaser scene this clock is attached to.
      * @param {number} dayDurationInSeconds - The total duration of a 24-hour in-game day in real-world seconds.
      */
     constructor(scene, dayDurationInSeconds = 240) { // 4 minutes for a full day
+        /** @type {Phaser.Scene} Reference to the Phaser scene. */
         this.scene = scene;
+        /** @type {number} Duration of a game day in milliseconds. */
         this.dayDurationInMs = dayDurationInSeconds * 1000;
 
         // The current time of day, from 0 (midnight) to 1 (next midnight)
+        /** @type {number} Current normalized time (0.0 to 1.0). */
         this.time = 0.25; // Start at 6 AM (sunrise)
 
         // Define the periods of the day as fractions of the 24-hour cycle
+        /** @type {Object.<string, {start: number, end: number, name: string}>} Time period definitions. */
         this.periods = {
             NIGHT: { start: 0, end: 0.2, name: "Night" },      // 00:00 - 04:48
             DAWN: { start: 0.2, end: 0.3, name: "Dawn" },      // 04:48 - 07:12

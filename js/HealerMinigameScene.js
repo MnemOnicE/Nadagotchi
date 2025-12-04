@@ -1,6 +1,11 @@
 import { EventKeys } from './EventKeys.js';
 
 /**
+ * @fileoverview A mini-game for the Healer career.
+ * Involves diagnosing symptoms and selecting the correct remedy.
+ */
+
+/**
  * @class HealerMinigameScene
  * @extends Phaser.Scene
  * @classdesc
@@ -8,6 +13,9 @@ import { EventKeys } from './EventKeys.js';
  * The player must diagnose a patient's symptom and select the correct remedy from a list of options.
  */
 export class HealerMinigameScene extends Phaser.Scene {
+    /**
+     * Creates an instance of HealerMinigameScene.
+     */
     constructor() {
         super({ key: 'HealerMinigameScene' });
         /**

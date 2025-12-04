@@ -1,6 +1,11 @@
 import { PersistenceManager } from './PersistenceManager.js';
 
 /**
+ * @fileoverview Manages the "Legacy Sanctuary" where pets retire and offspring are generated.
+ * Provides UI for selecting environmental influences on genetics.
+ */
+
+/**
  * @class BreedingScene
  * @extends Phaser.Scene
  * @classdesc
@@ -8,6 +13,9 @@ import { PersistenceManager } from './PersistenceManager.js';
  * It provides a graphical environment for retiring a pet and influencing the creation of a new generation.
  */
 export class BreedingScene extends Phaser.Scene {
+    /**
+     * Creates an instance of BreedingScene.
+     */
     constructor() {
         super({ key: 'BreedingScene' });
         /** @type {Array<Phaser.GameObjects.GameObject>} */
@@ -17,10 +25,10 @@ export class BreedingScene extends Phaser.Scene {
     /**
      * Initializes data passed from the MainScene when this scene is started.
      * @param {object} data - The data object from the previous scene.
-     * @param {Nadagotchi} data.parentData - The state of the parent pet being retired.
+     * @param {import('./Nadagotchi.js').Nadagotchi} data.parentData - The state of the parent pet being retired.
      */
     init(data) {
-        /** @type {Nadagotchi} */
+        /** @type {import('./Nadagotchi.js').Nadagotchi} */
         this.parentData = data;
         /** @type {PersistenceManager} */
         this.persistence = new PersistenceManager();

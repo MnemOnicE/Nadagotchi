@@ -1,74 +1,121 @@
 # Nadagotchi
 
-Nadagotchi is a virtual pet game inspired by Tamagotchi, built with the Phaser.js game engine. It features a deep, emergent personality system where the pet's mood, archetype, and skills evolve based on player interactions and a dynamic world.
+**A complex, reactive virtual pet simulation built with Phaser 3.**
 
-## Core Features
+## High-Level Purpose
 
-*   **Dynamic Personality System:** Pets have core archetypes (e.g., Adventurer, Nurturer, Intellectual) and their mood shifts based on their needs and the environment.
-*   **Skill & Career Progression:** Pets can develop skills like logic, navigation, and empathy, which can unlock unique career paths and mini-games.
-*   **Generational Legacy:** "Retire" an elder pet to the Hall of Fame and start a new generation, passing down inherited traits and creating a unique lineage.
-*   **Dynamic World:** The game features a day/night cycle, changing weather, and seasonal events that impact the pet's life and mood.
-*   **Persistent Data:** The game saves your pet's progress, journal entries, and discovered recipes to your browser's `localStorage`.
+Nadagotchi is designed to be more than a simple "feed and clean" simulator. It is an exploration of:
+*   **Emergent Personality:** A pet's behavior and needs are driven by a dynamic personality system (Archetypes) that evolves based on player actions.
+*   **Genetic Legacy:** A Mendelian-inspired genetics engine allows traits to be passed down through generations, creating a long-term lineage strategy.
+*   **Living World:** A rigorous clock system, dynamic weather, seasonal festivals, and NPC interactions create a world that feels alive and reactive.
 
-## Getting Started
+The software architecture is built to be modular, event-driven, and testable, separating core simulation logic (`Nadagotchi.js`, `GeneticsSystem.js`) from the presentation layer (`Phaser Scenes`).
 
-To run the Nadagotchi prototype locally, you need to use the modern build tools (Vite).
+## Installation & Setup
 
 ### Prerequisites
+*   **Node.js** (v14 or higher)
+*   **npm** (Node Package Manager)
 
-*   [Node.js](https://nodejs.org/) installed on your system.
+### Step-by-Step Guide
 
-### Running the Game
-
-1.  **Clone the repository:**
+1.  **Clone the Repository**
     ```bash
-    git clone https://github.com/your-username/nadagotchi.git
+    git clone <repository-url>
     cd nadagotchi
     ```
 
-2.  **Install dependencies:**
+2.  **Install Dependencies**
     ```bash
     npm install
     ```
 
-3.  **Start the development server:**
+3.  **Run Development Server**
+    Starts a local Vite server with hot-reloading.
     ```bash
     npm run dev
     ```
-    This will start a Vite server, typically on `http://localhost:5173`. Open this URL in your browser.
+    Access the game at `http://localhost:5173` (or similar).
 
-4.  **Run Tests:**
+4.  **Run Tests**
+    Executes the Jest test suite.
     ```bash
     npm test
     ```
 
-## Code Structure
+5.  **Build for Production**
+    Generates optimized static assets in the `dist/` folder.
+    ```bash
+    npm run build
+    ```
 
-The game's source code is located in the `js/` directory and uses ES6 Modules.
+## Usage Examples
 
-*   **`game.js`**: The main entry point. It initializes the Phaser game instance and registers all the scenes.
-*   **`Nadagotchi.js`**: The "brain" of the pet. This class manages all of the pet's internal state, including stats, mood, personality, skills, and career. It is not tied to Phaser and contains only pure game logic.
-*   **`PersistenceManager.js`**: A utility class for saving and loading all game data to and from `localStorage`.
-*   **`PreloaderScene.js`**: The first scene loaded, responsible for generating or loading assets and displaying a loading bar.
+### Simulation Core (Headless)
+You can instantiate the core pet logic independently of the graphics engine, useful for testing or server-side simulation.
 
-### Scenes (`js/*Scene.js`)
+```javascript
+import { Nadagotchi } from './js/Nadagotchi.js';
 
-The game is built using multiple Phaser Scenes that manage different parts of the experience.
+// Create a new pet with the 'Intellectual' archetype
+const pet = new Nadagotchi('Intellectual');
 
-*   **`MainScene.js`**: The primary scene for gameplay. It renders the pet, the environment, and runs the main game loop.
-*   **`UIScene.js`**: Runs in parallel with `MainScene` to handle all UI elements, such as stats displays, buttons, and modals.
-*   **`BreedingScene.js`**: The scene for the Generational Legacy system, where a pet is retired and a new one is created.
-*   **Mini-game Scenes**:
-    *   `LogicPuzzleScene.js` (Innovator career)
-    *   `ScoutMinigameScene.js` (Scout career)
-    *   `HealerMinigameScene.js` (Healer career)
-    *   `ArtisanMinigameScene.js` (Artisan career)
+// Simulate a game tick
+// Pass in the current world state (Weather, Time, etc.)
+pet.live({
+    weather: 'Rainy',
+    time: 'Day',
+    season: 'Autumn'
+});
 
-### World Systems (`js/*.js`)
+// Perform an action
+pet.handleAction('STUDY');
 
-These classes manage the dynamic world the pet lives in.
+console.log(`Current Mood: ${pet.mood}`); // e.g., 'happy'
+console.log(`Logic Skill: ${pet.skills.logic}`);
+```
 
-*   **`Calendar.js`**: Manages the in-game date and seasons.
-*   **`EventManager.js`**: Triggers seasonal festivals and rare, spontaneous events.
-*   **`WorldClock.js`**: Manages the 24-hour day/night cycle.
-*   **`WeatherSystem.js`**: Manages weather changes and their effects.
+### Event System
+The game uses a centralized event bus for decoupling logic from UI.
+
+```javascript
+import { EventKeys } from './js/EventKeys.js';
+
+// In a Scene (e.g., MainScene.js)
+// Listen for UI actions
+this.game.events.on(EventKeys.UI_ACTION, (actionType, data) => {
+    if (actionType === EventKeys.FEED) {
+        this.nadagotchi.handleAction('FEED');
+    }
+});
+
+// Emit an event (e.g., from a button click in UIScene.js)
+this.game.events.emit(EventKeys.UI_ACTION, EventKeys.FEED);
+```
+
+## File Structure
+
+### Core Systems (`js/`)
+*   **`Nadagotchi.js`**: The "Brain" of the pet. Manages state, stats, skills, and the main lifecycle loop (`live()`).
+*   **`GeneticsSystem.js`**: Handles DNA generation, inheritance, mutation, and phenotype calculation.
+*   **`Config.js`**: Central configuration for game balance (stat decay rates, thresholds).
+*   **`ItemData.js`**: Static definitions for items and crafting recipes.
+*   **`EventKeys.js`**: Constant registry for all system events.
+
+### Managers (`js/`)
+*   **`PersistenceManager.js`**: Handles saving/loading data to `localStorage` with integrity checks (hashing).
+*   **`EventManager.js`**: Manages seasonal festivals and spontaneous world events.
+*   **`Calendar.js`**: Tracks days and seasons.
+*   **`WorldClock.js`**: Manages the day/night cycle and time transitions.
+*   **`WeatherSystem.js`**: Controls dynamic weather changes.
+*   **`NarrativeSystem.js`**: Generates procedural text for journals and advice.
+
+### Scenes (`js/`)
+*   **`PreloaderScene.js`**: Generates procedural assets and handles loading.
+*   **`MainScene.js`**: The primary gameplay view. Renders the world and the pet.
+*   **`UIScene.js`**: The "Physical Shell" dashboard. Manages UI, buttons, and modals.
+*   **`BreedingScene.js`**: UI for the retirement and legacy system.
+*   **`*MinigameScene.js`**: Specialized scenes for career mini-games (Logic, Scout, Healer, Artisan).
+
+### Entry Point
+*   **`js/game.js`**: Initializes the Phaser Game instance and registers scenes.

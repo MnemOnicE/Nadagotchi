@@ -1,6 +1,12 @@
 /**
- * PersistenceManager is a utility class for handling game state saving and loading via localStorage.
- * This allows the game to remember the pet's state, retired pets, and other meta-game data across browser sessions.
+ * @fileoverview Utility class for handling game state persistence via localStorage.
+ * Includes mechanisms for data integrity (checksums), legacy support, and specialized save slots (Pet, Hall of Fame, Journal).
+ */
+
+/**
+ * PersistenceManager handles saving and loading game data.
+ * It provides an abstraction layer over `localStorage` with added security features.
+ * @class PersistenceManager
  */
 export class PersistenceManager {
     /**
@@ -13,7 +19,7 @@ export class PersistenceManager {
 
     /**
      * Loads the active Nadagotchi's data from localStorage.
-     * @returns {object|null} The parsed Nadagotchi data, or null if no save exists.
+     * @returns {object|null} The parsed Nadagotchi data, or null if no save exists or data is corrupted.
      */
     loadPet() {
         return this._load("nadagotchi_save");
@@ -38,8 +44,8 @@ export class PersistenceManager {
     }
 
     /**
-     * Clears the save data for the active pet. This is used when a pet is retired
-     * to make way for the next generation.
+     * Clears the save data for the active pet.
+     * This is typically used when a pet is retired to allow starting a new generation.
      */
     clearActivePet() {
         localStorage.removeItem("nadagotchi_save");
@@ -55,7 +61,7 @@ export class PersistenceManager {
 
     /**
      * Loads the player's journal entries from localStorage.
-     * @returns {Array<object>} The array of journal entries.
+     * @returns {Array<object>} The array of journal entries, or empty array if none found.
      */
     loadJournal() {
         return this._load("nadagotchi_journal") || [];
@@ -71,7 +77,7 @@ export class PersistenceManager {
 
     /**
      * Loads the list of discovered recipes from localStorage.
-     * @returns {Array<string>} The array of discovered recipe names.
+     * @returns {Array<string>} The array of discovered recipe names, or empty array if none found.
      */
     loadRecipes() {
         return this._load("nadagotchi_recipes") || [];
@@ -110,7 +116,7 @@ export class PersistenceManager {
     }
 
     /**
-     * Helper method to save data with obfuscation and integrity check.
+     * Helper method to save data with simple obfuscation (Base64) and an integrity check (Hash).
      * @param {string} key - The localStorage key.
      * @param {any} data - The data to save.
      * @private
@@ -128,9 +134,9 @@ export class PersistenceManager {
 
     /**
      * Helper method to load data with integrity verification.
-     * Supports legacy plain JSON saves.
+     * Supports legacy plain JSON saves by checking for JSON syntax first.
      * @param {string} key - The localStorage key.
-     * @returns {any|null} The parsed data, or null if missing/tampered.
+     * @returns {any|null} The parsed data, or null if missing, corrupted, or tampered.
      * @private
      */
     _load(key) {
@@ -169,7 +175,7 @@ export class PersistenceManager {
     }
 
     /**
-     * Simple hash function for integrity checking.
+     * Simple hash function for integrity checking (DJB2 variant).
      * @param {string} str - The string to hash.
      * @returns {string} The hash value.
      * @private

@@ -1,4 +1,9 @@
 /**
+ * @fileoverview Logic for the genetics system, including Genome structure and breeding mechanics.
+ * Handles genotype-to-phenotype mapping, mutation, and environmental influences.
+ */
+
+/**
  * Constants for the Genetics System.
  */
 export const MUTATION_RATE = 0.05;
@@ -12,7 +17,8 @@ export const POSSIBLE_TRAITS = ['Night Owl', 'Photosynthetic'];
  */
 export class Genome {
     /**
-     * @param {Object} genes - Optional initial genotype.
+     * Creates a new Genome.
+     * @param {Object} [genes=null] - Optional initial genotype object. If null, a wild genome is generated.
      */
     constructor(genes = null) {
         // Genotype: The hidden DNA (Pairs of [Allele1, Allele2])
@@ -45,7 +51,8 @@ export class Genome {
 
     /**
      * Calculates the expressed traits (phenotype) from the genotype.
-     * @returns {Object} The phenotype object.
+     * Strategies vary by trait type: Average for metabolism, Max for personality (Dominant logic).
+     * @returns {Object} The phenotype object containing expressed values and homozygous flags.
      */
     calculatePhenotype() {
         const phenotype = {};
@@ -99,8 +106,9 @@ export class Genome {
 export class GeneticsSystem {
     /**
      * Generates a new Genome based on a parent Genome and environmental items.
+     * The environment acts as a "second parent" for allele contribution.
      * @param {Genome} parentGenome - The genome of the parent.
-     * @param {string[]} environmentalItems - List of items present during breeding.
+     * @param {string[]} [environmentalItems=[]] - List of items present during breeding (e.g., in inventory).
      * @returns {Genome} A new Genome instance for the offspring.
      */
     static breed(parentGenome, environmentalItems = []) {

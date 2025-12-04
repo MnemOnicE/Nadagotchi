@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.16.0] - 2025-12-07
+
+### Added
+- **Comprehensive Code Documentation:** Added thorough JSDoc docstrings to every class, method, and function in the codebase (`js/*.js`). This includes parameter types, return values, and file-level overviews to elevate code quality and maintainability.
+- **System Architecture Guide:** Added a new `README.md` serving as a high-level architectural guide, including installation steps, usage examples, and a file structure breakdown.
+
 ## [1.15.1] - 2025-12-06
 
 ### Fixed
@@ -373,7 +379,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `MainScene` now only handles core game logic and the pet's visual representation.
   - The new `UIScene` manages all UI elements, including stats text and action buttons.
   - Communication between the two scenes is now handled via Phaser's event emitter, creating a more robust and decoupled architecture.
-- **Fixed Missing Textures:** Replaced unreliable placeholder image URLs with a more stable service (`placehold.co`) to prevent missing texture errors.
+  - **Fixed Missing Textures:** Replaced unreliable placeholder image URLs with a more stable service (`placehold.co`) to prevent missing texture errors.
 
 ### Added
 - **`js/UIScene.js`:** A new file containing the dedicated scene for all UI components.

@@ -1,6 +1,11 @@
 import { EventKeys } from './EventKeys.js';
 
 /**
+ * @fileoverview A mini-game for the Artisan career.
+ * Tests the player's memory by asking them to reproduce a pattern.
+ */
+
+/**
  * @class ArtisanMinigameScene
  * @extends Phaser.Scene
  * @classdesc
@@ -8,13 +13,16 @@ import { EventKeys } from './EventKeys.js';
  * The player must memorize and replicate a pattern shown on a grid.
  */
 export class ArtisanMinigameScene extends Phaser.Scene {
+    /**
+     * Creates an instance of ArtisanMinigameScene.
+     */
     constructor() {
         super({ key: 'ArtisanMinigameScene' });
         /** @type {number} The size of the grid (e.g., 3 for a 3x3 grid). */
         this.gridSize = 3;
-        /** @type {Array<boolean>} The target pattern to be matched. */
+        /** @type {Array<boolean>} The target pattern to be matched (flattened). */
         this.pattern = [];
-        /** @type {Array<boolean>} The player's current input pattern. */
+        /** @type {Array<boolean>} The player's current input pattern (flattened). */
         this.playerPattern = [];
         /** @type {boolean} A flag to prevent input while the pattern is being displayed. */
         this.isDisplayingPattern = false;

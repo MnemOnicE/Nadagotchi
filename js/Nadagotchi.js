@@ -5,15 +5,21 @@ import { Config } from './Config.js';
 import { Recipes } from './ItemData.js';
 
 /**
+ * @fileoverview Core logic for the Nadagotchi pet.
+ * Manages stats, state, skills, inventory, relationships, and lifecycle (live loop).
+ * Acts as the central model for the game.
+ */
+
+/**
  * Represents the core Nadagotchi entity, its "Brain".
  * This class holds the Nadagotchi's state, including its personality, stats, skills, and more.
  * @class Nadagotchi
  */
 export class Nadagotchi {
     /**
-     * Creates a new Nadagotchi.
-     * @param {string} initialArchetype - The initial archetype of the Nadagotchi.
-     * @param {object} [loadedData=null] - Optional saved data to load from.
+     * Creates a new Nadagotchi instance.
+     * @param {string} initialArchetype - The initial archetype of the Nadagotchi (e.g., 'Adventurer').
+     * @param {object} [loadedData=null] - Optional saved data to load from. If provided, overrides defaults.
      */
     constructor(initialArchetype, loadedData = null) {
         if (loadedData) {
@@ -164,8 +170,8 @@ export class Nadagotchi {
 
     /**
      * Calculates data for the offspring of this Nadagotchi.
-     * Uses the GeneticsSystem to determine traits and stats.
-     * @param {string[]} environmentalFactors - List of items present during breeding.
+     * Uses the GeneticsSystem to determine traits and stats based on inheritance.
+     * @param {string[]} environmentalFactors - List of items present during breeding (e.g., from inventory).
      * @returns {object} The data object for the new Nadagotchi.
      */
     calculateOffspring(environmentalFactors) {
@@ -802,6 +808,7 @@ export class Nadagotchi {
     /**
      * Updates the dominant archetype based on which personality has the most points.
      * In case of a tie, the existing dominant archetype is preferred to prevent rapid switching.
+     * Ties are broken by relevant skill scores.
      * @private
      */
     updateDominantArchetype() {
