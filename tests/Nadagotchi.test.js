@@ -27,6 +27,18 @@ describe('Nadagotchi', () => {
 
     beforeEach(() => {
         pet = new Nadagotchi('Intellectual');
+        // Force a deterministic genome to avoid random homozygous bonuses in general tests
+        pet.genome.genotype = {
+            Adventurer: [10, 20],
+            Nurturer: [10, 20],
+            Mischievous: [10, 20], // Definitely not homozygous
+            Intellectual: [40, 40], // Expected for 'Intellectual' starter
+            Recluse: [10, 20],
+            metabolism: [5, 5],
+            moodSensitivity: [5, 5],
+            specialAbility: [null, null]
+        };
+        pet.genome.phenotype = pet.genome.calculatePhenotype();
     });
 
     describe('constructor', () => {
