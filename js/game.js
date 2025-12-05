@@ -6,6 +6,7 @@
 import { MainScene } from './MainScene.js';
 import { UIScene } from './UIScene.js';
 import { PreloaderScene } from './PreloaderScene.js';
+import { StartScene } from './StartScene.js';
 import { BreedingScene } from './BreedingScene.js';
 import { LogicPuzzleScene } from './LogicPuzzleScene.js';
 import { ScoutMinigameScene } from './ScoutMinigameScene.js';
@@ -28,9 +29,10 @@ const config = {
     },
     scene: [
         PreloaderScene,        // 1. Loads assets
-        MainScene,             // 2. Core gameplay loop
-        UIScene,               // 3. UI Overlay
-        BreedingScene,         // 4. Legacy/Retirement system
+        StartScene,            // 2. Main Menu / Onboarding
+        MainScene,             // 3. Core gameplay loop
+        UIScene,               // 4. UI Overlay
+        BreedingScene,         // 5. Legacy/Retirement system
         LogicPuzzleScene,      // 5. Minigames...
         ScoutMinigameScene,
         HealerMinigameScene,

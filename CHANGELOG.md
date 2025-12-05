@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.17.0] - 2025-12-07
+
+### Added
+- **First Time User Experience (FTUE):** Implemented a dedicated "Start Scene" for new and returning players.
+  - **Main Menu:** A "Town Gate" themed start screen that allows players to "Enter World" (Resume) or "Arrive" (New Game).
+  - **Archetype Selection:** New players can now choose their starting personality by selecting one of three "Welcome Baskets" (Adventurer, Nurturer, Intellectual), replacing the default forced archetype.
+  - **Interactive Onboarding:** Added a skippable "System Greeter" tutorial in `UIScene.js` that highlights key interface elements (Stats, Tabs, Actions) for new users.
+  - **New Assets:** Updated `PreloaderScene.js` to procedurally generate assets for the baskets and menu background.
+
 ## [1.16.0] - 2025-12-07
 
 ### Added

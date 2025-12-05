@@ -90,6 +90,7 @@ export class UIScene extends Phaser.Scene {
         // --- Event Listeners ---
         this.game.events.on(EventKeys.UPDATE_STATS, this.updateStatsUI, this);
         this.game.events.on(EventKeys.UI_ACTION, this.handleUIActions, this);
+        this.game.events.on(EventKeys.START_TUTORIAL, this.startTutorial, this);
         this.scale.on('resize', this.resize, this);
 
 
@@ -416,6 +417,122 @@ export class UIScene extends Phaser.Scene {
             { fontFamily: 'VT323, Arial', fontSize: '32px', color: '#000', backgroundColor: '#fff', padding: { x: 10, y: 5 }, align: 'center' }
         ).setOrigin(0.5);
         this.time.delayedCall(3000, () => notificationText.destroy());
+    }
+
+    /**
+     * Initiates the tutorial sequence.
+     */
+    startTutorial() {
+        this.scene.pause('MainScene');
+
+        // Create a specific modal for the tutorial prompt
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
+        const group = this.add.group();
+
+        const bg = this.add.rectangle(width/2, height/2, 400, 300, 0x000000, 0.9).setStrokeStyle(2, 0xFFFFFF);
+        const title = this.add.text(width/2, height/2 - 100, "SYSTEM GREETER", { fontFamily: 'VT323', fontSize: '32px', color: '#00FF00' }).setOrigin(0.5);
+        const text = this.add.text(width/2, height/2 - 20, "Welcome to Nadagotchi!\n\nWould you like a quick tour\nof the interface?", {
+            fontFamily: 'VT323', fontSize: '24px', color: '#FFFFFF', align: 'center'
+        }).setOrigin(0.5);
+
+        const yesBtn = ButtonFactory.createButton(this, width/2 - 60, height/2 + 80, "Yes", () => {
+             group.destroy(true);
+             this.runTutorialSequence();
+        }, { width: 100, height: 40, color: 0x4CAF50 });
+
+        const noBtn = ButtonFactory.createButton(this, width/2 + 60, height/2 + 80, "No", () => {
+             group.destroy(true);
+             this.scene.resume('MainScene');
+        }, { width: 100, height: 40, color: 0xF44336 });
+
+        group.addMultiple([bg, title, text, yesBtn, noBtn]);
+    }
+
+    /**
+     * Runs the step-by-step tutorial.
+     */
+    runTutorialSequence() {
+        let step = 0;
+        const graphics = this.add.graphics();
+        const textBg = this.add.rectangle(0, 0, 0, 0, 0x000000, 0.8).setOrigin(0.5);
+        const instructionText = this.add.text(0, 0, '', { fontFamily: 'VT323', fontSize: '24px', color: '#FFFFFF', align: 'center' }).setOrigin(0.5);
+
+        const nextStep = () => {
+            step++;
+            runStep();
+        };
+
+        const highlight = (x, y, w, h, text) => {
+            graphics.clear();
+
+            // Dim background
+            graphics.fillStyle(0x000000, 0.7);
+            graphics.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height);
+
+            // "Cut out" hole (Simulated by drawing clear rect with blending? Phaser 3 doesn't do ease cutouts without masks)
+            // Easier: Draw 4 rects around the hole.
+            const gameW = this.cameras.main.width;
+            const gameH = this.cameras.main.height;
+
+            graphics.fillRect(0, 0, gameW, y); // Top
+            graphics.fillRect(0, y + h, gameW, gameH - (y + h)); // Bottom
+            graphics.fillRect(0, y, x, h); // Left
+            graphics.fillRect(x + w, y, gameW - (x + w), h); // Right
+
+            // Border
+            graphics.lineStyle(4, 0x00FF00);
+            graphics.strokeRect(x, y, w, h);
+
+            // Text Box
+            textBg.setPosition(gameW / 2, gameH / 2);
+            textBg.setSize(400, 100);
+            textBg.setVisible(true);
+
+            instructionText.setPosition(gameW / 2, gameH / 2);
+            instructionText.setText(text + "\n\n(Click to continue)");
+            instructionText.setVisible(true);
+
+            // Bring to top
+            graphics.setDepth(1000);
+            textBg.setDepth(1001);
+            instructionText.setDepth(1002);
+        };
+
+        const runStep = () => {
+            if (step === 1) {
+                // Highlight Stats (Top Left)
+                highlight(5, 5, 400, 200, "Here you can see your Pet's\nStats, Mood, and Skills.");
+            } else if (step === 2) {
+                // Highlight Tabs (Bottom Left Area)
+                // Ensure we are on CARE tab
+                this.showTab('CARE');
+                const dashboardY = this.cameras.main.height - Math.floor(this.cameras.main.height * 0.25);
+                highlight(10, dashboardY, 500, 50, "Use these tabs to switch between\nCare, Actions, and Systems.");
+            } else if (step === 3) {
+                // Highlight Actions (Bottom Area)
+                const dashboardY = this.cameras.main.height - Math.floor(this.cameras.main.height * 0.25);
+                highlight(10, dashboardY + 60, 600, 100, "These buttons let you interact\nwith your Nadagotchi.");
+            } else {
+                // End
+                graphics.destroy();
+                textBg.destroy();
+                instructionText.destroy();
+                this.scene.resume('MainScene');
+                return;
+            }
+        };
+
+        // Input listener to advance
+        this.input.on('pointerdown', () => {
+            if (step > 0 && step < 4) {
+                 nextStep();
+            }
+        });
+
+        // Start
+        step = 1;
+        runStep();
     }
 
     /**

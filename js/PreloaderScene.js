@@ -44,6 +44,12 @@ export class PreloaderScene extends Phaser.Scene {
         createBox('npc_artisan', 0x4682B4, 48);
         createBox('npc_villager', 0x6B8E23, 48);
 
+        // --- NEW: Onboarding Assets ---
+        // Baskets for Egg Selection
+        createBox('basket_adventurer', 0xA52A2A, 64); // Brown/Red
+        createBox('basket_nurturer', 0x32CD32, 64);   // Lime Green
+        createBox('basket_intellectual', 0x4169E1, 64); // Royal Blue
+
         // Bubbles
         graphics.clear();
         graphics.fillStyle(0xFFFFFF); graphics.fillCircle(16, 16, 14);
@@ -108,10 +114,10 @@ export class PreloaderScene extends Phaser.Scene {
 
     /**
      * Phaser lifecycle method: create.
-     * Transitions to the MainScene once loading is complete.
+     * Transitions to the StartScene once loading is complete.
      */
     create() {
-        // Once loading is done, start MainScene
-        this.scene.start('MainScene');
+        // Updated to start StartScene instead of MainScene
+        this.scene.start('StartScene');
     }
 }

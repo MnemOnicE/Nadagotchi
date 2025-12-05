@@ -69,9 +69,15 @@ export class MainScene extends Phaser.Scene {
         // --- Pet Initialization ---
         this.persistence = new PersistenceManager();
         const loadedPet = this.persistence.loadPet();
-        this.nadagotchi = (data && data.newPetData)
-            ? new Nadagotchi(data.newPetData.dominantArchetype, data.newPetData)
-            : new Nadagotchi('Adventurer', loadedPet);
+
+        if (data && data.newPetData) {
+            // New Game: Pass null for loadedData to ensure defaults are used
+            this.nadagotchi = new Nadagotchi(data.newPetData.dominantArchetype, null);
+        } else {
+            // Resume Game or Default Fallback
+            this.nadagotchi = new Nadagotchi('Adventurer', loadedPet);
+        }
+
         if (!loadedPet && !(data && data.newPetData)) this.persistence.savePet(this.nadagotchi);
 
 
@@ -131,6 +137,14 @@ export class MainScene extends Phaser.Scene {
         this.updateDateText();
         this.drawSky();
         this.loadFurniture();
+
+        // --- Tutorial Trigger ---
+        if (data && data.startTutorial) {
+            // Delay slightly to ensure UIScene is fully ready
+            this.time.delayedCall(500, () => {
+                this.game.events.emit(EventKeys.START_TUTORIAL);
+            });
+        }
     }
 
     /**
