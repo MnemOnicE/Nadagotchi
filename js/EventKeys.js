@@ -54,5 +54,8 @@ export const EventKeys = {
 
     // System Events
     GAME_SAVED: 'GAME_SAVED',
-    GAME_LOADED: 'GAME_LOADED'
+    GAME_LOADED: 'GAME_LOADED',
+
+    // Tutorial
+    START_TUTORIAL: 'START_TUTORIAL'
 };
