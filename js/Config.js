@@ -169,5 +169,22 @@ export const Config = {
         SAD: 0.5,
         ANGRY: 0.2,
         NEUTRAL: 1.0
+    },
+
+    // Global Settings Defaults
+    SETTINGS: {
+        DEFAULT_VOLUME: 0.5,
+        DEFAULT_SPEED: 1.0,
+        SPEED_MULTIPLIERS: {
+            NORMAL: 1.0,
+            FAST: 2.0,
+            HYPER: 5.0
+        }
+    },
+
+    // Game Loop Constants
+    GAME_LOOP: {
+        TARGET_FPS: 60,
+        MS_PER_FRAME: 1000 / 60
     }
 };
