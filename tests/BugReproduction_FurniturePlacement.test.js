@@ -30,7 +30,8 @@ const mockAddImage = jest.fn(() => ({
     setOrigin: jest.fn().mockReturnThis(),
     setBlendMode: jest.fn().mockReturnThis(),
     setVisible: jest.fn().mockReturnThis(),
-    setPosition: jest.fn().mockReturnThis()
+    setPosition: jest.fn().mockReturnThis(),
+    setSize: jest.fn().mockReturnThis()
 }));
 
 // Define Color class first to attach static property
@@ -110,10 +111,12 @@ describe('MainScene Furniture Placement Bug', () => {
             main: {
                 width: 800,
                 height: 600,
-                setSize: jest.fn(),
+                setSize: jest.fn(function(w, h) {
+                    this.width = w;
+                    this.height = h;
+                }),
                 setViewport: jest.fn(),
-                height: 600, // Explicit properties for calculations
-                width: 800
+                // Initial values
             }
         };
         scene.scale = {
@@ -147,7 +150,8 @@ describe('MainScene Furniture Placement Bug', () => {
         scene.scene = {
             launch: jest.fn(),
             stop: jest.fn(),
-            start: jest.fn()
+            start: jest.fn(),
+            get: jest.fn().mockReturnValue({ showDialogue: jest.fn() })
         };
         scene.tweens = {
             add: jest.fn()
@@ -163,13 +167,13 @@ describe('MainScene Furniture Placement Bug', () => {
         pet.inventory['Fancy Bookshelf'] = 1;
     });
 
-    test('placeFurniture should remove item from inventory', () => {
+    test('placeFurniture should remove item from inventory when placed in valid area', () => {
         // Arrange
         scene.isPlacementMode = true;
         scene.selectedFurniture = 'Fancy Bookshelf';
-        const initialCount = pet.inventory['Fancy Bookshelf'];
 
-        // Act
+        // Game height should be 600 * 0.75 = 450.
+        // Place at 100 (< 450).
         scene.placeFurniture(100, 100);
 
         // Assert
@@ -179,5 +183,23 @@ describe('MainScene Furniture Placement Bug', () => {
 
         // Check that item was removed from inventory
         expect(pet.inventory['Fancy Bookshelf']).toBeUndefined();
+    });
+
+    test('placeFurniture should ignore placement in dashboard area (bottom 25%)', () => {
+        // Arrange
+        scene.isPlacementMode = true;
+        scene.selectedFurniture = 'Fancy Bookshelf';
+        const initialInventoryCount = pet.inventory['Fancy Bookshelf'];
+
+        // Game height is 450. Dashboard starts at 450. Height is 600.
+        // Place at 500 (> 450).
+        scene.placeFurniture(100, 500);
+
+        // Assert no placement occurred
+        expect(scene.placedFurniture.length).toBe(0);
+        // Assert inventory is unchanged
+        expect(pet.inventory['Fancy Bookshelf']).toBe(initialInventoryCount);
+        // Assert placement mode is still active
+        expect(scene.isPlacementMode).toBe(true);
     });
 });
