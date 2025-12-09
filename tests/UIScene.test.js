@@ -49,9 +49,16 @@ global.Phaser = {
             addMultiple(children) { this.list = this.list.concat(children); return this; }
         },
         Group: class Group {
-             constructor() { Object.assign(this, mockGameObject()); this.children = []; }
+             constructor() {
+                 Object.assign(this, mockGameObject());
+                 this.children = [];
+                 // Override the mockGameObject's addMultiple to ensure logic runs
+                 this.addMultiple = (children) => {
+                     this.children = this.children.concat(children);
+                     return this;
+                 };
+             }
              add(child) { this.children.push(child); return this; }
-             addMultiple(children) { this.children = this.children.concat(children); return this; }
              setVisible(v) { this.visible = v; return this; }
         },
         Text: class Text { constructor() { Object.assign(this, mockGameObject()); } },
@@ -75,6 +82,7 @@ jest.mock('../js/ButtonFactory', () => {
                     setPosition: jest.fn().mockReturnThis(),
                     setAlpha: jest.fn().mockReturnThis(),
                     setVisible: jest.fn().mockReturnThis(),
+                    setScale: jest.fn().mockReturnThis(),
                     destroy: jest.fn(),
                     x: x,
                     y: y
@@ -263,5 +271,70 @@ describe('UIScene', () => {
         const text = scene.scannerModal.content.setText.mock.calls[0][0];
         expect(text).toContain('Adventurer: [10 | 20]');
         expect(scene.scannerModal.setVisible).toHaveBeenCalledWith(true);
+    });
+
+    test('Settings Modal should open and emit updates', () => {
+        scene.create();
+
+        // Open Settings
+        scene.handleUIActions(EventKeys.OPEN_SETTINGS);
+        expect(scene.settingsModal.setVisible).toHaveBeenCalledWith(true);
+        expect(scene.scene.pause).toHaveBeenCalledWith('MainScene');
+
+        // Test Volume buttons
+        const volDown = scene.settingsModal.children.find(c => c.textLabel === '-');
+        if (!volDown) {
+             console.log('Settings Modal Children:', scene.settingsModal.children);
+             throw new Error('volDown button not found');
+        }
+        const volUp = scene.settingsModal.children.find(c => c.textLabel === '+');
+
+        volDown.emit('pointerdown');
+        // Default 0.5 -> 0.4
+        expect(mockGameEvents.emit).toHaveBeenCalledWith(EventKeys.UPDATE_SETTINGS, { volume: 0.4 });
+
+        volUp.emit('pointerdown');
+        // 0.4 -> 0.5 (assuming previous state isn't persisted in test mock)
+        // Actually, createSettingsModal closure captures local vars?
+        // No, it reads `this.settingsData`.
+        // `updateStatsUI` hasn't been called, so `this.settingsData` is undefined.
+        // `openSettingsMenu` sets default if undefined.
+        // So volume starts at 0.5.
+        // volDown -> 0.4.
+        // this.settingsData.volume is updated in callback.
+
+        // Reset state for volUp test?
+        // volUp reads `this.settingsData.volume` which is now 0.4.
+        // 0.4 + 0.1 = 0.5.
+        expect(mockGameEvents.emit).toHaveBeenCalledWith(EventKeys.UPDATE_SETTINGS, { volume: 0.5 });
+
+        // Test Speed Buttons
+        const speedButtons = scene.settingsModal.speedButtons;
+        const fastBtn = speedButtons.find(b => b.textLabel === '2x');
+
+        fastBtn.emit('pointerdown');
+        expect(mockGameEvents.emit).toHaveBeenCalledWith(EventKeys.UPDATE_SETTINGS, { gameSpeed: 2.0 });
+    });
+
+    test('updateStatsUI should handle new data structure with settings', () => {
+        scene.create();
+        const mockData = {
+            nadagotchi: {
+                stats: { hunger: 50, energy: 50, happiness: 50 },
+                skills: { logic: 1, navigation: 1, research: 1, empathy: 1, crafting: 1, focus: 1 },
+                mood: 'happy',
+                dominantArchetype: 'Adventurer',
+                location: 'Home',
+                currentCareer: null,
+                isLegacyReady: false,
+                inventory: {}
+            },
+            settings: { volume: 0.8, gameSpeed: 2.0 }
+        };
+
+        scene.updateStatsUI(mockData);
+
+        expect(scene.nadagotchiData).toBe(mockData.nadagotchi);
+        expect(scene.settingsData).toBe(mockData.settings);
     });
 });

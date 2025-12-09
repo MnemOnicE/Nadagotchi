@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.18.0] - 2025-12-07
+
+### Added
+- **Settings Menu:** Implemented a persistent "Settings" menu accessible from the System tab.
+  - **Volume Control:** Added UI controls for game volume (visual feedback).
+  - **Game Speed Control:** Added buttons to toggle between Normal (1x), Fast (2x), and Hyper (5x) game speeds.
+  - **Persistence:** Settings are automatically saved to `localStorage` and restored on game load.
+- **Framerate Independence:** Refactored the core simulation loop (`Nadagotchi.live`) to use delta-time (`dt`) for calculations.
+  - This ensures the game simulation runs at the correct speed regardless of the device's framerate.
+  - This architecture enables the "Game Speed" feature to work by simply scaling the delta-time passed to the simulation.
+
+### Changed
+- **Config Update:** Updated `js/Config.js` to include global settings defaults and time-based constants for the simulation loop.
+
 ## [1.17.0] - 2025-12-07
 
 ### Added

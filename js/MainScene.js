@@ -5,6 +5,7 @@ import { EventManager } from './EventManager.js';
 import { WorldClock } from './WorldClock.js';
 import { WeatherSystem } from './WeatherSystem.js';
 import { EventKeys } from './EventKeys.js';
+import { Config } from './Config.js';
 
 /**
  * @fileoverview The primary game scene.
@@ -80,6 +81,14 @@ export class MainScene extends Phaser.Scene {
 
         if (!loadedPet && !(data && data.newPetData)) this.persistence.savePet(this.nadagotchi);
 
+        // --- Settings Initialization ---
+        const savedSettings = this.persistence.loadSettings();
+        this.gameSettings = {
+            volume: Config.SETTINGS.DEFAULT_VOLUME,
+            gameSpeed: Config.SETTINGS.DEFAULT_SPEED,
+            ...savedSettings
+        };
+
 
         // --- World Systems Initialization ---
         const loadedCalendar = this.persistence.loadCalendar();
@@ -129,6 +138,7 @@ export class MainScene extends Phaser.Scene {
         // --- Timers and Event Listeners ---
         this.time.addEvent({ delay: 5000, callback: () => this.persistence.savePet(this.nadagotchi), loop: true });
         this.game.events.on(EventKeys.UI_ACTION, this.handleUIAction, this);
+        this.game.events.on(EventKeys.UPDATE_SETTINGS, this.handleUpdateSettings, this);
         this.game.events.on(EventKeys.WORK_RESULT, this.handleWorkResult, this);
         this.scale.on('resize', this.resize, this);
 
@@ -166,8 +176,11 @@ export class MainScene extends Phaser.Scene {
         this.worldState.season = this.calendar.season;
         this.drawSky();
 
-        this.nadagotchi.live(this.worldState);
-        this.game.events.emit(EventKeys.UPDATE_STATS, this.nadagotchi);
+        // Apply game speed multiplier to delta time
+        const simDelta = delta * (this.gameSettings.gameSpeed || 1.0);
+        this.nadagotchi.live(simDelta, this.worldState);
+
+        this.game.events.emit(EventKeys.UPDATE_STATS, { nadagotchi: this.nadagotchi, settings: this.gameSettings });
 
         this.updateSpriteMood();
         this.checkProactiveBehaviors();
@@ -224,6 +237,15 @@ export class MainScene extends Phaser.Scene {
                 this.nadagotchi.handleAction(actionType, data);
                 break;
         }
+    }
+
+    /**
+     * Handles updates to game settings (Volume, Speed).
+     * @param {object} newSettings - Partial settings object (e.g., { gameSpeed: 2.0 }).
+     */
+    handleUpdateSettings(newSettings) {
+        this.gameSettings = { ...this.gameSettings, ...newSettings };
+        this.persistence.saveSettings(this.gameSettings);
     }
 
     /**

@@ -114,7 +114,9 @@ describe('MainScene Coverage', () => {
             savePet: jest.fn(),
             loadCalendar: jest.fn(),
             loadFurniture: jest.fn().mockReturnValue([]),
-            saveFurniture: jest.fn()
+            saveFurniture: jest.fn(),
+            loadSettings: jest.fn().mockReturnValue({ volume: 0.5, gameSpeed: 1.0 }),
+            saveSettings: jest.fn()
         }));
 
         Calendar.mockImplementation(() => ({
@@ -238,7 +240,7 @@ describe('MainScene Coverage', () => {
         scene.update(1000, 16);
 
         expect(mockNadagotchi.live).toHaveBeenCalled();
-        expect(mockGameEvents.emit).toHaveBeenCalledWith(EventKeys.UPDATE_STATS, mockNadagotchi);
+        expect(mockGameEvents.emit).toHaveBeenCalledWith(EventKeys.UPDATE_STATS, { nadagotchi: mockNadagotchi, settings: scene.gameSettings });
     });
 
     test('furniture placement logic', () => {

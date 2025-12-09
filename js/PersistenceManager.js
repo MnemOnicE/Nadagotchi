@@ -116,6 +116,22 @@ export class PersistenceManager {
     }
 
     /**
+     * Saves the global game settings to localStorage.
+     * @param {object} settings - The settings object to save.
+     */
+    saveSettings(settings) {
+        this._save("nadagotchi_settings", settings);
+    }
+
+    /**
+     * Loads the global game settings from localStorage.
+     * @returns {object|null} The parsed settings, or null if no save exists.
+     */
+    loadSettings() {
+        return this._load("nadagotchi_settings");
+    }
+
+    /**
      * Helper method to save data with simple obfuscation (Base64) and an integrity check (Hash).
      * @param {string} key - The localStorage key.
      * @param {any} data - The data to save.

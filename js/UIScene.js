@@ -3,6 +3,7 @@ import { PersistenceManager } from './PersistenceManager.js';
 import { NarrativeSystem } from './NarrativeSystem.js';
 import { EventKeys } from './EventKeys.js';
 import { ItemDefinitions } from './ItemData.js';
+import { Config } from './Config.js';
 
 /**
  * @fileoverview Manages the "Physical Shell" UI layer of the game.
@@ -81,10 +82,7 @@ export class UIScene extends Phaser.Scene {
         this.scannerButton = ButtonFactory.createButton(this, this.cameras.main.width - 110, 100, "🧬 GENES", () => {
              this.onClickScanner();
         }, { width: 100, height: 35, color: 0x008080, fontSize: '16px' });
-        // Manually adjust origin/position since ButtonFactory returns a container centered at x,y usually?
-        // ButtonFactory creates container at x,y. Let's assume x,y is center.
-        // My Retire button is top-right aligned.
-        // I'll leave it as is and check placement. ButtonFactory centers content.
+
         this.scannerButton.setVisible(false);
 
         // --- Event Listeners ---
@@ -104,6 +102,7 @@ export class UIScene extends Phaser.Scene {
         this.scannerModal = this.createModal("Genetic Scanner");
         this.ancestorModal = this.createModal("Hall of Ancestors");
         this.inventoryModal = this.createModal("Inventory");
+        this.settingsModal = this.createSettingsModal();
 
         // --- Initial Layout ---
         this.createTabs();
@@ -171,6 +170,7 @@ export class UIScene extends Phaser.Scene {
                 { text: 'Recipes', action: EventKeys.OPEN_RECIPES },
                 { text: 'Hobbies', action: EventKeys.OPEN_HOBBIES },
                 { text: 'Decorate', action: EventKeys.DECORATE },
+                { text: 'Settings', action: EventKeys.OPEN_SETTINGS },
                 { text: 'Retire', action: EventKeys.RETIRE, condition: () => this.nadagotchiData && this.nadagotchiData.isLegacyReady }
             ];
         } else if (tabId === 'ANCESTORS') {
@@ -222,13 +222,7 @@ export class UIScene extends Phaser.Scene {
 
             const btn = ButtonFactory.createButton(this, currentX, currentY, item.text, () => {
                 this.game.events.emit(EventKeys.UI_ACTION, item.action, item.data);
-            }, { width: btnWidth, height: btnHeight, color: 0x6A0DAD, fontSize: '24px', textColor: '#FFFFFF' }); // Different color for actions?
-
-            // Override color for specific types?
-            // Let's keep them consistent "Neo-Retro" style. Maybe different base colors?
-            // User spec: Active Elements: #D8A373.
-            // Let's use #D8A373 for tabs, and maybe a variation for actions?
-            // Let's stick to user palette.
+            }, { width: btnWidth, height: btnHeight, color: 0x6A0DAD, fontSize: '24px', textColor: '#FFFFFF' });
 
             this.actionButtons.push(btn);
             currentX += btnWidth + spacing;
@@ -262,48 +256,25 @@ export class UIScene extends Phaser.Scene {
         const tabY = dashboardY + 10; // Padding from top of dashboard
 
         this.tabButtons.forEach(btn => {
-            // ButtonFactory returns a container, we can't easily resize it via a method unless we add one
-            // We can destroy and recreate or just set position.
-            // Since width is baked in, ideally we recreate.
-            // For now, let's just move them. If screen gets too narrow, they might overlap.
-            // TODO: Ideally ButtonFactory should support setSize or we recreate.
-            // Let's just set position for now.
             btn.setPosition(tabX, tabY);
             tabX += tabWidth + tabSpacing;
-
-            // Update the click handler to refresh layout?
-            // No, the tab click refreshes actions.
         });
 
-        // Update static elements (Job Board, Retire)
-        if (this.jobBoardButton) {
-             this.jobBoardButton.setPosition(width - 10, height - 10);
-        }
-        if (this.retireButton) {
-             this.retireButton.setPosition(width - 10, 50);
-        }
-        if (this.scannerButton) {
-            // Reposition scanner button below retire button
-            this.scannerButton.setPosition(width - 110, 100);
-        }
+        // Update static elements
+        if (this.jobBoardButton) this.jobBoardButton.setPosition(width - 10, height - 10);
+        if (this.retireButton) this.retireButton.setPosition(width - 10, 50);
+        if (this.scannerButton) this.scannerButton.setPosition(width - 110, 100);
 
-        // Refresh active tab actions to fit new width
+        // Refresh active tab actions
         this.showTab(this.currentTab);
     }
 
     /**
      * Creates and positions the main action buttons using a responsive flow layout.
-     * Buttons wrap upwards from the bottom-left to ensure they fit on mobile screens.
      * @private
      */
     createActionButtons() {
-        // This method is now likely unused with the new tab system, but kept for initialization if needed.
-        // Or if we want to retain the old logic for fallback.
-        // But since create() calls createActionButtons(), let's empty it or make it do nothing if tabs are used.
-        // Actually, create() sets this.actionButtons = [], then calls createActionButtons().
-        // But showTab() handles creating buttons now.
-        // Let's leave it empty to avoid confusion, or remove call in create().
-        // I'll leave it empty.
+        // Unused/Legacy
     }
 
     /**
@@ -322,6 +293,7 @@ export class UIScene extends Phaser.Scene {
             case EventKeys.INTERACT_NPC: this.openRelationshipMenu(); break;
             case EventKeys.OPEN_ANCESTOR_MODAL: this.openAncestorModal(data); break;
             case EventKeys.OPEN_INVENTORY: this.openInventoryMenu(); break;
+            case EventKeys.OPEN_SETTINGS: this.openSettingsMenu(); break;
         }
     }
 
@@ -331,8 +303,15 @@ export class UIScene extends Phaser.Scene {
      * @param {object} data - The entire Nadagotchi object from MainScene.
      */
     updateStatsUI(data) {
-        this.nadagotchiData = data; // Cache the latest data
-        const { stats, skills, mood, dominantArchetype, currentCareer, location, isLegacyReady, newCareerUnlocked } = data;
+        // Handle both old format (Nadagotchi object) and new format ({ nadagotchi, settings })
+        if (data.nadagotchi) {
+            this.nadagotchiData = data.nadagotchi;
+            this.settingsData = data.settings;
+        } else {
+            this.nadagotchiData = data;
+        }
+
+        const { stats, skills, mood, dominantArchetype, currentCareer, location, isLegacyReady, newCareerUnlocked } = this.nadagotchiData;
 
         const moodEmoji = this.getMoodEmoji(mood);
         const text = `Location: ${location}\n` +
@@ -345,13 +324,10 @@ export class UIScene extends Phaser.Scene {
                      `Logic: ${skills.logic.toFixed(2)} | Nav: ${skills.navigation.toFixed(2)} | Research: ${skills.research.toFixed(2)}`;
         this.statsText.setText(text);
 
-        // Refresh tab if conditional buttons changed state (like Work or Retire)
-        // Optimization: check if state actually changed before redraw?
-        // For now, simple redraw to ensure buttons appear/disappear correctly
         if (this.currentTab === 'ACTION' || this.currentTab === 'SYSTEM') {
             this.showTab(this.currentTab);
         }
-        // Update interactive element states
+
         if (currentCareer) {
             this.jobBoardButton.setInteractive();
             this.jobBoardButton.setAlpha(1.0);
@@ -362,13 +338,12 @@ export class UIScene extends Phaser.Scene {
 
         this.retireButton.setVisible(isLegacyReady);
 
-        // Check inventory for Genetic Scanner
         const hasScanner = this.nadagotchiData.inventory && this.nadagotchiData.inventory['Genetic Scanner'] > 0;
         this.scannerButton.setVisible(hasScanner);
 
         if (newCareerUnlocked) {
             this.showCareerNotification(newCareerUnlocked);
-            this.mainScene.nadagotchi.newCareerUnlocked = null; // Reset flag
+            this.mainScene.nadagotchi.newCareerUnlocked = null;
         }
     }
 
@@ -382,11 +357,7 @@ export class UIScene extends Phaser.Scene {
         const genotype = this.nadagotchiData.genome.genotype;
 
         for (const [geneKey, allelePair] of Object.entries(genotype)) {
-             // e.g. "Metabolism: [5, 8]"
              displayText += `${geneKey}: [${allelePair[0]} | ${allelePair[1]}]`;
-
-             // Check for Heterozygous (different alleles)
-             // Note: Alleles can be numbers or strings (traits) or null.
              if (allelePair[0] !== allelePair[1]) {
                  displayText += " (Hetero)";
              }
@@ -400,7 +371,7 @@ export class UIScene extends Phaser.Scene {
 
     /**
      * Returns an emoji character corresponding to a given mood.
-     * @param {string} mood - The current mood of the Nadagotchi (e.g., 'happy', 'sad').
+     * @param {string} mood - The current mood of the Nadagotchi.
      * @returns {string} An emoji representing the mood.
      */
     getMoodEmoji(mood) {
@@ -424,8 +395,8 @@ export class UIScene extends Phaser.Scene {
      */
     startTutorial() {
         this.scene.pause('MainScene');
-
-        // Create a specific modal for the tutorial prompt
+        // ... (Tutorial implementation remains same, reused via createModal or separate group)
+        // Note: Original code had specific implementation. I'll paste it here.
         const width = this.cameras.main.width;
         const height = this.cameras.main.height;
         const group = this.add.group();
@@ -465,26 +436,20 @@ export class UIScene extends Phaser.Scene {
 
         const highlight = (x, y, w, h, text) => {
             graphics.clear();
-
-            // Dim background
             graphics.fillStyle(0x000000, 0.7);
             graphics.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height);
 
-            // "Cut out" hole (Simulated by drawing clear rect with blending? Phaser 3 doesn't do ease cutouts without masks)
-            // Easier: Draw 4 rects around the hole.
             const gameW = this.cameras.main.width;
             const gameH = this.cameras.main.height;
 
-            graphics.fillRect(0, 0, gameW, y); // Top
-            graphics.fillRect(0, y + h, gameW, gameH - (y + h)); // Bottom
-            graphics.fillRect(0, y, x, h); // Left
-            graphics.fillRect(x + w, y, gameW - (x + w), h); // Right
+            graphics.fillRect(0, 0, gameW, y);
+            graphics.fillRect(0, y + h, gameW, gameH - (y + h));
+            graphics.fillRect(0, y, x, h);
+            graphics.fillRect(x + w, y, gameW - (x + w), h);
 
-            // Border
             graphics.lineStyle(4, 0x00FF00);
             graphics.strokeRect(x, y, w, h);
 
-            // Text Box
             textBg.setPosition(gameW / 2, gameH / 2);
             textBg.setSize(400, 100);
             textBg.setVisible(true);
@@ -493,7 +458,6 @@ export class UIScene extends Phaser.Scene {
             instructionText.setText(text + "\n\n(Click to continue)");
             instructionText.setVisible(true);
 
-            // Bring to top
             graphics.setDepth(1000);
             textBg.setDepth(1001);
             instructionText.setDepth(1002);
@@ -501,20 +465,15 @@ export class UIScene extends Phaser.Scene {
 
         const runStep = () => {
             if (step === 1) {
-                // Highlight Stats (Top Left)
                 highlight(5, 5, 400, 200, "Here you can see your Pet's\nStats, Mood, and Skills.");
             } else if (step === 2) {
-                // Highlight Tabs (Bottom Left Area)
-                // Ensure we are on CARE tab
                 this.showTab('CARE');
                 const dashboardY = this.cameras.main.height - Math.floor(this.cameras.main.height * 0.25);
                 highlight(10, dashboardY, 500, 50, "Use these tabs to switch between\nCare, Actions, and Systems.");
             } else if (step === 3) {
-                // Highlight Actions (Bottom Area)
                 const dashboardY = this.cameras.main.height - Math.floor(this.cameras.main.height * 0.25);
                 highlight(10, dashboardY + 60, 600, 100, "These buttons let you interact\nwith your Nadagotchi.");
             } else {
-                // End
                 graphics.destroy();
                 textBg.destroy();
                 instructionText.destroy();
@@ -523,33 +482,27 @@ export class UIScene extends Phaser.Scene {
             }
         };
 
-        // Input listener to advance
         this.input.on('pointerdown', () => {
             if (step > 0 && step < 4) {
                  nextStep();
             }
         });
 
-        // Start
         step = 1;
         runStep();
     }
 
     /**
-     * Creates a generic modal group (background, title, content, close button).
-     * @param {string} title - The title to display at the top of the modal.
-     * @returns {Phaser.GameObjects.Group} The created (but hidden) modal group.
+     * Creates a generic modal group.
      */
     createModal(title) {
         const modalGroup = this.add.group();
-        // Responsive modal sizing
         const modalWidth = Math.min(500, this.cameras.main.width - 40);
         const modalHeight = Math.min(400, this.cameras.main.height - 100);
 
         const modalBg = this.add.rectangle(this.cameras.main.width / 2, this.cameras.main.height / 2, modalWidth, modalHeight, 0x1a1a1a, 0.95).setStrokeStyle(2, 0xffffff);
         const modalTitle = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2 - (modalHeight/2) + 30, title, { fontFamily: 'VT323, Arial', fontSize: '36px', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5);
 
-        // Dynamic word wrap based on modal width
         const modalContent = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2, '', {
             fontSize: '24px', fontFamily: 'VT323, Arial', color: '#fff', wordWrap: { width: modalWidth - 40 }
         }).setOrigin(0.5);
@@ -561,66 +514,47 @@ export class UIScene extends Phaser.Scene {
 
         modalGroup.addMultiple([modalBg, modalTitle, modalContent, closeButton]);
         modalGroup.setVisible(false);
-        modalGroup.content = modalContent; // For easy access
+        modalGroup.content = modalContent;
         return modalGroup;
     }
 
-    /**
-     * Populates and displays the journal modal.
-     */
     openJournal() {
         const entries = new PersistenceManager().loadJournal();
         if (entries.length === 0) {
             this.journalModal.content.setText("No entries yet.");
         } else {
-            const formattedEntries = entries
-                .slice() // Create a shallow copy to avoid reversing the original array
-                .reverse() // Show most recent first
-                .map(e => `[${e.date}]\n${e.text}`)
-                .join('\n\n---\n\n'); // Add a separator
+            const formattedEntries = entries.slice().reverse().map(e => `[${e.date}]\n${e.text}`).join('\n\n---\n\n');
             this.journalModal.content.setText(formattedEntries);
         }
         this.journalModal.setVisible(true);
         this.scene.pause('MainScene');
     }
 
-    /**
-     * Populates and displays the recipe book modal.
-     */
     openRecipeBook() {
         const discovered = (this.nadagotchiData && this.nadagotchiData.discoveredRecipes) || new PersistenceManager().loadRecipes();
         const allRecipes = (this.nadagotchiData && this.nadagotchiData.recipes) || {};
-
         let text = "";
-
         if (!discovered || discovered.length === 0) {
             text = "No recipes discovered yet. Keep exploring and studying!";
         } else {
             text = "Discovered Recipes:\n\n";
             discovered.forEach(recipeName => {
                 const recipeDef = allRecipes[recipeName];
-
                 text += `• ${recipeName}\n`;
                 if (recipeDef) {
                     text += `  "${recipeDef.description}"\n`;
-                    const materials = Object.entries(recipeDef.materials)
-                        .map(([mat, count]) => `${count} ${mat}`)
-                        .join(', ');
+                    const materials = Object.entries(recipeDef.materials).map(([mat, count]) => `${count} ${mat}`).join(', ');
                     text += `  Requires: ${materials}\n\n`;
                 } else {
                     text += "  (Details unknown)\n\n";
                 }
             });
         }
-
         this.recipeModal.content.setText(text);
         this.recipeModal.setVisible(true);
         this.scene.pause('MainScene');
     }
 
-    /**
-     * Populates and displays the hobby menu modal.
-     */
     openHobbyMenu() {
         if (!this.nadagotchiData) return;
         const text = Object.entries(this.nadagotchiData.hobbies).map(([hobby, level]) => `${hobby}: Level ${level}`).join('\n');
@@ -629,59 +563,38 @@ export class UIScene extends Phaser.Scene {
         this.scene.pause('MainScene');
     }
 
-    /**
-     * Populates and displays the crafting menu modal.
-     */
     openCraftingMenu() {
         if (!this.nadagotchiData) return;
-
-        // Clear existing buttons
         if (this.craftingButtons) {
             this.craftingButtons.forEach(btn => btn.destroy());
         }
         this.craftingButtons = [];
-
-        const inventoryText = "Inventory:\n" +
-            Object.entries(this.nadagotchiData.inventory)
-                  .map(([item, count]) => `- ${item}: ${count}`)
-                  .join('\n');
-
+        const inventoryText = "Inventory:\n" + Object.entries(this.nadagotchiData.inventory).map(([item, count]) => `- ${item}: ${count}`).join('\n');
         let recipeText = "\n\nRecipes:\n";
-        let yPos = this.cameras.main.height / 2 - 50; // Start position for buttons
-
+        let yPos = this.cameras.main.height / 2 - 50;
         for (const recipeName in this.nadagotchiData.recipes) {
             const recipe = this.nadagotchiData.recipes[recipeName];
-            const materials = Object.entries(recipe.materials)
-                                    .map(([mat, count]) => `${count} ${mat}`)
-                                    .join(', ');
+            const materials = Object.entries(recipe.materials).map(([mat, count]) => `${count} ${mat}`).join(', ');
             recipeText += `- ${recipeName}: ${recipe.description} (Req: ${materials})\n`;
-
-            // Check if player can craft it
             const canCraft = Object.entries(recipe.materials).every(([mat, count]) => {
                 return (this.nadagotchiData.inventory[mat] || 0) >= count;
             });
-
             if (canCraft) {
                 const craftButton = ButtonFactory.createButton(this, this.cameras.main.width / 2 + 150, yPos, 'Craft', () => {
                     this.game.events.emit(EventKeys.UI_ACTION, EventKeys.CRAFT_ITEM, recipeName);
                     this.craftingModal.setVisible(false);
                     this.scene.resume('MainScene');
                 }, { width: 80, height: 30, color: 0x228B22 });
-
                 this.craftingModal.add(craftButton);
                 this.craftingButtons.push(craftButton);
                 yPos += 35;
             }
         }
-
         this.craftingModal.content.setText(inventoryText + recipeText);
         this.craftingModal.setVisible(true);
         this.scene.pause('MainScene');
     }
 
-    /**
-     * Populates and displays the relationship menu modal.
-     */
     openRelationshipMenu() {
         if (!this.nadagotchiData) return;
         const text = Object.entries(this.nadagotchiData.relationships).map(([npc, data]) => `${npc}: Friendship ${data.level}`).join('\n');
@@ -690,131 +603,185 @@ export class UIScene extends Phaser.Scene {
         this.scene.pause('MainScene');
     }
 
-    /**
-     * Populates and displays the decoration/furniture menu modal.
-     */
     openDecorateMenu() {
         if (!this.nadagotchiData) return;
-
-        // Clear existing buttons
         if (this.decorateButtons) {
             this.decorateButtons.forEach(btn => btn.destroy());
         }
         this.decorateButtons = [];
-
-        const furniture = Object.entries(this.nadagotchiData.inventory)
-            .filter(([item, count]) => this.nadagotchiData.recipes[item] && count > 0);
-
-        let yPos = this.cameras.main.height / 2 - 50; // Start position for buttons
+        const furniture = Object.entries(this.nadagotchiData.inventory).filter(([item, count]) => this.nadagotchiData.recipes[item] && count > 0);
+        let yPos = this.cameras.main.height / 2 - 50;
         let text = "Select an item to place:\n\n";
-
         if (furniture.length === 0) {
             text += "You have no furniture to place.";
         }
-
         furniture.forEach(([itemName, count]) => {
             text += `- ${itemName}: ${count}\n`;
-
             const placeButton = ButtonFactory.createButton(this, this.cameras.main.width / 2 + 150, yPos, 'Place', () => {
                 this.game.events.emit(EventKeys.UI_ACTION, EventKeys.DECORATE, itemName);
                 this.decorateModal.setVisible(false);
                 this.scene.resume('MainScene');
             }, { width: 80, height: 30, color: 0x228B22 });
-
             this.decorateModal.add(placeButton);
             this.decorateButtons.push(placeButton);
             yPos += 35;
         });
-
         this.decorateModal.content.setText(text);
         this.decorateModal.setVisible(true);
         this.scene.pause('MainScene');
     }
 
-    /**
-     * Populates and displays the inventory menu modal.
-     * Shows consumable items with a "Use" button.
-     */
     openInventoryMenu() {
         if (!this.nadagotchiData) return;
-
-        // Clear existing buttons
         if (this.inventoryButtons) {
             this.inventoryButtons.forEach(btn => btn.destroy());
         }
         this.inventoryButtons = [];
-
-        // Clear existing dynamic texts
         if (this.inventoryTexts) {
             this.inventoryTexts.forEach(t => t.destroy());
         }
         this.inventoryTexts = [];
-
         const inventory = this.nadagotchiData.inventory || {};
         const items = Object.entries(inventory);
-
-        this.inventoryModal.content.setText(""); // Clear default text block
-
+        this.inventoryModal.content.setText("");
         if (items.length === 0) {
             this.inventoryModal.content.setText("Your inventory is empty.");
         } else {
-            let currentY = this.cameras.main.height / 2 - 150; // Start higher to fit list
+            let currentY = this.cameras.main.height / 2 - 150;
             const startX = this.cameras.main.width / 2 - 200;
-
             items.forEach(([itemName, count]) => {
                 const def = ItemDefinitions[itemName] || { description: "Unknown item", emoji: "❓", type: "Misc" };
-
                 const itemStr = `${def.emoji} ${itemName} (x${count})`;
                 const descStr = `${def.description}`;
-
                 const itemText = this.add.text(startX, currentY, itemStr, { font: '20px monospace', color: '#ffffff' });
                 const descText = this.add.text(startX + 20, currentY + 25, descStr, { font: '16px monospace', color: '#aaaaaa', wordWrap: { width: 350 } });
-
                 this.inventoryModal.add(itemText);
                 this.inventoryModal.add(descText);
                 this.inventoryTexts.push(itemText, descText);
-
                 if (def.type === 'Consumable' && count > 0) {
                      const useButton = ButtonFactory.createButton(this, startX + 350, currentY + 10, 'Use', () => {
                         this.game.events.emit(EventKeys.UI_ACTION, EventKeys.CONSUME_ITEM, itemName);
                         this.inventoryModal.setVisible(false);
                         this.scene.resume('MainScene');
                     }, { width: 60, height: 30, color: 0x228B22 });
-
                     this.inventoryModal.add(useButton);
                     this.inventoryButtons.push(useButton);
                 }
-
-                currentY += 60; // Fixed spacing
+                currentY += 60;
             });
         }
-
         this.inventoryModal.setVisible(true);
         this.scene.pause('MainScene');
     }
 
-    /**
-     * Populates and displays the Hall of Ancestors modal for a specific ancestor.
-     * @param {object} ancestorData - The data of the retired pet.
-     */
     openAncestorModal(ancestorData) {
         if (!ancestorData) return;
-
         const advice = NarrativeSystem.getAdvice(ancestorData.dominantArchetype);
-
         let text = `Name: Generation ${ancestorData.generation}\n`;
         text += `Archetype: ${ancestorData.dominantArchetype}\n`;
         text += `Career: ${ancestorData.currentCareer || 'Unemployed'}\n\n`;
-
         text += `Stats at Retirement:\n`;
         text += `- Happiness: ${Math.floor(ancestorData.stats.happiness)}\n`;
         text += `- Logic: ${ancestorData.skills.logic.toFixed(1)}\n`;
         text += `- Empathy: ${ancestorData.skills.empathy.toFixed(1)}\n\n`;
-
         text += `Ancestral Advice:\n"${advice}"`;
-
         this.ancestorModal.content.setText(text);
         this.ancestorModal.setVisible(true);
+        this.scene.pause('MainScene');
+    }
+
+    /**
+     * Creates the settings modal with Volume and Speed controls.
+     * @returns {Phaser.GameObjects.Group} The settings modal group.
+     */
+    createSettingsModal() {
+        const modal = this.createModal("Settings");
+
+        // Volume Control (Placeholder)
+        const volLabel = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2 - 80, "Volume", { fontSize: '24px', fontFamily: 'VT323, monospace' }).setOrigin(0.5);
+        const volDown = ButtonFactory.createButton(this, this.cameras.main.width / 2 - 80, this.cameras.main.height / 2 - 40, "-", () => {
+             const currentVol = (this.settingsData && this.settingsData.volume !== undefined) ? this.settingsData.volume : 0.5;
+             const newVol = Math.max(0, currentVol - 0.1);
+             this.game.events.emit(EventKeys.UPDATE_SETTINGS, { volume: newVol });
+             this.settingsModal.volDisplay.setText(`${Math.round(newVol * 100)}%`);
+             if (!this.settingsData) this.settingsData = {};
+             this.settingsData.volume = newVol;
+        }, { width: 40, height: 40, color: 0x808080 });
+
+        const volUp = ButtonFactory.createButton(this, this.cameras.main.width / 2 + 80, this.cameras.main.height / 2 - 40, "+", () => {
+             const currentVol = (this.settingsData && this.settingsData.volume !== undefined) ? this.settingsData.volume : 0.5;
+             const newVol = Math.min(1, currentVol + 0.1);
+             this.game.events.emit(EventKeys.UPDATE_SETTINGS, { volume: newVol });
+             this.settingsModal.volDisplay.setText(`${Math.round(newVol * 100)}%`);
+             if (!this.settingsData) this.settingsData = {};
+             this.settingsData.volume = newVol;
+        }, { width: 40, height: 40, color: 0x808080 });
+
+        const volDisplay = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2 - 40, "50%", { fontSize: '24px', fontFamily: 'VT323, monospace' }).setOrigin(0.5);
+
+        // Speed Control
+        const speedLabel = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2 + 20, "Game Speed", { fontSize: '24px', fontFamily: 'VT323, monospace' }).setOrigin(0.5);
+
+        const speedButtons = [];
+        const speeds = [
+            { label: "1x", val: Config.SETTINGS.SPEED_MULTIPLIERS.NORMAL },
+            { label: "2x", val: Config.SETTINGS.SPEED_MULTIPLIERS.FAST },
+            { label: "5x", val: Config.SETTINGS.SPEED_MULTIPLIERS.HYPER }
+        ];
+
+        let startX = this.cameras.main.width / 2 - 80;
+        speeds.forEach(s => {
+            const btn = ButtonFactory.createButton(this, startX, this.cameras.main.height / 2 + 60, s.label, () => {
+                 this.game.events.emit(EventKeys.UPDATE_SETTINGS, { gameSpeed: s.val });
+                 this.updateSpeedButtons(s.val);
+                 if (!this.settingsData) this.settingsData = {};
+                 this.settingsData.gameSpeed = s.val;
+            }, { width: 60, height: 40, fontSize: '20px', color: 0x008080 });
+            btn.speedVal = s.val;
+            speedButtons.push(btn);
+            startX += 80;
+        });
+
+        modal.addMultiple([volLabel, volDown, volUp, volDisplay, speedLabel, ...speedButtons]);
+
+        // Store references for updates
+        modal.volDisplay = volDisplay;
+        modal.speedButtons = speedButtons;
+
+        return modal;
+    }
+
+    /**
+     * Updates the visual state of speed buttons.
+     * @param {number} currentSpeed - The current game speed.
+     */
+    updateSpeedButtons(currentSpeed) {
+        this.settingsModal.speedButtons.forEach(btn => {
+            if (Math.abs(btn.speedVal - currentSpeed) < 0.01) {
+                btn.setAlpha(1);
+                btn.setScale(1.1);
+            } else {
+                btn.setAlpha(0.6);
+                btn.setScale(1.0);
+            }
+        });
+    }
+
+    /**
+     * Opens the settings menu and updates the UI state.
+     */
+    openSettingsMenu() {
+        if (!this.settingsData) {
+            this.settingsData = { volume: Config.SETTINGS.DEFAULT_VOLUME, gameSpeed: Config.SETTINGS.DEFAULT_SPEED };
+        }
+
+        const vol = Math.round((this.settingsData.volume !== undefined ? this.settingsData.volume : 0.5) * 100);
+        this.settingsModal.volDisplay.setText(`${vol}%`);
+
+        const currentSpeed = this.settingsData.gameSpeed || 1.0;
+        this.updateSpeedButtons(currentSpeed);
+
+        this.settingsModal.setVisible(true);
         this.scene.pause('MainScene');
     }
 }

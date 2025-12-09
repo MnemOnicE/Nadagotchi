@@ -68,8 +68,9 @@ This phase focuses on building out the primary gameplay loops, giving players cl
 -   **[x] Security & Balance:**
     -   [x] Implemented save data obfuscation and integrity verification to prevent tampering.
     -   [x] Implemented diminishing returns logic for minigame rewards to ensure long-term progression balance.
--   **[ ] Future Work:**
-    -   [ ] **In-Game Settings/Options:** Implement persistent settings for sound, music volume, and gameplay speed. This is crucial for user experience and accessibility.
+-   **[x] Settings & Accessibility:**
+    -   [x] **In-Game Settings/Options:** Implemented persistent settings for volume and gameplay speed.
+    -   [x] Refactored core loop to be delta-time based to support variable game speeds and framerate independence.
 
 ---
 
