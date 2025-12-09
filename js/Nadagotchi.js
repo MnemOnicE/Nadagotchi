@@ -232,12 +232,22 @@ export class Nadagotchi {
     /**
      * Simulates the passage of time for the Nadagotchi.
      * This method should be called in the main game loop. It handles stat decay, mood changes, and aging.
+     * @param {number} dt - The time elapsed since the last update in milliseconds.
      * @param {object} [worldState={ weather: "Sunny", time: "Day", activeEvent: null }] - An object containing information about the game world.
      * @param {string} worldState.weather - The current weather (e.g., "Sunny", "Rainy").
      * @param {string} worldState.time - The current time of day (e.g., "Day", "Night").
      * @param {?object} worldState.activeEvent - The currently active world event, if any.
      */
-    live(worldState = { weather: "Sunny", time: "Day", activeEvent: null }) {
+    live(dt, worldState = { weather: "Sunny", time: "Day", activeEvent: null }) {
+        // Fallback for legacy calls or tests omitting dt
+        if (typeof dt === 'object') {
+             worldState = dt;
+             dt = Config.GAME_LOOP.MS_PER_FRAME;
+        } else if (dt === undefined) {
+             dt = Config.GAME_LOOP.MS_PER_FRAME;
+        }
+
+        const ticksPassed = dt / Config.GAME_LOOP.MS_PER_FRAME;
         const oldMood = this.mood;
 
         if (worldState.season) {
@@ -245,8 +255,8 @@ export class Nadagotchi {
         }
 
         // 1. Setup Base Decay Rates
-        let hungerDecay = Config.DECAY.HUNGER;
-        let energyDecay = Config.DECAY.ENERGY;
+        let hungerDecay = Config.DECAY.HUNGER * ticksPassed;
+        let energyDecay = Config.DECAY.ENERGY * ticksPassed;
         let happinessChange = 0;
 
         // 2. Get Metabolism Factor from Genome (Phenotype)
@@ -267,24 +277,24 @@ export class Nadagotchi {
         }
 
         if (worldState.activeEvent && worldState.activeEvent.name.includes('Festival')) {
-            this.stats.happiness += Config.ENV_MODIFIERS.FESTIVAL_HAPPINESS;
+            this.stats.happiness += Config.ENV_MODIFIERS.FESTIVAL_HAPPINESS * ticksPassed;
         }
 
         switch (worldState.weather) {
             case "Rainy":
-                if (this.dominantArchetype === "Adventurer") happinessChange += Config.ENV_MODIFIERS.RAINY.ADVENTURER_HAPPINESS;
+                if (this.dominantArchetype === "Adventurer") happinessChange += Config.ENV_MODIFIERS.RAINY.ADVENTURER_HAPPINESS * ticksPassed;
                 if (this.dominantArchetype === "Nurturer") energyDecay *= Config.ENV_MODIFIERS.RAINY.NURTURER_ENERGY_MULT;
                 break;
             case "Stormy":
-                if (this.dominantArchetype === "Adventurer") happinessChange += Config.ENV_MODIFIERS.STORMY.ADVENTURER_HAPPINESS;
-                if (this.dominantArchetype === "Recluse") happinessChange += Config.ENV_MODIFIERS.STORMY.RECLUSE_HAPPINESS;
+                if (this.dominantArchetype === "Adventurer") happinessChange += Config.ENV_MODIFIERS.STORMY.ADVENTURER_HAPPINESS * ticksPassed;
+                if (this.dominantArchetype === "Recluse") happinessChange += Config.ENV_MODIFIERS.STORMY.RECLUSE_HAPPINESS * ticksPassed;
                 energyDecay *= Config.ENV_MODIFIERS.STORMY.ENERGY_MULT;
                 break;
             case "Cloudy":
                 energyDecay *= Config.ENV_MODIFIERS.CLOUDY.ENERGY_MULT;
                 break;
             case "Sunny":
-                if (this.dominantArchetype === "Adventurer") happinessChange += Config.ENV_MODIFIERS.SUNNY.ADVENTURER_HAPPINESS;
+                if (this.dominantArchetype === "Adventurer") happinessChange += Config.ENV_MODIFIERS.SUNNY.ADVENTURER_HAPPINESS * ticksPassed;
                 energyDecay *= Config.ENV_MODIFIERS.SUNNY.ENERGY_MULT;
                 break;
         }
@@ -292,7 +302,7 @@ export class Nadagotchi {
         switch (worldState.time) {
             case "Night":
                 hungerDecay *= Config.ENV_MODIFIERS.NIGHT.HUNGER_MULT;
-                if (this.dominantArchetype === "Recluse") happinessChange += Config.ENV_MODIFIERS.NIGHT.RECLUSE_HAPPINESS;
+                if (this.dominantArchetype === "Recluse") happinessChange += Config.ENV_MODIFIERS.NIGHT.RECLUSE_HAPPINESS * ticksPassed;
                 if (this.dominantArchetype === "Adventurer") energyDecay *= Config.ENV_MODIFIERS.NIGHT.ADVENTURER_ENERGY_MULT;
                 break;
             case "Dusk":
@@ -332,7 +342,7 @@ export class Nadagotchi {
             this.mood = 'neutral';
         }
 
-        this.age += Config.DECAY.AGE_INCREMENT;
+        this.age += Config.DECAY.AGE_INCREMENT * ticksPassed;
         if (this.age > Config.THRESHOLDS.AGE_LEGACY && !this.isLegacyReady) {
             this.isLegacyReady = true;
         }
