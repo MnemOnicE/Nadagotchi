@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.18.1] - 2025-12-07
+
+### Fixed
+- **Invisible Furniture Placement:** Fixed a logic bug in `MainScene.js` where furniture could be placed in the UI dashboard area (bottom 25% of the screen), causing the item to be consumed but rendered outside the visible camera viewport. Placement in this area is now blocked to prevent item loss.
 ## [1.19.0] - 2025-12-07
 
 ### Security
