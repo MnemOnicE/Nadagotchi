@@ -91,22 +91,23 @@ export class BreedingScene extends Phaser.Scene {
         const panelTitle = this.add.text(0, -30, 'Choose Environmental Influences', { fontFamily: 'Georgia, serif', fontSize: '18px', color: '#b2d8b2' }).setOrigin(0.5);
         panelContainer.add([panelBg, panelTitle]);
 
-        const items = [
+        const allPossibleItems = [
             { name: 'Ancient Tome', emoji: '🧠', description: 'Boosts Intellectual Gene' },
             { name: 'Heart Amulet', emoji: '💖', description: 'Boosts Nurturer Gene' },
             { name: 'Muse Flower', emoji: '🎨', description: 'Boosts Mischievous Gene' },
             { name: 'Nutrient Bar', emoji: '🍎', description: 'Balanced Nutrition' },
             { name: 'Espresso', emoji: '☕', description: 'Increases Metabolism Speed' },
-            { name: 'Chamomile', emoji: '🍵', description: 'Decreases Metabolism (Calm)' }
+            { name: 'Chamomile', emoji: '🍵', description: 'Decreases Metabolism (Calm)' },
+            { name: 'Metabolism-Slowing Tonic', emoji: '🧪', description: 'Slows Metabolism (Efficient)' }
         ];
 
-        // Check parent inventory for special crafted items
-        if (this.parentData.inventory && this.parentData.inventory['Metabolism-Slowing Tonic'] > 0) {
-            items.push({
-                name: 'Metabolism-Slowing Tonic',
-                emoji: '🧪',
-                description: 'Slows Metabolism (Efficient)'
-            });
+        // Security Fix: Only show items that are actually in the parent's inventory
+        const items = allPossibleItems.filter(item => (this.parentData.inventory && this.parentData.inventory[item.name] > 0));
+
+        if (items.length === 0) {
+            const noItemsText = this.add.text(0, 20, "No influence items in inventory.", { fontSize: '14px', color: '#888' }).setOrigin(0.5);
+            panelContainer.add(noItemsText);
+            return panelContainer;
         }
 
         // Adjust spacing to fit more items
@@ -119,8 +120,9 @@ export class BreedingScene extends Phaser.Scene {
             const itemSprite = this.add.text(0, 0, item.emoji, { fontSize: '48px' }).setOrigin(0.5).setInteractive();
             this.interactiveItems.push(itemSprite);
             const itemText = this.add.text(0, 35, item.description, { fontSize: '12px', fontFamily: 'Arial' }).setOrigin(0.5);
+            const countText = this.add.text(0, -35, `x${this.parentData.inventory[item.name]}`, { fontSize: '14px', color: '#FFF' }).setOrigin(0.5);
             const glow = this.add.graphics().fillStyle(0xffff00, 0.4).fillCircle(0, 0, 30).setVisible(false);
-            itemContainer.add([glow, itemSprite, itemText]);
+            itemContainer.add([glow, itemSprite, itemText, countText]);
 
             itemSprite.on('pointerdown', () => {
                 const itemIndex = this.selectedItems.indexOf(item.name);

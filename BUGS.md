@@ -72,3 +72,10 @@
 **Line:** 770
 **Description:** Tie-breaking for the dominant archetype relies on internal list order (deterministic but arbitrary), which can feel non-intuitive to players who expect their pet's skills to matter.
 **Fix:** Updated `updateDominantArchetype` to break ties by comparing the relevant skills associated with each archetype (e.g., Logic+Research for Intellectual) before falling back to list order.
+
+---
+
+**File:** `js/ItemData.js`
+**Line:** N/A
+**Description:** The `BreedingScene.js` references several items (e.g., 'Ancient Tome', 'Heart Amulet', 'Muse Flower', 'Nutrient Bar', 'Espresso', 'Chamomile') intended for environmental influence during breeding. However, these items are missing from `ItemDefinitions` in `js/ItemData.js` and are not currently obtainable in the game (no recipes or drop sources). This renders the "Inventory-Gated Breeding" security fix effectively a feature disablement for these specific items until they are properly implemented.
+**Fix:** Define these items in `ItemDefinitions` and add them to loot tables (e.g., `forage`) or crafting recipes to make them obtainable for legitimate players.

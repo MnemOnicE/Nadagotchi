@@ -33,6 +33,8 @@ export class MainScene extends Phaser.Scene {
         this.selectedFurniture = null;
         /** @type {Array<{key: string, x: number, y: number}>} List of furniture placed in the world. */
         this.placedFurniture = [];
+        /** @type {?string} The career associated with the currently active minigame (for validation). */
+        this.activeMinigameCareer = null;
     }
 
     /**
@@ -262,6 +264,13 @@ export class MainScene extends Phaser.Scene {
      * @param {string} [data.craftedItem] - The item that was crafted, if any.
      */
     handleWorkResult(data) {
+        // Security Check: Ensure the result comes from a valid, active minigame session.
+        if (this.activeMinigameCareer !== data.career) {
+            console.warn(`Security Alert: Received WORK_RESULT for '${data.career}' but expected '${this.activeMinigameCareer}'. Event ignored.`);
+            return;
+        }
+        this.activeMinigameCareer = null; // Reset flag
+
         let skillUp = '';
         if (data.success) {
             // Calculate happiness gain with diminishing returns based on current happiness
@@ -324,6 +333,7 @@ export class MainScene extends Phaser.Scene {
         };
         const sceneConfig = careerToSceneMap[this.nadagotchi.currentCareer];
         if (sceneConfig) {
+            this.activeMinigameCareer = this.nadagotchi.currentCareer; // Set security flag
             this.scene.pause();
             this.scene.launch(sceneConfig.key, sceneConfig.data || {});
         }

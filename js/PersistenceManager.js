@@ -14,7 +14,8 @@ export class PersistenceManager {
      * @param {object} nadagotchiData - The Nadagotchi object to save.
      */
     savePet(nadagotchiData) {
-        this._save("nadagotchi_save", nadagotchiData);
+        // Pass the UUID as salt to bind the save file to this specific pet instance
+        this._save("nadagotchi_save", nadagotchiData, nadagotchiData.uuid);
     }
 
     /**
@@ -22,7 +23,8 @@ export class PersistenceManager {
      * @returns {object|null} The parsed Nadagotchi data, or null if no save exists or data is corrupted.
      */
     loadPet() {
-        return this._load("nadagotchi_save");
+        // Provide a callback to extract the UUID from the parsed data for hash verification
+        return this._load("nadagotchi_save", (data) => data.uuid);
     }
 
     /**
@@ -150,13 +152,15 @@ export class PersistenceManager {
      * Helper method to save data with simple obfuscation (Base64) and an integrity check (Hash).
      * @param {string} key - The localStorage key.
      * @param {any} data - The data to save.
+     * @param {string} [salt=null] - Optional salt (e.g., UUID) to bind the hash to the data content.
      * @private
      */
-    _save(key, data) {
+    _save(key, data, salt = null) {
         try {
             const json = JSON.stringify(data);
             const encoded = btoa(json);
-            const hash = this._hash(encoded);
+            const strToHash = salt ? encoded + salt : encoded;
+            const hash = this._hash(strToHash);
             localStorage.setItem(key, `${encoded}|${hash}`);
         } catch (e) {
             console.error(`Failed to save data for key ${key}:`, e);
@@ -167,10 +171,11 @@ export class PersistenceManager {
      * Helper method to load data with integrity verification.
      * Supports legacy plain JSON saves by checking for JSON syntax first.
      * @param {string} key - The localStorage key.
+     * @param {function} [saltCallback=null] - Optional callback to extract salt from parsed data for verification.
      * @returns {any|null} The parsed data, or null if missing, corrupted, or tampered.
      * @private
      */
-    _load(key) {
+    _load(key, saltCallback = null) {
         const raw = localStorage.getItem(key);
         if (!raw) return null;
 
@@ -191,18 +196,35 @@ export class PersistenceManager {
         }
 
         const [encoded, hash] = parts;
-        if (this._hash(encoded) !== hash) {
-            console.warn(`Save file tampered (hash mismatch) for key ${key}.`);
-            return null;
-        }
-
+        let json;
         try {
-            const json = atob(encoded);
-            return JSON.parse(json);
+            json = atob(encoded);
         } catch (e) {
             console.error(`Failed to decode save for key ${key}:`, e);
             return null;
         }
+
+        let data;
+        try {
+            data = JSON.parse(json);
+        } catch (e) {
+            console.error(`Failed to parse JSON for key ${key}:`, e);
+            return null;
+        }
+
+        // Integrity Check
+        let salt = "";
+        if (saltCallback) {
+            salt = saltCallback(data) || "";
+        }
+
+        const strToHash = salt ? encoded + salt : encoded;
+        if (this._hash(strToHash) !== hash) {
+            console.warn(`Save file tampered (hash mismatch) for key ${key}.`);
+            return null;
+        }
+
+        return data;
     }
 
     /**
