@@ -102,6 +102,7 @@ export class UIScene extends Phaser.Scene {
         this.scannerModal = this.createModal("Genetic Scanner");
         this.ancestorModal = this.createModal("Hall of Ancestors");
         this.inventoryModal = this.createModal("Inventory");
+        this.dialogueModal = this.createModal("Conversation");
         this.settingsModal = this.createSettingsModal();
 
         // --- Initial Layout ---
@@ -515,7 +516,19 @@ export class UIScene extends Phaser.Scene {
         modalGroup.addMultiple([modalBg, modalTitle, modalContent, closeButton]);
         modalGroup.setVisible(false);
         modalGroup.content = modalContent;
+        modalGroup.modalTitle = modalTitle; // Expose title for updates
         return modalGroup;
+    }
+
+    showDialogue(npcName, text) {
+        // 1. Reuse the generic modal
+        // 2. Set the Title to the NPC Name
+        this.dialogueModal.modalTitle.setText(npcName);
+
+        // 3. Set the content with quotation marks
+        this.dialogueModal.content.setText(`"${text}"`);
+        this.dialogueModal.setVisible(true);
+        this.scene.pause('MainScene');
     }
 
     openJournal() {
@@ -747,6 +760,9 @@ export class UIScene extends Phaser.Scene {
         // Store references for updates
         modal.volDisplay = volDisplay;
         modal.speedButtons = speedButtons;
+
+        // Ensure all new elements are hidden initially
+        modal.setVisible(false);
 
         return modal;
     }

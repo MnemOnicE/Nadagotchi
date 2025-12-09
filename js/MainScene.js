@@ -218,15 +218,21 @@ export class MainScene extends Phaser.Scene {
             case EventKeys.PLACE_FURNITURE:
                 this.placeFurniture(data.x, data.y);
                 break;
-            case EventKeys.INTERACT_SCOUT:
-                this.nadagotchi.interact('Grizzled Scout');
+            case EventKeys.INTERACT_SCOUT: {
+                const text = this.nadagotchi.interact('Grizzled Scout');
+                this.scene.get('UIScene').showDialogue('Grizzled Scout', text);
                 break;
-            case EventKeys.INTERACT_ARTISAN:
-                this.nadagotchi.interact('Master Artisan');
+            }
+            case EventKeys.INTERACT_ARTISAN: {
+                const text = this.nadagotchi.interact('Master Artisan');
+                this.scene.get('UIScene').showDialogue('Master Artisan', text);
                 break;
-            case EventKeys.INTERACT_VILLAGER:
-                this.nadagotchi.interact('Sickly Villager');
+            }
+            case EventKeys.INTERACT_VILLAGER: {
+                const text = this.nadagotchi.interact('Sickly Villager');
+                this.scene.get('UIScene').showDialogue('Sickly Villager', text);
                 break;
+            }
             case EventKeys.INTERACT_BOOKSHELF:
             case EventKeys.INTERACT_PLANT:
             case EventKeys.OPEN_CRAFTING_MENU:

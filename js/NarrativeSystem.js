@@ -1,3 +1,5 @@
+import { DialogueDefinitions } from './DialogueDefinitions.js';
+
 /**
  * @fileoverview System for generating dynamic narrative text.
  * Selects appropriate journal entries and advice based on pet archetype and context.
@@ -8,6 +10,29 @@
  * @class NarrativeSystem
  */
 export class NarrativeSystem {
+
+    /**
+     * Retrieves a dialogue line for an NPC based on relationship level and quest state.
+     * @param {string} npcName - The name of the NPC.
+     * @param {number} relationshipLevel - The current relationship level (0-10).
+     * @param {boolean} hasActiveQuest - Whether the player has an active quest with this NPC.
+     * @returns {string} A random line of dialogue.
+     */
+    static getNPCDialogue(npcName, relationshipLevel, hasActiveQuest) {
+        const npcData = DialogueDefinitions[npcName];
+        if (!npcData) return "...";
+
+        let category = 'default';
+
+        if (hasActiveQuest && npcData['quest_active']) {
+            category = 'quest_active';
+        } else if (relationshipLevel >= 5) {
+            category = 'friend';
+        }
+
+        const lines = npcData[category];
+        return lines[Math.floor(Math.random() * lines.length)];
+    }
 
     /**
      * Generates a journal entry text.

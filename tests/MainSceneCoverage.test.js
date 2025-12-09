@@ -179,7 +179,10 @@ describe('MainScene Coverage', () => {
             launch: jest.fn(),
             stop: jest.fn(),
             start: jest.fn(),
-            pause: jest.fn()
+            pause: jest.fn(),
+            get: jest.fn().mockReturnValue({ // Mocking scene.get('UIScene')
+                 showDialogue: jest.fn()
+            })
         };
         scene.time = {
             addEvent: jest.fn(),
@@ -209,6 +212,7 @@ describe('MainScene Coverage', () => {
          // INTERACT_SCOUT
          scene.handleUIAction('INTERACT_SCOUT');
          expect(mockNadagotchi.interact).toHaveBeenCalledWith('Grizzled Scout');
+         expect(scene.scene.get).toHaveBeenCalledWith('UIScene');
 
          // Default (e.g., FEED)
          scene.handleUIAction('FEED');
