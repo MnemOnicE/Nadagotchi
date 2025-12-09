@@ -89,6 +89,7 @@ export class UIScene extends Phaser.Scene {
         this.game.events.on(EventKeys.UPDATE_STATS, this.updateStatsUI, this);
         this.game.events.on(EventKeys.UI_ACTION, this.handleUIActions, this);
         this.game.events.on(EventKeys.START_TUTORIAL, this.startTutorial, this);
+        this.game.events.on(EventKeys.ACHIEVEMENT_UNLOCKED, this.handleAchievementUnlocked, this);
         this.scale.on('resize', this.resize, this);
 
 
@@ -701,6 +702,48 @@ export class UIScene extends Phaser.Scene {
         this.ancestorModal.content.setText(text);
         this.ancestorModal.setVisible(true);
         this.scene.pause('MainScene');
+    }
+
+    /**
+     * Handles the Achievement Unlocked event.
+     * @param {object} achievement - The unlocked achievement object.
+     */
+    handleAchievementUnlocked(achievement) {
+        this.showToast("Achievement Unlocked!", achievement.name, achievement.icon);
+    }
+
+    /**
+     * Displays a toast notification at the top of the screen.
+     * @param {string} title - The title of the toast.
+     * @param {string} message - The main message.
+     * @param {string} [icon=''] - An optional emoji icon.
+     */
+    showToast(title, message, icon = '') {
+        const width = this.cameras.main.width;
+        const toastWidth = 300;
+        const toastHeight = 80;
+        const x = width / 2 - toastWidth / 2;
+        const startY = -toastHeight - 20;
+        const endY = 20;
+
+        const container = this.add.container(x, startY);
+
+        const bg = this.add.rectangle(0, 0, toastWidth, toastHeight, 0xFFD700).setOrigin(0).setStrokeStyle(2, 0xFFFFFF); // Gold
+        const iconText = this.add.text(10, 15, icon, { fontSize: '40px' });
+        const titleText = this.add.text(70, 10, title, { fontSize: '16px', color: '#000000', fontStyle: 'bold', fontFamily: 'VT323, monospace' });
+        const msgText = this.add.text(70, 35, message, { fontSize: '24px', color: '#000000', fontFamily: 'VT323, monospace' });
+
+        container.add([bg, iconText, titleText, msgText]);
+
+        this.tweens.add({
+            targets: container,
+            y: endY,
+            duration: 500,
+            ease: 'Back.out',
+            hold: 3000,
+            yoyo: true,
+            onComplete: () => container.destroy()
+        });
     }
 
     /**

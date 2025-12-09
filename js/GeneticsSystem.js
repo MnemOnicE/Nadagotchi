@@ -3,6 +3,8 @@
  * Handles genotype-to-phenotype mapping, mutation, and environmental influences.
  */
 
+import { SeededRandom } from './utils/SeededRandom.js';
+
 /**
  * Constants for the Genetics System.
  */
@@ -19,14 +21,20 @@ export class Genome {
     /**
      * Creates a new Genome.
      * @param {Object} [genes=null] - Optional initial genotype object. If null, a wild genome is generated.
+     * @param {Object} [phenotype=null] - Optional initial phenotype object. If provided, skips calculation.
+     * @param {SeededRandom} [rng=null] - The seeded RNG instance. Required if genes or phenotype are missing/incomplete.
      */
-    constructor(genes = null) {
+    constructor(genes = null, phenotype = null, rng = null) {
+        // Fallback to Math.random if no RNG provided (Legacy support / Safety)
+        const random = rng ? () => rng.random() : () => Math.random();
+        const range = rng ? (min, max) => rng.range(min, max) : (min, max) => Math.floor(Math.random() * (max - min)) + min;
+
         // Genotype: The hidden DNA (Pairs of [Allele1, Allele2])
         if (genes) {
             this.genotype = genes;
         } else {
             // Helper to generate a wild personality gene (10-30)
-            const randomGene = () => Math.floor(Math.random() * 21) + 10;
+            const randomGene = () => range(10, 31); // 10 to 30 inclusive
 
             this.genotype = {
                 // Personality Potentials (0-100)
@@ -46,15 +54,23 @@ export class Genome {
         }
 
         // Phenotype: The expressed stats used by the game
-        this.phenotype = this.calculatePhenotype();
+        if (phenotype) {
+            this.phenotype = phenotype;
+        } else {
+            this.phenotype = this.calculatePhenotype(rng);
+        }
     }
 
     /**
      * Calculates the expressed traits (phenotype) from the genotype.
      * Strategies vary by trait type: Average for metabolism, Max for personality (Dominant logic).
+     * @param {SeededRandom} [rng=null] - RNG for resolving ties/random traits.
      * @returns {Object} The phenotype object containing expressed values and homozygous flags.
      */
-    calculatePhenotype() {
+    calculatePhenotype(rng = null) {
+        const random = rng ? () => rng.random() : () => Math.random();
+        const choice = rng ? (arr) => rng.choice(arr) : (arr) => arr[Math.floor(Math.random() * arr.length)];
+
         const phenotype = {};
         for (const [trait, alleles] of Object.entries(this.genotype)) {
             if (trait === 'specialAbility') {
@@ -62,15 +78,13 @@ export class Genome {
                 // If both are strings and different, pick one randomly.
                 const activeTraits = alleles.filter(a => a !== null);
                 if (activeTraits.length > 0) {
-                    phenotype[trait] = activeTraits[Math.floor(Math.random() * activeTraits.length)];
+                    phenotype[trait] = choice(activeTraits);
                 } else {
                     phenotype[trait] = null;
                 }
 
                 // Check for Homozygous state
                 // Only consider it homozygous if both alleles are the same non-null trait.
-                // If both are null, it's effectively homozygous null, but that doesn't trigger the flag usually.
-                // But for "Active + Bonus Effect", we care about the trait.
                 if (alleles[0] !== null && alleles[0] === alleles[1]) {
                     phenotype.isHomozygous = true;
                 } else {
@@ -109,9 +123,14 @@ export class GeneticsSystem {
      * The environment acts as a "second parent" for allele contribution.
      * @param {Genome} parentGenome - The genome of the parent.
      * @param {string[]} [environmentalItems=[]] - List of items present during breeding (e.g., in inventory).
+     * @param {SeededRandom} [rng=null] - The seeded RNG instance.
      * @returns {Genome} A new Genome instance for the offspring.
      */
-    static breed(parentGenome, environmentalItems = []) {
+    static breed(parentGenome, environmentalItems = [], rng = null) {
+        const random = rng ? () => rng.random() : () => Math.random();
+        const range = rng ? (min, max) => rng.range(min, max) : (min, max) => Math.floor(Math.random() * (max - min)) + min;
+        const choice = rng ? (arr) => rng.choice(arr) : (arr) => arr[Math.floor(Math.random() * arr.length)];
+
         const newGenotype = {};
         const parentGenotype = parentGenome.genotype;
 
@@ -141,7 +160,7 @@ export class GeneticsSystem {
             // --- Step 1: Meiosis (Parental Contribution) ---
             // Randomly select one allele from the parent's pair.
             const parentAlleles = parentGenotype[geneKey];
-            let parentAllele = parentAlleles[Math.floor(Math.random() * parentAlleles.length)];
+            let parentAllele = choice(parentAlleles);
 
             // --- Step 2: Environmental Contribution (The "Second Parent") ---
             let envAllele = null;
@@ -162,49 +181,54 @@ export class GeneticsSystem {
                     envAllele = null; // Wild usually doesn't provide special traits
                 } else if (geneKey === 'metabolism' || geneKey === 'moodSensitivity') {
                     // Physio: Wild values are typically average/random (1-10)
-                    envAllele = Math.floor(Math.random() * 10) + 1;
+                    envAllele = range(1, 11);
                 } else {
                     // Personality: Wild values are low (10-30) as per new requirement
-                    envAllele = Math.floor(Math.random() * 21) + 10;
+                    envAllele = range(10, 31);
                 }
             }
 
             // --- Step 3: Mutation ---
             // Mutate Parent Allele
-            if (Math.random() < MUTATION_RATE) {
-                parentAllele = GeneticsSystem.mutateAllele(geneKey, parentAllele);
+            if (random() < MUTATION_RATE) {
+                parentAllele = GeneticsSystem.mutateAllele(geneKey, parentAllele, rng);
             }
             // Mutate Environment Allele
-            if (Math.random() < MUTATION_RATE) {
-                envAllele = GeneticsSystem.mutateAllele(geneKey, envAllele);
+            if (random() < MUTATION_RATE) {
+                envAllele = GeneticsSystem.mutateAllele(geneKey, envAllele, rng);
             }
 
             newGenotype[geneKey] = [parentAllele, envAllele];
         }
 
-        return new Genome(newGenotype);
+        // Return new Genome, passing RNG to ensure consistent phenotype calculation if needed
+        return new Genome(newGenotype, null, rng);
     }
 
     /**
      * Helper to mutate a single allele value.
      * @param {string} geneKey - The name of the gene.
      * @param {*} value - The current value of the allele.
+     * @param {SeededRandom} [rng=null] - The seeded RNG instance.
      * @returns {*} The mutated value.
      */
-    static mutateAllele(geneKey, value) {
+    static mutateAllele(geneKey, value, rng = null) {
+        const random = rng ? () => rng.random() : () => Math.random();
+        const choice = rng ? (arr) => rng.choice(arr) : (arr) => arr[Math.floor(Math.random() * arr.length)];
+
         if (geneKey === 'specialAbility') {
             // Chance to flip to a random trait or back to null
             if (value === null) {
-                return POSSIBLE_TRAITS[Math.floor(Math.random() * POSSIBLE_TRAITS.length)];
+                return choice(POSSIBLE_TRAITS);
             } else {
                 // Small chance to lose trait? Or switch?
                 // Let's say switch or lose.
-                return Math.random() < 0.5 ? null : POSSIBLE_TRAITS[Math.floor(Math.random() * POSSIBLE_TRAITS.length)];
+                return random() < 0.5 ? null : choice(POSSIBLE_TRAITS);
             }
         } else {
             // Numeric mutation
             let mutationAmount = (geneKey === 'metabolism' || geneKey === 'moodSensitivity') ? 1 : 5;
-            let newValue = value + (Math.random() < 0.5 ? mutationAmount : -mutationAmount);
+            let newValue = value + (random() < 0.5 ? mutationAmount : -mutationAmount);
 
             // Clamp values
             const max = (geneKey === 'metabolism' || geneKey === 'moodSensitivity') ? MAX_PHYSIO : MAX_PERSONALITY;

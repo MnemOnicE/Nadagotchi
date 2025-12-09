@@ -5,10 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.18.1] - 2025-12-07
+## [1.20.0] - 2025-12-07
 
-### Fixed
-- **Invisible Furniture Placement:** Fixed a logic bug in `MainScene.js` where furniture could be placed in the UI dashboard area (bottom 25% of the screen), causing the item to be consumed but rendered outside the visible camera viewport. Placement in this area is now blocked to prevent item loss.
+### Added
+- **Seeded RNG:** Implemented a `SeededRandom` class (Mulberry32) to ensure deterministic game logic. The `universeSeed` is generated once at the start of a lineage ("Big Bang") and persists across saves, enabling true replayability and preventing "save scumming" of random events.
+- **Achievement System:** Implemented a headless `AchievementManager` that subscribes to game events to track player milestones.
+  - **Achievements:** Defined initial achievements: "First Craft", "Novice Explorer", "Socialite", "Scholar".
+  - **UI Toast:** Added a visual "Toast" notification system to `UIScene.js` that slides down from the top of the screen when an achievement is unlocked.
+- **Unit Tests:** Added `tests/SeededRNG.test.js` to verify determinism and `tests/Achievement.test.js` to verify event tracking.
+
+### Changed
+- **Genetics System:** Refactored `GeneticsSystem.js` and `Genome` to accept an RNG instance, making breeding outcomes fully deterministic based on the universe seed.
+- **Nadagotchi Logic:** Updated `Nadagotchi.js` to use the seeded RNG for UUID generation, offspring calculation, recipe discovery, and foraging drops.
+- **Event Keys:** Added `ACHIEVEMENT_UNLOCKED` to `EventKeys.js`.
+
 ## [1.19.0] - 2025-12-07
 
 ### Security
@@ -18,6 +28,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Minigame State Protection:** Refactored all minigame scenes (`Artisan`, `Logic`, `Scout`, `Healer`) to use closures for game state (patterns, solutions). This prevents players from reading the solution from the browser console (`game.scene...`).
 - **Inventory-Gated Breeding:** Updated `BreedingScene.js` to enforce strict inventory checks for all environmental influence items. Players can no longer select genetic modifiers they do not own.
 - **Recipe Logic:** Updated `discoverRecipe` to return `false` if a recipe is already known, allowing strict quest progression checks and preventing reward farming.
+
+## [1.18.1] - 2025-12-07
+
+### Fixed
+- **Invisible Furniture Placement:** Fixed a logic bug in `MainScene.js` where furniture could be placed in the UI dashboard area (bottom 25% of the screen), causing the item to be consumed but rendered outside the visible camera viewport. Placement in this area is now blocked to prevent item loss.
 
 ## [1.18.0] - 2025-12-07
 
@@ -188,7 +203,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Genetics System Config:** Updated `js/GeneticsSystem.js` and `js/BreedingScene.js` to use descriptive item names (e.g., "Ancient Tome", "Espresso") instead of internal IDs, improving clarity and matching the UI.
 - **Legacy Logic:** Deprecated the old `legacyTraits` array usage in the main simulation loop, replacing it with direct checks against the new `Genome` system.
 
-## [1.9.0] - 2025-12-01
+## [0.9.0] - 2025-12-01
 
 ### Added
 - **Refined Genetics System:** Implemented advanced Mendelian-inspired logic in `js/GeneticsSystem.js`.
@@ -202,7 +217,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Nadagotchi Integration:** Updated `js/Nadagotchi.js` to utilize the new random default generation for Genomes. The "starter pet" bias is now applied as a boost on top of this random wild background, ensuring the player's choice remains significant but organic.
 - **Breeding Scene UI:** Updated `js/BreedingScene.js` to include the "Espresso" item in the selection panel and improved the layout spacing to accommodate the new option.
 
-## [1.8.0] - 2025-11-30
+## [0.8.0] - 2025-11-30
 
 ### Added
 - **Genetics System Backend:** Implemented `GeneticsSystem.js` with a Mendelian-inspired inheritance model using `Genome` class (Genotype/Phenotype).
@@ -214,7 +229,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Nadagotchi Integration:** Updated `Nadagotchi` constructor to use the new `Genome` class and support legacy save migration.
 - **Breeding Scene:** Added "Nutrient Bar" to the breeding item selection to support metabolism modification.
 
-## [1.7.0] - 2025-11-30
+## [0.7.0] - 2025-11-30
 
 ### Changed
 - **Modern Architecture (Vite & ES Modules):** Migrated the entire codebase from vanilla JavaScript (global scope) to modern ES6 Modules bundled with Vite.
@@ -227,7 +242,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added a visual loading bar to `PreloaderScene` to provide feedback during initialization.
   - `MainScene` now focuses purely on gameplay logic and rendering.
 
-## [1.6.0] - 2025-11-30
+## [0.6.0] - 2025-11-30
 
 ### Added
 - **Comprehensive Minigame Test Coverage:** Implemented a robust test suite (`tests/Minigames.test.js`) covering the Artisan, Healer, and Scout career mini-games.
@@ -235,7 +250,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Verified critical game loops, win/loss conditions, input handling, and event emission logic.
   - Added mocks for Phaser's `Scene`, `Time`, and `Input` systems to ensure reliable, deterministic testing.
 
-## [1.5.6] - 2025-11-29
+## [0.5.6] - 2025-11-29
 
 ### Fixed
 - **UI Button System:** Restored the missing `js/ButtonFactory.js` and integrated it into `js/UIScene.js`.
@@ -243,7 +258,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Updated the `UIScene` responsive layout to correctly calculate the dimensions of the new 3D button containers, ensuring no overlap on mobile or desktop.
   - Fixed unit tests in `tests/legacy.test.js` to support the new `ButtonFactory` dependency.
 
-## [1.5.5] - 2025-11-29
+## [0.5.5] - 2025-11-29
 
 ### Changed
 - **UI Overhaul ("The Physical Shell"):** Completely redesigned the interface to resemble a physical device dashboard.
@@ -256,13 +271,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Action buttons are dynamically arranged to prevent overlap and ensure accessibility on smaller screens.
   - Modals are now sized relative to the screen dimensions (`this.cameras.main.width/height`) to ensure they fit within the viewport.
 
-## [1.5.4] - 2025-11-28
+## [0.5.4] - 2025-11-28
 
 ### Fixed
 - **Crafting Logic Exploit:** Fixed a bug in `Nadagotchi.js` where players could craft items they had not yet discovered (i.e., not in `discoveredRecipes`). Added a validation check to `craftItem`.
 - **Default Recipe Initialization:** Ensured that default recipes (like "Fancy Bookshelf") are automatically added to the player's discovered recipes for new games, preserving the intended progression flow.
 
-## [1.5.3] - 2025-11-27
+## [0.5.3] - 2025-11-27
 
 ### Fixed
 - **UI Overlap Issues:**
@@ -270,31 +285,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Resolved button overlap in the bottom action bar by splitting the action buttons into two distinct rows (Core Actions and Menus), ensuring they no longer conflict with the "Job Board" button on smaller screens.
 - **Critical Syntax Error:** Fixed a mangled and duplicated `handleUIAction` method in `js/MainScene.js` that was preventing the game from running correctly.
 
-## [1.5.2] - 2025-11-16
+## [0.5.2] - 2025-11-16
 
 ### Fixed
 - **Syntax Error in MainScene:** Fixed a duplicated and conflicting `handleUIAction` method definition in `js/MainScene.js` that caused syntax errors and prevented tests from running.
 - **Runtime Error (Black Screen):** Fixed a crash caused by using `addDynamicTexture` (a Phaser 3.60+ feature) in an environment using an older Phaser version. Replaced it with `createCanvas`, restoring correct rendering of the sky and game scene.
 
-## [1.5.1] - 2025-11-16
+## [0.5.1] - 2025-11-16
 
 ### Fixed
 - **Syntax Error in Core Logic:** Fixed a duplicated and conflicting method definition in `js/Nadagotchi.js` that caused syntax errors and potential logic bugs in NPC interactions.
 - **Test Suite Syntax Error:** Fixed missing closing braces in `tests/Nadagotchi.test.js`, restoring the integrity of the test suite and ensuring all tests run correctly.
 
-## [1.5.0] - 2025-11-16
+## [0.5.0] - 2025-11-16
 
 ### Added
 - **Expanded NPC Interactions:** Replaced the generic "friend" NPC with a cast of three distinct, career-focused NPCs: the "Grizzled Scout," "Master Artisan," and "Sickly Villager."
   - Interacting with these NPCs now provides small skill gains in their respective career paths (Navigation, Crafting, and Empathy), creating a more interconnected game world and rewarding social engagement.
   - Added unique sprites and interaction handlers for each new NPC in `MainScene.js`.
 
-## [1.4.1] - 2025-11-16
+## [0.4.1] - 2025-11-16
 
 ### Fixed
 - **Incorrect Tie-Breaking Logic:** Fixed a bug in `updateDominantArchetype` where a tie for the dominant archetype was not correctly handling the incumbent. The logic now correctly prioritizes the existing archetype in a tie, or chooses randomly if the incumbent is not involved.
 
-## [1.4.0] - 2025-11-16
+## [0.4.0] - 2025-11-16
 
 ### Added
 - **Comprehensive Code Documentation:** Added detailed JSDoc comments to every class, method, and function across all JavaScript files in the `js/` directory. This improves code clarity, maintainability, and makes the codebase significantly easier for new developers to understand.
@@ -305,17 +320,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - **Unpredictable Personality Tie-Breaking:** Fixed a logical flaw in `Nadagotchi.js`'s `updateDominantArchetype` method that caused unpredictable behavior when handling ties for the dominant archetype.
 
-## [1.3.2] - 2025-11-16
+## [0.3.2] - 2025-11-16
 
 ### Fixed
 - **Unpredictable Personality Tie-Breaking:** Fixed a bug in `updateDominantArchetype` where a tie in personality points would be broken unpredictably based on object property iteration order. The logic now ensures that the incumbent dominant archetype will always win a tie, preventing unexpected personality shifts.
 
-## [1.3.1] - 2025-11-16
+## [0.3.1] - 2025-11-16
 
 ### Fixed
 - **Stagnant Personality Bug:** Fixed a bug in `updateDominantArchetype` where the dominant archetype would not change if another archetype's score was equal to it. The logic now correctly handles ties by allowing a personality shift, making the system more dynamic.
 
-## [1.3.0] - 2025-11-12
+## [0.3.0] - 2025-11-12
 
 ### Added
 - **Seasonal Festivals and Spontaneous Events:** Implemented a dynamic event system that introduces seasonal festivals (e.g., "Spring Bloom Festival") and rare, spontaneous events (e.g., "Traveling Merchant").
@@ -332,14 +347,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - **Case-Insensitive Actions:** Fixed a bug in `js/Nadagotchi.js` where player actions were case-sensitive. Actions are now converted to uppercase to ensure commands like 'feed' and 'FEED' are treated the same.
 
-## [1.2.0] - 2025-11-10
+## [0.2.0] - 2025-11-10
 
 ### Added
 - **Test Coverage:** Added unit tests for `PersistenceManager.js` and `Nadagotchi.js`.
   - `PersistenceManager.js`: Added tests for all methods.
   - `Nadagotchi.js`: Added tests for the `live` and `updateDominantArchetype` methods.
 
-## [1.1.0] - 2025-11-09
+## [0.1.1] - 2025-11-09
 
 ### Added
 - **Hobby and Crafting System:** Implemented a new hobby system allowing the Nadagotchi to practice skills like painting and music. A new crafting system allows the pet to use foraged items.
@@ -349,7 +364,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - **Critical Black Screen Regression:** Fixed a race condition in `js/MainScene.js` where the `resize` event could be called before the scene's objects were fully created, causing a fatal error that prevented the game from rendering.
 
-## [1.0.0] - 2025-11-09
+## [0.1.0] - 2025-11-09
 
 ### Added
 - **Interactive Home Environment:** The pet's home is now interactive. Added a clickable "Bookshelf" and "Potted Plant" that provide skill gains and mood boosts, deepening the core simulation.
@@ -361,7 +376,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `CARE_FOR_PLANT` action has been removed and its functionality is replaced by the new interactive plant.
 - The "Care" button was removed from `UIScene.js` as it is now redundant.
 
-## [0.9.0] - 2025-11-07
+## [0.0.9] - 2025-11-07
 
 ### Changed
 - **Responsive Design:** The game now dynamically scales to fit the browser window, making it fully playable on both desktop and mobile devices.
@@ -376,7 +391,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - **Legacy Files:** Deleted the unused `game.js` and `style.css` files from the root directory to clean up the project structure.
 
-## [0.8.0] - 2025-11-07
+## [0.0.8] - 2025-11-07
 
 ### Added
 - "Healer" and "Artisan" career paths.
@@ -384,7 +399,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New player actions: "Care for Plant", "Meditate", "Craft Item".
 - New UI buttons and stats display for the new actions/skills.
 
-## [0.7.0] - 2025-11-07
+## [0.0.7] - 2025-11-07
 
 ### Added
 - **"Scout" Career Path:** Implemented the "Scout" career path, unlocking for 'Adventurer' archetypes when `skills.navigation > 10`.
@@ -398,7 +413,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - **Mood Logic Bug:** Fixed a critical bug in `Nadagotchi.js`'s `live()` method where the 'angry' state (`hunger < 10`) was unreachable because the 'sad' state (`hunger < 30`) was checked first. The conditional logic has been re-ordered.
 
-## [0.6.0] - 2025-11-07
+## [0.0.6] - 2025-11-07
 
 ### Added
 - **Career System Logic:** Implemented the logic for career progression as outlined in the roadmap.
@@ -409,7 +424,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - `Nadagotchi.js`: `handleAction()` now calls `updateCareer()` after `updateDominantArchetype()`.
 
-## [0.5.0] - 2025-09-14
+## [0.0.5] - 2025-09-14
 
 ### Changed
 - **UI Refactoring:** Overhauled the UI system by separating it into a dedicated `UIScene`.
@@ -421,7 +436,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **`js/UIScene.js`:** A new file containing the dedicated scene for all UI components.
 
-## [0.4.0] - 2025-09-14
+## [0.0.4] - 2025-09-14
 
 ### Added
 - **Career-Specific Job Board:** Implemented a new "Job Board" UI element.
@@ -432,7 +447,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Modified `js/MainScene.js` to add the Job Board button, its activation logic in the `update` loop, and the new `openJobBoard()` method.
 
-## [0.3.0] - 2025-09-14
+## [0.0.3] - 2025-09-14
 
 ### Added
 - **Mood-Based Skill Gain:** The 'STUDY' action's effectiveness is now influenced by the Nadagotchi's mood.
@@ -443,7 +458,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated `Nadagotchi.js` to include the mood multiplier logic in the `handleAction` method.
 - Updated `MainScene.js` to display the logic skill in `updateStatsUI`.
 
-## [0.2.0] - 2025-09-14
+## [0.0.2] - 2025-09-14
 
 ### Added
 - **"Explore" Action:** Implemented a new 'EXPLORE' action for the Nadagotchi.
@@ -454,7 +469,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Added detailed retroactive comments to `js/Nadagotchi.js` and `js/MainScene.js` to improve code clarity and documentation.
 
-## [0.1.0] - 2025-09-14
+## [0.0.1] - 2025-09-14
 
 ### Added
 

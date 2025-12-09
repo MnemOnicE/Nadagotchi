@@ -149,6 +149,22 @@ export class PersistenceManager {
     }
 
     /**
+     * Saves the achievement progress to localStorage.
+     * @param {object} achievementData - The achievement data (unlocked list + progress).
+     */
+    saveAchievements(achievementData) {
+        this._save("nadagotchi_achievements", achievementData);
+    }
+
+    /**
+     * Loads the achievement progress from localStorage.
+     * @returns {object} The parsed achievement data, or default structure.
+     */
+    loadAchievements() {
+        return this._load("nadagotchi_achievements") || { unlocked: [], progress: {} };
+    }
+
+    /**
      * Helper method to save data with simple obfuscation (Base64) and an integrity check (Hash).
      * @param {string} key - The localStorage key.
      * @param {any} data - The data to save.

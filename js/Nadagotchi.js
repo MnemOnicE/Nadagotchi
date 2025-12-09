@@ -3,6 +3,7 @@ import { Genome, GeneticsSystem } from './GeneticsSystem.js';
 import { NarrativeSystem } from './NarrativeSystem.js';
 import { Config } from './Config.js';
 import { Recipes } from './ItemData.js';
+import { SeededRandom } from './utils/SeededRandom.js';
 
 /**
  * @fileoverview Core logic for the Nadagotchi pet.
@@ -22,6 +23,21 @@ export class Nadagotchi {
      * @param {object} [loadedData=null] - Optional saved data to load from. If provided, overrides defaults.
      */
     constructor(initialArchetype, loadedData = null) {
+        // --- RNG Initialization ---
+        if (loadedData) {
+             // Load the universe seed (The "Big Bang")
+             this.universeSeed = loadedData.universeSeed || this._generateSeed(); // Migration for old saves
+             this.rng = new SeededRandom(this.universeSeed);
+             // Restore RNG state if available to ensure continuity
+             if (loadedData.rng && loadedData.rng.state) {
+                 this.rng.state = loadedData.rng.state;
+             }
+        } else {
+             // New Game: Generate a new universe seed
+             this.universeSeed = this._generateSeed();
+             this.rng = new SeededRandom(this.universeSeed);
+        }
+
         if (loadedData) {
             // This is a loaded pet. Populate all properties from the save file.
             /** @type {string} Unique identifier for this pet instance (Salt). */
@@ -61,7 +77,9 @@ export class Nadagotchi {
             if (loadedData.genome) {
                 if (loadedData.genome.genotype) {
                      // New Genome format
-                     this.genome = new Genome(loadedData.genome.genotype);
+                     // Pass loaded phenotype if available to avoid random recalculation
+                     const phenotype = loadedData.genome.phenotype || null;
+                     this.genome = new Genome(loadedData.genome.genotype, phenotype, this.rng);
                 } else {
                     // Legacy migration: Create homozygous genotype from old data
                     const migratedGenotype = {};
@@ -82,11 +100,11 @@ export class Nadagotchi {
                         migratedGenotype.specialAbility = [trait, trait];
                     }
 
-                    this.genome = new Genome(migratedGenotype);
+                    this.genome = new Genome(migratedGenotype, null, this.rng);
                 }
             } else {
                 // Should not happen for valid saves, but fallback
-                this.genome = new Genome();
+                this.genome = new Genome(null, null, this.rng);
             }
 
         } else {
@@ -113,15 +131,15 @@ export class Nadagotchi {
             this.moodSensitivity = Config.INITIAL_STATE.MOOD_SENSITIVITY_DEFAULT;
 
             // Initialize Genome for new game
-            // Start with random defaults, then bias towards the chosen starter
-            this.genome = new Genome(); // Random "Wild" defaults
+            // Start with random defaults (using RNG), then bias towards the chosen starter
+            this.genome = new Genome(null, null, this.rng);
             // Boost the dominant archetype to ensure it wins against the wild traits (10-30)
             if (this.genome.genotype[initialArchetype]) {
                 const val = Config.INITIAL_STATE.GENOME_STARTER_VAL;
                 this.genome.genotype[initialArchetype] = [val, val];
             }
             // Recalculate phenotype after manual genotype modification
-            this.genome.phenotype = this.genome.calculatePhenotype();
+            this.genome.phenotype = this.genome.calculatePhenotype(this.rng);
         }
 
         /** @type {{hunger: number, energy: number, happiness: number}} Maximum values for stats. */
@@ -173,18 +191,38 @@ export class Nadagotchi {
     }
 
     /**
-     * Generates a UUID for the pet.
+     * Generates a random seed for the universe.
+     * Uses Math.random() as the bootstrap entropy source.
+     * @returns {number} A large random integer.
+     * @private
+     */
+    _generateSeed() {
+        return Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+    }
+
+    /**
+     * Generates a deterministic UUID for the pet using the seeded RNG.
      * @returns {string} A unique identifier.
      * @private
      */
     _generateUUID() {
-        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-            return crypto.randomUUID();
+        // Deterministic UUID generation using SeededRandom
+        const chars = '0123456789abcdef';
+        let uuid = '';
+        for (let i = 0; i < 36; i++) {
+            if (i === 8 || i === 13 || i === 18 || i === 23) {
+                uuid += '-';
+            } else if (i === 14) {
+                uuid += '4';
+            } else if (i === 19) {
+                // (r & 0x3 | 0x8) logic
+                const r = this.rng.range(0, 16);
+                uuid += chars[(r & 0x3) | 0x8];
+            } else {
+                uuid += chars[this.rng.range(0, 16)];
+            }
         }
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-        });
+        return uuid;
     }
 
     /**
@@ -194,7 +232,8 @@ export class Nadagotchi {
      * @returns {object} The data object for the new Nadagotchi.
      */
     calculateOffspring(environmentalFactors) {
-        const childGenome = GeneticsSystem.breed(this.genome, environmentalFactors);
+        // Pass the RNG to GeneticsSystem.breed
+        const childGenome = GeneticsSystem.breed(this.genome, environmentalFactors, this.rng);
         const childPhenotype = childGenome.phenotype;
 
         // Determine dominant archetype from the phenotype
@@ -210,7 +249,8 @@ export class Nadagotchi {
 
         const contenders = personalityKeys.filter(type => childPhenotype[type] === maxScore);
         if (contenders.length > 0) {
-            dominant = contenders[Math.floor(Math.random() * contenders.length)];
+            // Use RNG for deterministic tie-breaking
+            dominant = this.rng.choice(contenders);
         }
 
         // Initialize personality points based on phenotype
@@ -245,7 +285,16 @@ export class Nadagotchi {
             },
             quests: {}, // Quests reset for new generation
             location: 'Home',
-            genome: childGenome
+            genome: childGenome,
+            // Pass the parent's universe seed to the child to maintain the "Timeline"?
+            // Or let the child generate a new one?
+            // "If you share an 'Egg' (a seed), the recipient must generate the exact same pet."
+            // The logic above creates the data. MainScene uses this data to instantiate a new Nadagotchi.
+            // MainScene: new Nadagotchi(null, newPetData).
+            // Nadagotchi constructor will use newPetData.universeSeed if present, or generate new.
+            // If we want the child to be deterministic from this point, we should probably pass a derived seed.
+            // Let's generate a seed for the child using our RNG.
+            universeSeed: this.rng.range(0, Number.MAX_SAFE_INTEGER)
         };
     }
 
@@ -462,7 +511,8 @@ export class Nadagotchi {
                     this.skills.navigation += (Config.ACTIONS.STUDY.NAVIGATION_GAIN_ADVENTURER * moodMultiplier);
                 }
 
-                if (Math.random() < 0.05) this.discoverRecipe("Logic-Boosting Snack");
+                // Use RNG for recipe discovery
+                if (this.rng.random() < 0.05) this.discoverRecipe("Logic-Boosting Snack");
                 break;
 
             case 'INTERACT_BOOKSHELF':
@@ -532,7 +582,8 @@ export class Nadagotchi {
                     this.stats.happiness += Config.ACTIONS.EXPLORE.HAPPINESS_RESTORE_ADVENTURER;
                     this.personalityPoints.Adventurer += 2;
                     this.skills.navigation += Config.ACTIONS.EXPLORE.SKILL_GAIN;
-                    if (Math.random() < 0.1) this.discoverRecipe("Stamina-Up Tea");
+                    // Use RNG for recipe discovery
+                    if (this.rng.random() < 0.1) this.discoverRecipe("Stamina-Up Tea");
                 } else if (this.dominantArchetype === 'Recluse') {
                     this.mood = 'sad';
                     this.stats.happiness -= Config.ACTIONS.EXPLORE.HAPPINESS_PENALTY_RECLUSE;
@@ -628,7 +679,8 @@ export class Nadagotchi {
                     const old = this.genome.genotype.metabolism;
                     // Decrease both alleles by 1, min 1
                     this.genome.genotype.metabolism = [Math.max(1, old[0] - 1), Math.max(1, old[1] - 1)];
-                    this.genome.phenotype = this.genome.calculatePhenotype(); // Recalculate
+                    // Recalculate phenotype using existing RNG state
+                    this.genome.phenotype = this.genome.calculatePhenotype(this.rng);
                     this.addJournalEntry("I drank the tonic. I feel... slower. My metabolism has decreased.");
                     consumed = true;
                 }
@@ -724,7 +776,8 @@ export class Nadagotchi {
             potentialItems.push('Frostbloom');
         }
 
-        const foundItem = Phaser.Utils.Array.GetRandom(potentialItems);
+        // Use RNG to select item
+        const foundItem = this.rng.choice(potentialItems);
         this._addItem(foundItem, 1);
 
         if (foundItem === 'Frostbloom') {
@@ -860,7 +913,7 @@ export class Nadagotchi {
     }
 
     /**
-     * Adds a new recipe to the list if it's not already discovered and saves to persistence.
+     * Adds a new recipe to the list if it's not already discovered and saves it to persistence.
      * @param {string} recipeName - The name of the recipe to add.
      * @returns {boolean} True if the recipe was newly discovered, false if already known.
      */
