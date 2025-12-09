@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **Invisible Furniture Placement:** Fixed a logic bug in `MainScene.js` where furniture could be placed in the UI dashboard area (bottom 25% of the screen), causing the item to be consumed but rendered outside the visible camera viewport. Placement in this area is now blocked to prevent item loss.
+## [1.19.0] - 2025-12-07
+
+### Security
+- **Hardened Persistence:** Updated `PersistenceManager` to salt the save file hash with the pet's unique UUID. This binds the save data to a specific pet instance, preventing save swapping and replay attacks.
+- **Event System Validation:** Secured the `WORK_RESULT` event in `MainScene.js`. The scene now validates that a minigame was legitimately active before processing rewards, blocking console-based event injection exploits.
+- **Resource Check Enforcement:** Updated `Nadagotchi.js` to strictly check for sufficient resources (Energy, Hunger) before executing actions. This fixes the "Zombie Pet" exploit where players could farm stats with 0 Energy.
+- **Minigame State Protection:** Refactored all minigame scenes (`Artisan`, `Logic`, `Scout`, `Healer`) to use closures for game state (patterns, solutions). This prevents players from reading the solution from the browser console (`game.scene...`).
+- **Inventory-Gated Breeding:** Updated `BreedingScene.js` to enforce strict inventory checks for all environmental influence items. Players can no longer select genetic modifiers they do not own.
+- **Recipe Logic:** Updated `discoverRecipe` to return `false` if a recipe is already known, allowing strict quest progression checks and preventing reward farming.
 
 ## [1.18.0] - 2025-12-07
 

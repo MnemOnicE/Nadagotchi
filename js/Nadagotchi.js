@@ -24,6 +24,9 @@ export class Nadagotchi {
     constructor(initialArchetype, loadedData = null) {
         if (loadedData) {
             // This is a loaded pet. Populate all properties from the save file.
+            /** @type {string} Unique identifier for this pet instance (Salt). */
+            this.uuid = loadedData.uuid || this._generateUUID(); // Migration for old saves
+
             /** @type {string} The pet's current mood (e.g., 'happy', 'sad'). */
             this.mood = loadedData.mood;
             /** @type {string} The dominant personality trait. */
@@ -88,6 +91,7 @@ export class Nadagotchi {
 
         } else {
             // This is a brand new game. Start from defaults.
+            this.uuid = this._generateUUID();
             this.mood = 'neutral';
             this.dominantArchetype = initialArchetype;
             this.personalityPoints = {
@@ -169,6 +173,21 @@ export class Nadagotchi {
     }
 
     /**
+     * Generates a UUID for the pet.
+     * @returns {string} A unique identifier.
+     * @private
+     */
+    _generateUUID() {
+        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+            return crypto.randomUUID();
+        }
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
+    /**
      * Calculates data for the offspring of this Nadagotchi.
      * Uses the GeneticsSystem to determine traits and stats based on inheritance.
      * @param {string[]} environmentalFactors - List of items present during breeding (e.g., from inventory).
@@ -205,6 +224,7 @@ export class Nadagotchi {
         }
 
         return {
+            uuid: this._generateUUID(), // New UUID for the child
             mood: 'neutral',
             dominantArchetype: dominant,
             personalityPoints: initialPoints,
@@ -397,6 +417,7 @@ export class Nadagotchi {
                 break;
 
             case 'PLAY':
+                if (this.stats.energy < Config.ACTIONS.PLAY.ENERGY_COST) return;
                 this.stats.energy = Math.max(0, this.stats.energy - Config.ACTIONS.PLAY.ENERGY_COST);
                 this.stats.happiness = Math.min(this.maxStats.happiness, this.stats.happiness + Config.ACTIONS.PLAY.HAPPINESS_RESTORE);
 
@@ -415,6 +436,9 @@ export class Nadagotchi {
                 break;
 
             case 'STUDY':
+                if (this.stats.energy < Config.ACTIONS.STUDY.ENERGY_COST) return;
+                if (this.stats.happiness < Config.ACTIONS.STUDY.HAPPINESS_COST) return;
+
                 this.stats.energy = Math.max(0, this.stats.energy - Config.ACTIONS.STUDY.ENERGY_COST);
                 this.stats.happiness = Math.max(0, this.stats.happiness - Config.ACTIONS.STUDY.HAPPINESS_COST);
                 moodMultiplier = this._getMoodMultiplier();
@@ -442,6 +466,9 @@ export class Nadagotchi {
                 break;
 
             case 'INTERACT_BOOKSHELF':
+                if (this.stats.energy < Config.ACTIONS.INTERACT_BOOKSHELF.ENERGY_COST) return;
+                if (this.stats.happiness < Config.ACTIONS.INTERACT_BOOKSHELF.HAPPINESS_COST) return;
+
                 this.stats.energy -= Config.ACTIONS.INTERACT_BOOKSHELF.ENERGY_COST;
                 this.stats.happiness -= Config.ACTIONS.INTERACT_BOOKSHELF.HAPPINESS_COST;
                 if (this.dominantArchetype === 'Intellectual') {
@@ -455,6 +482,8 @@ export class Nadagotchi {
                 break;
 
             case 'INTERACT_PLANT':
+                if (this.stats.energy < Config.ACTIONS.INTERACT_PLANT.ENERGY_COST) return;
+
                 this.stats.energy -= Config.ACTIONS.INTERACT_PLANT.ENERGY_COST;
                 this.stats.happiness += Config.ACTIONS.INTERACT_PLANT.HAPPINESS_RESTORE;
                 if (this.dominantArchetype === 'Nurturer') {
@@ -473,6 +502,8 @@ export class Nadagotchi {
                 break;
 
             case 'INTERACT_FANCY_BOOKSHELF':
+                if (this.stats.energy < Config.ACTIONS.INTERACT_FANCY_BOOKSHELF.ENERGY_COST) return;
+
                 this.stats.energy -= Config.ACTIONS.INTERACT_FANCY_BOOKSHELF.ENERGY_COST;
                 this.stats.happiness += Config.ACTIONS.INTERACT_FANCY_BOOKSHELF.HAPPINESS_RESTORE; // It's a nice bookshelf!
                 if (this.dominantArchetype === 'Intellectual') {
@@ -487,6 +518,8 @@ export class Nadagotchi {
                 break;
 
             case 'EXPLORE':
+                if (this.stats.energy < Config.ACTIONS.EXPLORE.ENERGY_COST) return;
+
                 this.stats.energy = Math.max(0, this.stats.energy - Config.ACTIONS.EXPLORE.ENERGY_COST);
 
                 // Homozygous Adventurer Bonus: Boost Happiness Gain
@@ -551,6 +584,8 @@ export class Nadagotchi {
      */
     practiceHobby(hobbyName) {
         if (this.hobbies.hasOwnProperty(hobbyName)) {
+            if (this.stats.energy < Config.ACTIONS.PRACTICE_HOBBY.ENERGY_COST) return;
+
             this.hobbies[hobbyName] += 1;
             this.stats.happiness += Config.ACTIONS.PRACTICE_HOBBY.HAPPINESS_RESTORE;
             this.stats.energy -= Config.ACTIONS.PRACTICE_HOBBY.ENERGY_COST;
@@ -634,6 +669,12 @@ export class Nadagotchi {
             return;
         }
 
+        // Check resources (Energy)
+        if (this.stats.energy < Config.ACTIONS.CRAFT.ENERGY_COST) {
+            this.addJournalEntry("I'm too tired to craft right now.");
+            return;
+        }
+
         // Check if pet has all required materials
         for (const material in recipe.materials) {
             const requiredAmount = recipe.materials[material];
@@ -671,6 +712,8 @@ export class Nadagotchi {
      * Simulates foraging for items, changing location, updating stats, and adding items to inventory.
      */
     forage() {
+        if (this.stats.energy < Config.ACTIONS.FORAGE.ENERGY_COST) return;
+
         this.location = 'Forest';
         this.stats.energy -= Config.ACTIONS.FORAGE.ENERGY_COST;
         const moodMultiplier = this._getMoodMultiplier();
@@ -760,10 +803,17 @@ export class Nadagotchi {
 
         if (quest.stage === 1) {
             if ((this.inventory['Sticks'] || 0) >= 5) {
-                this._removeItem('Sticks', 5);
-                this.discoverRecipe("Masterwork Chair");
-                quest.stage = 2;
-                this.addJournalEntry("I gave the Sticks to the Artisan. He taught me how to make a Masterwork Chair! I need to craft one to show him.");
+                // Check if we already know the recipe (unlikely if in stage 1, but safe)
+                if (this.discoverRecipe("Masterwork Chair")) {
+                    this._removeItem('Sticks', 5);
+                    quest.stage = 2;
+                    this.addJournalEntry("I gave the Sticks to the Artisan. He taught me how to make a Masterwork Chair! I need to craft one to show him.");
+                } else {
+                     // Should not happen unless they learned it elsewhere
+                     // Advance quest anyway if they already know it
+                    this._removeItem('Sticks', 5);
+                    quest.stage = 2;
+                }
             } else {
                 this.addJournalEntry("The Master Artisan is waiting for 5 Sticks.");
             }
@@ -812,13 +862,16 @@ export class Nadagotchi {
     /**
      * Adds a new recipe to the list if it's not already discovered and saves to persistence.
      * @param {string} recipeName - The name of the recipe to add.
+     * @returns {boolean} True if the recipe was newly discovered, false if already known.
      */
     discoverRecipe(recipeName) {
         if (!this.discoveredRecipes.includes(recipeName)) {
             this.discoveredRecipes.push(recipeName);
             this.persistence.saveRecipes(this.discoveredRecipes);
             this.addJournalEntry(`I discovered a new recipe: ${recipeName}!`);
+            return true;
         }
+        return false;
     }
 
     /**

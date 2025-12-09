@@ -66,7 +66,8 @@ This phase focuses on building out the primary gameplay loops, giving players cl
     -   [x] Refactored codebase to use centralized Configuration and Event Keys for better maintainability.
     -   [x] Cleanup and Documentation: Created `GUIDE.md` and removed redundant logic from core classes.
 -   **[x] Security & Balance:**
-    -   [x] Implemented save data obfuscation and integrity verification to prevent tampering.
+    -   [x] Implemented save data obfuscation with UUID salting and integrity verification to prevent tampering and save swapping.
+    -   [x] Hardened event system and action handlers to prevent console injection and logic exploits.
     -   [x] Implemented diminishing returns logic for minigame rewards to ensure long-term progression balance.
 -   **[x] Settings & Accessibility:**
     -   [x] **In-Game Settings/Options:** Implemented persistent settings for volume and gameplay speed.
