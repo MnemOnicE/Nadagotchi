@@ -696,6 +696,7 @@ export class Nadagotchi {
      * Manages interaction with an NPC, updating relationship status and stats.
      * @param {string} npcName - The name of the NPC being interacted with.
      * @param {string} [interactionType='CHAT'] - The type of interaction (e.g., 'CHAT', 'GIFT').
+     * @returns {string} The dialogue text to display.
      */
     interact(npcName, interactionType = 'CHAT') {
         if (!this.relationships.hasOwnProperty(npcName)) {
@@ -707,8 +708,9 @@ export class Nadagotchi {
             this.relationships[npcName].level += Config.ACTIONS.INTERACT_NPC.GIFT_RELATIONSHIP;
             this.stats.happiness += Config.ACTIONS.INTERACT_NPC.GIFT_HAPPINESS;
             this.skills.empathy += Config.ACTIONS.INTERACT_NPC.GIFT_SKILL_GAIN;
+            const text = "Thanks for the gift!";
             this.addJournalEntry(`I gave Berries to ${npcName}. They seemed to like it!`);
-            return;
+            return text;
         }
 
         const moodMultiplier = this._getMoodMultiplier();
@@ -719,24 +721,28 @@ export class Nadagotchi {
         switch (npcName) {
             case 'Grizzled Scout':
                 this.skills.navigation += Config.ACTIONS.INTERACT_NPC.SCOUT_SKILL_GAIN * moodMultiplier;
-                this.addJournalEntry("The Grizzled Scout shared a story about a hidden grove. I learned a little about navigating the woods.");
                 break;
             case 'Master Artisan':
                 if (this.relationships['Master Artisan'].level >= 5) {
                     this._handleArtisanQuest();
                 } else {
                     this.skills.crafting += Config.ACTIONS.INTERACT_NPC.ARTISAN_SKILL_GAIN * moodMultiplier;
-                    this.addJournalEntry("The Master Artisan showed me a clever technique for joining wood. My crafting skill improved.");
                 }
                 break;
             case 'Sickly Villager':
                 this.skills.empathy += Config.ACTIONS.INTERACT_NPC.VILLAGER_SKILL_GAIN * moodMultiplier;
-                this.addJournalEntry("I spent some time with the Sickly Villager. It felt good to offer some comfort.");
-                break;
-            default:
-                this.addJournalEntry(`I had a nice chat with ${npcName}.`);
                 break;
         }
+
+        const relLevel = this.relationships[npcName].level;
+        // Check quest active state: Exists AND is not completed (Stage 3 is complete)
+        const quest = this.quests['masterwork_crafting'];
+        const hasQuest = (quest && quest.stage < 3 && npcName === 'Master Artisan');
+
+        const dialogueText = NarrativeSystem.getNPCDialogue(npcName, relLevel, hasQuest);
+        this.addJournalEntry(`Chatted with ${npcName}: "${dialogueText}"`);
+
+        return dialogueText;
     }
 
     /**

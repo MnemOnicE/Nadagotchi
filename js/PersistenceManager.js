@@ -52,6 +52,21 @@ export class PersistenceManager {
     }
 
     /**
+     * Clears all game-related data from localStorage (except settings and hall of fame).
+     * Used for starting a completely new game.
+     */
+    clearAllData() {
+        const keysToClear = [
+            "nadagotchi_save",
+            "nadagotchi_journal",
+            "nadagotchi_recipes",
+            "nadagotchi_calendar",
+            "nadagotchi_furniture"
+        ];
+        keysToClear.forEach(key => localStorage.removeItem(key));
+    }
+
+    /**
      * Saves the player's journal entries to localStorage.
      * @param {Array<object>} journalEntries - The array of journal entries to save.
      */
