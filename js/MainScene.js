@@ -4,6 +4,7 @@ import { Calendar } from './Calendar.js';
 import { EventManager } from './EventManager.js';
 import { WorldClock } from './WorldClock.js';
 import { WeatherSystem } from './WeatherSystem.js';
+import { AchievementManager } from './AchievementManager.js';
 import { EventKeys } from './EventKeys.js';
 import { Config } from './Config.js';
 
@@ -98,6 +99,7 @@ export class MainScene extends Phaser.Scene {
         this.eventManager = new EventManager(this.calendar);
         this.worldClock = new WorldClock(this);
         this.weatherSystem = new WeatherSystem(this);
+        this.achievementManager = new AchievementManager(this.game);
 
         this.worldState = {
             time: this.worldClock.getCurrentPeriod(),

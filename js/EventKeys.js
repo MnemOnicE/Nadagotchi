@@ -59,5 +59,8 @@ export const EventKeys = {
     GAME_LOADED: 'GAME_LOADED',
 
     // Tutorial
-    START_TUTORIAL: 'START_TUTORIAL'
+    START_TUTORIAL: 'START_TUTORIAL',
+
+    // Achievements
+    ACHIEVEMENT_UNLOCKED: 'ACHIEVEMENT_UNLOCKED'
 };
