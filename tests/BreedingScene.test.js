@@ -112,7 +112,15 @@ describe('BreedingScene', () => {
         mockParentData = {
             generation: 1,
             dominantArchetype: 'Adventurer',
-            inventory: { 'Metabolism-Slowing Tonic': 1 },
+            inventory: {
+                'Metabolism-Slowing Tonic': 1,
+                'Ancient Tome': 1,
+                'Heart Amulet': 1,
+                'Muse Flower': 1,
+                'Nutrient Bar': 1,
+                'Espresso': 1,
+                'Chamomile': 1
+            },
             calculateOffspring: jest.fn().mockReturnValue({
                 dominantArchetype: 'Intellectual',
                 generation: 2
