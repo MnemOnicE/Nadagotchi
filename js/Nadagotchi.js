@@ -799,6 +799,14 @@ export class Nadagotchi {
             return;
         }
 
+        // Check for energy cost
+        if (this.stats.energy < Config.ACTIONS.INTERACT_NPC.ENERGY_COST) {
+            this.addJournalEntry("I'm too tired to interact right now.");
+            return null;
+        }
+
+        this.stats.energy -= Config.ACTIONS.INTERACT_NPC.ENERGY_COST;
+
         if (interactionType === 'GIFT' && this.inventory['Berries'] > 0) {
             this._removeItem('Berries', 1);
             this.relationships[npcName].level += Config.ACTIONS.INTERACT_NPC.GIFT_RELATIONSHIP;

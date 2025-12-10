@@ -224,17 +224,17 @@ export class MainScene extends Phaser.Scene {
                 break;
             case EventKeys.INTERACT_SCOUT: {
                 const text = this.nadagotchi.interact('Grizzled Scout');
-                this.scene.get('UIScene').showDialogue('Grizzled Scout', text);
+                if (text) this.scene.get('UIScene').showDialogue('Grizzled Scout', text);
                 break;
             }
             case EventKeys.INTERACT_ARTISAN: {
                 const text = this.nadagotchi.interact('Master Artisan');
-                this.scene.get('UIScene').showDialogue('Master Artisan', text);
+                if (text) this.scene.get('UIScene').showDialogue('Master Artisan', text);
                 break;
             }
             case EventKeys.INTERACT_VILLAGER: {
                 const text = this.nadagotchi.interact('Sickly Villager');
-                this.scene.get('UIScene').showDialogue('Sickly Villager', text);
+                if (text) this.scene.get('UIScene').showDialogue('Sickly Villager', text);
                 break;
             }
             case EventKeys.INTERACT_BOOKSHELF:

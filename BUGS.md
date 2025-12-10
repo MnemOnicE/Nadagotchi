@@ -79,3 +79,10 @@
 **Line:** N/A
 **Description:** The `BreedingScene.js` references several items (e.g., 'Ancient Tome', 'Heart Amulet', 'Muse Flower', 'Nutrient Bar', 'Espresso', 'Chamomile') intended for environmental influence during breeding. However, these items are missing from `ItemDefinitions` in `js/ItemData.js` and are not currently obtainable in the game (no recipes or drop sources). This renders the "Inventory-Gated Breeding" security fix effectively a feature disablement for these specific items until they are properly implemented.
 **Fix:** Define these items in `ItemDefinitions` and add them to loot tables (e.g., `forage`) or crafting recipes to make them obtainable for legitimate players.
+
+---
+
+**File:** `js/Nadagotchi.js`, `js/Config.js`
+**Line:** `Nadagotchi.js` ~790 (interact method)
+**Description:** NPC interactions (Chat) do not consume energy but provide significant stat and skill gains (Happiness, Communication, Navigation, etc.). This allows players to spam the interaction button to maximize stats and skills instantly without resource cost, breaking game balance.
+**Fix:** Add `ENERGY_COST` to `INTERACT_NPC` in `js/Config.js`. Update `Nadagotchi.interact` to check for sufficient energy and deduct it. If energy is insufficient, return `null` and log a journal entry explaining the fatigue. Update `MainScene` to handle the `null` return by skipping the dialogue modal.
