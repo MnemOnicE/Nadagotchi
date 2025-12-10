@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.20.2] - 2025-12-07
+
+### Security
+- **Backend Inventory Validation:** Implemented server-side (logic-layer) validation in `Nadagotchi.calculateOffspring` to prevent item injection exploits.
+  - The method now filters incoming `environmentalFactors` against the pet's actual inventory, ensuring that only owned items can influence the next generation's genetics.
+  - This complements the existing UI-side filtering in `BreedingScene.js`, providing a robust defense-in-depth solution.
+
 ## [1.20.1] - 2025-12-07
 
 ### Fixed

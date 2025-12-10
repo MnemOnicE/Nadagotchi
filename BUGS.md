@@ -86,3 +86,7 @@
 **Line:** `Nadagotchi.js` ~790 (interact method)
 **Description:** NPC interactions (Chat) do not consume energy but provide significant stat and skill gains (Happiness, Communication, Navigation, etc.). This allows players to spam the interaction button to maximize stats and skills instantly without resource cost, breaking game balance.
 **Fix:** Add `ENERGY_COST` to `INTERACT_NPC` in `js/Config.js`. Update `Nadagotchi.interact` to check for sufficient energy and deduct it. If energy is insufficient, return `null` and log a journal entry explaining the fatigue. Update `MainScene` to handle the `null` return by skipping the dialogue modal.
+**File:** `js/Nadagotchi.js`
+**Line:** 233
+**Description:** The `calculateOffspring` method in `Nadagotchi.js` accepts a list of `environmentalFactors` (items) to influence the child's genetics but does not verify that the parent pet actually possesses these items in its inventory. This allows an attacker (or a bug) to inject arbitrary items into the breeding process, bypassing gameplay restrictions.
+**Fix:** Added a validation step at the beginning of `calculateOffspring` to filter the `environmentalFactors` array. The method now checks `this.inventory` for each item and ensures the quantity is greater than 0, discarding any items the player does not own before passing the list to `GeneticsSystem.breed`.
