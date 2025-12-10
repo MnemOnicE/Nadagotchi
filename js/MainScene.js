@@ -135,7 +135,8 @@ export class MainScene extends Phaser.Scene {
         // --- Post-FX & UI ---
         this.lightTexture = this.textures.createCanvas('light', this.scale.width, this.scale.height);
         this.lightImage = this.add.image(0, 0, 'light').setOrigin(0).setBlendMode('MULTIPLY').setVisible(false);
-        // FIX: Moved dateText to the top-right corner (origin 1,0) to avoid overlap with stats
+
+        // Date Text (Top-Right)
         this.dateText = this.add.text(this.scale.width - 10, 10, '', { fontFamily: 'VT323, Arial', fontSize: '20px', color: '#ffffff', backgroundColor: 'rgba(0,0,0,0.5)', padding: { x: 5, y: 3 } }).setOrigin(1, 0);
         this.scene.launch('UIScene');
 
