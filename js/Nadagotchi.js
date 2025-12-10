@@ -232,8 +232,12 @@ export class Nadagotchi {
      * @returns {object} The data object for the new Nadagotchi.
      */
     calculateOffspring(environmentalFactors) {
+        // Security Fix: Filter environmental factors to ensure they are present in inventory.
+        // Prevents injection of items the user doesn't own.
+        const validFactors = environmentalFactors.filter(item => this.inventory[item] && this.inventory[item] > 0);
+
         // Pass the RNG to GeneticsSystem.breed
-        const childGenome = GeneticsSystem.breed(this.genome, environmentalFactors, this.rng);
+        const childGenome = GeneticsSystem.breed(this.genome, validFactors, this.rng);
         const childPhenotype = childGenome.phenotype;
 
         // Determine dominant archetype from the phenotype

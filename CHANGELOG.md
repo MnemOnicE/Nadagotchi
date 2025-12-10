@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **Responsive UI Controls:** Implemented hover states (brightness boost) for all Neo-Retro buttons (`ButtonFactory.js`) to improve tactile feedback and UI responsiveness.
 - **Keyboard Navigation:** Added keyboard shortcuts for the main dashboard tabs in `UIScene.js` (1: Care, 2: Action, 3: System, 4: Ancestors) to improve accessibility and navigation speed.
+## [1.20.2] - 2025-12-07
+
+### Security
+- **Backend Inventory Validation:** Implemented server-side (logic-layer) validation in `Nadagotchi.calculateOffspring` to prevent item injection exploits.
+  - The method now filters incoming `environmentalFactors` against the pet's actual inventory, ensuring that only owned items can influence the next generation's genetics.
+  - This complements the existing UI-side filtering in `BreedingScene.js`, providing a robust defense-in-depth solution.
 
 ## [1.20.1] - 2025-12-07
 

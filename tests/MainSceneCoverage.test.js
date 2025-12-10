@@ -95,7 +95,7 @@ describe('MainScene Coverage', () => {
     beforeEach(() => {
         mockNadagotchi = {
              handleAction: jest.fn(),
-             interact: jest.fn(),
+             interact: jest.fn().mockReturnValue("Hello!"),
              placeItem: jest.fn().mockReturnValue(true),
              live: jest.fn(),
              addJournalEntry: jest.fn(),
@@ -117,7 +117,7 @@ describe('MainScene Coverage', () => {
             saveFurniture: jest.fn(),
             loadSettings: jest.fn().mockReturnValue({ volume: 0.5, gameSpeed: 1.0 }),
             saveSettings: jest.fn(),
-            loadAchievements: jest.fn().mockReturnValue({})
+            loadAchievements: jest.fn().mockReturnValue({ unlocked: [], progress: {} })
         }));
 
         Calendar.mockImplementation(() => ({
@@ -223,6 +223,8 @@ describe('MainScene Coverage', () => {
     test('handleWorkResult should improve skills on success', () => {
         scene.create();
 
+        // Bypass security check by setting the active minigame
+        scene.activeMinigameCareer = 'Innovator';
         scene.handleWorkResult({ success: true, career: 'Innovator' });
 
         expect(mockNadagotchi.skills.logic).toBeGreaterThan(10);
