@@ -80,6 +80,7 @@ jest.mock('../js/PersistenceManager.js', () => ({
         saveRecipes() {}
         loadSettings() { return { volume: 0.5, gameSpeed: 1.0 }; }
         saveSettings() {}
+        loadAchievements() { return {}; }
     }
 }));
 

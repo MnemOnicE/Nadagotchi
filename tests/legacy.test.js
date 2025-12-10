@@ -62,7 +62,7 @@ class Scene {
             setPosition: jest.fn().mockReturnThis()
         };
         this.add = addMock;
-        this.input = { on: jest.fn() };
+        this.input = { on: jest.fn(), keyboard: { on: jest.fn() } };
         this.time = { addEvent: jest.fn(), delayedCall: jest.fn() };
         this.cameras = {
             main: {

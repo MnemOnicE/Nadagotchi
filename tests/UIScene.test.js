@@ -147,6 +147,7 @@ describe('UIScene', () => {
         scene.game = { events: mockGameEvents };
         scene.scale = { on: jest.fn() };
         scene.time = { delayedCall: jest.fn((delay, cb) => cb()) };
+        scene.input = { keyboard: { on: jest.fn() } };
         scene.scene = {
             pause: jest.fn(),
             resume: jest.fn(),

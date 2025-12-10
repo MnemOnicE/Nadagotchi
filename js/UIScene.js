@@ -110,6 +110,13 @@ export class UIScene extends Phaser.Scene {
         this.createTabs();
         this.resize(this.scale);
         this.showTab('CARE');
+
+        // --- Keyboard Shortcuts (Palette UX) ---
+        // Quick access to tabs using number keys 1-4
+        this.input.keyboard.on('keydown-ONE', () => this.showTab('CARE'));
+        this.input.keyboard.on('keydown-TWO', () => this.showTab('ACTION'));
+        this.input.keyboard.on('keydown-THREE', () => this.showTab('SYSTEM'));
+        this.input.keyboard.on('keydown-FOUR', () => this.showTab('ANCESTORS'));
     }
 
     /**

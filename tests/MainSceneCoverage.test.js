@@ -116,7 +116,8 @@ describe('MainScene Coverage', () => {
             loadFurniture: jest.fn().mockReturnValue([]),
             saveFurniture: jest.fn(),
             loadSettings: jest.fn().mockReturnValue({ volume: 0.5, gameSpeed: 1.0 }),
-            saveSettings: jest.fn()
+            saveSettings: jest.fn(),
+            loadAchievements: jest.fn().mockReturnValue({})
         }));
 
         Calendar.mockImplementation(() => ({
