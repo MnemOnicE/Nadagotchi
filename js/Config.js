@@ -111,6 +111,7 @@ export const Config = {
             SKILL_GAIN: 0.2
         },
         INTERACT_NPC: {
+            ENERGY_COST: 5,
             GIFT_HAPPINESS: 10,
             GIFT_SKILL_GAIN: 0.2,
             GIFT_RELATIONSHIP: 5,

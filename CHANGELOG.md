@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.20.1] - 2025-12-07
+
+### Fixed
+- **Infinite Chat Exploit:** Fixed a game balance bug where NPC interactions (`CHAT`) provided significant stat and skill gains (Happiness, Communication, Navigation) without consuming any energy.
+  - Added an `ENERGY_COST` of 5 to the `INTERACT_NPC` configuration.
+  - Updated `Nadagotchi.interact` to enforce this cost and prevent interaction when exhausted.
+  - Updated `MainScene` to gracefully handle failed interactions by suppressing the dialogue modal.
+
 ## [1.20.0] - 2025-12-07
 
 ### Added
