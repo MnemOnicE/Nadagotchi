@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.21.0] - 2025-12-07
+
+### Added
+- **Responsive UI Controls:** Implemented hover states (brightness boost) for all Neo-Retro buttons (`ButtonFactory.js`) to improve tactile feedback and UI responsiveness.
+- **Keyboard Navigation:** Added keyboard shortcuts for the main dashboard tabs in `UIScene.js` (1: Care, 2: Action, 3: System, 4: Ancestors) to improve accessibility and navigation speed.
 ## [1.20.2] - 2025-12-07
 
 ### Security

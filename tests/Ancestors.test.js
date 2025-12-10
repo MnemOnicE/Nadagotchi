@@ -48,7 +48,7 @@ class Scene {
             zone: jest.fn(mockGO),
         };
         this.add = addMock;
-        this.input = { on: jest.fn() };
+        this.input = { on: jest.fn(), keyboard: { on: jest.fn() } };
         this.time = { addEvent: jest.fn(), delayedCall: jest.fn() };
         this.cameras = {
             main: { width: 800, height: 600, setBackgroundColor: jest.fn(), setSize: jest.fn(), setViewport: jest.fn() },

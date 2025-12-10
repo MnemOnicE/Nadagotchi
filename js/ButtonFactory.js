@@ -41,6 +41,9 @@ export class ButtonFactory {
         // Base Background
         const bg = scene.add.rectangle(0, 0, width, height, baseColor).setOrigin(0);
 
+        // Hover Overlay (White, invisible by default) - Palette UX
+        const hoverOverlay = scene.add.rectangle(0, 0, width, height, 0xFFFFFF, 0).setOrigin(0);
+
         // Bevel Highlights (Top/Left)
         const highlightTop = scene.add.rectangle(0, 0, width, 3, 0xFFFFFF, 0.5).setOrigin(0);
         const highlightLeft = scene.add.rectangle(0, 0, 3, height, 0xFFFFFF, 0.5).setOrigin(0);
@@ -62,7 +65,8 @@ export class ButtonFactory {
             .setInteractive({ useHandCursor: true });
 
         // Add everything to container
-        container.add([shadow, bg, highlightTop, highlightLeft, shadeBottom, shadeRight, btnText, hitZone]);
+        // Order determines Z-index: shadow (back), bg, hoverOverlay, highlights/shades, text, hitZone (front)
+        container.add([shadow, bg, hoverOverlay, highlightTop, highlightLeft, shadeBottom, shadeRight, btnText, hitZone]);
 
         // Input Handling
         hitZone.on('pointerdown', () => {
@@ -70,8 +74,16 @@ export class ButtonFactory {
             container.x += 2;
             container.y += 2;
             shadow.setVisible(false);
-
             if (callback) callback();
+        });
+
+        // Hover Effects - Palette UX
+        hitZone.on('pointerover', () => {
+            scene.tweens.add({
+                targets: hoverOverlay,
+                alpha: 0.2, // Lighten the button
+                duration: 100
+            });
         });
 
         const resetState = () => {
@@ -80,6 +92,12 @@ export class ButtonFactory {
                 container.y -= 2;
                 shadow.setVisible(true);
             }
+            // Restore hover state
+            scene.tweens.add({
+                targets: hoverOverlay,
+                alpha: 0,
+                duration: 100
+            });
         };
 
         hitZone.on('pointerup', resetState);
