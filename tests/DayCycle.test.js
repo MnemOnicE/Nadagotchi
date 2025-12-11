@@ -22,6 +22,7 @@ class Scene {
             setStyle: jest.fn().mockReturnThis(),
             setOrigin: jest.fn().mockReturnThis(),
             setPosition: jest.fn().mockReturnThis(),
+            setAngle: jest.fn().mockReturnThis(),
             setFrame: jest.fn().mockReturnThis(),
             setScale: jest.fn().mockReturnThis(),
             setBlendMode: jest.fn().mockReturnThis(),
@@ -88,7 +89,7 @@ class Scene {
             get: jest.fn().mockReturnValue({ get: jest.fn(), getFrameNames: jest.fn().mockReturnValue([]), add: jest.fn() })
         };
         this.make = { graphics: jest.fn(() => gameObjectMock) };
-        this.tweens = { add: jest.fn() };
+        this.tweens = { add: jest.fn(), killTweensOf: jest.fn() };
         this.load = {
             spritesheet: jest.fn(),
             image: jest.fn(),

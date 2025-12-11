@@ -90,3 +90,17 @@
 **Line:** 233
 **Description:** The `calculateOffspring` method in `Nadagotchi.js` accepts a list of `environmentalFactors` (items) to influence the child's genetics but does not verify that the parent pet actually possesses these items in its inventory. This allows an attacker (or a bug) to inject arbitrary items into the breeding process, bypassing gameplay restrictions.
 **Fix:** Added a validation step at the beginning of `calculateOffspring` to filter the `environmentalFactors` array. The method now checks `this.inventory` for each item and ensures the quantity is greater than 0, discarding any items the player does not own before passing the list to `GeneticsSystem.breed`.
+
+---
+
+**File:** `tests/ExploitArtisanQuest.test.js`
+**Line:** 41, 68
+**Description:** The test calls `pet._handleArtisanQuest()` directly, but this method was refactored into the `RelationshipSystem` class and is no longer directly accessible on the `Nadagotchi` instance, causing a `TypeError`.
+**Fix:** Updated the test to call `pet.relationshipSystem._handleArtisanQuest()`.
+
+---
+
+**File:** `tests/DayCycle.test.js`
+**Line:** 513, 524
+**Description:** The mock for `this.tweens` in the test setup was missing the `killTweensOf` method, and `this.add.sprite()` mock was missing `setAngle`. This caused `TypeError`s when `MainScene.updateSpriteMood` attempted to start idle animations during the test execution.
+**Fix:** Added `killTweensOf` to the `tweens` mock and `setAngle` to the `add` mock in `tests/DayCycle.test.js`.

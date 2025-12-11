@@ -353,6 +353,12 @@ export class MainScene extends Phaser.Scene {
     drawSky() {
         if (!this.skyTexture || !this.skyTexture.context) return;
         const daylightFactor = this.worldClock.getDaylightFactor();
+
+        // OPTIMIZATION: Skip expensive gradient and star drawing if the sky state hasn't changed.
+        // This saves significant CPU cycles during the ~80% of the day/night cycle when light is static.
+        if (this.lastDaylightFactor === daylightFactor) return;
+        this.lastDaylightFactor = daylightFactor;
+
         const nightTop = new Phaser.Display.Color(0, 0, 51);
         const nightBottom = new Phaser.Display.Color(0, 0, 0);
         const dawnTop = new Phaser.Display.Color(255, 153, 102);
@@ -397,6 +403,13 @@ export class MainScene extends Phaser.Scene {
      */
     drawLight() {
         if (!this.lightTexture) return;
+
+        // OPTIMIZATION: Skip expensive radial gradient creation if the light source (sprite) hasn't moved.
+        // This avoids unnecessary canvas operations during idle animations where position is static.
+        if (this.lastLightX === this.sprite.x && this.lastLightY === this.sprite.y) return;
+        this.lastLightX = this.sprite.x;
+        this.lastLightY = this.sprite.y;
+
         this.lightTexture.clear();
         // Use the current size
         const width = this.lightTexture.width;
@@ -418,6 +431,11 @@ export class MainScene extends Phaser.Scene {
      */
     resize(gameSize) {
         const { width, height } = gameSize;
+
+        // Force redraw of sky and light on resize
+        this.lastDaylightFactor = -1;
+        this.lastLightX = -9999;
+        this.lastLightY = -9999;
 
         // --- VIEWPORT ADJUSTMENT FOR DASHBOARD ---
         // Reserve bottom 25% for the UI Shell (matches UIScene layout)
