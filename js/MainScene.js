@@ -36,6 +36,8 @@ export class MainScene extends Phaser.Scene {
         this.placedFurniture = [];
         /** @type {?string} The career associated with the currently active minigame (for validation). */
         this.activeMinigameCareer = null;
+        /** @type {?string} Tracks the current visual mood to optimize animation updates. */
+        this.currentMood = null;
     }
 
     /**
@@ -424,7 +426,12 @@ export class MainScene extends Phaser.Scene {
         this.cameras.main.setViewport(0, 0, width, gameHeight);
 
         // Update elements to fit within the new gameHeight
-        this.sprite.setPosition(width / 2, gameHeight / 2);
+        // Restart animation to recalculate center position for tweens
+        if (this.currentMood) {
+            this.startIdleAnimation(this.currentMood);
+        } else {
+            this.sprite.setPosition(width / 2, gameHeight / 2);
+        }
 
         // Resize dynamic textures to match the game view
         if (this.lightTexture) this.lightTexture.setSize(width, gameHeight);
@@ -481,11 +488,91 @@ export class MainScene extends Phaser.Scene {
     }
 
     /**
-     * Updates the pet's sprite frame to reflect its current mood.
+     * Updates the pet's sprite frame and animation to reflect its current mood.
+     * Only triggers updates when the mood actually changes to prevent jitter.
      */
     updateSpriteMood() {
-        const moodMap = { 'happy': 0, 'neutral': 1, 'sad': 2, 'angry': 3 };
-        this.sprite.setFrame(moodMap[this.nadagotchi.mood] ?? 1);
+        if (this.currentMood !== this.nadagotchi.mood) {
+            this.currentMood = this.nadagotchi.mood;
+            const moodMap = { 'happy': 0, 'neutral': 1, 'sad': 2, 'angry': 3 };
+            this.sprite.setFrame(moodMap[this.currentMood] ?? 1);
+            this.startIdleAnimation(this.currentMood);
+        }
+    }
+
+    /**
+     * Starts a procedural idle animation based on the pet's mood.
+     * Uses Phaser Tweens to create life-like movement (bouncing, swaying, breathing).
+     * @param {string} mood - The current mood ('happy', 'sad', 'angry', 'neutral').
+     */
+    startIdleAnimation(mood) {
+        // Kill existing tweens on the sprite to prevent conflicts
+        this.tweens.killTweensOf(this.sprite);
+
+        // Calculate center position
+        const dashboardHeight = Math.floor(this.scale.height * 0.25);
+        const gameHeight = this.scale.height - dashboardHeight;
+        const centerX = this.scale.width / 2;
+        const centerY = gameHeight / 2;
+
+        // Reset properties to base state
+        this.sprite.setPosition(centerX, centerY);
+        this.sprite.setScale(4);
+        this.sprite.setAngle(0);
+
+        switch (mood) {
+            case 'happy':
+                // Happy Hop: Squash and Stretch + Jump
+                this.tweens.add({
+                    targets: this.sprite,
+                    y: centerY - 15,
+                    scaleY: 3.8,
+                    scaleX: 4.2,
+                    duration: 400,
+                    yoyo: true,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                });
+                break;
+
+            case 'sad':
+                // Sad Sway: Slow rotation
+                this.tweens.add({
+                    targets: this.sprite,
+                    angle: { from: -5, to: 5 },
+                    duration: 1500,
+                    yoyo: true,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                });
+                break;
+
+            case 'angry':
+                // Angry Shake: Fast horizontal vibration
+                this.tweens.add({
+                    targets: this.sprite,
+                    x: { from: centerX - 3, to: centerX + 3 },
+                    duration: 50,
+                    yoyo: true,
+                    repeat: -1,
+                    ease: 'Linear'
+                });
+                break;
+
+            case 'neutral':
+            default:
+                // Breathing: Subtle Scale Y
+                this.tweens.add({
+                    targets: this.sprite,
+                    scaleY: 4.1, // Slight stretch up
+                    scaleX: 3.9, // Slight squash in
+                    duration: 1500,
+                    yoyo: true,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                });
+                break;
+        }
     }
 
     /**

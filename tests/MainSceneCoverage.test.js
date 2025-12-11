@@ -27,6 +27,7 @@ const mockGameObject = () => {
         setStrokeStyle: jest.fn().mockReturnThis(),
         setBlendMode: jest.fn().mockReturnThis(),
         setScale: jest.fn().mockReturnThis(),
+        setAngle: jest.fn().mockReturnThis(),
         setFrame: jest.fn().mockReturnThis(),
         clear: jest.fn(),
         fillStyle: jest.fn().mockReturnThis(),
@@ -190,6 +191,10 @@ describe('MainScene Coverage', () => {
             delayedCall: jest.fn()
         };
         scene.input = { on: jest.fn(), off: jest.fn() };
+        scene.tweens = {
+            add: jest.fn(),
+            killTweensOf: jest.fn()
+        };
     });
 
     test('create should initialize systems and objects', () => {

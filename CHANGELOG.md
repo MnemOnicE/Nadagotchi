@@ -12,6 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - This improves maintainability, reduces the complexity of the main `Nadagotchi` class (God Object refactor), and isolates game subsystems.
   - The `RelationshipSystem` operates on the pet's existing data structure, ensuring 100% backward compatibility with save files.
 
+### Added
+- **Procedural Pet Animations:** Implemented dynamic idle animations in `MainScene.js` using Phaser Tweens. The pet now reacts visually to its mood:
+  - **Happy:** Bouncing/Hopping.
+  - **Sad:** Slow swaying.
+  - **Angry:** Shaking.
+  - **Neutral:** Gentle breathing.
+
 ## [1.22.0] - 2025-12-07
 
 ### Added
