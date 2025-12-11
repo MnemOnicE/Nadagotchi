@@ -83,6 +83,8 @@ jest.mock('../js/ButtonFactory', () => {
                     setAlpha: jest.fn().mockReturnThis(),
                     setVisible: jest.fn().mockReturnThis(),
                     setScale: jest.fn().mockReturnThis(),
+                    setInteractive: jest.fn().mockReturnThis(),
+                    disableInteractive: jest.fn().mockReturnThis(),
                     destroy: jest.fn(),
                     x: x,
                     y: y
@@ -109,6 +111,19 @@ jest.mock('../js/PersistenceManager', () => {
     };
 });
 
+// Mock SoundSynthesizer
+const mockPlayFailure = jest.fn();
+jest.mock('../js/utils/SoundSynthesizer', () => {
+    return {
+        SoundSynthesizer: {
+            instance: {
+                playFailure: mockPlayFailure,
+                playChime: jest.fn()
+            }
+        }
+    };
+});
+
 const { UIScene } = require('../js/UIScene');
 const { EventKeys } = require('../js/EventKeys');
 
@@ -121,6 +136,7 @@ describe('UIScene', () => {
         mockLoadJournal.mockClear();
         mockLoadRecipes.mockClear();
         mockLoadHallOfFame.mockClear();
+        mockPlayFailure.mockClear();
 
         mockAdd = {
             text: jest.fn(() => new Phaser.GameObjects.Text()),
@@ -136,6 +152,7 @@ describe('UIScene', () => {
 
         scene = new UIScene();
         scene.add = mockAdd;
+        scene.tweens = { add: jest.fn() };
         scene.cameras = {
             main: {
                 width: 800,
@@ -222,13 +239,49 @@ describe('UIScene', () => {
         expect(textCall).toContain('Adventurer');
 
         // Check Job Board enabled (since currentCareer exists)
-        expect(scene.jobBoardButton.setInteractive).toHaveBeenCalled();
+        // Correct behavior: alpha set to 1.0 (not setInteractive)
+        expect(scene.jobBoardButton.setAlpha).toHaveBeenCalledWith(1.0);
 
         // Check Retire button visible (isLegacyReady)
         expect(scene.retireButton.setVisible).toHaveBeenCalledWith(true);
 
         // Check Scanner button visible
         expect(scene.scannerButton.setVisible).toHaveBeenCalledWith(true);
+    });
+
+    test('Job Board button provides feedback when disabled', () => {
+        scene.create();
+
+        // Mock data with NO career
+        scene.nadagotchiData = { currentCareer: null };
+
+        // Manually trigger the Job Board click handler
+        // Note: We need to ensure jobBoardButton is created and callback calls handleJobBoardClick
+        // But since we are unit testing the scene method:
+        scene.handleJobBoardClick();
+
+        // Should NOT emit WORK event
+        expect(mockGameEvents.emit).not.toHaveBeenCalledWith(EventKeys.UI_ACTION, EventKeys.WORK);
+
+        // Should play failure sound
+        expect(mockPlayFailure).toHaveBeenCalled();
+
+        // Should show toast (check add.container called)
+        expect(mockAdd.container).toHaveBeenCalled();
+        // Check text in toast
+        expect(mockAdd.text).toHaveBeenCalledWith(expect.any(Number), expect.any(Number), "Job Board Locked", expect.anything());
+    });
+
+    test('Job Board button emits WORK when enabled', () => {
+        scene.create();
+
+        // Mock data WITH career
+        scene.nadagotchiData = { currentCareer: 'Innovator' };
+
+        scene.handleJobBoardClick();
+
+        expect(mockGameEvents.emit).toHaveBeenCalledWith(EventKeys.UI_ACTION, EventKeys.WORK);
+        expect(mockPlayFailure).not.toHaveBeenCalled();
     });
 
     test('should open modals correctly', () => {
@@ -296,17 +349,6 @@ describe('UIScene', () => {
 
         volUp.emit('pointerdown');
         // 0.4 -> 0.5 (assuming previous state isn't persisted in test mock)
-        // Actually, createSettingsModal closure captures local vars?
-        // No, it reads `this.settingsData`.
-        // `updateStatsUI` hasn't been called, so `this.settingsData` is undefined.
-        // `openSettingsMenu` sets default if undefined.
-        // So volume starts at 0.5.
-        // volDown -> 0.4.
-        // this.settingsData.volume is updated in callback.
-
-        // Reset state for volUp test?
-        // volUp reads `this.settingsData.volume` which is now 0.4.
-        // 0.4 + 0.1 = 0.5.
         expect(mockGameEvents.emit).toHaveBeenCalledWith(EventKeys.UPDATE_SETTINGS, { volume: 0.5 });
 
         // Test Speed Buttons
