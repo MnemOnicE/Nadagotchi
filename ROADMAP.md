@@ -73,6 +73,7 @@ This phase focuses on building out the primary gameplay loops, giving players cl
     -   [x] **In-Game Settings/Options:** Implemented persistent settings for volume and gameplay speed.
     -   [x] Refactored core loop to be delta-time based to support variable game speeds and framerate independence.
     -   [x] **Accessibility & Polish:** Implemented keyboard navigation for tabs and improved button visual feedback (hover states).
+    -   [x] **UI Window Management:** Implemented exclusive window management to prevent menu stacking (Inventory over Journal, etc.).
 
 ---
 

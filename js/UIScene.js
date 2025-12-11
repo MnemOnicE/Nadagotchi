@@ -35,6 +35,7 @@ export class UIScene extends Phaser.Scene {
         this.currentTab = 'CARE';
         this.tabButtons = [];
         this.actionButtons = [];
+        this.allModals = []; // Track all modals for exclusive management
 
         // --- Dashboard Background ---
         this.dashboardBg = this.add.rectangle(0, 0, 1, 1, 0xA3B8A2).setOrigin(0); // Soft Olive Green
@@ -117,6 +118,14 @@ export class UIScene extends Phaser.Scene {
         this.input.keyboard.on('keydown-TWO', () => this.showTab('ACTION'));
         this.input.keyboard.on('keydown-THREE', () => this.showTab('SYSTEM'));
         this.input.keyboard.on('keydown-FOUR', () => this.showTab('ANCESTORS'));
+    }
+
+    /**
+     * Helper method to close all tracked modals.
+     * Call this before opening any new modal to ensure exclusive visibility.
+     */
+    closeAllModals() {
+        this.allModals.forEach(modal => modal.setVisible(false));
     }
 
     /**
@@ -362,6 +371,9 @@ export class UIScene extends Phaser.Scene {
     onClickScanner() {
         if (!this.nadagotchiData || !this.nadagotchiData.genome) return;
 
+        // Ensure other modals are closed
+        this.closeAllModals();
+
         let displayText = "GENETIC ANALYSIS:\n\n";
         const genotype = this.nadagotchiData.genome.genotype;
 
@@ -403,12 +415,14 @@ export class UIScene extends Phaser.Scene {
      * Initiates the tutorial sequence.
      */
     startTutorial() {
+        this.closeAllModals(); // Close any other open modals
         this.scene.pause('MainScene');
         // ... (Tutorial implementation remains same, reused via createModal or separate group)
         // Note: Original code had specific implementation. I'll paste it here.
         const width = this.cameras.main.width;
         const height = this.cameras.main.height;
         const group = this.add.group();
+        this.allModals.push(group); // Track this temporary modal as well (optional but safe)
 
         const bg = this.add.rectangle(width/2, height/2, 400, 300, 0x000000, 0.9).setStrokeStyle(2, 0xFFFFFF);
         const title = this.add.text(width/2, height/2 - 100, "SYSTEM GREETER", { fontFamily: 'VT323', fontSize: '32px', color: '#00FF00' }).setOrigin(0.5);
@@ -418,11 +432,14 @@ export class UIScene extends Phaser.Scene {
 
         const yesBtn = ButtonFactory.createButton(this, width/2 - 60, height/2 + 80, "Yes", () => {
              group.destroy(true);
+             // Remove from tracking array if destroyed
+             this.allModals = this.allModals.filter(m => m !== group);
              this.runTutorialSequence();
         }, { width: 100, height: 40, color: 0x4CAF50 });
 
         const noBtn = ButtonFactory.createButton(this, width/2 + 60, height/2 + 80, "No", () => {
              group.destroy(true);
+             this.allModals = this.allModals.filter(m => m !== group);
              this.scene.resume('MainScene');
         }, { width: 100, height: 40, color: 0xF44336 });
 
@@ -506,6 +523,9 @@ export class UIScene extends Phaser.Scene {
      */
     createModal(title) {
         const modalGroup = this.add.group();
+        // Register this modal for exclusive visibility management
+        this.allModals.push(modalGroup);
+
         const modalWidth = Math.min(500, this.cameras.main.width - 40);
         const modalHeight = Math.min(400, this.cameras.main.height - 100);
 
@@ -529,6 +549,9 @@ export class UIScene extends Phaser.Scene {
     }
 
     showDialogue(npcName, text) {
+        // Ensure other modals are closed
+        this.closeAllModals();
+
         // 1. Reuse the generic modal
         // 2. Set the Title to the NPC Name
         this.dialogueModal.modalTitle.setText(npcName);
@@ -540,6 +563,7 @@ export class UIScene extends Phaser.Scene {
     }
 
     openJournal() {
+        this.closeAllModals();
         const entries = new PersistenceManager().loadJournal();
         if (entries.length === 0) {
             this.journalModal.content.setText("No entries yet.");
@@ -552,6 +576,7 @@ export class UIScene extends Phaser.Scene {
     }
 
     openRecipeBook() {
+        this.closeAllModals();
         const discovered = (this.nadagotchiData && this.nadagotchiData.discoveredRecipes) || new PersistenceManager().loadRecipes();
         const allRecipes = (this.nadagotchiData && this.nadagotchiData.recipes) || {};
         let text = "";
@@ -577,6 +602,7 @@ export class UIScene extends Phaser.Scene {
     }
 
     openHobbyMenu() {
+        this.closeAllModals();
         if (!this.nadagotchiData) return;
         const text = Object.entries(this.nadagotchiData.hobbies).map(([hobby, level]) => `${hobby}: Level ${level}`).join('\n');
         this.hobbyModal.content.setText(text);
@@ -585,6 +611,7 @@ export class UIScene extends Phaser.Scene {
     }
 
     openCraftingMenu() {
+        this.closeAllModals();
         if (!this.nadagotchiData) return;
         if (this.craftingButtons) {
             this.craftingButtons.forEach(btn => btn.destroy());
@@ -617,6 +644,7 @@ export class UIScene extends Phaser.Scene {
     }
 
     openRelationshipMenu() {
+        this.closeAllModals();
         if (!this.nadagotchiData) return;
         const text = Object.entries(this.nadagotchiData.relationships).map(([npc, data]) => `${npc}: Friendship ${data.level}`).join('\n');
         this.relationshipModal.content.setText(text);
@@ -625,6 +653,7 @@ export class UIScene extends Phaser.Scene {
     }
 
     openDecorateMenu() {
+        this.closeAllModals();
         if (!this.nadagotchiData) return;
         if (this.decorateButtons) {
             this.decorateButtons.forEach(btn => btn.destroy());
@@ -653,6 +682,7 @@ export class UIScene extends Phaser.Scene {
     }
 
     openInventoryMenu() {
+        this.closeAllModals();
         if (!this.nadagotchiData) return;
         if (this.inventoryButtons) {
             this.inventoryButtons.forEach(btn => btn.destroy());
@@ -696,6 +726,7 @@ export class UIScene extends Phaser.Scene {
     }
 
     openAncestorModal(ancestorData) {
+        this.closeAllModals();
         if (!ancestorData) return;
         const advice = NarrativeSystem.getAdvice(ancestorData.dominantArchetype);
         let text = `Name: Generation ${ancestorData.generation}\n`;
@@ -837,6 +868,8 @@ export class UIScene extends Phaser.Scene {
      * Opens the settings menu and updates the UI state.
      */
     openSettingsMenu() {
+        this.closeAllModals();
+
         if (!this.settingsData) {
             this.settingsData = { volume: Config.SETTINGS.DEFAULT_VOLUME, gameSpeed: Config.SETTINGS.DEFAULT_SPEED };
         }
