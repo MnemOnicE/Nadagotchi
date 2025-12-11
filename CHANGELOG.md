@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.23.0] - 2025-12-07
+
+### Refactored
+- **Codebase Architecture:** Extracted NPC and quest interaction logic from the monolithic `Nadagotchi.js` into a dedicated `RelationshipSystem.js` (`js/systems/RelationshipSystem.js`).
+  - This improves maintainability, reduces the complexity of the main `Nadagotchi` class (God Object refactor), and isolates game subsystems.
+  - The `RelationshipSystem` operates on the pet's existing data structure, ensuring 100% backward compatibility with save files.
+
 ## [1.22.0] - 2025-12-07
 
 ### Added

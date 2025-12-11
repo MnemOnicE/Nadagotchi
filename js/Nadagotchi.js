@@ -4,6 +4,7 @@ import { NarrativeSystem } from './NarrativeSystem.js';
 import { Config } from './Config.js';
 import { Recipes } from './ItemData.js';
 import { SeededRandom } from './utils/SeededRandom.js';
+import { RelationshipSystem } from './systems/RelationshipSystem.js';
 
 /**
  * @fileoverview Core logic for the Nadagotchi pet.
@@ -175,6 +176,15 @@ export class Nadagotchi {
             'Master Artisan': { level: 0 },
             'Sickly Villager': { level: 0 }
         };
+
+        // Initialize Relationship System (Logic Extracted)
+        // We make it non-enumerable so it is not saved to JSON automatically
+        Object.defineProperty(this, 'relationshipSystem', {
+            value: new RelationshipSystem(this),
+            enumerable: false,
+            writable: true
+        });
+
         /** @type {Object.<string, object>} A map of active quests. */
         this.quests = (loadedData && loadedData.quests) ? loadedData.quests : {};
 
@@ -494,7 +504,7 @@ export class Nadagotchi {
 
                 this.stats.energy = Math.max(0, this.stats.energy - Config.ACTIONS.STUDY.ENERGY_COST);
                 this.stats.happiness = Math.max(0, this.stats.happiness - Config.ACTIONS.STUDY.HAPPINESS_COST);
-                moodMultiplier = this._getMoodMultiplier();
+                moodMultiplier = this.getMoodMultiplier();
                 this.skills.logic += (Config.ACTIONS.STUDY.SKILL_GAIN * moodMultiplier);
                 this.skills.research += (Config.ACTIONS.STUDY.SKILL_GAIN * moodMultiplier);
 
@@ -529,7 +539,7 @@ export class Nadagotchi {
                     this.stats.happiness += Config.ACTIONS.INTERACT_BOOKSHELF.HAPPINESS_RESTORE_INTELLECTUAL;
                     this.mood = 'happy';
                 }
-                moodMultiplier = this._getMoodMultiplier();
+                moodMultiplier = this.getMoodMultiplier();
                 this.skills.logic += (Config.ACTIONS.INTERACT_BOOKSHELF.SKILL_GAIN * moodMultiplier);
                 this.skills.research += (Config.ACTIONS.INTERACT_BOOKSHELF.SKILL_GAIN * moodMultiplier);
                 this.personalityPoints.Intellectual++;
@@ -544,7 +554,7 @@ export class Nadagotchi {
                     this.stats.happiness += Config.ACTIONS.INTERACT_PLANT.HAPPINESS_RESTORE_NURTURER;
                     this.mood = 'happy';
                 }
-                moodMultiplier = this._getMoodMultiplier();
+                moodMultiplier = this.getMoodMultiplier();
                 this.skills.empathy += (Config.ACTIONS.INTERACT_PLANT.SKILL_GAIN * moodMultiplier);
 
                 // Homozygous Nurturer Bonus: Boost Empathy Gain
@@ -564,7 +574,7 @@ export class Nadagotchi {
                     this.stats.happiness += Config.ACTIONS.INTERACT_FANCY_BOOKSHELF.HAPPINESS_RESTORE_INTELLECTUAL; // Even better for intellectuals
                     this.mood = 'happy';
                 }
-                moodMultiplier = this._getMoodMultiplier();
+                moodMultiplier = this.getMoodMultiplier();
                 this.skills.logic += (Config.ACTIONS.INTERACT_FANCY_BOOKSHELF.SKILL_GAIN * moodMultiplier); // Higher buff
                 this.skills.research += (Config.ACTIONS.INTERACT_FANCY_BOOKSHELF.SKILL_GAIN * moodMultiplier);
                 this.personalityPoints.Intellectual += Config.ACTIONS.INTERACT_FANCY_BOOKSHELF.PERSONALITY_GAIN;
@@ -599,7 +609,7 @@ export class Nadagotchi {
             case "MEDITATE":
                 this.stats.energy = Math.min(this.maxStats.energy, this.stats.energy + Config.ACTIONS.MEDITATE.ENERGY_RESTORE);
                 this.stats.happiness += Config.ACTIONS.MEDITATE.HAPPINESS_RESTORE;
-                moodMultiplier = this._getMoodMultiplier();
+                moodMultiplier = this.getMoodMultiplier();
                 this.skills.focus += (Config.ACTIONS.MEDITATE.SKILL_GAIN * moodMultiplier);
                 if (this.dominantArchetype === "Recluse") this.personalityPoints.Recluse += Config.ACTIONS.MEDITATE.PERSONALITY_GAIN_RECLUSE;
 
@@ -759,7 +769,7 @@ export class Nadagotchi {
             this.quests['masterwork_crafting'].hasCraftedChair = true;
         }
 
-        const moodMultiplier = this._getMoodMultiplier();
+        const moodMultiplier = this.getMoodMultiplier();
         this.skills.crafting += (Config.ACTIONS.CRAFT.SKILL_GAIN * moodMultiplier);
         this.addJournalEntry(`I successfully crafted a ${itemName}!`);
     }
@@ -772,7 +782,7 @@ export class Nadagotchi {
 
         this.location = 'Forest';
         this.stats.energy -= Config.ACTIONS.FORAGE.ENERGY_COST;
-        const moodMultiplier = this._getMoodMultiplier();
+        const moodMultiplier = this.getMoodMultiplier();
         this.skills.navigation += (Config.ACTIONS.FORAGE.SKILL_GAIN * moodMultiplier);
 
         const potentialItems = ['Berries', 'Sticks', 'Shiny Stone'];
@@ -799,113 +809,14 @@ export class Nadagotchi {
      * @returns {string} The dialogue text to display.
      */
     interact(npcName, interactionType = 'CHAT') {
-        if (!this.relationships.hasOwnProperty(npcName)) {
-            return;
-        }
-
-        // Check for energy cost
-        if (this.stats.energy < Config.ACTIONS.INTERACT_NPC.ENERGY_COST) {
-            this.addJournalEntry("I'm too tired to interact right now.");
-            return null;
-        }
-
-        this.stats.energy -= Config.ACTIONS.INTERACT_NPC.ENERGY_COST;
-
-        if (interactionType === 'GIFT' && this.inventory['Berries'] > 0) {
-            this._removeItem('Berries', 1);
-            this.relationships[npcName].level += Config.ACTIONS.INTERACT_NPC.GIFT_RELATIONSHIP;
-            this.stats.happiness += Config.ACTIONS.INTERACT_NPC.GIFT_HAPPINESS;
-            this.skills.empathy += Config.ACTIONS.INTERACT_NPC.GIFT_SKILL_GAIN;
-            const text = "Thanks for the gift!";
-            this.addJournalEntry(`I gave Berries to ${npcName}. They seemed to like it!`);
-            return text;
-        }
-
-        const moodMultiplier = this._getMoodMultiplier();
-        this.relationships[npcName].level += Config.ACTIONS.INTERACT_NPC.CHAT_RELATIONSHIP;
-        this.stats.happiness += Config.ACTIONS.INTERACT_NPC.CHAT_HAPPINESS;
-        this.skills.communication += Config.ACTIONS.INTERACT_NPC.CHAT_SKILL_GAIN;
-
-        switch (npcName) {
-            case 'Grizzled Scout':
-                this.skills.navigation += Config.ACTIONS.INTERACT_NPC.SCOUT_SKILL_GAIN * moodMultiplier;
-                break;
-            case 'Master Artisan':
-                if (this.relationships['Master Artisan'].level >= 5) {
-                    this._handleArtisanQuest();
-                } else {
-                    this.skills.crafting += Config.ACTIONS.INTERACT_NPC.ARTISAN_SKILL_GAIN * moodMultiplier;
-                }
-                break;
-            case 'Sickly Villager':
-                this.skills.empathy += Config.ACTIONS.INTERACT_NPC.VILLAGER_SKILL_GAIN * moodMultiplier;
-                break;
-        }
-
-        const relLevel = this.relationships[npcName].level;
-        // Check quest active state: Exists AND is not completed (Stage 3 is complete)
-        const quest = this.quests['masterwork_crafting'];
-        const hasQuest = (quest && quest.stage < 3 && npcName === 'Master Artisan');
-
-        const dialogueText = NarrativeSystem.getNPCDialogue(npcName, relLevel, hasQuest);
-        this.addJournalEntry(`Chatted with ${npcName}: "${dialogueText}"`);
-
-        return dialogueText;
-    }
-
-    /**
-     * Handles the logic for the Master Artisan's quest line.
-     * @private
-     */
-    _handleArtisanQuest() {
-        if (!this.quests['masterwork_crafting']) {
-            this.quests['masterwork_crafting'] = { stage: 1, name: 'Masterwork Crafting' };
-            this.addJournalEntry("The Master Artisan sees potential in me. He asked for 5 Sticks to prove my dedication.");
-            return;
-        }
-
-        const quest = this.quests['masterwork_crafting'];
-
-        if (quest.stage === 1) {
-            if ((this.inventory['Sticks'] || 0) >= 5) {
-                // Check if we already know the recipe (unlikely if in stage 1, but safe)
-                if (this.discoverRecipe("Masterwork Chair")) {
-                    this._removeItem('Sticks', 5);
-                    quest.stage = 2;
-                    this.addJournalEntry("I gave the Sticks to the Artisan. He taught me how to make a Masterwork Chair! I need to craft one to show him.");
-                } else {
-                     // Should not happen unless they learned it elsewhere
-                     // Advance quest anyway if they already know it
-                    this._removeItem('Sticks', 5);
-                    quest.stage = 2;
-                }
-            } else {
-                this.addJournalEntry("The Master Artisan is waiting for 5 Sticks.");
-            }
-        } else if (quest.stage === 2) {
-            if (quest.hasCraftedChair && this.inventory['Masterwork Chair'] && this.inventory['Masterwork Chair'] > 0) {
-                this._removeItem('Masterwork Chair', 1);
-                quest.stage = 3;
-                this.skills.crafting += Config.ACTIONS.INTERACT_NPC.QUEST_CRAFTING_GAIN;
-                this.stats.happiness += Config.ACTIONS.INTERACT_NPC.QUEST_HAPPINESS_GAIN;
-                this.addJournalEntry("The Master Artisan was impressed by my chair! He declared me a true craftsman.");
-            } else {
-                this.addJournalEntry("I need to craft a Masterwork Chair to show the Artisan.");
-            }
-        } else {
-            // Completed
-            const moodMultiplier = this._getMoodMultiplier();
-            this.skills.crafting += 0.2 * moodMultiplier;
-            this.addJournalEntry("The Master Artisan greeted me warmly as a fellow master. We discussed advanced crafting theory.");
-        }
+        return this.relationshipSystem.interact(npcName, interactionType);
     }
 
     /**
      * Calculates the skill gain multiplier based on the pet's current mood.
      * @returns {number} The calculated mood multiplier (e.g., 1.5 for happy, 0.5 for sad).
-     * @private
      */
-    _getMoodMultiplier() {
+    getMoodMultiplier() {
         switch (this.mood) {
             case 'happy': return Config.MOOD_MULTIPLIERS.HAPPY;
             case 'sad': return Config.MOOD_MULTIPLIERS.SAD;
