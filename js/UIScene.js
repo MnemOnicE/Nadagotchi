@@ -5,6 +5,7 @@ import { EventKeys } from './EventKeys.js';
 import { ItemDefinitions } from './ItemData.js';
 import { Config } from './Config.js';
 import { SoundSynthesizer } from './utils/SoundSynthesizer.js';
+import { Achievements } from './AchievementData.js';
 
 /**
  * @fileoverview Manages the "Physical Shell" UI layer of the game.
@@ -105,6 +106,7 @@ export class UIScene extends Phaser.Scene {
         this.scannerModal = this.createModal("Genetic Scanner");
         this.ancestorModal = this.createModal("Hall of Ancestors");
         this.inventoryModal = this.createModal("Inventory");
+        this.achievementsModal = this.createModal("Achievements");
         this.dialogueModal = this.createModal("Conversation");
         this.settingsModal = this.createSettingsModal();
 
@@ -188,6 +190,7 @@ export class UIScene extends Phaser.Scene {
                 { text: 'Inventory', action: EventKeys.OPEN_INVENTORY },
                 { text: 'Recipes', action: EventKeys.OPEN_RECIPES },
                 { text: 'Hobbies', action: EventKeys.OPEN_HOBBIES },
+                { text: 'Achievements', action: EventKeys.OPEN_ACHIEVEMENTS },
                 { text: 'Decorate', action: EventKeys.DECORATE },
                 { text: 'Settings', action: EventKeys.OPEN_SETTINGS },
                 { text: 'Retire', action: EventKeys.RETIRE, condition: () => this.nadagotchiData && this.nadagotchiData.isLegacyReady }
@@ -312,6 +315,7 @@ export class UIScene extends Phaser.Scene {
             case EventKeys.INTERACT_NPC: this.openRelationshipMenu(); break;
             case EventKeys.OPEN_ANCESTOR_MODAL: this.openAncestorModal(data); break;
             case EventKeys.OPEN_INVENTORY: this.openInventoryMenu(); break;
+            case EventKeys.OPEN_ACHIEVEMENTS: this.openAchievementsModal(); break;
             case EventKeys.OPEN_SETTINGS: this.openSettingsMenu(); break;
         }
     }
@@ -740,6 +744,26 @@ export class UIScene extends Phaser.Scene {
         text += `Ancestral Advice:\n"${advice}"`;
         this.ancestorModal.content.setText(text);
         this.ancestorModal.setVisible(true);
+        this.scene.pause('MainScene');
+    }
+
+    openAchievementsModal() {
+        this.closeAllModals();
+        const achievementState = new PersistenceManager().loadAchievements();
+        const unlockedIds = achievementState.unlocked || [];
+
+        let text = "";
+
+        Achievements.forEach(ach => {
+            if (unlockedIds.includes(ach.id)) {
+                text += `${ach.icon} ${ach.name}\n${ach.description}\n\n`;
+            } else {
+                text += `🔒 ${ach.name}\n(Locked)\n\n`;
+            }
+        });
+
+        this.achievementsModal.content.setText(text);
+        this.achievementsModal.setVisible(true);
         this.scene.pause('MainScene');
     }
 
