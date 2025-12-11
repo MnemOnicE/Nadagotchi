@@ -4,6 +4,7 @@ import { NarrativeSystem } from './NarrativeSystem.js';
 import { EventKeys } from './EventKeys.js';
 import { ItemDefinitions } from './ItemData.js';
 import { Config } from './Config.js';
+import { SoundSynthesizer } from './utils/SoundSynthesizer.js';
 
 /**
  * @fileoverview Manages the "Physical Shell" UI layer of the game.
@@ -747,6 +748,7 @@ export class UIScene extends Phaser.Scene {
      * @param {object} achievement - The unlocked achievement object.
      */
     handleAchievementUnlocked(achievement) {
+        SoundSynthesizer.instance.playChime();
         this.showToast("Achievement Unlocked!", achievement.name, achievement.icon);
     }
 

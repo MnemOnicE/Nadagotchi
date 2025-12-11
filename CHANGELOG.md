@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.23.0] - 2025-12-07
+
+### Refactored
+- **Codebase Architecture:** Extracted NPC and quest interaction logic from the monolithic `Nadagotchi.js` into a dedicated `RelationshipSystem.js` (`js/systems/RelationshipSystem.js`).
+  - This improves maintainability, reduces the complexity of the main `Nadagotchi` class (God Object refactor), and isolates game subsystems.
+  - The `RelationshipSystem` operates on the pet's existing data structure, ensuring 100% backward compatibility with save files.
+
+### Added
+- **Procedural Pet Animations:** Implemented dynamic idle animations in `MainScene.js` using Phaser Tweens. The pet now reacts visually to its mood:
+  - **Happy:** Bouncing/Hopping.
+  - **Sad:** Slow swaying.
+  - **Angry:** Shaking.
+  - **Neutral:** Gentle breathing.
+- **Procedural Sound System:** Implemented `js/utils/SoundSynthesizer.js`, a Web Audio API-based sound engine that generates retro-style SFX (blips, chimes, buzzes) without loading external assets.
+  - **Interaction Sounds:** UI buttons now emit a satisfying "click" sound.
+  - **Feedback Sounds:** Minigames and careers now have "success" and "failure" audio cues.
+  - **Achievement Chime:** Unlocking an achievement triggers a celebratory rising chime.
+
 ## [1.22.0] - 2025-12-07
 
 ### Added

@@ -27,6 +27,7 @@ const mockGameObject = () => {
         setStrokeStyle: jest.fn().mockReturnThis(),
         setBlendMode: jest.fn().mockReturnThis(),
         setScale: jest.fn().mockReturnThis(),
+        setAngle: jest.fn().mockReturnThis(),
         setFrame: jest.fn().mockReturnThis(),
         clear: jest.fn(),
         fillStyle: jest.fn().mockReturnThis(),
@@ -76,6 +77,16 @@ jest.mock('../js/Calendar');
 jest.mock('../js/EventManager');
 jest.mock('../js/WorldClock');
 jest.mock('../js/WeatherSystem');
+jest.mock('../js/utils/SoundSynthesizer', () => ({
+    SoundSynthesizer: {
+        instance: {
+            playClick: jest.fn(),
+            playSuccess: jest.fn(),
+            playFailure: jest.fn(),
+            playChime: jest.fn()
+        }
+    }
+}));
 
 const { MainScene } = require('../js/MainScene');
 const { Nadagotchi } = require('../js/Nadagotchi');
@@ -190,6 +201,10 @@ describe('MainScene Coverage', () => {
             delayedCall: jest.fn()
         };
         scene.input = { on: jest.fn(), off: jest.fn() };
+        scene.tweens = {
+            add: jest.fn(),
+            killTweensOf: jest.fn()
+        };
     });
 
     test('create should initialize systems and objects', () => {
