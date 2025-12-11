@@ -107,31 +107,23 @@ describe('Feature Enhancements', () => {
     });
 
     describe('Environmental Influence Expansion', () => {
+        // Deterministic RNG Mock to prevent mutation during testing
+        const mockRNG = {
+            random: () => 0.5, // Always > 0.05 to prevent mutation
+            range: (min, max) => min,
+            choice: (arr) => arr[0]
+        };
+
         test('Expanded envMap includes crafted items and resources', () => {
-            // We can test this by calling breed with new items
-            const parentGenome = new Genome();
+            const parentGenome = new Genome(null, null, mockRNG);
             const environmentalItems = ['Fancy Bookshelf', 'Shiny Stone'];
 
-            // Fancy Bookshelf -> Intellectual (75)
-            // Shiny Stone -> Mischievous (60)
-
-            // We need to run breed multiple times or spy on random to ensure we pick the env allele?
-            // Or inspect internal envMap? We can't access private variables easily, but we can infer from results if we mock Math.random to always pick env allele.
-
-            // Mock Math.random to always favor environment?
-            // breed logic:
-            // 1. Parent Allele (random)
-            // 2. Env Allele (from map)
-            // 3. Mutation (random)
-            // 4. Result = [Parent, Env]
-
-            // If we inspect the resulting genotype, one allele should be the env value.
-
-            const childGenome = GeneticsSystem.breed(parentGenome, environmentalItems);
+            // Pass mockRNG to breed to suppress mutation
+            const childGenome = GeneticsSystem.breed(parentGenome, environmentalItems, mockRNG);
 
             // Check Intellectual gene. Should contain 75 (Fancy Bookshelf).
             const intellectualAlleles = childGenome.genotype.Intellectual;
-            expect(intellectualAlleles).toContain(75); // Assuming no mutation changed it immediately (5% chance).
+            expect(intellectualAlleles).toContain(75);
 
             // Check Mischievous gene. Should contain 60 (Shiny Stone).
             const mischievousAlleles = childGenome.genotype.Mischievous;
@@ -139,15 +131,15 @@ describe('Feature Enhancements', () => {
         });
 
          test('Breed with Logic-Boosting Snack', () => {
-            const parentGenome = new Genome();
-            const childGenome = GeneticsSystem.breed(parentGenome, ['Logic-Boosting Snack']);
+            const parentGenome = new Genome(null, null, mockRNG);
+            const childGenome = GeneticsSystem.breed(parentGenome, ['Logic-Boosting Snack'], mockRNG);
             // Logic-Boosting Snack -> Intellectual 60
             expect(childGenome.genotype.Intellectual).toContain(60);
         });
 
         test('Breed with Stamina-Up Tea', () => {
-            const parentGenome = new Genome();
-            const childGenome = GeneticsSystem.breed(parentGenome, ['Stamina-Up Tea']);
+            const parentGenome = new Genome(null, null, mockRNG);
+            const childGenome = GeneticsSystem.breed(parentGenome, ['Stamina-Up Tea'], mockRNG);
             // Stamina-Up Tea -> Adventurer 65
             expect(childGenome.genotype.Adventurer).toContain(65);
         });

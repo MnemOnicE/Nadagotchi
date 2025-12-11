@@ -11,11 +11,11 @@ class LocalStorageMock {
 }
 global.localStorage = new LocalStorageMock();
 
-// Mock Phaser
+// Mock Phaser (still needed for some internals, but not GetRandom in Nadagotchi anymore)
 const Phaser = {
     Utils: {
         Array: {
-            GetRandom: (arr) => arr[0]
+            GetRandom: (arr) => arr ? arr[0] : null
         }
     }
 };
@@ -26,6 +26,8 @@ describe('Task Verification', () => {
 
     beforeEach(() => {
         pet = new Nadagotchi('Intellectual');
+        // Ensure plenty of energy
+        pet.stats.energy = 100;
     });
 
     test('Recipe "Metabolism-Slowing Tonic" should exist', () => {
@@ -33,26 +35,33 @@ describe('Task Verification', () => {
     });
 
     test('Foraging in Winter should yield "Frostbloom"', () => {
-        // Simulate Winter by passing it to live(), assuming we implement it that way
+        // Simulate Winter by passing it to live()
         pet.live({ weather: "Sunny", time: "Day", activeEvent: null, season: "Winter" });
 
-        // Spy on GetRandom to check what items are available
-        const getRandomSpy = jest.spyOn(Phaser.Utils.Array, 'GetRandom');
+        // Spy on the seeded RNG
+        const choiceSpy = jest.spyOn(pet.rng, 'choice');
 
         pet.handleAction('FORAGE');
 
-        const calls = getRandomSpy.mock.calls;
-        const lastCallArgs = calls[calls.length - 1][0];
+        // Check calls to choice()
+        expect(choiceSpy).toHaveBeenCalled();
 
-        expect(lastCallArgs).toContain('Frostbloom');
+        // Check arguments passed to choice(). Should be the potential items array.
+        // The array is constructed inside the method: ['Berries', 'Sticks', 'Shiny Stone', 'Frostbloom']
+        const args = choiceSpy.mock.calls[0][0];
+        expect(args).toContain('Frostbloom');
 
-        getRandomSpy.mockRestore();
+        choiceSpy.mockRestore();
     });
 
     test('GeneticsSystem should recognize "Metabolism-Slowing Tonic"', () => {
-        const parentGenome = new Genome();
+        const parentGenome = new Genome(null, null, pet.rng); // Mock RNG needs to be passed now
         // Breed with the tonic
-        const childGenome = GeneticsSystem.breed(parentGenome, ['Metabolism-Slowing Tonic']);
+        // Need to mock inventory check if calculating from Nadagotchi instance,
+        // but GeneticsSystem.breed is static.
+
+        // GeneticsSystem.breed(parentGenome, envFactors, rng)
+        const childGenome = GeneticsSystem.breed(parentGenome, ['Metabolism-Slowing Tonic'], pet.rng);
 
         // We expect one allele to be 2 (from the tonic)
         const metabolismAlleles = childGenome.genotype.metabolism;
