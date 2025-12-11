@@ -5,6 +5,7 @@ import { Config } from './Config.js';
 import { Recipes } from './ItemData.js';
 import { SeededRandom } from './utils/SeededRandom.js';
 import { RelationshipSystem } from './systems/RelationshipSystem.js';
+import { InventorySystem } from './systems/InventorySystem.js';
 
 /**
  * @fileoverview Core logic for the Nadagotchi pet.
@@ -181,6 +182,13 @@ export class Nadagotchi {
         // We make it non-enumerable so it is not saved to JSON automatically
         Object.defineProperty(this, 'relationshipSystem', {
             value: new RelationshipSystem(this),
+            enumerable: false,
+            writable: true
+        });
+
+        // Initialize Inventory System (Logic Extracted)
+        Object.defineProperty(this, 'inventorySystem', {
+            value: new InventorySystem(this),
             enumerable: false,
             writable: true
         });
@@ -660,146 +668,38 @@ export class Nadagotchi {
 
     /**
      * Consumes an item, applying its effects to the Nadagotchi.
+     * Delegates to InventorySystem.
      * @param {string} itemName - The name of the item to consume.
      */
     consumeItem(itemName) {
-        if (!this.inventory[itemName] || this.inventory[itemName] <= 0) return;
-
-        let consumed = false;
-
-        switch (itemName) {
-            case 'Berries':
-                // Berries provide a small amount of food and energy
-                this.stats.hunger = Math.min(this.maxStats.hunger, this.stats.hunger + 10);
-                this.stats.energy = Math.min(this.maxStats.energy, this.stats.energy + 2);
-                this.addJournalEntry("I ate some Berries. Yummy!");
-                consumed = true;
-                break;
-            case 'Logic-Boosting Snack':
-                this.stats.energy = Math.min(this.maxStats.energy, this.stats.energy + 10);
-                this.stats.happiness = Math.min(this.maxStats.happiness, this.stats.happiness + 5);
-                this.skills.logic += 0.5;
-                this.addJournalEntry("I ate a Logic-Boosting Snack. I feel smarter!");
-                consumed = true;
-                break;
-            case 'Stamina-Up Tea':
-                this.stats.energy = Math.min(this.maxStats.energy, this.stats.energy + 30);
-                this.addJournalEntry("I drank some Stamina-Up Tea. I feel refreshed!");
-                consumed = true;
-                break;
-            case 'Metabolism-Slowing Tonic':
-                // Gene Therapy: Reduces metabolism gene values permanently (for this life/lineage)
-                if (this.genome && this.genome.genotype && this.genome.genotype.metabolism) {
-                    const old = this.genome.genotype.metabolism;
-                    // Decrease both alleles by 1, min 1
-                    this.genome.genotype.metabolism = [Math.max(1, old[0] - 1), Math.max(1, old[1] - 1)];
-                    // Recalculate phenotype using existing RNG state
-                    this.genome.phenotype = this.genome.calculatePhenotype(this.rng);
-                    this.addJournalEntry("I drank the tonic. I feel... slower. My metabolism has decreased.");
-                    consumed = true;
-                }
-                break;
-            default:
-                // Item is not consumable
-                break;
-        }
-
-        if (consumed) {
-            this._removeItem(itemName, 1);
-            // Stats will be updated in UI on next tick/event
-        }
+        this.inventorySystem.consumeItem(itemName);
     }
 
     /**
      * Removes an item from the inventory for placement in the world.
+     * Delegates to InventorySystem.
      * @param {string} itemName - The name of the item to place.
      * @returns {boolean} True if the item was successfully removed, false otherwise.
      */
     placeItem(itemName) {
-        if (this.inventory[itemName] && this.inventory[itemName] > 0) {
-            this._removeItem(itemName, 1);
-            return true;
-        }
-        return false;
+        return this.inventorySystem.placeItem(itemName);
     }
 
     /**
-     * Attempts to craft a specified item. Checks for required materials, consumes them, and adds the item to inventory.
-     * @param {string} itemName - The name of the item to craft from the `this.recipes` object.
+     * Attempts to craft a specified item.
+     * Delegates to InventorySystem.
+     * @param {string} itemName - The name of the item to craft.
      */
     craftItem(itemName) {
-        const recipe = this.recipes[itemName];
-        // Check if recipe exists and is discovered
-        if (!recipe || !this.discoveredRecipes.includes(itemName)) {
-            this.addJournalEntry(`I tried to craft '${itemName}', but I don't know the recipe.`);
-            return;
-        }
-
-        // Check resources (Energy)
-        if (this.stats.energy < Config.ACTIONS.CRAFT.ENERGY_COST) {
-            this.addJournalEntry("I'm too tired to craft right now.");
-            return;
-        }
-
-        // Check if pet has all required materials
-        for (const material in recipe.materials) {
-            const requiredAmount = recipe.materials[material];
-            const hasAmount = this.inventory[material] || 0;
-            if (hasAmount < requiredAmount) {
-                this.addJournalEntry(`I don't have enough ${material} to craft a ${itemName}.`);
-                this.stats.happiness -= Config.ACTIONS.CRAFT.HAPPINESS_PENALTY_MISSING_MATS; // Frustration
-                return;
-            }
-        }
-
-        // Consume materials
-        for (const material in recipe.materials) {
-            this._removeItem(material, recipe.materials[material]);
-        }
-
-        // Add crafted item to inventory
-        this._addItem(itemName, 1);
-        this.stats.energy -= Config.ACTIONS.CRAFT.ENERGY_COST;
-        this.stats.happiness += Config.ACTIONS.CRAFT.HAPPINESS_RESTORE;
-
-        // Update Quest Progress
-        if (itemName === 'Masterwork Chair' &&
-            this.quests['masterwork_crafting'] &&
-            this.quests['masterwork_crafting'].stage === 2) {
-            this.quests['masterwork_crafting'].hasCraftedChair = true;
-        }
-
-        const moodMultiplier = this.getMoodMultiplier();
-        this.skills.crafting += (Config.ACTIONS.CRAFT.SKILL_GAIN * moodMultiplier);
-        this.addJournalEntry(`I successfully crafted a ${itemName}!`);
+        this.inventorySystem.craftItem(itemName);
     }
 
     /**
-     * Simulates foraging for items, changing location, updating stats, and adding items to inventory.
+     * Simulates foraging for items.
+     * Delegates to InventorySystem.
      */
     forage() {
-        if (this.stats.energy < Config.ACTIONS.FORAGE.ENERGY_COST) return;
-
-        this.location = 'Forest';
-        this.stats.energy -= Config.ACTIONS.FORAGE.ENERGY_COST;
-        const moodMultiplier = this.getMoodMultiplier();
-        this.skills.navigation += (Config.ACTIONS.FORAGE.SKILL_GAIN * moodMultiplier);
-
-        const potentialItems = ['Berries', 'Sticks', 'Shiny Stone'];
-        if (this.currentSeason === 'Winter') {
-            potentialItems.push('Frostbloom');
-        }
-
-        // Use RNG to select item
-        const foundItem = this.rng.choice(potentialItems);
-        this._addItem(foundItem, 1);
-
-        if (foundItem === 'Frostbloom') {
-            this.discoverRecipe("Metabolism-Slowing Tonic");
-        }
-
-        this.addJournalEntry(`I went foraging in the ${this.location} and found a ${foundItem}.`);
-        this.location = 'Home';
+        this.inventorySystem.forage();
     }
 
     /**
@@ -837,17 +737,12 @@ export class Nadagotchi {
 
     /**
      * Adds a new recipe to the list if it's not already discovered and saves it to persistence.
+     * Delegates to InventorySystem.
      * @param {string} recipeName - The name of the recipe to add.
      * @returns {boolean} True if the recipe was newly discovered, false if already known.
      */
     discoverRecipe(recipeName) {
-        if (!this.discoveredRecipes.includes(recipeName)) {
-            this.discoveredRecipes.push(recipeName);
-            this.persistence.saveRecipes(this.discoveredRecipes);
-            this.addJournalEntry(`I discovered a new recipe: ${recipeName}!`);
-            return true;
-        }
-        return false;
+        return this.inventorySystem.discoverRecipe(recipeName);
     }
 
     /**
@@ -948,29 +843,23 @@ export class Nadagotchi {
 
     /**
      * Adds a specified quantity of an item to the inventory.
+     * Delegates to InventorySystem.
      * @param {string} itemName - The name of the item to add.
      * @param {number} quantity - The number of items to add.
      * @private
      */
     _addItem(itemName, quantity) {
-        if (!this.inventory[itemName]) {
-            this.inventory[itemName] = 0;
-        }
-        this.inventory[itemName] += quantity;
+        this.inventorySystem.addItem(itemName, quantity);
     }
 
     /**
      * Removes a specified quantity of an item from the inventory.
+     * Delegates to InventorySystem.
      * @param {string} itemName - The name of the item to remove.
      * @param {number} quantity - The number of items to remove.
      * @private
      */
     _removeItem(itemName, quantity) {
-        if (this.inventory[itemName]) {
-            this.inventory[itemName] -= quantity;
-            if (this.inventory[itemName] <= 0) {
-                delete this.inventory[itemName];
-            }
-        }
+        this.inventorySystem.removeItem(itemName, quantity);
     }
 }

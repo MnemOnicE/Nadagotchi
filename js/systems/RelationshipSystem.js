@@ -34,7 +34,7 @@ export class RelationshipSystem {
         this.pet.stats.energy -= Config.ACTIONS.INTERACT_NPC.ENERGY_COST;
 
         if (interactionType === 'GIFT' && this.pet.inventory['Berries'] > 0) {
-            this.pet._removeItem('Berries', 1);
+            this.pet.inventorySystem.removeItem('Berries', 1);
             this.pet.relationships[npcName].level += Config.ACTIONS.INTERACT_NPC.GIFT_RELATIONSHIP;
             this.pet.stats.happiness += Config.ACTIONS.INTERACT_NPC.GIFT_HAPPINESS;
             this.pet.skills.empathy += Config.ACTIONS.INTERACT_NPC.GIFT_SKILL_GAIN;
@@ -92,15 +92,15 @@ export class RelationshipSystem {
         if (quest.stage === 1) {
             if ((this.pet.inventory['Sticks'] || 0) >= 5) {
                 // Check if we already know the recipe (unlikely if in stage 1, but safe)
-                // Accessing public discoverRecipe
-                if (this.pet.discoverRecipe("Masterwork Chair")) {
-                    this.pet._removeItem('Sticks', 5);
+                // Accessing InventorySystem directly
+                if (this.pet.inventorySystem.discoverRecipe("Masterwork Chair")) {
+                    this.pet.inventorySystem.removeItem('Sticks', 5);
                     quest.stage = 2;
                     this.pet.addJournalEntry("I gave the Sticks to the Artisan. He taught me how to make a Masterwork Chair! I need to craft one to show him.");
                 } else {
                      // Should not happen unless they learned it elsewhere
                      // Advance quest anyway if they already know it
-                    this.pet._removeItem('Sticks', 5);
+                    this.pet.inventorySystem.removeItem('Sticks', 5);
                     quest.stage = 2;
                 }
             } else {
@@ -108,7 +108,7 @@ export class RelationshipSystem {
             }
         } else if (quest.stage === 2) {
             if (quest.hasCraftedChair && this.pet.inventory['Masterwork Chair'] && this.pet.inventory['Masterwork Chair'] > 0) {
-                this.pet._removeItem('Masterwork Chair', 1);
+                this.pet.inventorySystem.removeItem('Masterwork Chair', 1);
                 quest.stage = 3;
                 this.pet.skills.crafting += Config.ACTIONS.INTERACT_NPC.QUEST_CRAFTING_GAIN;
                 this.pet.stats.happiness += Config.ACTIONS.INTERACT_NPC.QUEST_HAPPINESS_GAIN;
