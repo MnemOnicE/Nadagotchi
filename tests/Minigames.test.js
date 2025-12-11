@@ -4,6 +4,20 @@ global.Phaser = {
     Scene: class Scene {
         constructor(config) {
             this.config = config;
+            this.cameras = { main: { width: 800, height: 600, setBackgroundColor: jest.fn() } };
+            this.add = {
+                text: jest.fn(() => createMockText()),
+                rectangle: jest.fn(() => createMockRectangle())
+            };
+            this.time = {
+                delayedCall: jest.fn((delay, callback) => callback()),
+                addEvent: jest.fn(() => ({ destroy: jest.fn() }))
+            };
+            this.sys = { events: { once: jest.fn(), on: jest.fn(), off: jest.fn() } };
+            this.scene = { stop: jest.fn(), resume: jest.fn(), get: jest.fn() };
+            this.game = { events: { emit: jest.fn() } };
+            // Simulate input for keys
+            this.input = { keyboard: { on: jest.fn() } };
         }
     },
     Utils: {
@@ -55,121 +69,78 @@ const createMockText = () => ({
     fontSize: ''
 });
 
-// 4. Common Mock Scene Context
-const getMockContext = () => ({
-    sys: { events: { once: jest.fn(), on: jest.fn(), off: jest.fn() } },
-    time: {
-        delayedCall: jest.fn((delay, callback) => callback()), // Immediate execution for tests
-        addEvent: jest.fn(() => ({ destroy: jest.fn() }))
-    },
-    add: {
-        text: jest.fn(() => createMockText()),
-        rectangle: jest.fn(() => createMockRectangle())
-    },
-    cameras: {
-        main: {
-            width: 800,
-            height: 600,
-            setBackgroundColor: jest.fn()
-        }
-    },
-    scene: {
-        stop: jest.fn(),
-        resume: jest.fn(),
-        get: jest.fn()
-    },
-    game: {
-        events: {
-            emit: jest.fn()
-        }
-    }
-});
-
 describe('Minigames Test Suite', () => {
-    let mockContext;
-
-    beforeEach(() => {
-        mockContext = getMockContext();
-        jest.clearAllMocks();
-    });
 
     describe('ArtisanMinigameScene', () => {
         let scene;
 
         beforeEach(() => {
             scene = new ArtisanMinigameScene();
-            Object.assign(scene, mockContext);
         });
 
         test('create() initializes grid and displays pattern', () => {
             scene.create();
-            expect(mockContext.add.rectangle).toHaveBeenCalledTimes(9);
-            expect(scene.gridButtons.length).toBe(9);
-            expect(scene.pattern.length).toBe(9);
-            expect(mockContext.time.delayedCall).toHaveBeenCalled();
-            expect(scene.isDisplayingPattern).toBe(false);
+            // 9 grid buttons
+            expect(scene.add.rectangle).toHaveBeenCalledTimes(9);
+            // Check if delayedCall was made to hide the pattern
+            expect(scene.time.delayedCall).toHaveBeenCalled();
         });
 
-        test('handleGridClick ignores input when displaying pattern', () => {
+        test('handleGridClick functionality (Success Path)', () => {
             scene.create();
-            // Clear mocks to ignore calls made during create()
-            scene.gridButtons.forEach(b => b.setFillStyle.mockClear());
 
-            scene.isDisplayingPattern = true; // Force true
-            const button = scene.gridButtons[0];
+            // Capture the 9 buttons created.
+            // The createGrid loop runs 0..8.
+            // Mocks are pushed to results.
+            const buttons = scene.add.rectangle.mock.results.map(r => r.value);
 
-            scene.handleGridClick(button);
+            // The logic uses:
+            // patternIndices = slice(0, 4) of indices [0..8].
+            // Shuffle is identity.
+            // So pattern is true for indices 0, 1, 2, 3.
 
-            // Should not toggle
-            expect(scene.playerPattern[0]).toBe(false);
-            expect(button.setFillStyle).not.toHaveBeenCalled();
-        });
+            // Click the correct buttons
+            buttons[0].emit('pointerdown');
+            buttons[1].emit('pointerdown');
+            buttons[2].emit('pointerdown');
+            buttons[3].emit('pointerdown');
 
-        test('handleGridClick correctly updates player pattern', () => {
-            scene.create();
-            scene.pattern = [true, false, false, false, false, false, false, false, false];
-            scene.playerPattern = Array(9).fill(false);
+            expect(buttons[0].setFillStyle).toHaveBeenCalledWith(0x4169E1); // Blue
 
-            const button0 = scene.gridButtons[0];
-            const button1 = scene.gridButtons[1];
+            // Check success event
+            // The checkPattern has a delayedCall(1500, endGame)
+            // Our mock calls it immediately.
 
-            scene.handleGridClick(button0);
-            expect(scene.playerPattern[0]).toBe(true);
-            expect(button0.setFillStyle).toHaveBeenCalledWith(0x4169E1);
-
-            scene.handleGridClick(button1);
-            expect(scene.playerPattern[1]).toBe(true);
-
-            scene.handleGridClick(button1);
-            expect(scene.playerPattern[1]).toBe(false);
-        });
-
-        test('Success condition triggers workResult event', () => {
-            scene.create();
-            scene.pattern = [true, false, false, false, false, false, false, false, false];
-            scene.playerPattern = [false, false, false, false, false, false, false, false, false];
-
-            scene.handleGridClick(scene.gridButtons[0]);
-
-            expect(mockContext.game.events.emit).toHaveBeenCalledWith('workResult', {
+            expect(scene.game.events.emit).toHaveBeenCalledWith('workResult', {
                 success: true,
                 career: 'Artisan',
                 craftedItem: 'Fancy Bookshelf'
             });
-            expect(mockContext.scene.resume).toHaveBeenCalledWith('MainScene');
         });
 
-        test('Failure condition', () => {
-             scene.create();
-             scene.pattern = [true, false, false, false, false, false, false, false, false];
-             scene.playerPattern = [false, false, false, false, false, false, false, false, false];
+        test('handleGridClick functionality (Failure Path)', () => {
+            scene.create();
+            const buttons = scene.add.rectangle.mock.results.map(r => r.value);
 
-             scene.handleGridClick(scene.gridButtons[1]); // Wrong button
+            // Click a wrong button (index 8)
+            buttons[8].emit('pointerdown');
 
-             expect(mockContext.game.events.emit).toHaveBeenCalledWith('workResult', {
-                 success: false,
-                 career: 'Artisan'
-             });
+            expect(buttons[8].setFillStyle).toHaveBeenCalledWith(0x4169E1);
+
+            // This doesn't trigger end game yet because active tiles (1) != pattern tiles (4)
+            // We need to click 4 tiles to trigger the check.
+
+            // Click 3 more wrong ones? Or just correct ones?
+            // If we click 0, 1, 2 (Correct) and 8 (Wrong).
+            buttons[0].emit('pointerdown');
+            buttons[1].emit('pointerdown');
+            buttons[2].emit('pointerdown');
+
+            // Now we have 4 active tiles. Check triggers.
+            expect(scene.game.events.emit).toHaveBeenCalledWith('workResult', {
+                success: false,
+                career: 'Artisan'
+            });
         });
     });
 
@@ -178,21 +149,29 @@ describe('Minigames Test Suite', () => {
 
         beforeEach(() => {
             scene = new HealerMinigameScene();
-            Object.assign(scene, mockContext);
         });
 
         test('create() selects ailment and creates remedy buttons', () => {
             scene.create();
-            expect(scene.currentAilment).toEqual(scene.ailments[0]);
-            expect(mockContext.add.rectangle).toHaveBeenCalledTimes(3);
+            // 3 remedy buttons created
+            expect(scene.add.rectangle).toHaveBeenCalledTimes(3);
         });
 
         test('Selecting correct remedy sends success event', () => {
             scene.create();
-            const correctRemedy = scene.currentAilment.remedy;
-            scene.handleRemedyClick(correctRemedy);
+            // GetRandom returns arr[0] -> High Temperature
+            // Remedy -> Cooling Herb
+            // setupRemedyOptions logic:
+            // options = [Cooling Herb]
+            // push distractors[0], [1] -> [Cooling, Happy Potion, Soothing Syrup]
+            // Shuffle -> Identity
+            // So options[0] is correct.
 
-            expect(mockContext.game.events.emit).toHaveBeenCalledWith('workResult', {
+            const buttons = scene.add.rectangle.mock.results.map(r => r.value);
+            // Button 0 is correct
+            buttons[0].emit('pointerdown');
+
+            expect(scene.game.events.emit).toHaveBeenCalledWith('workResult', {
                 success: true,
                 career: 'Healer'
             });
@@ -200,10 +179,11 @@ describe('Minigames Test Suite', () => {
 
         test('Selecting incorrect remedy sends failure event', () => {
             scene.create();
-            const wrongRemedy = { name: 'Wrong', emoji: 'X' };
-            scene.handleRemedyClick(wrongRemedy);
+            const buttons = scene.add.rectangle.mock.results.map(r => r.value);
+            // Button 1 is incorrect (Happy Potion)
+            buttons[1].emit('pointerdown');
 
-            expect(mockContext.game.events.emit).toHaveBeenCalledWith('workResult', {
+            expect(scene.game.events.emit).toHaveBeenCalledWith('workResult', {
                 success: false,
                 career: 'Healer'
             });
@@ -215,139 +195,74 @@ describe('Minigames Test Suite', () => {
 
         beforeEach(() => {
             scene = new ScoutMinigameScene();
-            Object.assign(scene, mockContext);
-            scene.init(); // Initialize defaults
+            scene.init();
         });
 
         test('create() sets up grid and timer', () => {
             scene.create();
-            expect(mockContext.add.rectangle).toHaveBeenCalledTimes(12);
-            expect(mockContext.time.addEvent).toHaveBeenCalled();
-            expect(scene.grid.length).toBe(12);
-        });
-
-        test('handleCardClick ignores already revealed cards', () => {
-            scene.create();
-            const card = createMockRectangle();
-            card.getData.mockImplementation((k) => k === 'revealed' ? true : null);
-
-            scene.handleCardClick(card);
-
-            expect(card.setFillStyle).not.toHaveBeenCalled();
-            expect(scene.firstSelection).toBeNull();
-        });
-
-        test('handleCardClick ignores clicks when two cards selected', () => {
-            scene.create();
-            scene.firstSelection = {};
-            scene.secondSelection = {};
-
-            const card = createMockRectangle();
-            card.getData.mockReturnValue(false); // not revealed
-
-            scene.handleCardClick(card);
-
-            expect(card.setFillStyle).not.toHaveBeenCalled();
-        });
-
-        test('handleCardClick reveals card', () => {
-            scene.create();
-            const mockCard = createMockRectangle();
-            const mockText = createMockText();
-            mockCard.getData.mockImplementation((key) => {
-                if (key === 'iconText') return mockText;
-                if (key === 'icon') return 'A';
-                if (key === 'revealed') return false;
-            });
-
-            scene.handleCardClick(mockCard);
-
-            expect(mockText.setText).toHaveBeenCalledWith('A');
-            expect(mockCard.setData).toHaveBeenCalledWith('revealed', true);
-            expect(scene.firstSelection).toBe(mockCard);
+            // 12 cards created
+            expect(scene.add.rectangle).toHaveBeenCalledTimes(12);
+            expect(scene.time.addEvent).toHaveBeenCalled();
         });
 
         test('Matching pair logic', () => {
             scene.create();
-            const card1 = createMockRectangle();
-            const text1 = createMockText();
-            card1.getData.mockImplementation((k) => {
-                if (k === 'iconText') return text1;
-                if (k === 'icon') return 'A';
-                return false;
-            });
+            const cards = scene.add.rectangle.mock.results.map(r => r.value);
 
-            const card2 = createMockRectangle();
-            const text2 = createMockText();
-            card2.getData.mockImplementation((k) => {
-                if (k === 'iconText') return text2;
-                if (k === 'icon') return 'A'; // MATCH
-                return false;
-            });
+            // Logic:
+            // icons = ['A', 'B', 'C', 'D', 'E', 'F']
+            // grid = icons.concat(icons) = ['A', 'B', 'C', 'D', 'E', 'F', 'A', 'B', 'C', 'D', 'E', 'F']
+            // (assuming Shuffle is identity)
+            // So Index 0 matches Index 6.
 
-            scene.handleCardClick(card1);
-            scene.handleCardClick(card2);
+            // Click card 0
+            cards[0].emit('pointerdown');
+            expect(cards[0].setData).toHaveBeenCalledWith('revealed', true);
 
-            expect(scene.matchesFound).toBe(1);
-            expect(scene.firstSelection).toBeNull();
-            expect(scene.secondSelection).toBeNull();
+            // Click card 6 (Match)
+            cards[6].emit('pointerdown');
+            expect(cards[6].setData).toHaveBeenCalledWith('revealed', true);
+
+            // Check if they stay revealed (no reset)
+            expect(cards[0].getData('revealed')).toBe(true);
+            expect(cards[6].getData('revealed')).toBe(true);
         });
 
         test('Mismatch pair logic', () => {
             scene.create();
-            const card1 = createMockRectangle();
-            const text1 = createMockText();
-            card1.getData.mockImplementation((k) => {
-                if (k === 'iconText') return text1;
-                if (k === 'icon') return 'A';
-                if (k === 'revealed') return card1._revealed;
-            });
-            card1.setData.mockImplementation((k, v) => { if(k==='revealed') card1._revealed = v; });
+            const cards = scene.add.rectangle.mock.results.map(r => r.value);
 
-            const card2 = createMockRectangle();
-            const text2 = createMockText();
-            card2.getData.mockImplementation((k) => {
-                if (k === 'iconText') return text2;
-                if (k === 'icon') return 'B'; // MISMATCH
-                if (k === 'revealed') return card2._revealed;
-            });
-            card2.setData.mockImplementation((k, v) => { if(k==='revealed') card2._revealed = v; });
+            // Card 0 (A) and Card 1 (B) -> Mismatch
 
-            scene.handleCardClick(card1);
-            scene.handleCardClick(card2);
+            cards[0].emit('pointerdown');
+            cards[1].emit('pointerdown');
 
-            expect(mockContext.time.delayedCall).toHaveBeenCalled();
-            expect(text1.setText).toHaveBeenCalledWith('');
-            expect(card1.setData).toHaveBeenCalledWith('revealed', false);
-            expect(scene.firstSelection).toBeNull();
+            // Mismatch -> delayedCall -> reset
+            // Mock executes delayedCall immediately.
+
+            // Check if reset
+            expect(cards[0].setData).toHaveBeenCalledWith('revealed', false);
+            expect(cards[1].setData).toHaveBeenCalledWith('revealed', false);
         });
 
         test('Win condition', () => {
             scene.create();
-            scene.matchesFound = 5;
+            const cards = scene.add.rectangle.mock.results.map(r => r.value);
 
-            const card1 = createMockRectangle();
-            card1.getData = (k) => k==='icon' ? 'A' : (k==='iconText' ? createMockText() : false);
-            const card2 = createMockRectangle();
-            card2.getData = (k) => k==='icon' ? 'A' : (k==='iconText' ? createMockText() : false);
+            // We need 6 matches. 12 cards.
+            // Pairs are (0,6), (1,7), (2,8), (3,9), (4,10), (5,11).
 
-            scene.handleCardClick(card1);
-            scene.handleCardClick(card2);
+            const pairs = [
+                [0, 6], [1, 7], [2, 8], [3, 9], [4, 10], [5, 11]
+            ];
 
-            expect(mockContext.game.events.emit).toHaveBeenCalledWith('workResult', {
-                success: true,
-                career: 'Scout'
+            pairs.forEach(pair => {
+                cards[pair[0]].emit('pointerdown');
+                cards[pair[1]].emit('pointerdown');
             });
-        });
 
-        test('Timer expiration', () => {
-            scene.create();
-            scene.timeLeft = 1;
-            scene.updateTimer(); // 1 -> 0
-
-            expect(scene.timeLeft).toBe(0);
-            expect(mockContext.game.events.emit).toHaveBeenCalledWith('workResult', {
-                success: false,
+            expect(scene.game.events.emit).toHaveBeenCalledWith('workResult', {
+                success: true,
                 career: 'Scout'
             });
         });

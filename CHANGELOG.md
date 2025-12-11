@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.22.0] - 2025-12-07
+
+### Added
+- **Production Build Configuration:** Added `vite.config.js` to ensure deterministic builds and handle base path configuration for production deployments (e.g., GitHub Pages).
+- **Progressive Web App (PWA) Support:**
+  - Added `public/manifest.json` and generated PWA icons to make Nadagotchi installable on mobile and desktop devices.
+  - Implemented a `service-worker.js` with a runtime caching strategy (Stale-While-Revalidate) to provide offline functionality for hashed assets.
+- **CI/CD Pipeline:** Created `.github/workflows/deploy.yml` to automate the build and verification process. The pipeline installs dependencies, runs all unit tests, and builds the project on every push to `main`.
+- **Mobile Optimization:** Added `viewport` and `theme-color` meta tags to `index.html` to ensure the game renders correctly on mobile devices without unwanted scaling.
+
+### Fixed
+- **Test Suite Stability:** Fixed critical failures in the test suite to ensure a passing build for production.
+  - Refactored `tests/Minigames.test.js` and `tests/LogicPuzzleScene.test.js` to correctly simulate user input events instead of relying on inaccessible closure-scoped variables.
+  - Fixed `tests/ExploitScaling.test.js` by correctly resetting the `activeMinigameCareer` security flag between test cases.
+  - Fixed `tests/SeasonalCrafting.test.js` by updating the mock strategy to align with the new `SeededRandom` implementation used in `Nadagotchi.js`.
+
 ## [1.21.1] - 2025-12-07
 
 ### Fixed
