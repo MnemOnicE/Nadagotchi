@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.24.0] - 2025-12-07
+
+### Added
+- **Missing Genetics Items:** Implemented the previously "Ghost" items referenced in the Breeding System (`Ancient Tome`, `Heart Amulet`, `Muse Flower`, `Nutrient Bar`, `Espresso`, `Chamomile`).
+  - Added definitions to `js/ItemData.js`.
+  - Added crafting recipes for `Ancient Tome`, `Heart Amulet`, `Nutrient Bar`, and `Espresso`.
+  - Added seasonal foraging drops for `Chamomile` (Spring) and `Muse Flower` (Autumn).
+  - Implemented consumption logic (`Nadagotchi.consumeItem`) for `Nutrient Bar` (Hunger/Energy), `Espresso` (Energy/Happiness), and `Chamomile` (Happiness/Calm).
+  - These items now correctly influence genetics in the Breeding Scene as originally intended.
+
+### Fixed
+- **Test Suite Regressions:** Fixed critical failures in `tests/ExploitArtisanQuest.test.js` and `tests/DayCycle.test.js` caused by previous refactors (missing mocks for `killTweensOf`, `setAngle`, and incorrect method calls to `_handleArtisanQuest`). The test suite is now fully green.
+
 ## [1.23.0] - 2025-12-07
 
 ### Refactored

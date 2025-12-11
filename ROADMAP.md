@@ -52,7 +52,7 @@ This phase focuses on building out the primary gameplay loops, giving players cl
         -   [x] Refined festival timing to align with astronomical events (Equinoxes/Solstices) for "Clock Rigor".
 -   **[ ] Future Work:**
     -   [x] Allow for deeper home customization with player-placed furniture.
-    -   [x] **Inventory/Item Management UI:** Develop a dedicated UI modal for viewing all items, quantities, and descriptions, which is currently missing but required.
+    -   [x] **Inventory/Item Management UI:** Developed a dedicated UI modal for viewing all items, quantities, and descriptions.
     -   [x] Expand NPC interactions with more complex dialogues and relationship-based events.
         -   [x] Implemented multi-stage quest system (e.g., Masterwork Crafting).
         -   [x] Hardened quest logic to prevent progression exploits.

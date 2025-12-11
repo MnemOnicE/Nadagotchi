@@ -25,7 +25,15 @@ export const ItemDefinitions = {
     "Masterwork Chair": { type: "Furniture", description: "A chair of unparalleled craftsmanship.", emoji: "🪑" },
 
     // Tools
-    "Genetic Scanner": { type: "Tool", description: "Allows analysis of pet genetics.", emoji: "🧬" }
+    "Genetic Scanner": { type: "Tool", description: "Allows analysis of pet genetics.", emoji: "🧬" },
+
+    // Special Breeding Items
+    "Ancient Tome": { type: "Tool", description: "A dusty book containing forgotten knowledge. Boosts Intellectual genes.", emoji: "📖" },
+    "Heart Amulet": { type: "Tool", description: "An amulet that pulses with warmth. Boosts Nurturer genes.", emoji: "🧿" },
+    "Muse Flower": { type: "Material", description: "A rare flower that inspires creativity. Boosts Mischievous genes.", emoji: "🌺" },
+    "Nutrient Bar": { type: "Consumable", description: "A scientifically formulated bar for perfect health. Boosts Metabolism genes.", emoji: "🍫" },
+    "Espresso": { type: "Consumable", description: "Highly concentrated caffeine. Increases Metabolism speed.", emoji: "☕" },
+    "Chamomile": { type: "Consumable", description: "A calming herb. Decreases Metabolism speed.", emoji: "🌼" }
 };
 
 /**
@@ -53,5 +61,21 @@ export const Recipes = {
     "Metabolism-Slowing Tonic": {
         materials: { "Frostbloom": 1, "Sticks": 2 },
         description: "A tonic that slows metabolism, helping to conserve energy."
+    },
+    "Ancient Tome": {
+        materials: { "Sticks": 10, "Shiny Stone": 2 },
+        description: "A dusty book containing forgotten knowledge."
+    },
+    "Heart Amulet": {
+        materials: { "Shiny Stone": 3, "Sticks": 1 },
+        description: "An amulet that pulses with warmth."
+    },
+    "Nutrient Bar": {
+        materials: { "Berries": 5, "Sticks": 1 },
+        description: "A scientifically formulated bar for perfect health."
+    },
+    "Espresso": {
+        materials: { "Berries": 10 },
+        description: "Highly concentrated caffeine."
     }
 };

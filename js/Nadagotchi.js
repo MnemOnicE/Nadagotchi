@@ -675,6 +675,24 @@ export class Nadagotchi {
                 this.addJournalEntry("I ate some Berries. Yummy!");
                 consumed = true;
                 break;
+            case 'Nutrient Bar':
+                this.stats.hunger = Math.min(this.maxStats.hunger, this.stats.hunger + 30);
+                this.stats.energy = Math.min(this.maxStats.energy, this.stats.energy + 10);
+                this.addJournalEntry("I ate a Nutrient Bar. I feel balanced.");
+                consumed = true;
+                break;
+            case 'Espresso':
+                this.stats.energy = Math.min(this.maxStats.energy, this.stats.energy + 20);
+                this.stats.happiness = Math.min(this.maxStats.happiness, this.stats.happiness + 2);
+                this.addJournalEntry("I drank an Espresso. BUZZING!");
+                consumed = true;
+                break;
+            case 'Chamomile':
+                this.stats.happiness = Math.min(this.maxStats.happiness, this.stats.happiness + 5);
+                this.stats.energy = Math.min(this.maxStats.energy, this.stats.energy + 2);
+                this.addJournalEntry("I sipped some Chamomile tea. So relaxing...");
+                consumed = true;
+                break;
             case 'Logic-Boosting Snack':
                 this.stats.energy = Math.min(this.maxStats.energy, this.stats.energy + 10);
                 this.stats.happiness = Math.min(this.maxStats.happiness, this.stats.happiness + 5);
@@ -788,6 +806,10 @@ export class Nadagotchi {
         const potentialItems = ['Berries', 'Sticks', 'Shiny Stone'];
         if (this.currentSeason === 'Winter') {
             potentialItems.push('Frostbloom');
+        } else if (this.currentSeason === 'Spring') {
+            potentialItems.push('Chamomile');
+        } else if (this.currentSeason === 'Autumn') {
+            potentialItems.push('Muse Flower');
         }
 
         // Use RNG to select item
@@ -796,6 +818,10 @@ export class Nadagotchi {
 
         if (foundItem === 'Frostbloom') {
             this.discoverRecipe("Metabolism-Slowing Tonic");
+        } else if (foundItem === 'Muse Flower') {
+            this.discoverRecipe("Ancient Tome");
+        } else if (foundItem === 'Chamomile') {
+            this.discoverRecipe("Nutrient Bar");
         }
 
         this.addJournalEntry(`I went foraging in the ${this.location} and found a ${foundItem}.`);
