@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Sad:** Slow swaying.
   - **Angry:** Shaking.
   - **Neutral:** Gentle breathing.
+- **Procedural Sound System:** Implemented `js/utils/SoundSynthesizer.js`, a Web Audio API-based sound engine that generates retro-style SFX (blips, chimes, buzzes) without loading external assets.
+  - **Interaction Sounds:** UI buttons now emit a satisfying "click" sound.
+  - **Feedback Sounds:** Minigames and careers now have "success" and "failure" audio cues.
+  - **Achievement Chime:** Unlocking an achievement triggers a celebratory rising chime.
 
 ## [1.22.0] - 2025-12-07
 

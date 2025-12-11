@@ -4,6 +4,8 @@
  * Implements a "Neo-Retro" aesthetic with 3D bevels and shadows.
  */
 
+import { SoundSynthesizer } from './utils/SoundSynthesizer.js';
+
 /**
  * @class ButtonFactory
  * @classdesc
@@ -70,6 +72,9 @@ export class ButtonFactory {
 
         // Input Handling
         hitZone.on('pointerdown', () => {
+            // Audio Feedback
+            SoundSynthesizer.instance.playClick();
+
             // Press effect: Move button down-right to cover shadow
             container.x += 2;
             container.y += 2;

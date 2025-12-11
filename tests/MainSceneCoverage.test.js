@@ -77,6 +77,16 @@ jest.mock('../js/Calendar');
 jest.mock('../js/EventManager');
 jest.mock('../js/WorldClock');
 jest.mock('../js/WeatherSystem');
+jest.mock('../js/utils/SoundSynthesizer', () => ({
+    SoundSynthesizer: {
+        instance: {
+            playClick: jest.fn(),
+            playSuccess: jest.fn(),
+            playFailure: jest.fn(),
+            playChime: jest.fn()
+        }
+    }
+}));
 
 const { MainScene } = require('../js/MainScene');
 const { Nadagotchi } = require('../js/Nadagotchi');

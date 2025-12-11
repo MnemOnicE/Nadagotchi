@@ -7,6 +7,7 @@ import { WeatherSystem } from './WeatherSystem.js';
 import { AchievementManager } from './AchievementManager.js';
 import { EventKeys } from './EventKeys.js';
 import { Config } from './Config.js';
+import { SoundSynthesizer } from './utils/SoundSynthesizer.js';
 
 /**
  * @fileoverview The primary game scene.
@@ -278,6 +279,7 @@ export class MainScene extends Phaser.Scene {
 
         let skillUp = '';
         if (data.success) {
+            SoundSynthesizer.instance.playSuccess();
             // Calculate happiness gain with diminishing returns based on current happiness
             const maxHappiness = this.nadagotchi.maxStats.happiness;
             const currentHappiness = this.nadagotchi.stats.happiness;
@@ -319,6 +321,7 @@ export class MainScene extends Phaser.Scene {
             }
             this.nadagotchi.addJournalEntry(`I had a successful day at my ${data.career} job! My ${skillUp} skill increased.`);
         } else {
+            SoundSynthesizer.instance.playFailure();
             this.nadagotchi.stats.happiness -= 10;
             this.nadagotchi.addJournalEntry(`I struggled at my ${data.career} job today. It was frustrating.`);
         }
