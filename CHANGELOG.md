@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.21.1] - 2025-12-07
+
+### Fixed
+- **UI Modal Stacking:** Fixed a usability issue in `UIScene.js` where menu windows (Inventory, Journal, etc.) would stack on top of each other, obscuring content.
+  - Implemented an exclusive visibility system: opening any menu (Journal, Recipes, Inventory, Settings, Scanner, etc.) now automatically closes any other open menus.
+  - This restores the expected "single active window" behavior and fixes the issue where players had to manually close top-level windows to reveal others beneath them.
+
 ## [1.21.0] - 2025-12-07
 
 ### Added
