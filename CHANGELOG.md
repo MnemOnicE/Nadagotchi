@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **System**: Implemented `QuestSystem.js` and `QuestDefinitions.js` to manage data-driven quests.
 - **Quest**: Ported "Masterwork Crafting" quest to the new system, enabling proper state tracking and stage transitions.
 - **Testing**: Added `tests/QuestSystem.test.js` and `tests/QuestIntegration.test.js` to verify quest logic and integration.
+- **Gameplay**: Implemented "Friendship Decay" system. Relationships with NPCs now slowly degrade if the player does not interact with them daily.
+- **System**: Added `RelationshipSystem.dailyUpdate()` to manage relationship maintenance and `interactedToday` tracking.
+- **Tests**: Added `tests/RelationshipSystem.test.js` to verify decay logic and boundary protection.
 
 ### Changed
 - **Architecture**: Refactored `RelationshipSystem.js` and `InventorySystem.js` to use `QuestSystem` instead of hardcoded quest logic.

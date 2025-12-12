@@ -33,6 +33,9 @@ export class RelationshipSystem {
 
         this.pet.stats.energy -= Config.ACTIONS.INTERACT_NPC.ENERGY_COST;
 
+        // Mark interaction for the day to prevent friendship decay
+        this.pet.relationships[npcName].interactedToday = true;
+
         if (interactionType === 'GIFT' && this.pet.inventory['Berries'] > 0) {
             this.pet.inventorySystem.removeItem('Berries', 1);
             this.pet.relationships[npcName].level += Config.ACTIONS.INTERACT_NPC.GIFT_RELATIONSHIP;
@@ -111,5 +114,75 @@ export class RelationshipSystem {
         this.pet.addJournalEntry(`Chatted with ${npcName}: "${dialogueText}"`);
 
         return dialogueText;
+    }
+
+    /**
+     * Updates relationship status daily.
+     * Applies decay to relationships that were not interacted with today.
+     * Resets the `interactedToday` flag for the next day.
+     */
+    dailyUpdate() {
+        const decayRate = Config.ACTIONS.INTERACT_NPC.FRIENDSHIP_DECAY || 0.5;
+
+        for (const npcName in this.pet.relationships) {
+            const rel = this.pet.relationships[npcName];
+
+            if (!rel.interactedToday) {
+                if (rel.level > 0) {
+                    rel.level = Math.max(0, rel.level - decayRate);
+                }
+            }
+
+            // Reset flag for the new day
+            rel.interactedToday = false;
+        }
+    }
+
+    /**
+     * Handles the logic for the Master Artisan's quest line.
+     * @private
+     */
+    _handleArtisanQuest() {
+        if (!this.pet.quests['masterwork_crafting']) {
+            this.pet.quests['masterwork_crafting'] = { stage: 1, name: 'Masterwork Crafting' };
+            this.pet.addJournalEntry("The Master Artisan sees potential in me. He asked for 5 Sticks to prove my dedication.");
+            return;
+        }
+
+        const quest = this.pet.quests['masterwork_crafting'];
+
+        if (quest.stage === 1) {
+            if ((this.pet.inventory['Sticks'] || 0) >= 5) {
+                // Check if we already know the recipe (unlikely if in stage 1, but safe)
+                // Accessing InventorySystem directly
+                if (this.pet.inventorySystem.discoverRecipe("Masterwork Chair")) {
+                    this.pet.inventorySystem.removeItem('Sticks', 5);
+                    quest.stage = 2;
+                    this.pet.addJournalEntry("I gave the Sticks to the Artisan. He taught me how to make a Masterwork Chair! I need to craft one to show him.");
+                } else {
+                     // Should not happen unless they learned it elsewhere
+                     // Advance quest anyway if they already know it
+                    this.pet.inventorySystem.removeItem('Sticks', 5);
+                    quest.stage = 2;
+                }
+            } else {
+                this.pet.addJournalEntry("The Master Artisan is waiting for 5 Sticks.");
+            }
+        } else if (quest.stage === 2) {
+            if (quest.hasCraftedChair && this.pet.inventory['Masterwork Chair'] && this.pet.inventory['Masterwork Chair'] > 0) {
+                this.pet.inventorySystem.removeItem('Masterwork Chair', 1);
+                quest.stage = 3;
+                this.pet.skills.crafting += Config.ACTIONS.INTERACT_NPC.QUEST_CRAFTING_GAIN;
+                this.pet.stats.happiness += Config.ACTIONS.INTERACT_NPC.QUEST_HAPPINESS_GAIN;
+                this.pet.addJournalEntry("The Master Artisan was impressed by my chair! He declared me a true craftsman.");
+            } else {
+                this.pet.addJournalEntry("I need to craft a Masterwork Chair to show the Artisan.");
+            }
+        } else {
+            // Completed
+            const moodMultiplier = this.pet.getMoodMultiplier();
+            this.pet.skills.crafting += 0.2 * moodMultiplier;
+            this.pet.addJournalEntry("The Master Artisan greeted me warmly as a fellow master. We discussed advanced crafting theory.");
+        }
     }
 }
