@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Gameplay**: Implemented "Friendship Decay" system. Relationships with NPCs now slowly degrade if the player does not interact with them daily.
+- **System**: Added `RelationshipSystem.dailyUpdate()` to manage relationship maintenance and `interactedToday` tracking.
+- **Tests**: Added `tests/RelationshipSystem.test.js` to verify decay logic and boundary protection.
+
 ### Changed
 - **UX Improvement**: The "Job Board" button now remains interactive when disabled. Instead of being unresponsive, it dims and provides a toast notification and sound feedback explaining that a career is required.
 - **UIScene**: Refactored the "Job Board" button to use `ButtonFactory` for visual consistency with the rest of the UI.

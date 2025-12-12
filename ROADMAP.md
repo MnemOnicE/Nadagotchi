@@ -13,7 +13,7 @@ The Nadagotchi project is an evolving digital life simulation. This roadmap outl
 ### Milestone 1: Enhanced Social & World
 - **NPC Schedules**: NPCs move between locations based on time of day.
 - **Dynamic Quests**: Procedurally generated quests from NPCs.
-- **Friendship Decay**: Relationships degrade over time if ignored.
+ - [x] **Friendship Decay**: Relationships degrade over time if ignored.
 
 ### Milestone 2: Advanced Career Paths
 - **New Careers**: Chef, Musician, Gardener.
