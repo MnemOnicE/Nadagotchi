@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.27.0] - 2025-12-07
+
+### Added
+- **Pet Export/Import ("Mystery Egg Exchange"):** Implemented a system to share pets via secure DNA strings.
+  - **Genetics Serialization:** Added `GeneticsSystem.serialize()` and `deserialize()` to convert a pet's genome into a Base64-encoded, checksum-protected string.
+  - **Security:** The export format includes a hash salt to prevent casual tampering (stat hacking) of the DNA string.
+  - **Export Logic:** Added `Nadagotchi.exportDNA()` to generate the code and `Nadagotchi.generateDataFromDNA()` to create a new pet data object from an imported code.
+  - **Unit Tests:** Added `tests/GeneticsSerialization.test.js` to verify integrity checks and data restoration.
+
 ## [1.26.1] - 2025-12-07
 
 ### Performance

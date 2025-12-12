@@ -4,6 +4,11 @@
  */
 
 import { SeededRandom } from './utils/SeededRandom.js';
+import { Config } from './Config.js';
+
+// Base64 Helpers for Environment Compatibility (Browser/Node)
+const toBase64 = (str) => (typeof btoa === 'function') ? btoa(str) : Buffer.from(str).toString('base64');
+const fromBase64 = (str) => (typeof atob === 'function') ? atob(str) : Buffer.from(str, 'base64').toString('utf-8');
 
 /**
  * Constants for the Genetics System.
@@ -234,5 +239,86 @@ export class GeneticsSystem {
             const max = (geneKey === 'metabolism' || geneKey === 'moodSensitivity') ? MAX_PHYSIO : MAX_PERSONALITY;
             return Math.max(0, Math.min(max, newValue));
         }
+    }
+
+    /**
+     * Serializes a Genome into a secure, shareable string.
+     * Format: [Base64(JSON(Genotype))].[Checksum]
+     * @param {Genome} genome - The genome to export.
+     * @returns {string} The encoded DNA string.
+     */
+    static serialize(genome) {
+        if (!genome || !genome.genotype) throw new Error("Invalid Genome for Serialization");
+
+        // 1. Serialize Genotype (Only DNA, no state)
+        const jsonStr = JSON.stringify(genome.genotype);
+
+        // 2. Base64 Encode
+        const encoded = toBase64(jsonStr);
+
+        // 3. Generate Checksum
+        const checksum = GeneticsSystem._generateChecksum(encoded + Config.SECURITY.DNA_SALT);
+
+        // 4. Combine
+        return `${encoded}.${checksum}`;
+    }
+
+    /**
+     * Deserializes a DNA string into a Genome object.
+     * @param {string} dnaString - The encoded DNA string.
+     * @returns {Genome} A new Genome instance.
+     * @throws {Error} If integrity check fails or format is invalid.
+     */
+    static deserialize(dnaString) {
+        const parts = dnaString.split('.');
+        if (parts.length !== 2) throw new Error("Invalid DNA Format");
+        const [encoded, checksum] = parts;
+
+        // 1. Verify Checksum
+        const expectedChecksum = GeneticsSystem._generateChecksum(encoded + Config.SECURITY.DNA_SALT);
+        if (checksum !== expectedChecksum) throw new Error("DNA Integrity Check Failed");
+
+        // 2. Decode
+        let jsonStr;
+        try {
+            jsonStr = fromBase64(encoded);
+        } catch (e) {
+            throw new Error("Invalid Base64 Encoding");
+        }
+
+        // 3. Parse JSON
+        let genotype;
+        try {
+            genotype = JSON.parse(jsonStr);
+        } catch (e) {
+            throw new Error("Invalid JSON Data");
+        }
+
+        // 4. Validate Structure (Basic check)
+        const requiredGenes = ['Adventurer', 'Nurturer', 'Mischievous', 'Intellectual', 'Recluse', 'metabolism', 'moodSensitivity', 'specialAbility'];
+        for (const gene of requiredGenes) {
+            if (!genotype[gene] || !Array.isArray(genotype[gene])) {
+                throw new Error(`Invalid Genotype Structure: Missing ${gene}`);
+            }
+        }
+
+        // 5. Return new Genome
+        // Note: The deserialized genome has NO RNG initially.
+        return new Genome(genotype);
+    }
+
+    /**
+     * Generates a simple DJB2 checksum for a string.
+     * @param {string} str - The input string.
+     * @returns {string} The checksum as a hex string.
+     * @private
+     */
+    static _generateChecksum(str) {
+        let hash = 5381;
+        for (let i = 0; i < str.length; i++) {
+            hash = ((hash << 5) + hash) + str.charCodeAt(i); /* hash * 33 + c */
+        }
+        // Convert to unsigned 32-bit integer then hex
+        return (hash >>> 0).toString(16);
     }
 }
