@@ -39,6 +39,8 @@ export class MainScene extends Phaser.Scene {
         this.activeMinigameCareer = null;
         /** @type {?string} Tracks the current visual mood to optimize animation updates. */
         this.currentMood = null;
+        /** @type {number} Time of the last UI stats update to throttle emissions. */
+        this.lastStatsUpdate = -1000;
     }
 
     /**
@@ -195,11 +197,11 @@ export class MainScene extends Phaser.Scene {
         const simDelta = delta * (this.gameSettings.gameSpeed || 1.0);
         this.nadagotchi.live(simDelta, this.worldState);
 
-        // OPTIMIZATION: Throttle UI updates to ~10 times per second (every 100ms)
-        // Reduces unnecessary DOM/Canvas updates and object creation in UIScene
-        if (time - this.lastStatsUpdateTime > 100) {
+        // OPTIMIZATION: Throttle stats updates to ~10Hz (every 100ms)
+        // This prevents excessive UI rebuilding in UIScene while keeping the display responsive.
+        if (time - this.lastStatsUpdate > 100) {
             this.game.events.emit(EventKeys.UPDATE_STATS, { nadagotchi: this.nadagotchi, settings: this.gameSettings });
-            this.lastStatsUpdateTime = time;
+            this.lastStatsUpdate = time;
         }
 
         this.updateSpriteMood();
