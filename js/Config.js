@@ -188,5 +188,10 @@ export const Config = {
     GAME_LOOP: {
         TARGET_FPS: 60,
         MS_PER_FRAME: 1000 / 60
+    },
+
+    // Security & Hashing
+    SECURITY: {
+        DNA_SALT: "NADAGOTCHI_GENETICS_V1_SALT"
     }
 };
