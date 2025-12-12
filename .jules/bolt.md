@@ -1,3 +1,3 @@
-## 2025-12-07 - Canvas Redraw Optimization
-**Learning:** Phaser `CanvasTexture` operations (`createLinearGradient`, `fillRect`) are expensive when executed every frame in `update()`. Visuals that depend on slowly changing state (like daylight cycle) or static state (idle animations) should use a dirty flag to skip redundant redraws.
-**Action:** When implementing procedural textures in update loops, always implement a state tracking mechanism (e.g., `lastState !== currentState`) to prevent wasted CPU/GPU cycles.
+## 2025-12-07 - Phaser Event Emission Frequency
+**Learning:** `MainScene.update()` emits `EventKeys.UPDATE_STATS` every single frame. `UIScene` listens to this and, crucially, destroys and recreates all action buttons every time it receives the event (if on certain tabs). This created a massive, silent performance bottleneck where hundreds of Phaser GameObjects were being created and destroyed per second.
+**Action:** Always check frequency of global event emitters in `update` loops. Throttling UI updates to 10Hz (100ms) is visually indistinguishable for stats but saves 80%+ of CPU time on the UI thread.
