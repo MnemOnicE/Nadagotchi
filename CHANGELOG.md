@@ -405,172 +405,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Incorrect Tie-Breaking Logic:** Fixed a bug in `updateDominantArchetype` where a tie for the dominant archetype was not correctly handling the incumbent. The logic now correctly prioritizes the existing archetype in a tie, or chooses randomly if the incumbent is not involved.
 
 ## [0.4.0] - 2025-11-16
+## [Unreleased]
 
 ### Added
-- **Comprehensive Code Documentation:** Added detailed JSDoc comments to every class, method, and function across all JavaScript files in the `js/` directory. This improves code clarity, maintainability, and makes the codebase significantly easier for new developers to understand.
+- **System**: Implemented `QuestSystem.js` and `QuestDefinitions.js` to manage data-driven quests.
+- **Quest**: Ported "Masterwork Crafting" quest to the new system, enabling proper state tracking and stage transitions.
+- **Testing**: Added `tests/QuestSystem.test.js` and `tests/QuestIntegration.test.js` to verify quest logic and integration.
+- **Gameplay**: Implemented "Friendship Decay" system. Relationships with NPCs now slowly degrade if the player does not interact with them daily.
+- **System**: Added `RelationshipSystem.dailyUpdate()` to manage relationship maintenance and `interactedToday` tracking.
+- **Tests**: Added `tests/RelationshipSystem.test.js` to verify decay logic and boundary protection.
 
 ### Changed
-- **Updated README:** Replaced the existing `README.md`, which was a copy of the design document, with a comprehensive guide for developers. The new README now includes a project overview, local setup and running instructions, and a detailed breakdown of the code structure.
+- **Architecture**: Refactored `RelationshipSystem.js` and `InventorySystem.js` to use `QuestSystem` instead of hardcoded quest logic.
+- **Nadagotchi**: Initialized `QuestSystem` in the `Nadagotchi` constructor.
+- **UX Improvement**: The "Job Board" button now remains interactive when disabled. Instead of being unresponsive, it dims and provides a toast notification and sound feedback explaining that a career is required.
+- **UIScene**: Refactored the "Job Board" button to use `ButtonFactory` for visual consistency with the rest of the UI.
+- **Tests**: Updated `tests/UIScene.test.js` to verify the new "soft disable" behavior and feedback mechanisms.
+
+## [0.6.0] - 2023-10-27
+
+### Added
+- **Game Balance**: Introduced `Config.js` to centralize all game constants (decay rates, thresholds, skill gains, etc.).
+- **Refactoring**: Updated `Nadagotchi.js`, `MainScene.js`, `UIScene.js`, and minigames to use `Config.js` constants instead of hardcoded numbers.
+- **Testing**: Added `tests/Config.test.js` to verify configuration integrity.
+
+### Changed
+- **Security**: Hardened minigame logic against console tampering by encapsulating state in closures.
+- **Reliability**: Improved `MainScene` resource loading to prevent potential race conditions with global textures.
+
+## [0.5.0] - 2023-10-26
+
+### Added
+- **Feature**: Added "Genetic Scanner" item and UI modal to inspect pet genotypes.
+- **Feature**: Implemented "Homozygous Traits" bonus system (e.g., Photosynthetic, Night Owl).
+- **System**: Created `GeneticsSystem.js` to encapsulate breeding and mutation logic.
+- **UI**: Added `EventKeys.js` to centralize event strings.
 
 ### Fixed
-- **Unpredictable Personality Tie-Breaking:** Fixed a logical flaw in `Nadagotchi.js`'s `updateDominantArchetype` method that caused unpredictable behavior when handling ties for the dominant archetype.
-
-## [0.3.2] - 2025-11-16
-
-### Fixed
-- **Unpredictable Personality Tie-Breaking:** Fixed a bug in `updateDominantArchetype` where a tie in personality points would be broken unpredictably based on object property iteration order. The logic now ensures that the incumbent dominant archetype will always win a tie, preventing unexpected personality shifts.
-
-## [0.3.1] - 2025-11-16
-
-### Fixed
-- **Stagnant Personality Bug:** Fixed a bug in `updateDominantArchetype` where the dominant archetype would not change if another archetype's score was equal to it. The logic now correctly handles ties by allowing a personality shift, making the system more dynamic.
-
-## [0.3.0] - 2025-11-12
-
-### Added
-- **Seasonal Festivals and Spontaneous Events:** Implemented a dynamic event system that introduces seasonal festivals (e.g., "Spring Bloom Festival") and rare, spontaneous events (e.g., "Traveling Merchant").
-  - **`js/Calendar.js`:** A new class to manage the in-game date, including days and seasons.
-  - **`js/EventManager.js`:** A new class to define and manage all in-game events.
-  - The main game loop now advances the calendar, checks for active events, and displays them to the player.
-  - Active events can now directly influence the Nadagotchi's mood and stats.
-- **New Career Mini-Games:** Designed and implemented unique, engaging mini-games for the Scout, Healer, and Artisan careers.
-  - **Scout:** A timed "match the pairs" game (`ScoutMinigameScene.js`).
-  - **Healer:** A diagnostic game where the player chooses the correct remedy for a symptom (`HealerMinigameScene.js`).
-  - **Artisan:** A pattern-matching game where the player replicates a displayed pattern (`ArtisanMinigameScene.js`).
-- **Mini-Game Integration:** Integrated the new mini-games into the main game loop. The `MainScene` now launches the appropriate mini-game when the "Work" button is clicked, based on the pet's current career.
-
-### Fixed
-- **Case-Insensitive Actions:** Fixed a bug in `js/Nadagotchi.js` where player actions were case-sensitive. Actions are now converted to uppercase to ensure commands like 'feed' and 'FEED' are treated the same.
-
-## [0.2.0] - 2025-11-10
-
-### Added
-- **Test Coverage:** Added unit tests for `PersistenceManager.js` and `Nadagotchi.js`.
-  - `PersistenceManager.js`: Added tests for all methods.
-  - `Nadagotchi.js`: Added tests for the `live` and `updateDominantArchetype` methods.
-
-## [0.1.1] - 2025-11-09
-
-### Added
-- **Hobby and Crafting System:** Implemented a new hobby system allowing the Nadagotchi to practice skills like painting and music. A new crafting system allows the pet to use foraged items.
-- **Exploration and Foraging System:** The Nadagotchi can now explore different locations and forage for items, which are added to its inventory.
-- **Social and Relationship System:** A new social system allows the Nadagotchi to build relationships with NPCs.
-
-### Fixed
-- **Critical Black Screen Regression:** Fixed a race condition in `js/MainScene.js` where the `resize` event could be called before the scene's objects were fully created, causing a fatal error that prevented the game from rendering.
-
-## [0.1.0] - 2025-11-09
-
-### Added
-- **Interactive Home Environment:** The pet's home is now interactive. Added a clickable "Bookshelf" and "Potted Plant" that provide skill gains and mood boosts, deepening the core simulation.
-- **Career Mini-Games:** The "Job Board" for the 'Innovator' career now launches an interactive logic puzzle mini-game. Success grants significant skill and happiness rewards, making careers more engaging.
-- **`js/LogicPuzzleScene.js`:** A new scene for the Innovator's career mini-game.
-
-### Changed
-- The `STUDY` action in `Nadagotchi.js` has been refactored and its functionality is now primarily handled by the new interactive bookshelf.
-- The `CARE_FOR_PLANT` action has been removed and its functionality is replaced by the new interactive plant.
-- The "Care" button was removed from `UIScene.js` as it is now redundant.
-
-## [0.0.9] - 2025-11-07
-
-### Changed
-- **Responsive Design:** The game now dynamically scales to fit the browser window, making it fully playable on both desktop and mobile devices.
-  - `js/game.js` was updated to use Phaser's Scale Manager.
-  - `js/MainScene.js` now handles resize events to keep the pet centered.
-  - `index.html` and `style.css` were modified to support a full-screen layout.
-
-### Fixed
-- **Stale Mood Calculation:** Fixed a critical bug in `js/Nadagotchi.js` where skill gains were calculated using the pet's mood *before* an action was processed, not after. This resulted in incorrect skill gains for actions that also changed the pet's mood (e.g., a sad 'Intellectual' pet studying). The logic has been refactored to calculate the mood multiplier *after* any mood changes occur.
-- **Negative Happiness Bug:** Fixed a bug in `js/Nadagotchi.js` where the `happiness` stat for the 'Adventurer' archetype could become negative in 'Rainy' weather. A bounds check was added to ensure `happiness` does not fall below 0.
-
-### Removed
-- **Legacy Files:** Deleted the unused `game.js` and `style.css` files from the root directory to clean up the project structure.
-
-## [0.0.8] - 2025-11-07
-
-### Added
-- "Healer" and "Artisan" career paths.
-- New skills: `empathy`, `focus`, `crafting`.
-- New player actions: "Care for Plant", "Meditate", "Craft Item".
-- New UI buttons and stats display for the new actions/skills.
-
-## [0.0.7] - 2025-11-07
-
-### Added
-- **"Scout" Career Path:** Implemented the "Scout" career path, unlocking for 'Adventurer' archetypes when `skills.navigation > 10`.
-  - Added skill gain for `navigation` to the 'EXPLORE' action in `Nadagotchi.js`.
-  - Added a case for "Scout" in the `openJobBoard()` method in `UIScene.js`.
-  - The `Nav Skill` is now displayed in the stats UI.
-- **Career Unlock Notification:** A visual, non-blocking notification now appears for 3 seconds when a new career is unlocked.
-  - `Nadagotchi.js` now has a `newCareerUnlocked` flag.
-  - `UIScene.js` checks for this flag in `updateStatsUI()` and calls a new `showCareerNotification()` method to display the temporary message.
-
-### Fixed
-- **Mood Logic Bug:** Fixed a critical bug in `Nadagotchi.js`'s `live()` method where the 'angry' state (`hunger < 10`) was unreachable because the 'sad' state (`hunger < 30`) was checked first. The conditional logic has been re-ordered.
-
-## [0.0.6] - 2025-11-07
-
-### Added
-- **Career System Logic:** Implemented the logic for career progression as outlined in the roadmap.
-  - Added an `updateCareer()` method to `Nadagotchi.js`.
-  - This method is called at the end of `handleAction()` to check if skill thresholds have been met.
-  - The "Innovator" career is now automatically assigned if the Nadagotchi's dominant archetype is 'Intellectual' and its 'logic' skill is greater than 10.
-
-### Changed
-- `Nadagotchi.js`: `handleAction()` now calls `updateCareer()` after `updateDominantArchetype()`.
-
-## [0.0.5] - 2025-09-14
-
-### Changed
-- **UI Refactoring:** Overhauled the UI system by separating it into a dedicated `UIScene`.
-  - `MainScene` now only handles core game logic and the pet's visual representation.
-  - The new `UIScene` manages all UI elements, including stats text and action buttons.
-  - Communication between the two scenes is now handled via Phaser's event emitter, creating a more robust and decoupled architecture.
-  - **Fixed Missing Textures:** Replaced unreliable placeholder image URLs with a more stable service (`placehold.co`) to prevent missing texture errors.
-
-### Added
-- **`js/UIScene.js`:** A new file containing the dedicated scene for all UI components.
-
-## [0.0.4] - 2025-09-14
-
-### Added
-- **Career-Specific Job Board:** Implemented a new "Job Board" UI element.
-  - The button is initially disabled and becomes active only when the Nadagotchi achieves a career (`currentCareer` is not null).
-  - Clicking the button triggers a career-specific action. Currently, it logs a message to the console for the 'Innovator' career.
-  - **Career Display in UI:** The Nadagotchi's current career is now displayed in the stats panel, making it easy for the player to see their progress.
-
-### Changed
-- Modified `js/MainScene.js` to add the Job Board button, its activation logic in the `update` loop, and the new `openJobBoard()` method.
-
-## [0.0.3] - 2025-09-14
-
-### Added
-- **Mood-Based Skill Gain:** The 'STUDY' action's effectiveness is now influenced by the Nadagotchi's mood.
-  - A `moodMultiplier` is applied to logic skill gains: `happy` (1.5x), `neutral` (1.0x), `sad` (0.5x), and `angry` (0.2x).
-- **Logic Skill UI:** The current logic skill level is now displayed in the main UI, providing clear feedback to the player.
-
-### Changed
-- Updated `Nadagotchi.js` to include the mood multiplier logic in the `handleAction` method.
-- Updated `MainScene.js` to display the logic skill in `updateStatsUI`.
-
-## [0.0.2] - 2025-09-14
-
-### Added
-- **"Explore" Action:** Implemented a new 'EXPLORE' action for the Nadagotchi.
-  - This action has unique effects based on the pet's dominant archetype, providing a significant happiness boost to 'Adventurer' types and a negative effect on 'Recluse' types.
-- **Proactive Behavior Hint:** A happy 'Adventurer' will now show a magnifying glass thought bubble, hinting to the player to use the new 'Explore' action.
-- **UI Button:** Added an "Explore" button to the main game scene.
-
-### Changed
-- Added detailed retroactive comments to `js/Nadagotchi.js` and `js/MainScene.js` to improve code clarity and documentation.
-
-## [0.0.1] - 2025-09-14
-
-### Added
-
-- Initial project setup.
-- `AGENTS.md`: Instructions for AI agents.
-- `CHANGELOG.md`: To track project history.
-- `ROADMAP.md`: Outlining the future direction of the project.
-- `BEST_PRACTICES.md`: Guidelines for developers.
-- `BUGS.md`: Process for reporting and tracking bugs.
+- **Bug**: Fixed infinite loop in `BreedingScene` when selecting environmental factors.
+- **Bug**: Corrected `Nadagotchi.js` age calculation to prevent negative values.

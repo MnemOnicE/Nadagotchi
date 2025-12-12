@@ -52,10 +52,8 @@ export class InventorySystem {
         this.pet.stats.happiness += Config.ACTIONS.CRAFT.HAPPINESS_RESTORE;
 
         // Update Quest Progress
-        if (itemName === 'Masterwork Chair' &&
-            this.pet.quests['masterwork_crafting'] &&
-            this.pet.quests['masterwork_crafting'].stage === 2) {
-            this.pet.quests['masterwork_crafting'].hasCraftedChair = true;
+        if (itemName === 'Masterwork Chair') {
+            this.pet.questSystem.setQuestFlag('masterwork_crafting', 'hasCraftedChair');
         }
 
         const moodMultiplier = this.pet.getMoodMultiplier();
