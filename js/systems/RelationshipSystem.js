@@ -58,7 +58,35 @@ export class RelationshipSystem {
                 break;
             case 'Master Artisan':
                 if (this.pet.relationships['Master Artisan'].level >= 5) {
-                    this._handleArtisanQuest();
+                    const questId = 'masterwork_crafting';
+                    const qs = this.pet.questSystem;
+                    const q = qs.getQuest(questId);
+
+                    if (!q) {
+                        qs.startQuest(questId);
+                    } else {
+                        const stageDef = qs.getStageDefinition(questId);
+                        if (stageDef && stageDef.isComplete) {
+                            // Recurring Interaction for Completed Quest
+                            if (stageDef.recurringInteraction) {
+                                const recurring = stageDef.recurringInteraction;
+                                if (recurring.rewards && recurring.rewards.skills && recurring.rewards.skills.crafting) {
+                                    this.pet.skills.crafting += recurring.rewards.skills.crafting * moodMultiplier;
+                                }
+                                if (recurring.journalEntry) {
+                                    this.pet.addJournalEntry(recurring.journalEntry);
+                                }
+                            }
+                        } else {
+                            // Try to advance quest
+                            if (!qs.advanceQuest(questId)) {
+                                // Failed to advance (requirements not met)
+                                if (stageDef && stageDef.description) {
+                                    this.pet.addJournalEntry(stageDef.description);
+                                }
+                            }
+                        }
+                    }
                 } else {
                     this.pet.skills.crafting += Config.ACTIONS.INTERACT_NPC.ARTISAN_SKILL_GAIN * moodMultiplier;
                 }
@@ -69,9 +97,18 @@ export class RelationshipSystem {
         }
 
         const relLevel = this.pet.relationships[npcName].level;
-        // Check quest active state: Exists AND is not completed (Stage 3 is complete)
-        const quest = this.pet.quests['masterwork_crafting'];
-        const hasQuest = (quest && quest.stage < 3 && npcName === 'Master Artisan');
+        // Check quest active state via QuestSystem
+        const quest = this.pet.questSystem.getQuest('masterwork_crafting');
+        // Legacy: check if stage < 3. Definitions say stage 3 is isComplete=true.
+        // NarrativeSystem expects 'hasQuest' to mean "Quest is In Progress"
+        // So we check if quest exists AND is not complete.
+        let hasQuest = false;
+        if (npcName === 'Master Artisan' && quest) {
+            const stageDef = this.pet.questSystem.getStageDefinition('masterwork_crafting');
+            if (stageDef && !stageDef.isComplete) {
+                hasQuest = true;
+            }
+        }
 
         const dialogueText = NarrativeSystem.getNPCDialogue(npcName, relLevel, hasQuest);
         this.pet.addJournalEntry(`Chatted with ${npcName}: "${dialogueText}"`);

@@ -6,6 +6,7 @@ import { Recipes } from './ItemData.js';
 import { SeededRandom } from './utils/SeededRandom.js';
 import { RelationshipSystem } from './systems/RelationshipSystem.js';
 import { InventorySystem } from './systems/InventorySystem.js';
+import { QuestSystem } from './systems/QuestSystem.js';
 
 /**
  * @fileoverview Core logic for the Nadagotchi pet.
@@ -195,6 +196,13 @@ export class Nadagotchi {
 
         /** @type {Object.<string, object>} A map of active quests. */
         this.quests = (loadedData && loadedData.quests) ? loadedData.quests : {};
+
+        // Initialize Quest System (Logic Extracted)
+        Object.defineProperty(this, 'questSystem', {
+            value: new QuestSystem(this),
+            enumerable: false,
+            writable: true
+        });
 
         /** @type {string} The pet's current location. */
         this.location = loadedData ? loadedData.location : 'Home';

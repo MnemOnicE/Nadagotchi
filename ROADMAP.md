@@ -5,6 +5,7 @@ The Nadagotchi project is an evolving digital life simulation. This roadmap outl
 ## Current Focus: UX Polish & System Robustness
 - [x] **Config Centralization**: Move magic numbers to `Config.js` (Completed v0.6.0).
 - [x] **UX Improvements**: Add better feedback for disabled actions (Completed).
+- [x] **Quest System**: Implement data-driven Quest System (Completed).
 - [ ] **Accessibility**: Add keyboard navigation support for all modals.
 - [ ] **Responsive Design**: Improve layout scaling for mobile devices.
 
