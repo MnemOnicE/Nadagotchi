@@ -175,6 +175,10 @@ export class MainScene extends Phaser.Scene {
         const dayPassed = this.worldClock.update(delta);
         if (dayPassed) {
             this.calendar.advanceDay();
+            // Apply daily friendship decay
+            if (this.nadagotchi.relationshipSystem) {
+                this.nadagotchi.relationshipSystem.dailyUpdate();
+            }
             this.eventManager.update();
             this.updateDateText();
         }

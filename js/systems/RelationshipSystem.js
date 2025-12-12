@@ -33,6 +33,9 @@ export class RelationshipSystem {
 
         this.pet.stats.energy -= Config.ACTIONS.INTERACT_NPC.ENERGY_COST;
 
+        // Mark interaction for the day to prevent friendship decay
+        this.pet.relationships[npcName].interactedToday = true;
+
         if (interactionType === 'GIFT' && this.pet.inventory['Berries'] > 0) {
             this.pet.inventorySystem.removeItem('Berries', 1);
             this.pet.relationships[npcName].level += Config.ACTIONS.INTERACT_NPC.GIFT_RELATIONSHIP;
@@ -74,6 +77,28 @@ export class RelationshipSystem {
         this.pet.addJournalEntry(`Chatted with ${npcName}: "${dialogueText}"`);
 
         return dialogueText;
+    }
+
+    /**
+     * Updates relationship status daily.
+     * Applies decay to relationships that were not interacted with today.
+     * Resets the `interactedToday` flag for the next day.
+     */
+    dailyUpdate() {
+        const decayRate = Config.ACTIONS.INTERACT_NPC.FRIENDSHIP_DECAY || 0.5;
+
+        for (const npcName in this.pet.relationships) {
+            const rel = this.pet.relationships[npcName];
+
+            if (!rel.interactedToday) {
+                if (rel.level > 0) {
+                    rel.level = Math.max(0, rel.level - decayRate);
+                }
+            }
+
+            // Reset flag for the new day
+            rel.interactedToday = false;
+        }
     }
 
     /**

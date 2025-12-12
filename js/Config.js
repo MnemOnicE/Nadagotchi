@@ -118,6 +118,7 @@ export const Config = {
             CHAT_HAPPINESS: 3,
             CHAT_RELATIONSHIP: 1,
             CHAT_SKILL_GAIN: 0.1,
+            FRIENDSHIP_DECAY: 0.5,
             QUEST_CRAFTING_GAIN: 2,
             QUEST_HAPPINESS_GAIN: 20,
             SCOUT_SKILL_GAIN: 0.15,
