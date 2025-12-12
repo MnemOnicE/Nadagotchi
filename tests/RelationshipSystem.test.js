@@ -47,6 +47,9 @@ describe('RelationshipSystem', () => {
             inventorySystem: {
                 removeItem: jest.fn()
             },
+            questSystem: {
+                getQuest: jest.fn()
+            },
             quests: {}
         };
         // Circular reference simulation if needed, but here we pass pet to system

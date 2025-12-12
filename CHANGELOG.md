@@ -14,8 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Gameplay**: Implemented "Friendship Decay" system. Relationships with NPCs now slowly degrade if the player does not interact with them daily.
 - **System**: Added `RelationshipSystem.dailyUpdate()` to manage relationship maintenance and `interactedToday` tracking.
 - **Tests**: Added `tests/RelationshipSystem.test.js` to verify decay logic and boundary protection.
+- **Performance**: Added `tests/Performance_UpdateStats.test.js` to monitor event emission rates and prevent regressions in UI update throttling.
 
 ### Changed
+- **Performance**: Optimized `MainScene` to throttle `UPDATE_STATS` event emissions to 10Hz (from 60Hz). This significantly reduces overhead in `UIScene` by preventing unnecessary button and text rebuilding every frame.
 - **Architecture**: Refactored `RelationshipSystem.js` and `InventorySystem.js` to use `QuestSystem` instead of hardcoded quest logic.
 - **Nadagotchi**: Initialized `QuestSystem` in the `Nadagotchi` constructor.
 - **UX Improvement**: The "Job Board" button now remains interactive when disabled. Instead of being unresponsive, it dims and provides a toast notification and sound feedback explaining that a career is required.
