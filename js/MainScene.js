@@ -113,6 +113,9 @@ export class MainScene extends Phaser.Scene {
             season: this.calendar.season
         };
 
+        /** @type {number} Timestamp of the last stats update emission to throttle UI refreshes. */
+        this.lastStatsUpdateTime = -1000;
+
         this.stars = Array.from({ length: 100 }, () => ({ x: Math.random(), y: Math.random() }));
 
         // --- Game Objects ---
