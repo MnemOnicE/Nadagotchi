@@ -3,39 +3,7 @@
 > vite
 
 
-  VITE v6.4.1  ready in 780 ms
+  VITE v6.4.1  ready in 399 ms
 
   ➜  Local:   http://localhost:5173/
   ➜  Network: use --host to expose
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/index.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/index.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/AchievementData.js.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/AchievementManager.js.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/ArtisanMinigameScene.js.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/BreedingScene.js.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/ButtonFactory.js.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/Calendar.js.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/Config.js.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/DialogueDefinitions.js.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/EventKeys.js.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/EventManager.js.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/GeneticsSystem.js.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/HealerMinigameScene.js.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/ItemData.js.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/LogicPuzzleScene.js.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/MainScene.js.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/Nadagotchi.js.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/NarrativeSystem.js.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/PersistenceManager.js.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/PreloaderScene.js.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/ScoutMinigameScene.js.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/StartScene.js.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/UIScene.js.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/WeatherSystem.js.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/WorldClock.js.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/game.js.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/systems/index.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/systems/RelationshipSystem.js.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/utils/index.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/utils/SeededRandom.js.html
-7:08:07 AM [vite] (client) page reload coverage/lcov-report/js/utils/SoundSynthesizer.js.html

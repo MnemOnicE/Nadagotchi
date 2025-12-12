@@ -54,20 +54,13 @@ export class UIScene extends Phaser.Scene {
 
         // --- Job Board ---
         // Positioned at bottom-right, with increased size for touch
-        this.jobBoardButton = this.add.text(this.cameras.main.width - 10, this.cameras.main.height - 10, 'Job Board', {
-            fontFamily: 'Arial', fontSize: '16px', padding: { x: 15, y: 10 }, backgroundColor: '#6A0DAD', color: '#ffffff'
-        })
-            .setOrigin(1, 1) // Anchor to bottom-right
-            .setInteractive({ useHandCursor: true })
-            .setAlpha(0.5) // Initially disabled
-            .on('pointerdown', () => {
-                if (this.jobBoardButton.alpha === 1) { // Check if enabled
-                    this.game.events.emit(EventKeys.UI_ACTION, EventKeys.WORK);
-                }
-            });
+        // Palette UX Improvement: Use ButtonFactory for consistency and better "Disabled" feedback
+        this.jobBoardButton = ButtonFactory.createButton(this, 0, 0, 'Job Board', () => {
+            this.handleJobBoardClick();
+        }, { width: 120, height: 50, color: 0x6A0DAD, fontSize: '20px' });
 
-        // Initial interactive state check
-        this.jobBoardButton.disableInteractive();
+        // Initial state: Dimmed but interactive (handled in updateStatsUI, but set safe default here)
+        this.jobBoardButton.setAlpha(0.6);
 
         // --- Retire Button ---
         // Positioned at top-right, below the date (managed by MainScene, but we'll keep this simple)
@@ -129,6 +122,20 @@ export class UIScene extends Phaser.Scene {
      */
     closeAllModals() {
         this.allModals.forEach(modal => modal.setVisible(false));
+    }
+
+    /**
+     * Handles clicks on the Job Board button.
+     * Provides feedback if the player has no career (Palette UX).
+     */
+    handleJobBoardClick() {
+        if (this.nadagotchiData && this.nadagotchiData.currentCareer) {
+            this.game.events.emit(EventKeys.UI_ACTION, EventKeys.WORK);
+        } else {
+            // Palette UX: Feedback for disabled state
+            SoundSynthesizer.instance.playFailure();
+            this.showToast("Job Board Locked", "You need a Career to work!\nTry Studying or Exploring.", "🚫");
+        }
     }
 
     /**
@@ -283,7 +290,11 @@ export class UIScene extends Phaser.Scene {
         });
 
         // Update static elements
-        if (this.jobBoardButton) this.jobBoardButton.setPosition(width - 10, height - 10);
+        if (this.jobBoardButton) {
+            // Position bottom-right, taking into account container width (origin 0,0)
+            // Button width is 120, height is 50. Padding 10.
+            this.jobBoardButton.setPosition(width - 130, height - 60);
+        }
         if (this.retireButton) this.retireButton.setPosition(width - 10, 50);
         if (this.scannerButton) this.scannerButton.setPosition(width - 110, 100);
 
@@ -352,11 +363,10 @@ export class UIScene extends Phaser.Scene {
         }
 
         if (currentCareer) {
-            this.jobBoardButton.setInteractive();
             this.jobBoardButton.setAlpha(1.0);
         } else {
-            this.jobBoardButton.disableInteractive();
-            this.jobBoardButton.setAlpha(0.5);
+            // Palette UX: Dimmed but interactive
+            this.jobBoardButton.setAlpha(0.6);
         }
 
         this.retireButton.setVisible(isLegacyReady);
