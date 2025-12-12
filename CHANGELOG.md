@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.28.0] - 2025-12-07
+
+### Added
+- **UX Discoverability ("Soft Disable"):** Improved the interface by showing unavailable actions (e.g., "Work" before having a career) in a disabled, interactive state instead of hiding them entirely.
+  - **Feedback:** Clicking a disabled action now plays a failure sound and displays a "Toast" notification explaining why the action is locked (e.g., "You need a Career first!").
+  - **Button Factory:** Updated `ButtonFactory.js` to support a standardized `setDisabled` state with visual dimming and optional click handlers.
+  - **UIScene:** Updated the 'ACTION' and 'SYSTEM' tabs to render disabled buttons for locked features like "Work" and "Retire", significantly improving feature discoverability for new players.
+
 ## [1.27.0] - 2025-12-07
 
 ### Added

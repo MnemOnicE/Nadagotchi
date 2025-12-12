@@ -25,6 +25,7 @@ export class ButtonFactory {
      * @param {number} [options.color=0xD8A373] - The background color of the button (hex).
      * @param {string} [options.textColor='#4A4A4A'] - The color of the text string.
      * @param {string} [options.fontSize='24px'] - The CSS font size for the text.
+     * @param {function} [options.onDisabledClick] - Callback for when the button is clicked while disabled.
      * @returns {Phaser.GameObjects.Container} The created button container.
      */
     static createButton(scene, x, y, text, callback, options = {}) {
@@ -72,6 +73,15 @@ export class ButtonFactory {
 
         // Input Handling
         hitZone.on('pointerdown', () => {
+            if (container.isDisabled) {
+                if (options.onDisabledClick) {
+                    options.onDisabledClick();
+                } else {
+                    SoundSynthesizer.instance.playFailure();
+                }
+                return;
+            }
+
             // Audio Feedback
             SoundSynthesizer.instance.playClick();
 
@@ -84,6 +94,7 @@ export class ButtonFactory {
 
         // Hover Effects - Palette UX
         hitZone.on('pointerover', () => {
+            if (container.isDisabled) return;
             scene.tweens.add({
                 targets: hoverOverlay,
                 alpha: 0.2, // Lighten the button
@@ -111,6 +122,17 @@ export class ButtonFactory {
         // Store size for layout calculations
         container.width = width;
         container.height = height;
+
+        /**
+         * Sets the disabled state of the button.
+         * @param {boolean} isDisabled - Whether the button is disabled.
+         */
+        container.setDisabled = (isDisabled) => {
+            container.isDisabled = isDisabled;
+            container.setAlpha(isDisabled ? 0.6 : 1.0);
+
+            // Palette UX: Visual cue for disabled state (Grayscale effect if possible, but alpha is safe)
+        };
 
         return container;
     }
