@@ -7,7 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **System**: Implemented `QuestSystem.js` and `QuestDefinitions.js` to manage data-driven quests.
+- **Quest**: Ported "Masterwork Crafting" quest to the new system, enabling proper state tracking and stage transitions.
+- **Testing**: Added `tests/QuestSystem.test.js` and `tests/QuestIntegration.test.js` to verify quest logic and integration.
+
 ### Changed
+- **Architecture**: Refactored `RelationshipSystem.js` and `InventorySystem.js` to use `QuestSystem` instead of hardcoded quest logic.
+- **Nadagotchi**: Initialized `QuestSystem` in the `Nadagotchi` constructor.
 - **UX Improvement**: The "Job Board" button now remains interactive when disabled. Instead of being unresponsive, it dims and provides a toast notification and sound feedback explaining that a career is required.
 - **UIScene**: Refactored the "Job Board" button to use `ButtonFactory` for visual consistency with the rest of the UI.
 - **Tests**: Updated `tests/UIScene.test.js` to verify the new "soft disable" behavior and feedback mechanisms.

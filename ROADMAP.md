@@ -5,6 +5,7 @@ The Nadagotchi project is an evolving digital life simulation. This roadmap outl
 ## Current Focus: UX Polish & System Robustness
 - [x] **Config Centralization**: Move magic numbers to `Config.js` (Completed v0.6.0).
 - [x] **UX Improvements**: Add better feedback for disabled actions (Completed).
+- [x] **Quest System**: Implement data-driven Quest System (Completed).
 - [ ] **Accessibility**: Add keyboard navigation support for all modals.
 - [ ] **Responsive Design**: Improve layout scaling for mobile devices.
 
@@ -12,7 +13,7 @@ The Nadagotchi project is an evolving digital life simulation. This roadmap outl
 
 ### Milestone 1: Enhanced Social & World
 - **NPC Schedules**: NPCs move between locations based on time of day.
-- **Dynamic Quests**: Procedurally generated quests from NPCs.
+- **Dynamic Quests**: Procedurally generated quests from NPCs (Building on QuestSystem).
 - **Friendship Decay**: Relationships degrade over time if ignored.
 
 ### Milestone 2: Advanced Career Paths
