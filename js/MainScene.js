@@ -111,6 +111,9 @@ export class MainScene extends Phaser.Scene {
             season: this.calendar.season
         };
 
+        /** @type {number} Timestamp of the last stats update emission to throttle UI refreshes. */
+        this.lastStatsUpdateTime = -1000;
+
         this.stars = Array.from({ length: 100 }, () => ({ x: Math.random(), y: Math.random() }));
 
         // --- Game Objects ---
@@ -188,7 +191,12 @@ export class MainScene extends Phaser.Scene {
         const simDelta = delta * (this.gameSettings.gameSpeed || 1.0);
         this.nadagotchi.live(simDelta, this.worldState);
 
-        this.game.events.emit(EventKeys.UPDATE_STATS, { nadagotchi: this.nadagotchi, settings: this.gameSettings });
+        // OPTIMIZATION: Throttle UI updates to ~10 times per second (every 100ms)
+        // Reduces unnecessary DOM/Canvas updates and object creation in UIScene
+        if (time - this.lastStatsUpdateTime > 100) {
+            this.game.events.emit(EventKeys.UPDATE_STATS, { nadagotchi: this.nadagotchi, settings: this.gameSettings });
+            this.lastStatsUpdateTime = time;
+        }
 
         this.updateSpriteMood();
         this.checkProactiveBehaviors();

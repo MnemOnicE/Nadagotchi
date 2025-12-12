@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.26.1] - 2025-12-07
+
+### Performance
+- **UI Update Throttling:** Optimized the `MainScene` game loop to throttle `UPDATE_STATS` event emissions to 10Hz (every 100ms) instead of running every frame (60Hz).
+  - This resolves a critical performance bottleneck where the `UIScene` was destroying and recreating action buttons every single frame while the 'ACTION' or 'SYSTEM' tabs were active.
+  - Significantly reduces garbage collection pressure and CPU usage for UI rendering without impacting perceived responsiveness.
+
 ## [1.26.0] - 2025-12-07
 
 ### Refactored

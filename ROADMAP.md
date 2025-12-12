@@ -66,6 +66,7 @@ This phase focuses on building out the primary gameplay loops, giving players cl
     -   [x] Refactored codebase to use centralized Configuration and Event Keys for better maintainability.
     -   [x] Cleanup and Documentation: Created `GUIDE.md` and removed redundant logic from core classes.
     -   [x] **Refactoring:** Extracted NPC and Quest logic from `Nadagotchi.js` into `RelationshipSystem.js` and Inventory logic into `InventorySystem.js` to decouple core systems.
+    -   [x] **Performance:** Optimized main loop event emission to throttle UI updates, eliminating unnecessary object creation/destruction cycles.
 -   **[x] Security & Balance:**
     -   [x] Implemented save data obfuscation with UUID salting and integrity verification to prevent tampering and save swapping.
     -   [x] Hardened event system and action handlers to prevent console injection and logic exploits.
