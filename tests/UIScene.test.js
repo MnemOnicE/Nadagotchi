@@ -44,9 +44,19 @@ global.Phaser = {
     },
     GameObjects: {
         Container: class Container {
-            constructor() { Object.assign(this, mockGameObject()); this.list = []; }
-            add(child) { this.list.push(child); return this; }
-            addMultiple(children) { this.list = this.list.concat(children); return this; }
+            constructor() {
+                Object.assign(this, mockGameObject());
+                this.list = [];
+                this.add = (child) => {
+                    if (Array.isArray(child)) {
+                        this.list = this.list.concat(child);
+                    } else {
+                        this.list.push(child);
+                    }
+                    return this;
+                };
+                this.addMultiple = (children) => { this.list = this.list.concat(children); return this; };
+            }
         },
         Group: class Group {
              constructor() {
@@ -340,12 +350,13 @@ describe('UIScene', () => {
         expect(scene.scene.pause).toHaveBeenCalledWith('MainScene');
 
         // Test Volume buttons
-        const volDown = scene.settingsModal.children.find(c => c.textLabel === '-');
+        // settingsModal is now a Container, so use .list
+        const volDown = scene.settingsModal.list.find(c => c.textLabel === '-');
         if (!volDown) {
-             console.log('Settings Modal Children:', scene.settingsModal.children);
+             console.log('Settings Modal Children:', scene.settingsModal.list);
              throw new Error('volDown button not found');
         }
-        const volUp = scene.settingsModal.children.find(c => c.textLabel === '+');
+        const volUp = scene.settingsModal.list.find(c => c.textLabel === '+');
 
         volDown.emit('pointerdown');
         // Default 0.5 -> 0.4

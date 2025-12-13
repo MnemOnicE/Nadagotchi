@@ -22,11 +22,11 @@ import { ArtisanMinigameScene } from './ArtisanMinigameScene.js';
 const config = {
     type: Phaser.AUTO, // Auto-detect WebGL or Canvas
     scale: {
-        mode: Phaser.Scale.FIT, // Scale to fit window while maintaining aspect ratio
+        mode: Phaser.Scale.RESIZE, // Scale the canvas to fill the parent container
         parent: 'game-container', // DOM element ID to mount the game
-        autoCenter: Phaser.Scale.CENTER_BOTH, // Center vertically and horizontally
-        width: 800,
-        height: 600
+        autoCenter: Phaser.Scale.NO_CENTER, // CSS handles centering/sizing
+        width: window.innerWidth, // Initial width
+        height: window.innerHeight // Initial height
     },
     scene: [
         PreloaderScene,        // 1. Loads assets

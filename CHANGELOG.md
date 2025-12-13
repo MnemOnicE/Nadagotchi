@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.30.0] - 2025-12-07
+
+### Added
+- **Responsive Design Support:** Switched the Phaser game configuration from `FIT` to `RESIZE` mode, allowing the game canvas to adapt dynamically to any screen aspect ratio (specifically improving mobile portrait experience).
+- **Dynamic UI Modals:** Refactored `js/UIScene.js` to use `Phaser.GameObjects.Container` for all modal windows. Implemented a `resizeModals` system that keeps windows centered and correctly sized even when the browser window is resized or rotated.
+
+### Changed
+- **CSS Layout:** Updated `style.css` to ensure the game container fully occupies the viewport without scrollbars.
+
 ## [1.29.0] - 2025-12-07
 
 ### Added

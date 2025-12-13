@@ -129,7 +129,7 @@ The Nadagotchi project is an evolving digital life simulation. This roadmap outl
 - [x] **Performance**: Optimize UI update frequency to reduce CPU load (Completed).
 - [x] **Performance**: Implement smart dirty-checking for UI button rendering (Completed).
 - [ ] **Accessibility**: Add keyboard navigation support for all modals.
-- [ ] **Responsive Design**: Improve layout scaling for mobile devices.
+- [x] **Responsive Design**: Improve layout scaling for mobile devices.
 
 ## Upcoming Milestones
 
