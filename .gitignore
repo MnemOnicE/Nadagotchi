@@ -1,3 +1,6 @@
 node_modules
 coverage/
 server.log
+
+# CHANGELOG.md ignored for now, will be restored in later versions
+CHANGELOG.md
