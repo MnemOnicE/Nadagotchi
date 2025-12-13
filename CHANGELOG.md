@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.28.0] - 2025-12-07
+
+### Added
+- **Showcase System (Pet Passport):** Implemented a visual "Showcase" modal in `UIScene.js` that displays a "Pet Passport".
+  - **Passport Card:** Renders a stylized ID card featuring the pet's sprite, archetype, generation, career, and age.
+  - **UI Integration:** Added a "Showcase" button to the "SYSTEM" tab in the main dashboard.
+- **New Items:** Added missing items to `ItemData.js` to support the Breeding and Crafting systems:
+  - **Tools:** 'Genetic Scanner', 'Ancient Tome', 'Heart Amulet'.
+  - **Consumables:** 'Nutrient Bar', 'Espresso', 'Chamomile'.
+  - **Materials:** 'Muse Flower'.
+  - This resolves a data integrity issue where the Genetics System referenced items that did not exist in the game.
+
 ## [1.27.0] - 2025-12-07
 
 ### Added

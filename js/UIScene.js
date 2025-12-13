@@ -102,6 +102,7 @@ export class UIScene extends Phaser.Scene {
         this.achievementsModal = this.createModal("Achievements");
         this.dialogueModal = this.createModal("Conversation");
         this.settingsModal = this.createSettingsModal();
+        this.showcaseModal = this.createShowcaseModal();
 
         // --- Initial Layout ---
         this.createTabs();
@@ -198,6 +199,7 @@ export class UIScene extends Phaser.Scene {
                 { text: 'Recipes', action: EventKeys.OPEN_RECIPES },
                 { text: 'Hobbies', action: EventKeys.OPEN_HOBBIES },
                 { text: 'Achievements', action: EventKeys.OPEN_ACHIEVEMENTS },
+                { text: 'Showcase', action: EventKeys.OPEN_SHOWCASE },
                 { text: 'Decorate', action: EventKeys.DECORATE },
                 { text: 'Settings', action: EventKeys.OPEN_SETTINGS },
                 { text: 'Retire', action: EventKeys.RETIRE, condition: () => this.nadagotchiData && this.nadagotchiData.isLegacyReady }
@@ -327,6 +329,7 @@ export class UIScene extends Phaser.Scene {
             case EventKeys.OPEN_ANCESTOR_MODAL: this.openAncestorModal(data); break;
             case EventKeys.OPEN_INVENTORY: this.openInventoryMenu(); break;
             case EventKeys.OPEN_ACHIEVEMENTS: this.openAchievementsModal(); break;
+            case EventKeys.OPEN_SHOWCASE: this.openShowcase(); break;
             case EventKeys.OPEN_SETTINGS: this.openSettingsMenu(); break;
         }
     }
@@ -917,6 +920,69 @@ export class UIScene extends Phaser.Scene {
         this.updateSpeedButtons(currentSpeed);
 
         this.settingsModal.setVisible(true);
+        this.scene.pause('MainScene');
+    }
+
+    /**
+     * Creates the Showcase (Passport) modal.
+     * @returns {Phaser.GameObjects.Group} The modal group.
+     */
+    createShowcaseModal() {
+        const modal = this.createModal("Pet Passport");
+        // Create a passport container for the content
+        const passportContainer = this.add.container(this.cameras.main.width / 2, this.cameras.main.height / 2);
+        modal.add(passportContainer);
+        modal.passportContainer = passportContainer;
+        return modal;
+    }
+
+    /**
+     * Opens the Showcase modal and renders the pet passport.
+     */
+    openShowcase() {
+        this.closeAllModals();
+        if (!this.nadagotchiData) return;
+
+        // Clear previous content
+        const container = this.showcaseModal.passportContainer;
+        container.removeAll(true);
+
+        const width = 400;
+        const height = 250;
+
+        // 1. Background Card (Gold/Official looking)
+        const cardBg = this.add.rectangle(0, 0, width, height, 0xFFF8E7).setStrokeStyle(4, 0xD4AF37); // Ivory with Gold border
+
+        // 2. Pet Sprite (Left Side)
+        // We use the 'pet' texture and the frame corresponding to current mood
+        const moodMap = { 'happy': 0, 'neutral': 1, 'sad': 2, 'angry': 3 };
+        const frame = moodMap[this.nadagotchiData.mood] ?? 1;
+        const sprite = this.add.image(-120, 0, 'pet', frame).setScale(8); // Big sprite
+
+        // 3. Info Text (Right Side)
+        const name = `Archetype: ${this.nadagotchiData.dominantArchetype}`;
+        const gen = `Generation: ${this.nadagotchiData.generation || 1}`;
+        const career = `Career: ${this.nadagotchiData.currentCareer || 'Unemployed'}`;
+        const age = `Age: ${Math.floor(this.nadagotchiData.age || 0)} Days`;
+
+        const infoText = this.add.text(0, -60, `${name}\n${gen}\n${career}\n${age}`, {
+            fontFamily: 'VT323, monospace',
+            fontSize: '24px',
+            color: '#000000',
+            lineSpacing: 10
+        }).setOrigin(0, 0); // Align left
+
+        // 4. Footer
+        const footer = this.add.text(0, 80, "OFFICIAL NADAGOTCHI PASSPORT", {
+            fontFamily: 'Arial',
+            fontSize: '12px',
+            color: '#888888',
+            fontStyle: 'italic'
+        }).setOrigin(0.5);
+
+        container.add([cardBg, sprite, infoText, footer]);
+
+        this.showcaseModal.setVisible(true);
         this.scene.pause('MainScene');
     }
 }

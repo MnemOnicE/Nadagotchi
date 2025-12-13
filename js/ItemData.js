@@ -14,18 +14,24 @@ export const ItemDefinitions = {
     "Berries": { type: "Consumable", description: "Sweet and nutritious wild berries.", emoji: "🍒" },
     "Shiny Stone": { type: "Material", description: "A rare stone that glitters in the sunlight.", emoji: "💎" },
     "Frostbloom": { type: "Material", description: "A magical flower that blooms in winter.", emoji: "❄️" },
+    "Muse Flower": { type: "Material", description: "A flower that inspires creativity.", emoji: "🌺" },
 
     // Crafted Items (Consumables)
     "Logic-Boosting Snack": { type: "Consumable", description: "A tasty snack that fuels the mind.", emoji: "🧠" },
     "Stamina-Up Tea": { type: "Consumable", description: "A warm tea that restores energy.", emoji: "🍵" },
     "Metabolism-Slowing Tonic": { type: "Consumable", description: "A tonic that slows metabolism, helping to conserve energy.", emoji: "🧪" },
+    "Nutrient Bar": { type: "Consumable", description: "A dense bar packed with vitamins.", emoji: "🍫" },
+    "Espresso": { type: "Consumable", description: "A strong coffee to speed you up.", emoji: "☕" },
+    "Chamomile": { type: "Consumable", description: "A calming tea to slow you down.", emoji: "🍵" },
 
     // Crafted Items (Furniture)
     "Fancy Bookshelf": { type: "Furniture", description: "A beautiful bookshelf that makes studying more effective.", emoji: "📚" },
     "Masterwork Chair": { type: "Furniture", description: "A chair of unparalleled craftsmanship.", emoji: "🪑" },
 
-    // Tools
-    "Genetic Scanner": { type: "Tool", description: "Allows analysis of pet genetics.", emoji: "🧬" }
+    // Tools & Artifacts
+    "Genetic Scanner": { type: "Tool", description: "Allows analysis of pet genetics.", emoji: "🧬" },
+    "Ancient Tome": { type: "Tool", description: "A dusty book filled with ancient wisdom.", emoji: "📖" },
+    "Heart Amulet": { type: "Tool", description: "A warm amulet that pulses with kindness.", emoji: "❤️" }
 };
 
 /**
