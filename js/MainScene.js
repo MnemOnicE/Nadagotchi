@@ -452,8 +452,8 @@ export class MainScene extends Phaser.Scene {
         this.lastLightY = -9999;
 
         // --- VIEWPORT ADJUSTMENT FOR DASHBOARD ---
-        // Reserve bottom 25% for the UI Shell (matches UIScene layout)
-        const dashboardHeight = Math.floor(height * 0.25);
+        // Reserve bottom portion for the UI Shell (matches UIScene layout)
+        const dashboardHeight = Math.floor(height * Config.UI.DASHBOARD_HEIGHT_RATIO);
         const gameHeight = height - dashboardHeight;
 
         // Resize the Main Camera to only render in the top portion
@@ -545,7 +545,7 @@ export class MainScene extends Phaser.Scene {
         this.tweens.killTweensOf(this.sprite);
 
         // Calculate center position
-        const dashboardHeight = Math.floor(this.scale.height * 0.25);
+        const dashboardHeight = Math.floor(this.scale.height * Config.UI.DASHBOARD_HEIGHT_RATIO);
         const gameHeight = this.scale.height - dashboardHeight;
         const centerX = this.scale.width / 2;
         const centerY = gameHeight / 2;

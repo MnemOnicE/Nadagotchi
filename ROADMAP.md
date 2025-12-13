@@ -116,6 +116,7 @@ This phase will introduce long-term replayability and a deeper sense of history 
 -   **[ ] Advanced Features:**
     -   [x] **Achievement Tracking System:** Implement backend logic to track milestones (e.g., "Breed 5 Generations," "Master a Career"), serving as the next logical step after stabilizing the core game loop.
     -   [x] **Achievements UI:** Implement frontend UI to visualize unlocked achievements.
+    - [x] **Showcase System:** Implemented a "Pet Passport" UI to visualize and share pet details.
     - [x] **Showcase System:** Implemented "Pet Passport" (ShowcaseScene) to visualize pet details and DNA for sharing.
     -   [x] **Mystery Egg Exchange:** Implemented the backend logic for exporting and importing pet DNA strings (Prerequisites met: Seeded RNG, Serialization).
 # Roadmap

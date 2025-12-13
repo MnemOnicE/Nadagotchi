@@ -96,6 +96,7 @@ export class UIScene extends Phaser.Scene {
         this.achievementsModal = this.createModal("Achievements");
         this.dialogueModal = this.createModal("Conversation");
         this.settingsModal = this.createSettingsModal();
+        this.showcaseModal = this.createShowcaseModal();
 
         // --- Initial Layout ---
         this.createTabs();
@@ -203,6 +204,7 @@ export class UIScene extends Phaser.Scene {
                 { text: 'Recipes', action: EventKeys.OPEN_RECIPES },
                 { text: 'Hobbies', action: EventKeys.OPEN_HOBBIES },
                 { text: 'Achievements', action: EventKeys.OPEN_ACHIEVEMENTS },
+                { text: 'Showcase', action: EventKeys.OPEN_SHOWCASE },
                 { text: 'Decorate', action: EventKeys.DECORATE },
                 { text: 'Settings', action: EventKeys.OPEN_SETTINGS },
                 {
@@ -229,6 +231,8 @@ export class UIScene extends Phaser.Scene {
         return actions;
     }
 
+        // Create buttons
+        const dashboardHeight = Math.floor(this.cameras.main.height * Config.UI.DASHBOARD_HEIGHT_RATIO);
     /**
      * Switches the active tab and populates the dashboard with relevant actions.
      * @param {string} tabId - The ID of the tab to switch to (e.g., 'CARE', 'ACTION').
@@ -328,7 +332,7 @@ export class UIScene extends Phaser.Scene {
     resize(gameSize) {
         const width = gameSize.width;
         const height = gameSize.height;
-        const dashboardHeight = Math.floor(height * 0.25);
+        const dashboardHeight = Math.floor(height * Config.UI.DASHBOARD_HEIGHT_RATIO);
         const dashboardY = height - dashboardHeight;
 
         this.cameras.main.setSize(width, height);
@@ -413,6 +417,7 @@ export class UIScene extends Phaser.Scene {
             case EventKeys.OPEN_ANCESTOR_MODAL: this.openAncestorModal(data); break;
             case EventKeys.OPEN_INVENTORY: this.openInventoryMenu(); break;
             case EventKeys.OPEN_ACHIEVEMENTS: this.openAchievementsModal(); break;
+            case EventKeys.OPEN_SHOWCASE: this.openShowcase(); break;
             case EventKeys.OPEN_SETTINGS: this.openSettingsMenu(); break;
         }
     }
@@ -560,6 +565,11 @@ export class UIScene extends Phaser.Scene {
             if (step === 1) highlight(5, 5, 400, 200, "Here you can see your Pet's\nStats, Mood, and Skills.");
             else if (step === 2) {
                 this.showTab('CARE');
+                const dashboardY = this.cameras.main.height - Math.floor(this.cameras.main.height * Config.UI.DASHBOARD_HEIGHT_RATIO);
+                highlight(10, dashboardY, 500, 50, "Use these tabs to switch between\nCare, Actions, and Systems.");
+            } else if (step === 3) {
+                const dashboardY = this.cameras.main.height - Math.floor(this.cameras.main.height * Config.UI.DASHBOARD_HEIGHT_RATIO);
+                highlight(10, dashboardY + 60, 600, 100, "These buttons let you interact\nwith your Nadagotchi.");
                 highlight(10, this.cameras.main.height - Math.floor(this.cameras.main.height * 0.25), 500, 50, "Use these tabs to switch between\nCare, Actions, and Systems.");
             } else if (step === 3) {
                  highlight(10, this.cameras.main.height - Math.floor(this.cameras.main.height * 0.25) + 60, 600, 100, "These buttons let you interact\nwith your Nadagotchi.");
@@ -858,6 +868,69 @@ export class UIScene extends Phaser.Scene {
         this.settingsModal.volDisplay.setText(`${vol}%`);
         this.updateSpeedButtons(this.settingsData.gameSpeed || 1.0);
         this.settingsModal.setVisible(true);
+        this.scene.pause('MainScene');
+    }
+
+    /**
+     * Creates the Showcase (Passport) modal.
+     * @returns {Phaser.GameObjects.Group} The modal group.
+     */
+    createShowcaseModal() {
+        const modal = this.createModal("Pet Passport");
+        // Create a passport container for the content
+        const passportContainer = this.add.container(this.cameras.main.width / 2, this.cameras.main.height / 2);
+        modal.add(passportContainer);
+        modal.passportContainer = passportContainer;
+        return modal;
+    }
+
+    /**
+     * Opens the Showcase modal and renders the pet passport.
+     */
+    openShowcase() {
+        this.closeAllModals();
+        if (!this.nadagotchiData) return;
+
+        // Clear previous content
+        const container = this.showcaseModal.passportContainer;
+        container.removeAll(true);
+
+        const width = 400;
+        const height = 250;
+
+        // 1. Background Card (Gold/Official looking)
+        const cardBg = this.add.rectangle(0, 0, width, height, 0xFFF8E7).setStrokeStyle(4, 0xD4AF37); // Ivory with Gold border
+
+        // 2. Pet Sprite (Left Side)
+        // We use the 'pet' texture and the frame corresponding to current mood
+        const moodMap = { 'happy': 0, 'neutral': 1, 'sad': 2, 'angry': 3 };
+        const frame = moodMap[this.nadagotchiData.mood] ?? 1;
+        const sprite = this.add.image(-120, 0, 'pet', frame).setScale(8); // Big sprite
+
+        // 3. Info Text (Right Side)
+        const name = `Archetype: ${this.nadagotchiData.dominantArchetype}`;
+        const gen = `Generation: ${this.nadagotchiData.generation || 1}`;
+        const career = `Career: ${this.nadagotchiData.currentCareer || 'Unemployed'}`;
+        const age = `Age: ${Math.floor(this.nadagotchiData.age || 0)} Days`;
+
+        const infoText = this.add.text(0, -60, `${name}\n${gen}\n${career}\n${age}`, {
+            fontFamily: 'VT323, monospace',
+            fontSize: '24px',
+            color: '#000000',
+            lineSpacing: 10
+        }).setOrigin(0, 0); // Align left
+
+        // 4. Footer
+        const footer = this.add.text(0, 80, "OFFICIAL NADAGOTCHI PASSPORT", {
+            fontFamily: 'Arial',
+            fontSize: '12px',
+            color: '#888888',
+            fontStyle: 'italic'
+        }).setOrigin(0.5);
+
+        container.add([cardBg, sprite, infoText, footer]);
+
+        this.showcaseModal.setVisible(true);
         this.scene.pause('MainScene');
     }
 }
