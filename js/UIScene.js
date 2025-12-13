@@ -26,6 +26,8 @@ export class UIScene extends Phaser.Scene {
      */
     constructor() {
         super({ key: 'UIScene' });
+        /** @type {string} Stores the signature of the last rendered action buttons to prevent redundant rebuilds. */
+        this.lastActionSignature = '';
     }
 
     /**
@@ -152,9 +154,11 @@ export class UIScene extends Phaser.Scene {
     }
 
     /**
-     * Switches the active tab and populates the dashboard with relevant actions.
-     * @param {string} tabId - The ID of the tab to switch to (e.g., 'CARE', 'ACTION').
+     * Retrieves the list of actions (buttons) for a given tab ID.
+     * @param {string} tabId - The ID of the tab (e.g., 'CARE', 'ACTION').
+     * @returns {Array<object>} List of action definitions.
      */
+    getTabActions(tabId) {
     showTab(tabId) {
         this.currentTab = tabId;
 
@@ -222,12 +226,62 @@ export class UIScene extends Phaser.Scene {
                 });
             }
         }
+        return actions;
+    }
+
+    /**
+     * Switches the active tab and populates the dashboard with relevant actions.
+     * @param {string} tabId - The ID of the tab to switch to (e.g., 'CARE', 'ACTION').
+     */
+    showTab(tabId) {
+        this.currentTab = tabId;
+
+        // Update Tab Visuals (Highlight active)
+        this.tabButtons.forEach(btn => {
+            const isSelected = btn.tabId === tabId;
+            btn.setAlpha(isSelected ? 1.0 : 0.7);
+        });
+
+        // Get Actions
+        const allActions = this.getTabActions(tabId);
+
+        // Filter actions based on conditions to determine what will be shown
+        // We do this here so we can generate the signature from the *visible* buttons
+        const visibleActions = allActions.filter(item => !item.condition || item.condition());
+
+        // Generate Signature (e.g., "Feed|Play|Meditate")
+        const signature = visibleActions.map(a => a.text).join('|');
+
+        // OPTIMIZATION: If we are calling showTab but the buttons are already correct, skip rebuild.
+        // NOTE: If the user manually clicked the tab, we might want to force rebuild?
+        // But usually showTab is called by UI clicks or updateStatsUI.
+        // If the signature matches, we don't need to destroy and recreate buttons.
+        // However, we must ensure that if this method is called via a Tab Click, we verify we are actually ON that tab.
+        // Since we destroyed actionButtons previously in the old logic, we need to be careful.
+        // In this logic: "Is the current displayed UI matching the requested UI?"
+
+        // If the actionButtons array is populated and the signature matches, we can return early?
+        // But we need to make sure we are not switching tabs (which clears buttons).
+        // Let's rely on updateStatsUI to handle the optimization conditional call.
+        // BUT, if showTab is called explicitly (e.g. click), we should proceed.
+        // To be safe, let's just implement the rendering logic here and let updateStatsUI decide when to call it.
+        // Wait, if I click 'Action' tab, showTab('ACTION') is called. Buttons are built.
+        // Then updateStatsUI is called. It checks signature. Signature matches. It SKIPS calling showTab.
+        // This is the desired behavior.
+        // So showTab's job is just to BUILD.
+
+        // Clear existing action buttons
+        this.actionButtons.forEach(btn => btn.destroy());
+        this.actionButtons = [];
+
+        // Update signature for next comparison
+        this.lastActionSignature = signature;
 
         // Create buttons
         const dashboardHeight = Math.floor(this.cameras.main.height * 0.25);
         const dashboardY = this.cameras.main.height - dashboardHeight;
 
-        this.layoutActionButtons(actions, dashboardY + 50); // Start below tabs
+        this.layoutActionButtons(visibleActions, dashboardY + 50); // Start below tabs
     }
 
     /**
@@ -243,6 +297,7 @@ export class UIScene extends Phaser.Scene {
         const btnHeight = 40;
 
         actions.forEach(item => {
+            // Condition check already done in showTab filtering
             // Palette UX: Show disabled buttons instead of hiding them for better discoverability
             const isDisabled = item.condition && !item.condition();
 
@@ -409,6 +464,13 @@ export class UIScene extends Phaser.Scene {
         }
 
         if (this.currentTab === 'ACTION' || this.currentTab === 'SYSTEM') {
+            // OPTIMIZATION: Check if the visible buttons actually changed before rebuilding
+            const allActions = this.getTabActions(this.currentTab);
+            const visibleActions = allActions.filter(item => !item.condition || item.condition());
+            const signature = visibleActions.map(a => a.text).join('|');
+
+            // Only rebuild if the signature differs from the last rendered state
+            if (signature !== this.lastActionSignature) {
             // OPTIMIZATION: Only rebuild the action buttons if the relevant game state (signature) has changed.
             const newSignature = this.getTabStateSignature(this.currentTab);
             if (newSignature !== this.lastTabSignature) {
