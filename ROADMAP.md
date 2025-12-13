@@ -66,7 +66,8 @@ This phase focuses on building out the primary gameplay loops, giving players cl
     -   [x] Refactored codebase to use centralized Configuration and Event Keys for better maintainability.
     -   [x] Cleanup and Documentation: Created `GUIDE.md` and removed redundant logic from core classes.
     -   [x] **Refactoring:** Extracted NPC and Quest logic from `Nadagotchi.js` into `RelationshipSystem.js` and Inventory logic into `InventorySystem.js` to decouple core systems.
-    -   [x] **Performance:** Optimized main loop event emission to throttle UI updates, eliminating unnecessary object creation/destruction cycles.
+    -   [x] **Performance:** Optimized main loop event emission to throttle UI updates.
+    -   [x] **Performance:** Implemented smart rendering in `UIScene` to prevent unnecessary DOM/Object rebuilding.
 -   **[x] Security & Balance:**
     -   [x] Implemented save data obfuscation with UUID salting and integrity verification to prevent tampering and save swapping.
     -   [x] Hardened event system and action handlers to prevent console injection and logic exploits.
@@ -126,6 +127,7 @@ The Nadagotchi project is an evolving digital life simulation. This roadmap outl
 - [x] **UX Improvements**: Add better feedback for disabled actions ("Soft Disable") to improve discoverability.
 - [x] **Quest System**: Implement data-driven Quest System (Completed).
 - [x] **Performance**: Optimize UI update frequency to reduce CPU load (Completed).
+- [x] **Performance**: Implement smart dirty-checking for UI button rendering (Completed).
 - [ ] **Accessibility**: Add keyboard navigation support for all modals.
 - [ ] **Responsive Design**: Improve layout scaling for mobile devices.
 
