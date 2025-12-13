@@ -48,6 +48,8 @@ export class UIScene extends Phaser.Scene {
         this.statsText = this.add.text(10, 10, '', {
             fontFamily: 'VT323, monospace', fontSize: '24px', color: '#ffffff', stroke: '#000000', strokeThickness: 3
         });
+        /** @type {string} Cache the last text value to prevent redundant setText calls. */
+        this.lastStatsText = '';
 
         // --- Action Buttons ---
         this.actionButtons = [];
@@ -155,6 +157,9 @@ export class UIScene extends Phaser.Scene {
      */
     showTab(tabId) {
         this.currentTab = tabId;
+
+        // Cache the signature of the state used to render this tab
+        this.lastTabSignature = this.getTabStateSignature(tabId);
 
         // Update Tab Visuals (Highlight active)
         this.tabButtons.forEach(btn => {
@@ -350,6 +355,27 @@ export class UIScene extends Phaser.Scene {
     }
 
     /**
+     * Generates a signature string for the current tab's state.
+     * Used to avoid rebuilding UI when state hasn't changed.
+     * @param {string} tabId - The ID of the tab.
+     * @returns {string} A signature representing relevant state.
+     */
+    getTabStateSignature(tabId) {
+        if (!this.nadagotchiData) return '';
+        switch (tabId) {
+            case 'ACTION':
+                // 'Work' button enabled state depends on currentCareer existence
+                return `career:${!!this.nadagotchiData.currentCareer}`;
+            case 'SYSTEM':
+                // 'Retire' button enabled state depends on isLegacyReady
+                return `legacy:${!!this.nadagotchiData.isLegacyReady}`;
+            default:
+                // Other tabs (CARE, ANCESTORS) don't have dynamic enabled states in the main button grid
+                return 'static';
+        }
+    }
+
+    /**
      * Updates all UI elements with the latest data from the Nadagotchi.
      * This method is the callback for the 'updateStats' event.
      * @param {object} data - The entire Nadagotchi object from MainScene.
@@ -374,10 +400,20 @@ export class UIScene extends Phaser.Scene {
                      `Energy: ${Math.floor(stats.energy)}\n` +
                      `Happiness: ${Math.floor(stats.happiness)}\n` +
                      `Logic: ${skills.logic.toFixed(2)} | Nav: ${skills.navigation.toFixed(2)} | Research: ${skills.research.toFixed(2)}`;
-        this.statsText.setText(text);
+
+        // OPTIMIZATION: Only update text object if the string content has actually changed.
+        // This runs 10 times a second, so avoiding texture regeneration is a win.
+        if (this.lastStatsText !== text) {
+            this.statsText.setText(text);
+            this.lastStatsText = text;
+        }
 
         if (this.currentTab === 'ACTION' || this.currentTab === 'SYSTEM') {
-            this.showTab(this.currentTab);
+            // OPTIMIZATION: Only rebuild the action buttons if the relevant game state (signature) has changed.
+            const newSignature = this.getTabStateSignature(this.currentTab);
+            if (newSignature !== this.lastTabSignature) {
+                this.showTab(this.currentTab);
+            }
         }
 
         if (currentCareer) {
