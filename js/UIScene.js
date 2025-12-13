@@ -72,15 +72,6 @@ export class UIScene extends Phaser.Scene {
             .setVisible(false)
             .on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, EventKeys.RETIRE));
 
-        // --- Genetic Scanner Button ---
-        // Hidden by default, revealed if item is owned
-        // Position: width - buttonWidth (100) - padding (10) = width - 110
-        this.scannerButton = ButtonFactory.createButton(this, this.cameras.main.width - 110, 100, "🧬 GENES", () => {
-             this.onClickScanner();
-        }, { width: 100, height: 35, color: 0x008080, fontSize: '16px' });
-
-        this.scannerButton.setVisible(false);
-
         // --- Event Listeners ---
         this.game.events.on(EventKeys.UPDATE_STATS, this.updateStatsUI, this);
         this.game.events.on(EventKeys.UI_ACTION, this.handleUIActions, this);
@@ -96,7 +87,6 @@ export class UIScene extends Phaser.Scene {
         this.craftingModal = this.createModal("Crafting");
         this.relationshipModal = this.createModal("Relationships");
         this.decorateModal = this.createModal("Decorate");
-        this.scannerModal = this.createModal("Genetic Scanner");
         this.ancestorModal = this.createModal("Hall of Ancestors");
         this.inventoryModal = this.createModal("Inventory");
         this.achievementsModal = this.createModal("Achievements");
@@ -198,6 +188,7 @@ export class UIScene extends Phaser.Scene {
             ];
         } else if (tabId === 'SYSTEM') {
             actions = [
+                { text: 'Passport', action: EventKeys.OPEN_SHOWCASE },
                 { text: 'Journal', action: EventKeys.OPEN_JOURNAL },
                 { text: 'Inventory', action: EventKeys.OPEN_INVENTORY },
                 { text: 'Recipes', action: EventKeys.OPEN_RECIPES },
@@ -319,7 +310,6 @@ export class UIScene extends Phaser.Scene {
             this.jobBoardButton.setPosition(width - 130, height - 60);
         }
         if (this.retireButton) this.retireButton.setPosition(width - 10, 50);
-        if (this.scannerButton) this.scannerButton.setPosition(width - 110, 100);
 
         // Refresh active tab actions
         this.showTab(this.currentTab);
@@ -341,6 +331,11 @@ export class UIScene extends Phaser.Scene {
      */
     handleUIActions(action, data) {
         switch (action) {
+            case EventKeys.OPEN_SHOWCASE:
+                this.scene.pause('MainScene');
+                this.scene.sleep();
+                this.scene.launch('ShowcaseScene', { nadagotchi: this.nadagotchiData });
+                break;
             case EventKeys.OPEN_JOURNAL: this.openJournal(); break;
             case EventKeys.OPEN_RECIPES: this.openRecipeBook(); break;
             case EventKeys.OPEN_HOBBIES: this.openHobbyMenu(); break;
@@ -394,38 +389,10 @@ export class UIScene extends Phaser.Scene {
 
         this.retireButton.setVisible(isLegacyReady);
 
-        const hasScanner = this.nadagotchiData.inventory && this.nadagotchiData.inventory['Genetic Scanner'] > 0;
-        this.scannerButton.setVisible(hasScanner);
-
         if (newCareerUnlocked) {
             this.showCareerNotification(newCareerUnlocked);
             this.mainScene.nadagotchi.newCareerUnlocked = null;
         }
-    }
-
-    /**
-     * Shows the genetic scanner modal with the pet's genotype.
-     */
-    onClickScanner() {
-        if (!this.nadagotchiData || !this.nadagotchiData.genome) return;
-
-        // Ensure other modals are closed
-        this.closeAllModals();
-
-        let displayText = "GENETIC ANALYSIS:\n\n";
-        const genotype = this.nadagotchiData.genome.genotype;
-
-        for (const [geneKey, allelePair] of Object.entries(genotype)) {
-             displayText += `${geneKey}: [${allelePair[0]} | ${allelePair[1]}]`;
-             if (allelePair[0] !== allelePair[1]) {
-                 displayText += " (Hetero)";
-             }
-             displayText += "\n";
-        }
-
-        this.scannerModal.content.setText(displayText);
-        this.scannerModal.setVisible(true);
-        this.scene.pause('MainScene');
     }
 
     /**

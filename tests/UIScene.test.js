@@ -180,6 +180,8 @@ describe('UIScene', () => {
         scene.scene = {
             pause: jest.fn(),
             resume: jest.fn(),
+            launch: jest.fn(),
+            sleep: jest.fn(),
             isPaused: jest.fn().mockReturnValue(true)
         };
     });
@@ -214,9 +216,10 @@ describe('UIScene', () => {
         systemTab.emit('pointerdown');
 
         expect(scene.currentTab).toBe('SYSTEM');
-        // Check system buttons (Journal, Inventory, etc.)
+        // Check system buttons (Passport, Journal, Inventory, etc.)
         const systemButtons = scene.actionButtons;
         expect(systemButtons.length).toBeGreaterThan(0);
+        expect(systemButtons.find(b => b.textLabel === 'Passport')).toBeDefined();
         expect(systemButtons.find(b => b.textLabel === 'Journal')).toBeDefined();
     });
 
@@ -256,9 +259,6 @@ describe('UIScene', () => {
 
         // Check Retire button visible (isLegacyReady)
         expect(scene.retireButton.setVisible).toHaveBeenCalledWith(true);
-
-        // Check Scanner button visible
-        expect(scene.scannerButton.setVisible).toHaveBeenCalledWith(true);
     });
 
     test('Job Board button provides feedback when disabled', () => {
@@ -268,8 +268,6 @@ describe('UIScene', () => {
         scene.nadagotchiData = { currentCareer: null };
 
         // Manually trigger the Job Board click handler
-        // Note: We need to ensure jobBoardButton is created and callback calls handleJobBoardClick
-        // But since we are unit testing the scene method:
         scene.handleJobBoardClick();
 
         // Should NOT emit WORK event
@@ -311,6 +309,17 @@ describe('UIScene', () => {
         expect(scene.inventoryModal.setVisible).toHaveBeenCalledWith(true);
     });
 
+    test('opening passport should trigger scene launch', () => {
+        scene.create();
+        scene.nadagotchiData = { some: 'data' };
+
+        scene.handleUIActions(EventKeys.OPEN_SHOWCASE);
+
+        expect(scene.scene.pause).toHaveBeenCalledWith('MainScene');
+        expect(scene.scene.sleep).toHaveBeenCalled();
+        expect(scene.scene.launch).toHaveBeenCalledWith('ShowcaseScene', { nadagotchi: scene.nadagotchiData });
+    });
+
     test('resize should reposition elements', () => {
         scene.create();
 
@@ -320,23 +329,6 @@ describe('UIScene', () => {
         expect(scene.dashboardBg.setSize).toHaveBeenCalled();
         // Tabs should be moved
         // ... (hard to verify position without complex mocks, but function called is good)
-    });
-
-    test('scanner should display gene info', () => {
-        scene.create();
-        scene.nadagotchiData = {
-            genome: {
-                genotype: { Adventurer: [10, 20] }
-            },
-            inventory: { 'Genetic Scanner': 1 }
-        };
-
-        scene.onClickScanner();
-
-        expect(scene.scannerModal.content.setText).toHaveBeenCalled();
-        const text = scene.scannerModal.content.setText.mock.calls[0][0];
-        expect(text).toContain('Adventurer: [10 | 20]');
-        expect(scene.scannerModal.setVisible).toHaveBeenCalledWith(true);
     });
 
     test('Settings Modal should open and emit updates', () => {

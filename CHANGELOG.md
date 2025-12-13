@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.29.0] - 2025-12-07
+
+### Added
+- **Pet Passport (Showcase System):** Implemented a dedicated "Showcase Scene" to view the pet's detailed profile and genetic data.
+  - **Architecture:** Created `js/ShowcaseScene.js` as a lightweight overlay scene that pauses the main game, improving performance and separation of concerns compared to the previous modal-heavy approach.
+  - **Feature:** Displays a high-resolution visualization of the pet (mood-dependent), career stats, generation, and a copyable DNA string for the "Mystery Egg" exchange.
+  - **UX:** Replaced the "Genetic Scanner" persistent button with a "Passport" entry in the System tab, decluttering the main HUD while making genetic data more accessible.
+  - **Integration:** Registered `OPEN_SHOWCASE` event in `EventKeys.js` and updated `UIScene.js` to handle the transition.
+
 ## [1.28.0] - 2025-12-07
 
 ### Added
