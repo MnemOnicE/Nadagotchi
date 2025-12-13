@@ -16,6 +16,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Consumables:** 'Nutrient Bar', 'Espresso', 'Chamomile'.
   - **Materials:** 'Muse Flower'.
   - This resolves a data integrity issue where the Genetics System referenced items that did not exist in the game.
+## [1.30.0] - 2025-12-07
+
+### Added
+- **Responsive Design Support:** Switched the Phaser game configuration from `FIT` to `RESIZE` mode, allowing the game canvas to adapt dynamically to any screen aspect ratio (specifically improving mobile portrait experience).
+- **Dynamic UI Modals:** Refactored `js/UIScene.js` to use `Phaser.GameObjects.Container` for all modal windows. Implemented a `resizeModals` system that keeps windows centered and correctly sized even when the browser window is resized or rotated.
+
+### Changed
+- **CSS Layout:** Updated `style.css` to ensure the game container fully occupies the viewport without scrollbars.
+
+## [1.29.0] - 2025-12-07
+
+### Added
+- **Pet Passport (Showcase System):** Implemented a dedicated "Showcase Scene" to view the pet's detailed profile and genetic data.
+  - **Architecture:** Created `js/ShowcaseScene.js` as a lightweight overlay scene that pauses the main game, improving performance and separation of concerns compared to the previous modal-heavy approach.
+  - **Feature:** Displays a high-resolution visualization of the pet (mood-dependent), career stats, generation, and a copyable DNA string for the "Mystery Egg" exchange.
+  - **UX:** Replaced the "Genetic Scanner" persistent button with a "Passport" entry in the System tab, decluttering the main HUD while making genetic data more accessible.
+  - **Integration:** Registered `OPEN_SHOWCASE` event in `EventKeys.js` and updated `UIScene.js` to handle the transition.
+
+## [1.28.0] - 2025-12-07
+
+### Added
+- **UX Discoverability ("Soft Disable"):** Improved the interface by showing unavailable actions (e.g., "Work" before having a career) in a disabled, interactive state instead of hiding them entirely.
+  - **Feedback:** Clicking a disabled action now plays a failure sound and displays a "Toast" notification explaining why the action is locked (e.g., "You need a Career first!").
+  - **Button Factory:** Updated `ButtonFactory.js` to support a standardized `setDisabled` state with visual dimming and optional click handlers.
+  - **UIScene:** Updated the 'ACTION' and 'SYSTEM' tabs to render disabled buttons for locked features like "Work" and "Retire", significantly improving feature discoverability for new players.
 
 ## [1.27.0] - 2025-12-07
 

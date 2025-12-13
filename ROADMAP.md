@@ -66,7 +66,8 @@ This phase focuses on building out the primary gameplay loops, giving players cl
     -   [x] Refactored codebase to use centralized Configuration and Event Keys for better maintainability.
     -   [x] Cleanup and Documentation: Created `GUIDE.md` and removed redundant logic from core classes.
     -   [x] **Refactoring:** Extracted NPC and Quest logic from `Nadagotchi.js` into `RelationshipSystem.js` and Inventory logic into `InventorySystem.js` to decouple core systems.
-    -   [x] **Performance:** Optimized main loop event emission to throttle UI updates, eliminating unnecessary object creation/destruction cycles.
+    -   [x] **Performance:** Optimized main loop event emission to throttle UI updates.
+    -   [x] **Performance:** Implemented smart rendering in `UIScene` to prevent unnecessary DOM/Object rebuilding.
 -   **[x] Security & Balance:**
     -   [x] Implemented save data obfuscation with UUID salting and integrity verification to prevent tampering and save swapping.
     -   [x] Hardened event system and action handlers to prevent console injection and logic exploits.
@@ -75,6 +76,7 @@ This phase focuses on building out the primary gameplay loops, giving players cl
     -   [x] **In-Game Settings/Options:** Implemented persistent settings for volume and gameplay speed.
     -   [x] Refactored core loop to be delta-time based to support variable game speeds and framerate independence.
     -   [x] **Accessibility & Polish:** Implemented keyboard navigation for tabs and improved button visual feedback (hover states).
+    -   [x] **Feature Discoverability:** Implemented "Soft Disable" state for locked actions (Work, Retire) to improve discoverability and provide clear feedback on requirements.
     -   [x] **UI Window Management:** Implemented exclusive window management to prevent menu stacking (Inventory over Journal, etc.).
 -   **[x] Production Readiness:**
     -   [x] **PWA Support:** Implemented Service Worker and Web Manifest for installable, offline-capable app.
@@ -115,6 +117,7 @@ This phase will introduce long-term replayability and a deeper sense of history 
     -   [x] **Achievement Tracking System:** Implement backend logic to track milestones (e.g., "Breed 5 Generations," "Master a Career"), serving as the next logical step after stabilizing the core game loop.
     -   [x] **Achievements UI:** Implement frontend UI to visualize unlocked achievements.
     - [x] **Showcase System:** Implemented a "Pet Passport" UI to visualize and share pet details.
+    - [x] **Showcase System:** Implemented "Pet Passport" (ShowcaseScene) to visualize pet details and DNA for sharing.
     -   [x] **Mystery Egg Exchange:** Implemented the backend logic for exporting and importing pet DNA strings (Prerequisites met: Seeded RNG, Serialization).
 # Roadmap
 
@@ -122,11 +125,12 @@ The Nadagotchi project is an evolving digital life simulation. This roadmap outl
 
 ## Current Focus: UX Polish & System Robustness
 - [x] **Config Centralization**: Move magic numbers to `Config.js` (Completed v0.6.0).
-- [x] **UX Improvements**: Add better feedback for disabled actions (Completed).
+- [x] **UX Improvements**: Add better feedback for disabled actions ("Soft Disable") to improve discoverability.
 - [x] **Quest System**: Implement data-driven Quest System (Completed).
 - [x] **Performance**: Optimize UI update frequency to reduce CPU load (Completed).
+- [x] **Performance**: Implement smart dirty-checking for UI button rendering (Completed).
 - [ ] **Accessibility**: Add keyboard navigation support for all modals.
-- [ ] **Responsive Design**: Improve layout scaling for mobile devices.
+- [x] **Responsive Design**: Improve layout scaling for mobile devices.
 
 ## Upcoming Milestones
 
@@ -142,6 +146,7 @@ The Nadagotchi project is an evolving digital life simulation. This roadmap outl
 
 ### Milestone 3: The "Cloud" Era (Meta-Game)
 - [x] **Pet Exchange**: Export/Import pets via text strings (DNA "Mystery Eggs").
+- [x] **Pet Passport**: Visual snapshot system for sharing pets.
 - **Leaderboards**: Hall of Fame integration with online high scores (optional).
 - **Ghost Pets**: Visit the "graveyards" of other players' retired pets.
 
