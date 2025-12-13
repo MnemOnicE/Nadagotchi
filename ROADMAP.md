@@ -115,7 +115,7 @@ This phase will introduce long-term replayability and a deeper sense of history 
 -   **[ ] Advanced Features:**
     -   [x] **Achievement Tracking System:** Implement backend logic to track milestones (e.g., "Breed 5 Generations," "Master a Career"), serving as the next logical step after stabilizing the core game loop.
     -   [x] **Achievements UI:** Implement frontend UI to visualize unlocked achievements.
-    -   [ ] Introduce a "Showcase System" for sharing pet snapshots and achievements.
+    - [x] **Showcase System:** Implemented "Pet Passport" (ShowcaseScene) to visualize pet details and DNA for sharing.
     -   [x] **Mystery Egg Exchange:** Implemented the backend logic for exporting and importing pet DNA strings (Prerequisites met: Seeded RNG, Serialization).
 # Roadmap
 
@@ -143,6 +143,7 @@ The Nadagotchi project is an evolving digital life simulation. This roadmap outl
 
 ### Milestone 3: The "Cloud" Era (Meta-Game)
 - [x] **Pet Exchange**: Export/Import pets via text strings (DNA "Mystery Eggs").
+- [x] **Pet Passport**: Visual snapshot system for sharing pets.
 - **Leaderboards**: Hall of Fame integration with online high scores (optional).
 - **Ghost Pets**: Visit the "graveyards" of other players' retired pets.
 

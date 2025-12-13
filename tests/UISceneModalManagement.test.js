@@ -152,6 +152,8 @@ describe('UIScene Modal Management', () => {
         scene.scene = {
             pause: jest.fn(),
             resume: jest.fn(),
+            launch: jest.fn(),
+            sleep: jest.fn(),
             isPaused: jest.fn().mockReturnValue(true)
         };
         scene.create();
@@ -160,7 +162,7 @@ describe('UIScene Modal Management', () => {
             recipes: {},
             hobbies: {},
             relationships: {},
-            genome: { genotype: {} } // Add genome to pass onClickScanner check
+            genome: { genotype: {} } // Add genome to pass checks
         };
     });
 
@@ -186,13 +188,11 @@ describe('UIScene Modal Management', () => {
         expect(scene.recipeModal.visible).toBe(false);
     });
 
-    test('opening scanner should close other modals', () => {
-        scene.handleUIActions(EventKeys.OPEN_HOBBIES);
-        expect(scene.hobbyModal.visible).toBe(true);
-
-        scene.onClickScanner();
-        expect(scene.scannerModal.visible).toBe(true);
-        expect(scene.hobbyModal.visible).toBe(false);
+    test('opening passport should pause MainScene and sleep UIScene', () => {
+        scene.handleUIActions(EventKeys.OPEN_SHOWCASE);
+        expect(scene.scene.pause).toHaveBeenCalledWith('MainScene');
+        expect(scene.scene.sleep).toHaveBeenCalled();
+        expect(scene.scene.launch).toHaveBeenCalledWith('ShowcaseScene', expect.anything());
     });
 
     test('showing dialogue should close other modals', () => {
