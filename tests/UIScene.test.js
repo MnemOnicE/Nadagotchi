@@ -72,13 +72,10 @@ global.Phaser = {
 jest.mock('../js/ButtonFactory', () => {
     return {
         ButtonFactory: {
-            createButton: jest.fn((scene, x, y, text, callback) => {
+            createButton: jest.fn((scene, x, y, text, callback, options) => {
                 // Return a simple object that mocks the Container behavior needed
                 const btn = {
                     textLabel: text,
-                    emit: (event) => {
-                         if (event === 'pointerdown' && callback) callback();
-                    },
                     setPosition: jest.fn().mockReturnThis(),
                     setAlpha: jest.fn().mockReturnThis(),
                     setVisible: jest.fn().mockReturnThis(),
@@ -86,8 +83,23 @@ jest.mock('../js/ButtonFactory', () => {
                     setInteractive: jest.fn().mockReturnThis(),
                     disableInteractive: jest.fn().mockReturnThis(),
                     destroy: jest.fn(),
+                    setDisabled: jest.fn(function(val) {
+                        this.isDisabled = val;
+                        return this;
+                    }),
+                    isDisabled: false,
                     x: x,
                     y: y
+                };
+
+                btn.emit = (event) => {
+                    if (event === 'pointerdown') {
+                        if (btn.isDisabled && options && options.onDisabledClick) {
+                            options.onDisabledClick();
+                        } else if (callback) {
+                            callback();
+                        }
+                    }
                 };
                 return btn;
             })

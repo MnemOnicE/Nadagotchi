@@ -75,6 +75,7 @@ This phase focuses on building out the primary gameplay loops, giving players cl
     -   [x] **In-Game Settings/Options:** Implemented persistent settings for volume and gameplay speed.
     -   [x] Refactored core loop to be delta-time based to support variable game speeds and framerate independence.
     -   [x] **Accessibility & Polish:** Implemented keyboard navigation for tabs and improved button visual feedback (hover states).
+    -   [x] **Feature Discoverability:** Implemented "Soft Disable" state for locked actions (Work, Retire) to improve discoverability and provide clear feedback on requirements.
     -   [x] **UI Window Management:** Implemented exclusive window management to prevent menu stacking (Inventory over Journal, etc.).
 -   **[x] Production Readiness:**
     -   [x] **PWA Support:** Implemented Service Worker and Web Manifest for installable, offline-capable app.
@@ -122,7 +123,7 @@ The Nadagotchi project is an evolving digital life simulation. This roadmap outl
 
 ## Current Focus: UX Polish & System Robustness
 - [x] **Config Centralization**: Move magic numbers to `Config.js` (Completed v0.6.0).
-- [x] **UX Improvements**: Add better feedback for disabled actions (Completed).
+- [x] **UX Improvements**: Add better feedback for disabled actions ("Soft Disable") to improve discoverability.
 - [x] **Quest System**: Implement data-driven Quest System (Completed).
 - [x] **Performance**: Optimize UI update frequency to reduce CPU load (Completed).
 - [ ] **Accessibility**: Add keyboard navigation support for all modals.

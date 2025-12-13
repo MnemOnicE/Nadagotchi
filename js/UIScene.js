@@ -188,7 +188,12 @@ export class UIScene extends Phaser.Scene {
             actions = [
                 { text: 'Explore', action: EventKeys.EXPLORE },
                 { text: 'Study', action: EventKeys.STUDY },
-                { text: 'Work', action: EventKeys.WORK, condition: () => this.nadagotchiData && this.nadagotchiData.currentCareer },
+                {
+                    text: 'Work',
+                    action: EventKeys.WORK,
+                    condition: () => this.nadagotchiData && this.nadagotchiData.currentCareer,
+                    disabledMessage: "You need a Career first!\nTry Studying or Exploring."
+                },
                 { text: 'Craft', action: EventKeys.OPEN_CRAFTING_MENU }
             ];
         } else if (tabId === 'SYSTEM') {
@@ -200,7 +205,12 @@ export class UIScene extends Phaser.Scene {
                 { text: 'Achievements', action: EventKeys.OPEN_ACHIEVEMENTS },
                 { text: 'Decorate', action: EventKeys.DECORATE },
                 { text: 'Settings', action: EventKeys.OPEN_SETTINGS },
-                { text: 'Retire', action: EventKeys.RETIRE, condition: () => this.nadagotchiData && this.nadagotchiData.isLegacyReady }
+                {
+                    text: 'Retire',
+                    action: EventKeys.RETIRE,
+                    condition: () => this.nadagotchiData && this.nadagotchiData.isLegacyReady,
+                    disabledMessage: "Not ready to retire yet."
+                }
             ];
         } else if (tabId === 'ANCESTORS') {
             const ancestors = new PersistenceManager().loadHallOfFame();
@@ -237,8 +247,8 @@ export class UIScene extends Phaser.Scene {
         const btnHeight = 40;
 
         actions.forEach(item => {
-            // Check condition if exists
-            if (item.condition && !item.condition()) return;
+            // Palette UX: Show disabled buttons instead of hiding them for better discoverability
+            const isDisabled = item.condition && !item.condition();
 
             // Estimate width
             const btnWidth = (item.text.length * 12) + 40; // Approx width
@@ -251,7 +261,20 @@ export class UIScene extends Phaser.Scene {
 
             const btn = ButtonFactory.createButton(this, currentX, currentY, item.text, () => {
                 this.game.events.emit(EventKeys.UI_ACTION, item.action, item.data);
-            }, { width: btnWidth, height: btnHeight, color: 0x6A0DAD, fontSize: '24px', textColor: '#FFFFFF' });
+            }, {
+                width: btnWidth,
+                height: btnHeight,
+                color: 0x6A0DAD,
+                fontSize: '24px',
+                textColor: '#FFFFFF',
+                onDisabledClick: () => {
+                    this.showToast("Action Locked", item.disabledMessage || "Not available yet.", "🔒");
+                }
+            });
+
+            if (isDisabled) {
+                btn.setDisabled(true);
+            }
 
             this.actionButtons.push(btn);
             currentX += btnWidth + spacing;
