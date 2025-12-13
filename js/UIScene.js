@@ -26,6 +26,8 @@ export class UIScene extends Phaser.Scene {
      */
     constructor() {
         super({ key: 'UIScene' });
+        /** @type {string} Stores the signature of the last rendered action buttons to prevent redundant rebuilds. */
+        this.lastActionSignature = '';
     }
 
     /**
@@ -48,6 +50,8 @@ export class UIScene extends Phaser.Scene {
         this.statsText = this.add.text(10, 10, '', {
             fontFamily: 'VT323, monospace', fontSize: '24px', color: '#ffffff', stroke: '#000000', strokeThickness: 3
         });
+        /** @type {string} Cache the last text value to prevent redundant setText calls. */
+        this.lastStatsText = '';
 
         // --- Action Buttons ---
         this.actionButtons = [];
@@ -149,11 +153,19 @@ export class UIScene extends Phaser.Scene {
     /**
      * Switches the active tab and populates the dashboard with relevant actions.
      * @param {string} tabId - The ID of the tab to switch to.
+     * Retrieves the list of actions (buttons) for a given tab ID.
+     * @param {string} tabId - The ID of the tab (e.g., 'CARE', 'ACTION').
+     * @returns {Array<object>} List of action definitions.
      */
+    getTabActions(tabId) {
     showTab(tabId) {
         this.currentTab = tabId;
 
         // Update Tab Visuals
+        // Cache the signature of the state used to render this tab
+        this.lastTabSignature = this.getTabStateSignature(tabId);
+
+        // Update Tab Visuals (Highlight active)
         this.tabButtons.forEach(btn => {
             const isSelected = btn.tabId === tabId;
             btn.setAlpha(isSelected ? 1.0 : 0.7);
@@ -214,11 +226,62 @@ export class UIScene extends Phaser.Scene {
                 });
             }
         }
+        return actions;
+    }
+
+    /**
+     * Switches the active tab and populates the dashboard with relevant actions.
+     * @param {string} tabId - The ID of the tab to switch to (e.g., 'CARE', 'ACTION').
+     */
+    showTab(tabId) {
+        this.currentTab = tabId;
+
+        // Update Tab Visuals (Highlight active)
+        this.tabButtons.forEach(btn => {
+            const isSelected = btn.tabId === tabId;
+            btn.setAlpha(isSelected ? 1.0 : 0.7);
+        });
+
+        // Get Actions
+        const allActions = this.getTabActions(tabId);
+
+        // Filter actions based on conditions to determine what will be shown
+        // We do this here so we can generate the signature from the *visible* buttons
+        const visibleActions = allActions.filter(item => !item.condition || item.condition());
+
+        // Generate Signature (e.g., "Feed|Play|Meditate")
+        const signature = visibleActions.map(a => a.text).join('|');
+
+        // OPTIMIZATION: If we are calling showTab but the buttons are already correct, skip rebuild.
+        // NOTE: If the user manually clicked the tab, we might want to force rebuild?
+        // But usually showTab is called by UI clicks or updateStatsUI.
+        // If the signature matches, we don't need to destroy and recreate buttons.
+        // However, we must ensure that if this method is called via a Tab Click, we verify we are actually ON that tab.
+        // Since we destroyed actionButtons previously in the old logic, we need to be careful.
+        // In this logic: "Is the current displayed UI matching the requested UI?"
+
+        // If the actionButtons array is populated and the signature matches, we can return early?
+        // But we need to make sure we are not switching tabs (which clears buttons).
+        // Let's rely on updateStatsUI to handle the optimization conditional call.
+        // BUT, if showTab is called explicitly (e.g. click), we should proceed.
+        // To be safe, let's just implement the rendering logic here and let updateStatsUI decide when to call it.
+        // Wait, if I click 'Action' tab, showTab('ACTION') is called. Buttons are built.
+        // Then updateStatsUI is called. It checks signature. Signature matches. It SKIPS calling showTab.
+        // This is the desired behavior.
+        // So showTab's job is just to BUILD.
+
+        // Clear existing action buttons
+        this.actionButtons.forEach(btn => btn.destroy());
+        this.actionButtons = [];
+
+        // Update signature for next comparison
+        this.lastActionSignature = signature;
 
         // Layout buttons based on current screen size
         const dashboardHeight = Math.floor(this.cameras.main.height * 0.25);
         const dashboardY = this.cameras.main.height - dashboardHeight;
-        this.layoutActionButtons(actions, dashboardY + 50);
+
+        this.layoutActionButtons(visibleActions, dashboardY + 50); // Start below tabs
     }
 
     /**
@@ -232,6 +295,8 @@ export class UIScene extends Phaser.Scene {
         const btnHeight = 40;
 
         actions.forEach(item => {
+            // Condition check already done in showTab filtering
+            // Palette UX: Show disabled buttons instead of hiding them for better discoverability
             const isDisabled = item.condition && !item.condition();
             const btnWidth = (item.text.length * 12) + 40;
 
@@ -352,6 +417,32 @@ export class UIScene extends Phaser.Scene {
         }
     }
 
+    /**
+     * Generates a signature string for the current tab's state.
+     * Used to avoid rebuilding UI when state hasn't changed.
+     * @param {string} tabId - The ID of the tab.
+     * @returns {string} A signature representing relevant state.
+     */
+    getTabStateSignature(tabId) {
+        if (!this.nadagotchiData) return '';
+        switch (tabId) {
+            case 'ACTION':
+                // 'Work' button enabled state depends on currentCareer existence
+                return `career:${!!this.nadagotchiData.currentCareer}`;
+            case 'SYSTEM':
+                // 'Retire' button enabled state depends on isLegacyReady
+                return `legacy:${!!this.nadagotchiData.isLegacyReady}`;
+            default:
+                // Other tabs (CARE, ANCESTORS) don't have dynamic enabled states in the main button grid
+                return 'static';
+        }
+    }
+
+    /**
+     * Updates all UI elements with the latest data from the Nadagotchi.
+     * This method is the callback for the 'updateStats' event.
+     * @param {object} data - The entire Nadagotchi object from MainScene.
+     */
     updateStatsUI(data) {
         if (data.nadagotchi) {
             this.nadagotchiData = data.nadagotchi;
@@ -361,12 +452,44 @@ export class UIScene extends Phaser.Scene {
         }
         const { stats, skills, mood, dominantArchetype, currentCareer, location, isLegacyReady, newCareerUnlocked } = this.nadagotchiData;
         const moodEmoji = this.getMoodEmoji(mood);
-        const text = `Location: ${location}\nArchetype: ${dominantArchetype}\nMood: ${mood} ${moodEmoji}\nCareer: ${currentCareer || 'None'}\nHunger: ${Math.floor(stats.hunger)}\nEnergy: ${Math.floor(stats.energy)}\nHappiness: ${Math.floor(stats.happiness)}\nLogic: ${skills.logic.toFixed(2)} | Nav: ${skills.navigation.toFixed(2)} | Research: ${skills.research.toFixed(2)}`;
-        this.statsText.setText(text);
+        const text = `Location: ${location}\n` +
+                     `Archetype: ${dominantArchetype}\n` +
+                     `Mood: ${mood} ${moodEmoji}\n` +
+                     `Career: ${currentCareer || 'None'}\n` +
+                     `Hunger: ${Math.floor(stats.hunger)}\n` +
+                     `Energy: ${Math.floor(stats.energy)}\n` +
+                     `Happiness: ${Math.floor(stats.happiness)}\n` +
+                     `Logic: ${skills.logic.toFixed(2)} | Nav: ${skills.navigation.toFixed(2)} | Research: ${skills.research.toFixed(2)}`;
 
-        if (this.currentTab === 'ACTION' || this.currentTab === 'SYSTEM') this.showTab(this.currentTab);
-        if (currentCareer) this.jobBoardButton.setAlpha(1.0);
-        else this.jobBoardButton.setAlpha(0.6);
+        // OPTIMIZATION: Only update text object if the string content has actually changed.
+        // This runs 10 times a second, so avoiding texture regeneration is a win.
+        if (this.lastStatsText !== text) {
+            this.statsText.setText(text);
+            this.lastStatsText = text;
+        }
+
+        if (this.currentTab === 'ACTION' || this.currentTab === 'SYSTEM') {
+            // OPTIMIZATION: Check if the visible buttons actually changed before rebuilding
+            const allActions = this.getTabActions(this.currentTab);
+            const visibleActions = allActions.filter(item => !item.condition || item.condition());
+            const signature = visibleActions.map(a => a.text).join('|');
+
+            // Only rebuild if the signature differs from the last rendered state
+            if (signature !== this.lastActionSignature) {
+            // OPTIMIZATION: Only rebuild the action buttons if the relevant game state (signature) has changed.
+            const newSignature = this.getTabStateSignature(this.currentTab);
+            if (newSignature !== this.lastTabSignature) {
+                this.showTab(this.currentTab);
+            }
+        }
+
+        if (currentCareer) {
+            this.jobBoardButton.setAlpha(1.0);
+        } else {
+            // Palette UX: Dimmed but interactive
+            this.jobBoardButton.setAlpha(0.6);
+        }
+
         this.retireButton.setVisible(isLegacyReady);
 
         if (newCareerUnlocked) {
