@@ -127,7 +127,7 @@ The Nadagotchi project is an evolving digital life simulation. This roadmap outl
 - [x] **Quest System**: Implement data-driven Quest System (Completed).
 - [x] **Performance**: Optimize UI update frequency to reduce CPU load (Completed).
 - [ ] **Accessibility**: Add keyboard navigation support for all modals.
-- [ ] **Responsive Design**: Improve layout scaling for mobile devices.
+- [x] **Responsive Design**: Improve layout scaling for mobile devices.
 
 ## Upcoming Milestones
 

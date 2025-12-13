@@ -104,3 +104,10 @@
 **Line:** 513, 524
 **Description:** The mock for `this.tweens` in the test setup was missing the `killTweensOf` method, and `this.add.sprite()` mock was missing `setAngle`. This caused `TypeError`s when `MainScene.updateSpriteMood` attempted to start idle animations during the test execution.
 **Fix:** Added `killTweensOf` to the `tweens` mock and `setAngle` to the `add` mock in `tests/DayCycle.test.js`.
+
+---
+
+**File:** `js/LogicPuzzleScene.js` (and other minigames)
+**Line:** N/A
+**Description:** Minigame scenes (Logic Puzzle, Scout, Healer, Artisan) rely on fixed coordinates (e.g., `this.cameras.main.width / 2`) calculated only during the `create()` phase. Since the game now supports dynamic resizing (`Phaser.Scale.RESIZE`), resizing the window *during* an active minigame will cause the UI elements to remain in their original positions, potentially becoming off-center or off-screen.
+**Fix:** Implement a `resize` method in each minigame scene to recalculate and update the positions of all interactive elements when the window size changes.
