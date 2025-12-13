@@ -220,7 +220,7 @@ export class UIScene extends Phaser.Scene {
         }
 
         // Create buttons
-        const dashboardHeight = Math.floor(this.cameras.main.height * 0.25);
+        const dashboardHeight = Math.floor(this.cameras.main.height * Config.UI.DASHBOARD_HEIGHT_RATIO);
         const dashboardY = this.cameras.main.height - dashboardHeight;
 
         this.layoutActionButtons(actions, dashboardY + 50); // Start below tabs
@@ -268,7 +268,7 @@ export class UIScene extends Phaser.Scene {
     resize(gameSize) {
         const width = gameSize.width;
         const height = gameSize.height;
-        const dashboardHeight = Math.floor(height * 0.25);
+        const dashboardHeight = Math.floor(height * Config.UI.DASHBOARD_HEIGHT_RATIO);
         const dashboardY = height - dashboardHeight;
 
         this.cameras.main.setSize(width, height);
@@ -512,10 +512,10 @@ export class UIScene extends Phaser.Scene {
                 highlight(5, 5, 400, 200, "Here you can see your Pet's\nStats, Mood, and Skills.");
             } else if (step === 2) {
                 this.showTab('CARE');
-                const dashboardY = this.cameras.main.height - Math.floor(this.cameras.main.height * 0.25);
+                const dashboardY = this.cameras.main.height - Math.floor(this.cameras.main.height * Config.UI.DASHBOARD_HEIGHT_RATIO);
                 highlight(10, dashboardY, 500, 50, "Use these tabs to switch between\nCare, Actions, and Systems.");
             } else if (step === 3) {
-                const dashboardY = this.cameras.main.height - Math.floor(this.cameras.main.height * 0.25);
+                const dashboardY = this.cameras.main.height - Math.floor(this.cameras.main.height * Config.UI.DASHBOARD_HEIGHT_RATIO);
                 highlight(10, dashboardY + 60, 600, 100, "These buttons let you interact\nwith your Nadagotchi.");
             } else {
                 graphics.destroy();

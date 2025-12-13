@@ -193,5 +193,10 @@ export const Config = {
     // Security & Hashing
     SECURITY: {
         DNA_SALT: "NADAGOTCHI_GENETICS_V1_SALT"
+    },
+
+    // UI Configuration
+    UI: {
+        DASHBOARD_HEIGHT_RATIO: 0.35 // Increased from 0.25 to prevent button overlap on mobile
     }
 };
