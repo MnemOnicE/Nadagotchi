@@ -50,6 +50,8 @@ export class UIScene extends Phaser.Scene {
         this.statsText = this.add.text(10, 10, '', {
             fontFamily: 'VT323, monospace', fontSize: '24px', color: '#ffffff', stroke: '#000000', strokeThickness: 3
         });
+        /** @type {string} Cache the last text value to prevent redundant setText calls. */
+        this.lastStatsText = '';
 
         // --- Action Buttons ---
         this.actionButtons = [];
@@ -74,15 +76,6 @@ export class UIScene extends Phaser.Scene {
             .setVisible(false)
             .on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, EventKeys.RETIRE));
 
-        // --- Genetic Scanner Button ---
-        // Hidden by default, revealed if item is owned
-        // Position: width - buttonWidth (100) - padding (10) = width - 110
-        this.scannerButton = ButtonFactory.createButton(this, this.cameras.main.width - 110, 100, "🧬 GENES", () => {
-             this.onClickScanner();
-        }, { width: 100, height: 35, color: 0x008080, fontSize: '16px' });
-
-        this.scannerButton.setVisible(false);
-
         // --- Event Listeners ---
         this.game.events.on(EventKeys.UPDATE_STATS, this.updateStatsUI, this);
         this.game.events.on(EventKeys.UI_ACTION, this.handleUIActions, this);
@@ -98,7 +91,6 @@ export class UIScene extends Phaser.Scene {
         this.craftingModal = this.createModal("Crafting");
         this.relationshipModal = this.createModal("Relationships");
         this.decorateModal = this.createModal("Decorate");
-        this.scannerModal = this.createModal("Genetic Scanner");
         this.ancestorModal = this.createModal("Hall of Ancestors");
         this.inventoryModal = this.createModal("Inventory");
         this.achievementsModal = this.createModal("Achievements");
@@ -167,6 +159,23 @@ export class UIScene extends Phaser.Scene {
      * @returns {Array<object>} List of action definitions.
      */
     getTabActions(tabId) {
+    showTab(tabId) {
+        this.currentTab = tabId;
+
+        // Cache the signature of the state used to render this tab
+        this.lastTabSignature = this.getTabStateSignature(tabId);
+
+        // Update Tab Visuals (Highlight active)
+        this.tabButtons.forEach(btn => {
+            const isSelected = btn.tabId === tabId;
+            btn.setAlpha(isSelected ? 1.0 : 0.7);
+        });
+
+        // Clear existing action buttons
+        this.actionButtons.forEach(btn => btn.destroy());
+        this.actionButtons = [];
+
+        // Define Actions per Tab
         let actions = [];
         if (tabId === 'CARE') {
             actions = [
@@ -178,11 +187,17 @@ export class UIScene extends Phaser.Scene {
             actions = [
                 { text: 'Explore', action: EventKeys.EXPLORE },
                 { text: 'Study', action: EventKeys.STUDY },
-                { text: 'Work', action: EventKeys.WORK, condition: () => this.nadagotchiData && this.nadagotchiData.currentCareer },
+                {
+                    text: 'Work',
+                    action: EventKeys.WORK,
+                    condition: () => this.nadagotchiData && this.nadagotchiData.currentCareer,
+                    disabledMessage: "You need a Career first!\nTry Studying or Exploring."
+                },
                 { text: 'Craft', action: EventKeys.OPEN_CRAFTING_MENU }
             ];
         } else if (tabId === 'SYSTEM') {
             actions = [
+                { text: 'Passport', action: EventKeys.OPEN_SHOWCASE },
                 { text: 'Journal', action: EventKeys.OPEN_JOURNAL },
                 { text: 'Inventory', action: EventKeys.OPEN_INVENTORY },
                 { text: 'Recipes', action: EventKeys.OPEN_RECIPES },
@@ -190,7 +205,12 @@ export class UIScene extends Phaser.Scene {
                 { text: 'Achievements', action: EventKeys.OPEN_ACHIEVEMENTS },
                 { text: 'Decorate', action: EventKeys.DECORATE },
                 { text: 'Settings', action: EventKeys.OPEN_SETTINGS },
-                { text: 'Retire', action: EventKeys.RETIRE, condition: () => this.nadagotchiData && this.nadagotchiData.isLegacyReady }
+                {
+                    text: 'Retire',
+                    action: EventKeys.RETIRE,
+                    condition: () => this.nadagotchiData && this.nadagotchiData.isLegacyReady,
+                    disabledMessage: "Not ready to retire yet."
+                }
             ];
         } else if (tabId === 'ANCESTORS') {
             const ancestors = new PersistenceManager().loadHallOfFame();
@@ -278,6 +298,8 @@ export class UIScene extends Phaser.Scene {
 
         actions.forEach(item => {
             // Condition check already done in showTab filtering
+            // Palette UX: Show disabled buttons instead of hiding them for better discoverability
+            const isDisabled = item.condition && !item.condition();
 
             // Estimate width
             const btnWidth = (item.text.length * 12) + 40; // Approx width
@@ -290,7 +312,20 @@ export class UIScene extends Phaser.Scene {
 
             const btn = ButtonFactory.createButton(this, currentX, currentY, item.text, () => {
                 this.game.events.emit(EventKeys.UI_ACTION, item.action, item.data);
-            }, { width: btnWidth, height: btnHeight, color: 0x6A0DAD, fontSize: '24px', textColor: '#FFFFFF' });
+            }, {
+                width: btnWidth,
+                height: btnHeight,
+                color: 0x6A0DAD,
+                fontSize: '24px',
+                textColor: '#FFFFFF',
+                onDisabledClick: () => {
+                    this.showToast("Action Locked", item.disabledMessage || "Not available yet.", "🔒");
+                }
+            });
+
+            if (isDisabled) {
+                btn.setDisabled(true);
+            }
 
             this.actionButtons.push(btn);
             currentX += btnWidth + spacing;
@@ -335,7 +370,6 @@ export class UIScene extends Phaser.Scene {
             this.jobBoardButton.setPosition(width - 130, height - 60);
         }
         if (this.retireButton) this.retireButton.setPosition(width - 10, 50);
-        if (this.scannerButton) this.scannerButton.setPosition(width - 110, 100);
 
         // Refresh active tab actions
         this.showTab(this.currentTab);
@@ -357,6 +391,11 @@ export class UIScene extends Phaser.Scene {
      */
     handleUIActions(action, data) {
         switch (action) {
+            case EventKeys.OPEN_SHOWCASE:
+                this.scene.pause('MainScene');
+                this.scene.sleep();
+                this.scene.launch('ShowcaseScene', { nadagotchi: this.nadagotchiData });
+                break;
             case EventKeys.OPEN_JOURNAL: this.openJournal(); break;
             case EventKeys.OPEN_RECIPES: this.openRecipeBook(); break;
             case EventKeys.OPEN_HOBBIES: this.openHobbyMenu(); break;
@@ -367,6 +406,27 @@ export class UIScene extends Phaser.Scene {
             case EventKeys.OPEN_INVENTORY: this.openInventoryMenu(); break;
             case EventKeys.OPEN_ACHIEVEMENTS: this.openAchievementsModal(); break;
             case EventKeys.OPEN_SETTINGS: this.openSettingsMenu(); break;
+        }
+    }
+
+    /**
+     * Generates a signature string for the current tab's state.
+     * Used to avoid rebuilding UI when state hasn't changed.
+     * @param {string} tabId - The ID of the tab.
+     * @returns {string} A signature representing relevant state.
+     */
+    getTabStateSignature(tabId) {
+        if (!this.nadagotchiData) return '';
+        switch (tabId) {
+            case 'ACTION':
+                // 'Work' button enabled state depends on currentCareer existence
+                return `career:${!!this.nadagotchiData.currentCareer}`;
+            case 'SYSTEM':
+                // 'Retire' button enabled state depends on isLegacyReady
+                return `legacy:${!!this.nadagotchiData.isLegacyReady}`;
+            default:
+                // Other tabs (CARE, ANCESTORS) don't have dynamic enabled states in the main button grid
+                return 'static';
         }
     }
 
@@ -395,7 +455,13 @@ export class UIScene extends Phaser.Scene {
                      `Energy: ${Math.floor(stats.energy)}\n` +
                      `Happiness: ${Math.floor(stats.happiness)}\n` +
                      `Logic: ${skills.logic.toFixed(2)} | Nav: ${skills.navigation.toFixed(2)} | Research: ${skills.research.toFixed(2)}`;
-        this.statsText.setText(text);
+
+        // OPTIMIZATION: Only update text object if the string content has actually changed.
+        // This runs 10 times a second, so avoiding texture regeneration is a win.
+        if (this.lastStatsText !== text) {
+            this.statsText.setText(text);
+            this.lastStatsText = text;
+        }
 
         if (this.currentTab === 'ACTION' || this.currentTab === 'SYSTEM') {
             // OPTIMIZATION: Check if the visible buttons actually changed before rebuilding
@@ -405,6 +471,9 @@ export class UIScene extends Phaser.Scene {
 
             // Only rebuild if the signature differs from the last rendered state
             if (signature !== this.lastActionSignature) {
+            // OPTIMIZATION: Only rebuild the action buttons if the relevant game state (signature) has changed.
+            const newSignature = this.getTabStateSignature(this.currentTab);
+            if (newSignature !== this.lastTabSignature) {
                 this.showTab(this.currentTab);
             }
         }
@@ -418,38 +487,10 @@ export class UIScene extends Phaser.Scene {
 
         this.retireButton.setVisible(isLegacyReady);
 
-        const hasScanner = this.nadagotchiData.inventory && this.nadagotchiData.inventory['Genetic Scanner'] > 0;
-        this.scannerButton.setVisible(hasScanner);
-
         if (newCareerUnlocked) {
             this.showCareerNotification(newCareerUnlocked);
             this.mainScene.nadagotchi.newCareerUnlocked = null;
         }
-    }
-
-    /**
-     * Shows the genetic scanner modal with the pet's genotype.
-     */
-    onClickScanner() {
-        if (!this.nadagotchiData || !this.nadagotchiData.genome) return;
-
-        // Ensure other modals are closed
-        this.closeAllModals();
-
-        let displayText = "GENETIC ANALYSIS:\n\n";
-        const genotype = this.nadagotchiData.genome.genotype;
-
-        for (const [geneKey, allelePair] of Object.entries(genotype)) {
-             displayText += `${geneKey}: [${allelePair[0]} | ${allelePair[1]}]`;
-             if (allelePair[0] !== allelePair[1]) {
-                 displayText += " (Hetero)";
-             }
-             displayText += "\n";
-        }
-
-        this.scannerModal.content.setText(displayText);
-        this.scannerModal.setVisible(true);
-        this.scene.pause('MainScene');
     }
 
     /**

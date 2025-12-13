@@ -8,6 +8,7 @@ import { UIScene } from './UIScene.js';
 import { PreloaderScene } from './PreloaderScene.js';
 import { StartScene } from './StartScene.js';
 import { BreedingScene } from './BreedingScene.js';
+import { ShowcaseScene } from './ShowcaseScene.js';
 import { LogicPuzzleScene } from './LogicPuzzleScene.js';
 import { ScoutMinigameScene } from './ScoutMinigameScene.js';
 import { HealerMinigameScene } from './HealerMinigameScene.js';
@@ -33,7 +34,8 @@ const config = {
         MainScene,             // 3. Core gameplay loop
         UIScene,               // 4. UI Overlay
         BreedingScene,         // 5. Legacy/Retirement system
-        LogicPuzzleScene,      // 5. Minigames...
+        ShowcaseScene,         // 6. Pet Passport
+        LogicPuzzleScene,      // 7. Minigames...
         ScoutMinigameScene,
         HealerMinigameScene,
         ArtisanMinigameScene
