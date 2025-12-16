@@ -4,6 +4,8 @@ import { Calendar } from './Calendar.js';
 import { EventManager } from './EventManager.js';
 import { WorldClock } from './WorldClock.js';
 import { WeatherSystem } from './WeatherSystem.js';
+import { SkyManager } from './SkyManager.js';
+import { LightingManager } from './LightingManager.js';
 import { AchievementManager } from './AchievementManager.js';
 import { EventKeys } from './EventKeys.js';
 import { Config } from './Config.js';
@@ -67,16 +69,30 @@ export class MainScene extends Phaser.Scene {
              petTexture.add(3, 0, 48, 0, 16, 16);
         }
 
-        // --- Environment Setup ---
-        // Initialize textures with full size initially; resize will adjust them
-        this.skyTexture = this.textures.createCanvas('sky', this.scale.width, this.scale.height);
-        this.add.image(0, 0, 'sky').setOrigin(0);
+        // --- World Systems Initialization (Pre-Visuals) ---
+        this.persistence = new PersistenceManager();
+        const loadedCalendar = this.persistence.loadCalendar();
+        this.calendar = new Calendar(loadedCalendar);
+        this.eventManager = new EventManager(this.calendar);
+        this.worldClock = new WorldClock(this);
+        this.weatherSystem = new WeatherSystem(this);
+        this.achievementManager = new AchievementManager(this.game);
+
+        this.worldState = {
+            time: this.worldClock.getCurrentPeriod(),
+            weather: this.weatherSystem.getCurrentWeather(),
+            activeEvent: this.eventManager.getActiveEvent(),
+            season: this.calendar.season
+        };
+
+        // --- Visual Systems Initialization ---
+        // Initialize SkyManager (creates skyTexture and image)
+        this.skyManager = new SkyManager(this);
 
         this.ground = this.add.graphics();
         // Drawing handled in resize
 
         // --- Pet Initialization ---
-        this.persistence = new PersistenceManager();
         const loadedPet = this.persistence.loadPet();
 
         if (data && data.newPetData) {
@@ -97,26 +113,8 @@ export class MainScene extends Phaser.Scene {
             ...savedSettings
         };
 
-
-        // --- World Systems Initialization ---
-        const loadedCalendar = this.persistence.loadCalendar();
-        this.calendar = new Calendar(loadedCalendar);
-        this.eventManager = new EventManager(this.calendar);
-        this.worldClock = new WorldClock(this);
-        this.weatherSystem = new WeatherSystem(this);
-        this.achievementManager = new AchievementManager(this.game);
-
-        this.worldState = {
-            time: this.worldClock.getCurrentPeriod(),
-            weather: this.weatherSystem.getCurrentWeather(),
-            activeEvent: this.eventManager.getActiveEvent(),
-            season: this.calendar.season
-        };
-
         /** @type {number} Timestamp of the last stats update emission to throttle UI refreshes. */
         this.lastStatsUpdateTime = -1000;
-
-        this.stars = Array.from({ length: 100 }, () => ({ x: Math.random(), y: Math.random() }));
 
         // --- Game Objects ---
         this.sprite = this.add.sprite(this.scale.width / 2, this.scale.height / 2, 'pet').setScale(4);
@@ -141,8 +139,8 @@ export class MainScene extends Phaser.Scene {
             .on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, EventKeys.INTERACT_VILLAGER, 'Sickly Villager'));
 
         // --- Post-FX & UI ---
-        this.lightTexture = this.textures.createCanvas('light', this.scale.width, this.scale.height);
-        this.lightImage = this.add.image(0, 0, 'light').setOrigin(0).setBlendMode('MULTIPLY').setVisible(false);
+        // Initialize LightingManager (creates lightTexture and image)
+        this.lightingManager = new LightingManager(this);
 
         // Date Text (Top-Right)
         this.dateText = this.add.text(this.scale.width - 10, 10, '', { fontFamily: 'VT323, Arial', fontSize: '20px', color: '#ffffff', backgroundColor: 'rgba(0,0,0,0.5)', padding: { x: 5, y: 3 } }).setOrigin(1, 0);
@@ -158,7 +156,7 @@ export class MainScene extends Phaser.Scene {
         // --- Final Setup ---
         this.resize({ width: this.scale.width, height: this.scale.height });
         this.updateDateText();
-        this.drawSky();
+        this.skyManager.update(); // Initial draw
         this.loadFurniture();
 
         // --- Tutorial Trigger ---
@@ -191,7 +189,9 @@ export class MainScene extends Phaser.Scene {
         this.worldState.time = this.worldClock.getCurrentPeriod();
         this.worldState.weather = this.weatherSystem.getCurrentWeather();
         this.worldState.season = this.calendar.season;
-        this.drawSky();
+
+        // Update Managers
+        this.skyManager.update();
 
         // Apply game speed multiplier to delta time
         const simDelta = delta * (this.gameSettings.gameSpeed || 1.0);
@@ -208,12 +208,7 @@ export class MainScene extends Phaser.Scene {
         this.checkProactiveBehaviors();
         this.checkCareerUnlock();
 
-        if (this.worldState.time === "Night" || this.worldState.time === "Dusk") {
-            this.drawLight();
-            this.lightImage.setVisible(true);
-        } else {
-            this.lightImage.setVisible(false);
-        }
+        this.lightingManager.update();
     }
 
     /**
@@ -362,82 +357,6 @@ export class MainScene extends Phaser.Scene {
     }
 
     /**
-     * Procedurally draws the sky gradient and stars to a dynamic texture based on the time of day.
-     */
-    drawSky() {
-        if (!this.skyTexture || !this.skyTexture.context) return;
-        const daylightFactor = this.worldClock.getDaylightFactor();
-
-        // OPTIMIZATION: Skip expensive gradient and star drawing if the sky state hasn't changed.
-        // This saves significant CPU cycles during the ~80% of the day/night cycle when light is static.
-        if (this.lastDaylightFactor === daylightFactor) return;
-        this.lastDaylightFactor = daylightFactor;
-
-        const nightTop = new Phaser.Display.Color(0, 0, 51);
-        const nightBottom = new Phaser.Display.Color(0, 0, 0);
-        const dawnTop = new Phaser.Display.Color(255, 153, 102);
-        const dawnBottom = new Phaser.Display.Color(255, 204, 153);
-        const dayTop = new Phaser.Display.Color(135, 206, 235);
-        const dayBottom = new Phaser.Display.Color(173, 216, 230);
-
-        let topColor, bottomColor;
-        const period = this.worldClock.getCurrentPeriod();
-        if (period === 'Dawn') {
-            topColor = Phaser.Display.Color.Interpolate.ColorWithColor(nightTop, dawnTop, 1, daylightFactor);
-            bottomColor = Phaser.Display.Color.Interpolate.ColorWithColor(nightBottom, dawnBottom, 1, daylightFactor);
-        } else if (period === 'Dusk') {
-            topColor = Phaser.Display.Color.Interpolate.ColorWithColor(dawnTop, nightTop, 1, 1 - daylightFactor);
-            bottomColor = Phaser.Display.Color.Interpolate.ColorWithColor(dawnBottom, nightBottom, 1, 1 - daylightFactor);
-        } else {
-            topColor = (daylightFactor === 1) ? dayTop : nightTop;
-            bottomColor = (daylightFactor === 1) ? dayBottom : nightBottom;
-        }
-
-        // Use the current size of the texture which matches the game viewport
-        const width = this.skyTexture.width;
-        const height = this.skyTexture.height;
-
-        this.skyTexture.clear();
-        const gradient = this.skyTexture.context.createLinearGradient(0, 0, 0, height);
-        gradient.addColorStop(0, `rgba(${topColor.r}, ${topColor.g}, ${topColor.b}, 1)`);
-        gradient.addColorStop(1, `rgba(${bottomColor.r}, ${bottomColor.g}, ${bottomColor.b}, 1)`);
-        this.skyTexture.context.fillStyle = gradient;
-        this.skyTexture.context.fillRect(0, 0, width, height);
-
-        if (daylightFactor < 0.5) {
-            this.skyTexture.context.fillStyle = `rgba(255, 255, 255, ${1 - (daylightFactor * 2)})`;
-            this.stars.forEach(star => this.skyTexture.context.fillRect(star.x * width, star.y * height * 0.7, 1, 1));
-        }
-
-        this.skyTexture.refresh();
-    }
-
-    /**
-     * Draws a radial gradient to a render texture to create a spotlight effect around the pet.
-     */
-    drawLight() {
-        if (!this.lightTexture) return;
-
-        // OPTIMIZATION: Skip expensive radial gradient creation if the light source (sprite) hasn't moved.
-        // This avoids unnecessary canvas operations during idle animations where position is static.
-        if (this.lastLightX === this.sprite.x && this.lastLightY === this.sprite.y) return;
-        this.lastLightX = this.sprite.x;
-        this.lastLightY = this.sprite.y;
-
-        this.lightTexture.clear();
-        // Use the current size
-        const width = this.lightTexture.width;
-        const height = this.lightTexture.height;
-
-        const gradient = this.lightTexture.context.createRadialGradient(this.sprite.x, this.sprite.y, 50, this.sprite.x, this.sprite.y, 150);
-        gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-        gradient.addColorStop(1, 'rgba(0, 0, 0, 1)');
-        this.lightTexture.context.fillStyle = gradient;
-        this.lightTexture.context.fillRect(0, 0, width, height);
-        this.lightTexture.refresh();
-    }
-
-    /**
      * Handles window resize events to keep game elements centered and textures scaled correctly.
      * @param {object} gameSize - The new size of the game window.
      * @param {number} gameSize.width - The new width.
@@ -445,11 +364,6 @@ export class MainScene extends Phaser.Scene {
      */
     resize(gameSize) {
         const { width, height } = gameSize;
-
-        // Force redraw of sky and light on resize
-        this.lastDaylightFactor = -1;
-        this.lastLightX = -9999;
-        this.lastLightY = -9999;
 
         // --- VIEWPORT ADJUSTMENT FOR DASHBOARD ---
         // Reserve bottom portion for the UI Shell (matches UIScene layout)
@@ -468,9 +382,9 @@ export class MainScene extends Phaser.Scene {
             this.sprite.setPosition(width / 2, gameHeight / 2);
         }
 
-        // Resize dynamic textures to match the game view
-        if (this.lightTexture) this.lightTexture.setSize(width, gameHeight);
-        if (this.skyTexture) this.skyTexture.setSize(width, gameHeight);
+        // Resize dynamic textures via managers
+        if (this.skyManager) this.skyManager.resize(width, gameHeight);
+        if (this.lightingManager) this.lightingManager.resize(width, gameHeight);
 
         // Redraw Ground relative to new gameHeight
         if (this.ground) {
@@ -489,9 +403,6 @@ export class MainScene extends Phaser.Scene {
 
         // Update Date Text
         this.dateText.setPosition(width - 10, 10);
-
-        this.drawSky();
-        this.drawLight();
     }
 
     /**
