@@ -152,31 +152,11 @@ export class UIScene extends Phaser.Scene {
     }
 
     /**
-     * Switches the active tab and populates the dashboard with relevant actions.
-     * @param {string} tabId - The ID of the tab to switch to.
      * Retrieves the list of actions (buttons) for a given tab ID.
      * @param {string} tabId - The ID of the tab (e.g., 'CARE', 'ACTION').
      * @returns {Array<object>} List of action definitions.
      */
     getTabActions(tabId) {
-    showTab(tabId) {
-        this.currentTab = tabId;
-
-        // Update Tab Visuals
-        // Cache the signature of the state used to render this tab
-        this.lastTabSignature = this.getTabStateSignature(tabId);
-
-        // Update Tab Visuals (Highlight active)
-        this.tabButtons.forEach(btn => {
-            const isSelected = btn.tabId === tabId;
-            btn.setAlpha(isSelected ? 1.0 : 0.7);
-        });
-
-        // Clear existing action buttons
-        this.actionButtons.forEach(btn => btn.destroy());
-        this.actionButtons = [];
-
-        // Define Actions per Tab
         let actions = [];
         if (tabId === 'CARE') {
             actions = [
@@ -231,8 +211,6 @@ export class UIScene extends Phaser.Scene {
         return actions;
     }
 
-        // Create buttons
-        const dashboardHeight = Math.floor(this.cameras.main.height * Config.UI.DASHBOARD_HEIGHT_RATIO);
     /**
      * Switches the active tab and populates the dashboard with relevant actions.
      * @param {string} tabId - The ID of the tab to switch to (e.g., 'CARE', 'ACTION').
@@ -282,7 +260,7 @@ export class UIScene extends Phaser.Scene {
         this.lastActionSignature = signature;
 
         // Layout buttons based on current screen size
-        const dashboardHeight = Math.floor(this.cameras.main.height * 0.25);
+        const dashboardHeight = Math.floor(this.cameras.main.height * Config.UI.DASHBOARD_HEIGHT_RATIO);
         const dashboardY = this.cameras.main.height - dashboardHeight;
 
         this.layoutActionButtons(visibleActions, dashboardY + 50); // Start below tabs
@@ -481,9 +459,6 @@ export class UIScene extends Phaser.Scene {
 
             // Only rebuild if the signature differs from the last rendered state
             if (signature !== this.lastActionSignature) {
-            // OPTIMIZATION: Only rebuild the action buttons if the relevant game state (signature) has changed.
-            const newSignature = this.getTabStateSignature(this.currentTab);
-            if (newSignature !== this.lastTabSignature) {
                 this.showTab(this.currentTab);
             }
         }
