@@ -116,7 +116,11 @@ describe('MainScene Coverage', () => {
              currentCareer: 'Innovator',
              inventory: {},
              mood: 'happy',
-             dominantArchetype: 'Adventurer'
+             dominantArchetype: 'Adventurer',
+             gainCareerXP: jest.fn().mockReturnValue(true),
+             questSystem: {
+                 generateDailyQuest: jest.fn()
+             }
         };
         Nadagotchi.mockImplementation(() => mockNadagotchi);
 
