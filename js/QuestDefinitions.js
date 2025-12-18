@@ -64,6 +64,14 @@ export const DailyQuestTemplates = {
     ],
     Winter: [
         { id: 'dq_winter_frost', type: 'FETCH', item: 'Frostbloom', qty: 1, npc: 'Grizzled Scout', text: "The Scout needs a Frostbloom for study." },
-        { id: 'dq_winter_warmth', type: 'FETCH', item: 'Stamina-Up Tea', qty: 2, npc: 'Sickly Villager', text: "It's freezing! The Villager needs warm tea." }
+        { id: 'dq_winter_warmth', type: 'FETCH', item: 'Stamina-Up Tea', qty: 2, npc: 'Sickly Villager', text: "It's freezing! The Villager needs warm tea." },
+        { id: 'dq_winter_firewood', type: 'FETCH', item: 'Sticks', qty: 5, npc: 'Sickly Villager', text: "The Villager needs firewood to stay warm." }
+    ],
+    // Weather-specific templates (can occur in any season if weather matches)
+    Rainy: [
+         { id: 'dq_rainy_cocoa', type: 'CRAFT', item: 'Hot Cocoa', qty: 1, npc: 'Sickly Villager', text: "It's a perfect day for Hot Cocoa." }
+    ],
+    Stormy: [
+         { id: 'dq_stormy_repair', type: 'FETCH', item: 'Sticks', qty: 3, npc: 'Grizzled Scout', text: "The storm damaged my shelter. I need repair materials." }
     ]
 };

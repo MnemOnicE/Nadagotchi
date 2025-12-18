@@ -37,6 +37,8 @@ export const EventKeys = {
     UPDATE_SETTINGS: 'UPDATE_SETTINGS',
     OPEN_ACHIEVEMENTS: 'OPEN_ACHIEVEMENTS',
     OPEN_SHOWCASE: 'OPEN_SHOWCASE',
+    OPEN_CAREER_MENU: 'OPEN_CAREER_MENU',
+    OPEN_JOB_BOARD: 'OPEN_JOB_BOARD',
 
     // NPC Interactions
     INTERACT_NPC: 'INTERACT_NPC', // Generic
@@ -46,6 +48,7 @@ export const EventKeys = {
 
     // System/Meta Actions
     WORK: 'WORK',
+    SWITCH_CAREER: 'SWITCH_CAREER',
     RETIRE: 'RETIRE',
     DECORATE: 'DECORATE',
     PLACE_FURNITURE: 'PLACE_FURNITURE',

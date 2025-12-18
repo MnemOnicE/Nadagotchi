@@ -85,6 +85,12 @@ export class InventorySystem {
                 this.pet.addJournalEntry("I ate a Logic-Boosting Snack. I feel smarter!");
                 consumed = true;
                 break;
+            case 'Hot Cocoa':
+                this.pet.stats.energy = Math.min(this.pet.maxStats.energy, this.pet.stats.energy + 15);
+                this.pet.stats.happiness = Math.min(this.pet.maxStats.happiness, this.pet.stats.happiness + 15);
+                this.pet.addJournalEntry("I drank some Hot Cocoa. It was warm and cozy!");
+                consumed = true;
+                break;
             case 'Stamina-Up Tea':
                 this.pet.stats.energy = Math.min(this.pet.maxStats.energy, this.pet.stats.energy + 30);
                 this.pet.addJournalEntry("I drank some Stamina-Up Tea. I feel refreshed!");
@@ -127,6 +133,8 @@ export class InventorySystem {
         const potentialItems = ['Berries', 'Sticks', 'Shiny Stone'];
         if (this.pet.currentSeason === 'Winter') {
             potentialItems.push('Frostbloom');
+        } else if (this.pet.currentSeason === 'Autumn') {
+            potentialItems.push('Muse Flower');
         }
 
         // Use RNG to select item

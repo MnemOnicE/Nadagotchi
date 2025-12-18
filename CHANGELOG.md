@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.32.0] - 2025-12-07
+
+### Added
+- **Career UI & Management:** Implemented a comprehensive frontend for the Career system.
+  - **Career Modal:** Added a new "Career Profile" modal in `UIScene` that displays current career stats (Title, Level, XP, Bonuses) and allows switching between unlocked careers.
+  - **Job Board Hub:** Upgraded the "Job Board" button to open a hub menu, offering options to "Start Shift" or "Manage Career".
+  - **System Integration:** Added a "Career" button to the "SYSTEM" tab for easy access.
+  - **Switching Logic:** Connected the UI to the backend `switchCareer` logic, enabling true career flexibility.
+- **Weather-Dynamic Quests:** Enhanced the Quest System to generate daily quests based on current Weather conditions.
+  - **Logic:** Updated `QuestSystem.generateDailyQuest` to pool templates from both Season and Weather.
+  - **Content:** Added new weather-specific quest templates (e.g., "Craft Hot Cocoa" during Rain, "Gather Firewood" in Winter).
+  - **New Items:** Added `Hot Cocoa` (Consumable) and `Muse Flower` (Material) to support these new quests.
+  - **Inventory:** Updated `InventorySystem` to allow foraging `Muse Flower` in Autumn.
+
 ## [1.31.0] - 2025-12-07
 
 ### Added

@@ -4,6 +4,7 @@ import { NarrativeSystem } from './NarrativeSystem.js';
 import { EventKeys } from './EventKeys.js';
 import { ItemDefinitions } from './ItemData.js';
 import { Config } from './Config.js';
+import { CareerDefinitions } from './CareerDefinitions.js';
 import { SoundSynthesizer } from './utils/SoundSynthesizer.js';
 import { Achievements } from './AchievementData.js';
 
@@ -97,6 +98,8 @@ export class UIScene extends Phaser.Scene {
         this.dialogueModal = this.createModal("Conversation");
         this.settingsModal = this.createSettingsModal();
         this.showcaseModal = this.createShowcaseModal();
+        this.careerModal = this.createModal("Career Profile");
+        this.jobBoardModal = this.createModal("Job Board");
 
         // --- Initial Layout ---
         this.createTabs();
@@ -123,12 +126,7 @@ export class UIScene extends Phaser.Scene {
      * Handles clicks on the Job Board button.
      */
     handleJobBoardClick() {
-        if (this.nadagotchiData && this.nadagotchiData.currentCareer) {
-            this.game.events.emit(EventKeys.UI_ACTION, EventKeys.WORK);
-        } else {
-            SoundSynthesizer.instance.playFailure();
-            this.showToast("Job Board Locked", "You need a Career to work!\nTry Studying or Exploring.", "🚫");
-        }
+        this.game.events.emit(EventKeys.UI_ACTION, EventKeys.OPEN_JOB_BOARD);
     }
 
     /**
@@ -179,6 +177,7 @@ export class UIScene extends Phaser.Scene {
         } else if (tabId === 'SYSTEM') {
             actions = [
                 { text: 'Passport', action: EventKeys.OPEN_SHOWCASE },
+                { text: 'Career', action: EventKeys.OPEN_CAREER_MENU },
                 { text: 'Journal', action: EventKeys.OPEN_JOURNAL },
                 { text: 'Inventory', action: EventKeys.OPEN_INVENTORY },
                 { text: 'Recipes', action: EventKeys.OPEN_RECIPES },
@@ -397,6 +396,8 @@ export class UIScene extends Phaser.Scene {
             case EventKeys.OPEN_ACHIEVEMENTS: this.openAchievementsModal(); break;
             case EventKeys.OPEN_SHOWCASE: this.openShowcase(); break;
             case EventKeys.OPEN_SETTINGS: this.openSettingsMenu(); break;
+            case EventKeys.OPEN_CAREER_MENU: this.openCareerMenu(); break;
+            case EventKeys.OPEN_JOB_BOARD: this.openJobBoardMenu(); break;
         }
     }
 
@@ -906,6 +907,144 @@ export class UIScene extends Phaser.Scene {
         container.add([cardBg, sprite, infoText, footer]);
 
         this.showcaseModal.setVisible(true);
+        this.scene.pause('MainScene');
+    }
+
+    openCareerMenu() {
+        this.closeAllModals();
+        if (!this.nadagotchiData) return;
+        const container = this.careerModal;
+        // Clean up previous dynamic content
+        if (this.careerDynamicItems) {
+             this.careerDynamicItems.forEach(i => i.destroy());
+        }
+        this.careerDynamicItems = [];
+
+        const mw = this.getModalWidth();
+        const mh = this.getModalHeight();
+        let yPos = -mh / 2 + 80;
+
+        // 1. Current Career Info
+        const career = this.nadagotchiData.currentCareer;
+        let infoText = "";
+        if (career) {
+            const level = this.nadagotchiData.careerLevels[career] || 1;
+            const xp = this.nadagotchiData.careerXP[career] || 0;
+            const title = CareerDefinitions.TITLES[career] ? CareerDefinitions.TITLES[career][level] : 'Employee';
+            const nextThreshold = CareerDefinitions.XP_THRESHOLDS[level + 1] || 'MAX';
+
+            // Perks info
+            const payBonus = (Config.CAREER.LEVEL_MULTIPLIERS[level] - 1) * 100; // e.g., 0.1 -> 10%
+
+            infoText = `Current Job: ${career}\nTitle: ${title} (Lvl ${level})\nXP: ${xp} / ${nextThreshold}\nBonuses: +${Math.round(payBonus)}% Efficiency`;
+        } else {
+            infoText = "No Active Career.\nStudy or Explore to unlock paths!";
+        }
+
+        const statsText = this.add.text(0, yPos, infoText, {
+            fontFamily: 'VT323, monospace', fontSize: '24px', color: '#ffffff', align: 'center', wordWrap: { width: mw - 60 }
+        }).setOrigin(0.5, 0);
+        container.add(statsText);
+        this.careerDynamicItems.push(statsText);
+
+        yPos += 140;
+
+        // 2. Unlocked Careers List
+        const listTitle = this.add.text(0, yPos, "Unlocked Career Paths:", {
+             fontFamily: 'VT323', fontSize: '20px', color: '#AAAAAA'
+        }).setOrigin(0.5);
+        container.add(listTitle);
+        this.careerDynamicItems.push(listTitle);
+
+        yPos += 30;
+
+        const unlocked = this.nadagotchiData.unlockedCareers || [];
+        if (unlocked.length === 0) {
+             const noneText = this.add.text(0, yPos, "(None yet)", { fontFamily: 'VT323', fontSize: '18px', color: '#888' }).setOrigin(0.5);
+             container.add(noneText);
+             this.careerDynamicItems.push(noneText);
+        } else {
+            unlocked.forEach(c => {
+                 const isCurrent = c === career;
+                 const lvl = this.nadagotchiData.careerLevels[c] || 1;
+                 const label = `${c} (Lvl ${lvl})`;
+
+                 // Row container
+                 // Left aligned text
+                 const rowText = this.add.text(-mw/2 + 60, yPos + 10, label, { fontFamily: 'VT323', fontSize: '24px', color: isCurrent ? '#00FF00' : '#FFF' });
+                 container.add(rowText);
+                 this.careerDynamicItems.push(rowText);
+
+                 if (!isCurrent) {
+                     const switchBtn = ButtonFactory.createButton(this, mw/2 - 80, yPos + 20, "Switch", () => {
+                          this.game.events.emit(EventKeys.UI_ACTION, EventKeys.SWITCH_CAREER, c);
+                          // Close or Refresh? Switching triggers generic update.
+                          // Let's close modal to see the Toast notification.
+                          container.setVisible(false);
+                          this.scene.resume('MainScene');
+                     }, { width: 80, height: 30, color: 0x4CAF50, fontSize: '18px' });
+                     container.add(switchBtn);
+                     this.careerDynamicItems.push(switchBtn);
+                 } else {
+                     const activeLbl = this.add.text(mw/2 - 80, yPos + 10, "[Active]", { fontFamily: 'VT323', fontSize: '18px', color: '#00FF00' });
+                     container.add(activeLbl);
+                     this.careerDynamicItems.push(activeLbl);
+                 }
+
+                 yPos += 45;
+            });
+        }
+
+        container.setVisible(true);
+        this.scene.pause('MainScene');
+    }
+
+    openJobBoardMenu() {
+        this.closeAllModals();
+        if (!this.nadagotchiData) return;
+        const container = this.jobBoardModal;
+        // Clean
+        if (this.jobBoardDynamicItems) { this.jobBoardDynamicItems.forEach(i => i.destroy()); }
+        this.jobBoardDynamicItems = [];
+
+        const career = this.nadagotchiData.currentCareer;
+        let text = "";
+
+        if (career) {
+            text = `Active Assignment:\n${career}`;
+        } else {
+            text = "No Active Career Assignment.";
+        }
+
+        const infoText = this.add.text(0, -50, text, {
+            fontFamily: 'VT323', fontSize: '32px', color: '#FFF', align: 'center'
+        }).setOrigin(0.5);
+        container.add(infoText);
+        this.jobBoardDynamicItems.push(infoText);
+
+        // Start Shift Button
+        const startBtn = ButtonFactory.createButton(this, 0, 30, "Start Shift", () => {
+             if (career) {
+                 this.game.events.emit(EventKeys.UI_ACTION, EventKeys.WORK);
+                 container.setVisible(false); // Minigame starts
+             } else {
+                 this.showToast("No Job", "Select a career first!", "🚫");
+             }
+        }, { width: 160, height: 50, color: career ? 0x6A0DAD : 0x555555, fontSize: '24px' });
+
+        if (!career) startBtn.setDisabled(true); // Soft disable
+
+        container.add(startBtn);
+        this.jobBoardDynamicItems.push(startBtn);
+
+        // Career Info Button
+        const careerBtn = ButtonFactory.createButton(this, 0, 100, "Career Profiles", () => {
+             this.openCareerMenu();
+        }, { width: 160, height: 40, color: 0xD8A373, fontSize: '20px' });
+        container.add(careerBtn);
+        this.jobBoardDynamicItems.push(careerBtn);
+
+        container.setVisible(true);
         this.scene.pause('MainScene');
     }
 }
