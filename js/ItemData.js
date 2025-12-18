@@ -17,6 +17,7 @@ export const ItemDefinitions = {
     "Muse Flower": { type: "Material", description: "A flower that inspires creativity.", emoji: "🌺" },
 
     // Crafted Items (Consumables)
+    "Hot Cocoa": { type: "Consumable", description: "A rich, warm drink perfect for rainy days.", emoji: "☕" },
     "Logic-Boosting Snack": { type: "Consumable", description: "A tasty snack that fuels the mind.", emoji: "🧠" },
     "Stamina-Up Tea": { type: "Consumable", description: "A warm tea that restores energy.", emoji: "🍵" },
     "Metabolism-Slowing Tonic": { type: "Consumable", description: "A tonic that slows metabolism, helping to conserve energy.", emoji: "🧪" },
@@ -47,6 +48,10 @@ export const Recipes = {
     "Logic-Boosting Snack": {
         materials: { "Berries": 3 },
         description: "A tasty snack that fuels the mind."
+    },
+    "Hot Cocoa": {
+        materials: { "Berries": 2, "Sticks": 1 },
+        description: "A rich, warm drink perfect for rainy days."
     },
     "Stamina-Up Tea": {
         materials: { "Berries": 1, "Sticks": 1 },

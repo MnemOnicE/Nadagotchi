@@ -154,13 +154,18 @@ export class QuestSystem {
     }
 
     /**
-     * Generates a new daily quest based on the season.
+     * Generates a new daily quest based on the season and weather.
      * @param {string} season - Current season.
+     * @param {string} [weather=null] - Current weather.
      * @returns {object|null} The new quest object.
      */
-    generateDailyQuest(season) {
-        const templates = DailyQuestTemplates[season];
-        if (!templates || templates.length === 0) return null;
+    generateDailyQuest(season, weather = null) {
+        let templates = DailyQuestTemplates[season] ? [...DailyQuestTemplates[season]] : [];
+        if (weather && DailyQuestTemplates[weather]) {
+            templates = templates.concat(DailyQuestTemplates[weather]);
+        }
+
+        if (templates.length === 0) return null;
 
         const template = this.pet.rng.choice(templates);
 

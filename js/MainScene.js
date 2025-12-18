@@ -185,7 +185,7 @@ export class MainScene extends Phaser.Scene {
 
             // Generate Daily Quest
             if (this.nadagotchi.questSystem) {
-                const newQuest = this.nadagotchi.questSystem.generateDailyQuest(this.calendar.season);
+                const newQuest = this.nadagotchi.questSystem.generateDailyQuest(this.calendar.season, this.weatherSystem.getCurrentWeather());
                 if (newQuest) {
                     this.showNotification("New Daily Quest Available!", '#00FFFF');
                 }
@@ -233,6 +233,16 @@ export class MainScene extends Phaser.Scene {
         switch (actionType) {
             case EventKeys.WORK:
                 this.startWorkMinigame();
+                break;
+            case EventKeys.SWITCH_CAREER:
+                if (this.nadagotchi.switchCareer(data)) {
+                    SoundSynthesizer.instance.playChime();
+                    this.showNotification(`Career Switched: ${data}`, '#00FF00');
+                    // Force UI update
+                    this.game.events.emit(EventKeys.UPDATE_STATS, { nadagotchi: this.nadagotchi, settings: this.gameSettings });
+                } else {
+                    SoundSynthesizer.instance.playFailure();
+                }
                 break;
             case EventKeys.RETIRE:
                 this.scene.stop('UIScene');
