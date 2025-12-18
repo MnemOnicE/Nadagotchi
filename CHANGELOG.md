@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.31.0] - 2025-12-07
+
+### Added
+- **Career Progression System:** Implemented a robust leveling system for careers.
+  - **Levels & XP:** Added levels 1-5 for all careers (e.g., Innovator Lv1: Lab Assistant -> Lv5: Nobel Laureate). Pets earn XP from successful work days.
+  - **Promotions:** Reaching XP thresholds triggers a promotion event with a unique title and permanent pay/happiness bonuses.
+  - **Infrastructure:** Created `js/CareerDefinitions.js` to manage career data and updated `Nadagotchi.js` to track `careerXP` and `careerLevels`.
+- **Dynamic Daily Quests:** Implemented a procedural quest system to encourage varied gameplay.
+  - **Procedural Generation:** Daily quests are generated based on the current season and weather (e.g., "Forage Firewood in Winter").
+  - **Integration:** Quests are integrated into the `RelationshipSystem`, requiring players to interact with specific NPCs to complete tasks.
+  - **Reward Loop:** Completing quests grants significant Career XP and Relationship boosts, closing the loop between Foraging, Crafting, and Social systems.
+
 ## [1.28.0] - 2025-12-07
 
 ### Added

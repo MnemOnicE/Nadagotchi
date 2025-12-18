@@ -36,6 +36,20 @@ export class RelationshipSystem {
         // Mark interaction for the day to prevent friendship decay
         this.pet.relationships[npcName].interactedToday = true;
 
+        // Check Daily Quest
+        if (this.pet.dailyQuest && this.pet.dailyQuest.npc === npcName && !this.pet.dailyQuest.completed) {
+            if (this.pet.questSystem.completeDailyQuest()) {
+                const text = "Oh, you brought it! Thank you so much!";
+                this.pet.addJournalEntry(`Completed request for ${npcName}: "${text}"`);
+                return text;
+            } else {
+                // If not completed, remind player
+                const text = this.pet.dailyQuest.text;
+                this.pet.addJournalEntry(`${npcName} reminded me: "${text}"`);
+                return text;
+            }
+        }
+
         if (interactionType === 'GIFT' && this.pet.inventory['Berries'] > 0) {
             this.pet.inventorySystem.removeItem('Berries', 1);
             this.pet.relationships[npcName].level += Config.ACTIONS.INTERACT_NPC.GIFT_RELATIONSHIP;

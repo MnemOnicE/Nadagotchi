@@ -23,6 +23,20 @@ export const Config = {
         HOMOZYGOUS_ENERGY_BONUS: 5
     },
 
+    // Career System
+    CAREER: {
+        BASE_PAYOUT: 10,
+        XP_PER_WORK: 20, // 5 days to reach lvl 2
+        PROMOTION_BONUS: 50,
+        LEVEL_MULTIPLIERS: {
+            1: 1.0,
+            2: 1.1,
+            3: 1.2,
+            4: 1.3,
+            5: 1.5
+        }
+    },
+
     // Stat Decay Rates
     DECAY: {
         HUNGER: 0.05,

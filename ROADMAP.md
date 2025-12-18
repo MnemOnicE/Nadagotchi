@@ -37,6 +37,8 @@ This phase focuses on building out the primary gameplay loops, giving players cl
     -   [x] Implemented the "Research" skill and integrated it into study loops.
 -   **[ ] Future Work:**
     -   [ ] Introduce NPC "mentors" in career-specific guilds to guide skill development.
+    -   [ ] **Career Progression:** Implement Career Levels (1-5) and XP system with title changes and perks.
+    -   [ ] **Career Flexibility:** Allow players to switch between unlocked careers (Fixing "Career Lock-in").
 
 ### **II. Dynamic World Events & Environmental Interaction**
 -   **[x] Interactive Home Environment:**
@@ -56,6 +58,7 @@ This phase focuses on building out the primary gameplay loops, giving players cl
     -   [x] Expand NPC interactions with more complex dialogues and relationship-based events.
         -   [x] Implemented multi-stage quest system (e.g., Masterwork Crafting).
         -   [x] Hardened quest logic to prevent progression exploits.
+    -   [ ] **Dynamic Daily Quests:** Implement procedural daily quests based on Season and Weather (e.g., "Forage Firewood in Winter").
 
 ### **III. Technical Foundation & Architecture**
 -   **[x] Modern Tooling & Architecture:**

@@ -104,6 +104,15 @@
     *   **Examples:** "Mapping the Whispering Woods" for a Scout, "Design a New Watering System" for an Innovator, "Comfort the Lost Sprite" for a Healer.
     *   **Rewards:** Unique items (tools, decor), cosmetics (career-themed outfits), new mini-games, or in-game currency.
 *   **Social Standing & Reputation:** Success in careers builds "Reputation" (visualized by a star system or title on their profile), leading to prestigious job offers, unique NPC interactions, or access to exclusive areas/shops.
+    *   **Career Progression (Levels):**
+        *   **XP System:** Pets earn Career XP (CXP) for successful work days.
+        *   **Levels (1-5):**
+            *   Level 1: Apprentice (Standard Pay)
+            *   Level 2: Associate (+10% Pay)
+            *   Level 3: Senior (+20% Pay, +5 Happiness)
+            *   Level 4: Expert (+30% Pay, +10 Happiness)
+            *   Level 5: Master (+50% Pay, Unique Title)
+        *   **Promotion:** Requires XP threshold + specific Skill levels.
 
 ### Canvas Integration:
 
@@ -143,6 +152,14 @@
     *   **Festivals:** Themed events (e.g., "Spring Bloom Festival," "Summer Sandcastle Contest," "Autumn Harvest Fair," "Winter Light Parade").
     *   **Content:** Unique themed mini-games, limited-time rewards (cosmetics, rare food, decor), special NPC visitors, and significant mood boosts.
     *   **Random Events:** Spontaneous occurrences like "Traveling Merchant Arrives" (with rare items), "Stray Critter Needs Help" (Nurturer opportunity), "Mystery Box Appears," or "Sudden Inspiration" (boost for Intellectual/Creative types).
+    *   **Daily Quests (Procedural):**
+        *   Each morning, a new "Daily Quest" is generated based on the current Season and Weather.
+        *   **Structure:** "NPC [Name] needs [Item/Action] because [Reason]."
+        *   **Examples:**
+            *   Winter: "Gather 3 Firewood for the Scout."
+            *   Rainy: "Craft a Hot Cocoa for the Villager."
+            *   Spring: "Forage 2 Wildflowers for the Artisan."
+        *   **Reward:** Boost to Career XP and Relationship with that NPC.
 
 ### Canvas Integration:
 

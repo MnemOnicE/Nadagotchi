@@ -182,6 +182,15 @@ export class MainScene extends Phaser.Scene {
             if (this.nadagotchi.relationshipSystem) {
                 this.nadagotchi.relationshipSystem.dailyUpdate();
             }
+
+            // Generate Daily Quest
+            if (this.nadagotchi.questSystem) {
+                const newQuest = this.nadagotchi.questSystem.generateDailyQuest(this.calendar.season);
+                if (newQuest) {
+                    this.showNotification("New Daily Quest Available!", '#00FFFF');
+                }
+            }
+
             this.eventManager.update();
             this.updateDateText();
         }
@@ -328,6 +337,13 @@ export class MainScene extends Phaser.Scene {
                     }
                     break;
             }
+
+            // Career XP & Promotion
+            const promoted = this.nadagotchi.gainCareerXP(Config.CAREER.XP_PER_WORK);
+            if (promoted) {
+                this.showNotification("PROMOTION!!", '#00FF00');
+            }
+
             this.nadagotchi.addJournalEntry(`I had a successful day at my ${data.career} job! My ${skillUp} skill increased.`);
         } else {
             SoundSynthesizer.instance.playFailure();
@@ -422,15 +438,23 @@ export class MainScene extends Phaser.Scene {
     checkCareerUnlock() {
         if (this.nadagotchi.newCareerUnlocked && !this.careerUnlockedNotified) {
             this.careerUnlockedNotified = true;
-            // Center in game view
-            const gameHeight = this.cameras.main.height;
-            const notificationText = this.add.text(this.cameras.main.width / 2, gameHeight / 2 - 50, `Career Unlocked: ${this.nadagotchi.newCareerUnlocked}!`,
-                { fontFamily: 'VT323, Arial', fontSize: '24px', color: '#FFD700', backgroundColor: 'rgba(0,0,0,0.7)', padding: { x: 15, y: 10 } }
-            ).setOrigin(0.5);
-
-            this.tweens.add({ targets: notificationText, alpha: { from: 0, to: 1 }, duration: 500, yoyo: true, hold: 2500, onComplete: () => notificationText.destroy() });
+            this.showNotification(`Career Unlocked: ${this.nadagotchi.newCareerUnlocked}!`, '#FFD700');
             this.nadagotchi.newCareerUnlocked = null; // Clear the flag in the 'brain'
         }
+    }
+
+    /**
+     * Displays a temporary notification text in the center of the game view.
+     * @param {string} text - The text to display.
+     * @param {string} [color='#FFD700'] - The color of the text.
+     */
+    showNotification(text, color = '#FFD700') {
+        const gameHeight = this.cameras.main.height;
+        const notificationText = this.add.text(this.cameras.main.width / 2, gameHeight / 2 - 50, text,
+            { fontFamily: 'VT323, Arial', fontSize: '24px', color: color, backgroundColor: 'rgba(0,0,0,0.7)', padding: { x: 15, y: 10 } }
+        ).setOrigin(0.5);
+
+        this.tweens.add({ targets: notificationText, alpha: { from: 0, to: 1 }, duration: 500, yoyo: true, hold: 2500, onComplete: () => notificationText.destroy() });
     }
 
     /**

@@ -45,3 +45,25 @@ export const QuestDefinitions = {
         }
     }
 };
+
+/**
+ * Templates for procedurally generated daily quests.
+ * Organized by Season.
+ */
+export const DailyQuestTemplates = {
+    Spring: [
+        { id: 'dq_spring_berries', type: 'FETCH', item: 'Berries', qty: 3, npc: 'Sickly Villager', text: "The Villager needs fresh vitamins after winter." },
+        { id: 'dq_spring_sticks', type: 'FETCH', item: 'Sticks', qty: 5, npc: 'Master Artisan', text: "The Artisan needs fresh wood for new projects." }
+    ],
+    Summer: [
+        { id: 'dq_summer_tea', type: 'FETCH', item: 'Stamina-Up Tea', qty: 1, npc: 'Grizzled Scout', text: "The Scout is parched from the summer heat." },
+        { id: 'dq_summer_stone', type: 'FETCH', item: 'Shiny Stone', qty: 1, npc: 'Master Artisan', text: "The Artisan needs a shiny stone for a mosaic." }
+    ],
+    Autumn: [
+         { id: 'dq_autumn_muse', type: 'FETCH', item: 'Muse Flower', qty: 1, npc: 'Master Artisan', text: "The Artisan seeks a Muse Flower for inspiration." }
+    ],
+    Winter: [
+        { id: 'dq_winter_frost', type: 'FETCH', item: 'Frostbloom', qty: 1, npc: 'Grizzled Scout', text: "The Scout needs a Frostbloom for study." },
+        { id: 'dq_winter_warmth', type: 'FETCH', item: 'Stamina-Up Tea', qty: 2, npc: 'Sickly Villager', text: "It's freezing! The Villager needs warm tea." }
+    ]
+};

@@ -3,6 +3,7 @@ import { Genome, GeneticsSystem } from './GeneticsSystem.js';
 import { NarrativeSystem } from './NarrativeSystem.js';
 import { Config } from './Config.js';
 import { Recipes } from './ItemData.js';
+import { CareerDefinitions } from './CareerDefinitions.js';
 import { SeededRandom } from './utils/SeededRandom.js';
 import { RelationshipSystem } from './systems/RelationshipSystem.js';
 import { InventorySystem } from './systems/InventorySystem.js';
@@ -63,6 +64,22 @@ export class Nadagotchi {
 
             /** @type {?string} The pet's current career, if any. */
             this.currentCareer = loadedData.currentCareer;
+            /** @type {Array<string>} List of careers the pet has unlocked. */
+            this.unlockedCareers = loadedData.unlockedCareers || (this.currentCareer ? [this.currentCareer] : []);
+            /** @type {Object.<string, number>} Current level in each career. */
+            this.careerLevels = loadedData.careerLevels || {};
+            /** @type {Object.<string, number>} Current XP in each career. */
+            this.careerXP = loadedData.careerXP || {};
+
+            // Migration: Ensure active career has level data
+            if (this.currentCareer && !this.careerLevels[this.currentCareer]) {
+                this.careerLevels[this.currentCareer] = 1;
+                this.careerXP[this.currentCareer] = 0;
+            }
+
+            /** @type {?object} The active daily quest. */
+            this.dailyQuest = loadedData.dailyQuest || null;
+
             /** @type {Object.<string, number>} The items the pet is currently holding. */
             this.inventory = loadedData.inventory || {};
             /** @type {number} The pet's age. */
@@ -126,6 +143,10 @@ export class Nadagotchi {
             this.skills = { ...Config.INITIAL_STATE.SKILLS };
 
             this.currentCareer = null;
+            this.unlockedCareers = [];
+            this.careerLevels = {};
+            this.careerXP = {};
+            this.dailyQuest = null;
             this.inventory = {};
             this.age = 0;
             this.generation = 1;
@@ -819,34 +840,80 @@ export class Nadagotchi {
      * @private
      */
     updateCareer() {
-        if (this.currentCareer === null) {
-            let newlyUnlockedCareer = null;
+        let newlyUnlockedCareer = null;
 
-            // Check Hybrid Careers First (Prioritize over standard paths)
-            // Archaeologist: High Adventurer & Intellectual, Research & Navigation
-            if (this.personalityPoints['Adventurer'] >= 10 &&
-                this.personalityPoints['Intellectual'] >= 10 &&
-                this.skills.navigation > 10 &&
-                this.skills.research > 10) {
-                newlyUnlockedCareer = 'Archaeologist';
-            }
-            // Standard Careers
-            else if (this.dominantArchetype === 'Intellectual' && this.skills.logic > 10) {
-                newlyUnlockedCareer = 'Innovator';
-            } else if (this.dominantArchetype === 'Adventurer' && this.skills.navigation > 10) {
-                newlyUnlockedCareer = 'Scout';
-            } else if (this.dominantArchetype === 'Nurturer' && this.skills.empathy > 10) {
-                newlyUnlockedCareer = 'Healer';
-            } else if (this.dominantArchetype === 'Recluse' && this.skills.crafting > 10 && this.skills.focus > 5) {
-                newlyUnlockedCareer = 'Artisan';
-            }
+        // Check Hybrid Careers First (Prioritize over standard paths)
+        // Archaeologist: High Adventurer & Intellectual, Research & Navigation
+        if (this.personalityPoints['Adventurer'] >= 10 &&
+            this.personalityPoints['Intellectual'] >= 10 &&
+            this.skills.navigation > 10 &&
+            this.skills.research > 10) {
+            newlyUnlockedCareer = 'Archaeologist';
+        }
+        // Standard Careers
+        else if (this.dominantArchetype === 'Intellectual' && this.skills.logic > 10) {
+            newlyUnlockedCareer = 'Innovator';
+        } else if (this.dominantArchetype === 'Adventurer' && this.skills.navigation > 10) {
+            newlyUnlockedCareer = 'Scout';
+        } else if (this.dominantArchetype === 'Nurturer' && this.skills.empathy > 10) {
+            newlyUnlockedCareer = 'Healer';
+        } else if (this.dominantArchetype === 'Recluse' && this.skills.crafting > 10 && this.skills.focus > 5) {
+            newlyUnlockedCareer = 'Artisan';
+        }
 
-            if (newlyUnlockedCareer) {
+        if (newlyUnlockedCareer && !this.unlockedCareers.includes(newlyUnlockedCareer)) {
+            this.unlockedCareers.push(newlyUnlockedCareer);
+            this.careerLevels[newlyUnlockedCareer] = 1;
+            this.careerXP[newlyUnlockedCareer] = 0;
+            this.newCareerUnlocked = newlyUnlockedCareer;
+            this.addJournalEntry(`I unlocked the ${newlyUnlockedCareer} career path!`);
+
+            // Auto-switch if no career is currently active
+            if (!this.currentCareer) {
                 this.currentCareer = newlyUnlockedCareer;
-                this.newCareerUnlocked = newlyUnlockedCareer;
-                this.addJournalEntry(`I became a ${this.currentCareer}!`);
+                this.addJournalEntry(`I started working as a ${newlyUnlockedCareer}!`);
             }
         }
+    }
+
+    /**
+     * Adds XP to the current career and checks for promotion.
+     * @param {number} amount - The amount of XP to add.
+     * @returns {boolean} True if promoted, false otherwise.
+     */
+    gainCareerXP(amount) {
+        if (!this.currentCareer) return false;
+
+        const currentXP = this.careerXP[this.currentCareer] || 0;
+        const currentLevel = this.careerLevels[this.currentCareer] || 1;
+
+        if (currentLevel >= 5) return false; // Max level
+
+        this.careerXP[this.currentCareer] = currentXP + amount;
+
+        // Check promotion
+        const nextThreshold = CareerDefinitions.XP_THRESHOLDS[currentLevel + 1];
+        if (nextThreshold && this.careerXP[this.currentCareer] >= nextThreshold) {
+            this.careerLevels[this.currentCareer]++;
+            const newTitle = CareerDefinitions.TITLES[this.currentCareer][this.careerLevels[this.currentCareer]];
+            this.addJournalEntry(`I was promoted to ${newTitle}!`);
+            this.stats.happiness += Config.CAREER.PROMOTION_BONUS;
+            return true; // Promoted
+        }
+        return false;
+    }
+
+    /**
+     * Switches the active career to another unlocked career.
+     * @param {string} careerId - The career ID to switch to.
+     * @returns {boolean} True if successful.
+     */
+    switchCareer(careerId) {
+        if (this.unlockedCareers.includes(careerId)) {
+            this.currentCareer = careerId;
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -918,6 +985,10 @@ export class Nadagotchi {
             stats: { ...Config.INITIAL_STATE.STATS },
             skills: { ...Config.INITIAL_STATE.SKILLS },
             currentCareer: null,
+            unlockedCareers: [],
+            careerLevels: {},
+            careerXP: {},
+            dailyQuest: null,
             inventory: {},
             age: 0,
             generation: 1, // Imported pets start their own lineage
