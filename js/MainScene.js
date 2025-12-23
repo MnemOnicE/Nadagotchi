@@ -142,7 +142,6 @@ export class MainScene extends Phaser.Scene {
         this.game.events.on(EventKeys.UI_ACTION, this.handleUIAction, this);
         this.game.events.on(EventKeys.UPDATE_SETTINGS, this.handleUpdateSettings, this);
         this.game.events.on(EventKeys.WORK_RESULT, this.handleWorkResult, this);
-        this.game.events.on(EventKeys.SCENE_COMPLETE, this.handleSceneComplete, this);
         this.scale.on('resize', this.resize, this);
 
         // --- Final Setup ---
@@ -267,17 +266,6 @@ export class MainScene extends Phaser.Scene {
                 // These specific cases fall through to default handler or are handled by sprite events directly emitting specific actions
                 this.nadagotchi.handleAction(actionType, data);
                 break;
-            case EventKeys.EXPLORE:
-                if (this.nadagotchi.stats.energy >= Config.ACTIONS.EXPEDITION.ENERGY_COST) {
-                    this.scene.pause();
-                    this.scene.launch('ExpeditionScene', {
-                        nadagotchi: this.nadagotchi,
-                        weather: this.worldState.weather
-                    });
-                } else {
-                     this.showNotification("Too Tired for Expedition", '#FF0000');
-                }
-                break;
             default:
                 this.nadagotchi.handleAction(actionType, data);
                 break;
@@ -291,20 +279,6 @@ export class MainScene extends Phaser.Scene {
     handleUpdateSettings(newSettings) {
         this.gameSettings = { ...this.gameSettings, ...newSettings };
         this.persistence.saveSettings(this.gameSettings);
-    }
-
-    /**
-     * Handles the results from a completed work mini-game.
-     * @param {object} data - The result data from the mini-game scene.
-     * @param {boolean} data.success - Whether the mini-game was completed successfully.
-     * @param {string} data.career - The career associated with the mini-game.
-     * @param {string} [data.craftedItem] - The item that was crafted, if any.
-     */
-    handleSceneComplete(data) {
-        if (data.type === 'EXPEDITION') {
-            // Expedition logic is handled within the scene/system, we just need to ensure UI update
-            this.game.events.emit(EventKeys.UPDATE_STATS, { nadagotchi: this.nadagotchi, settings: this.gameSettings });
-        }
     }
 
     /**
