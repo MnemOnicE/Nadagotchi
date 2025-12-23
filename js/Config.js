@@ -124,6 +124,9 @@ export const Config = {
             ENERGY_COST: 10,
             SKILL_GAIN: 0.2
         },
+        EXPEDITION: {
+            LENGTH: 3
+        },
         INTERACT_NPC: {
             ENERGY_COST: 5,
             GIFT_HAPPINESS: 10,

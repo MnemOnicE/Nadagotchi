@@ -13,6 +13,7 @@ import { LogicPuzzleScene } from './LogicPuzzleScene.js';
 import { ScoutMinigameScene } from './ScoutMinigameScene.js';
 import { HealerMinigameScene } from './HealerMinigameScene.js';
 import { ArtisanMinigameScene } from './ArtisanMinigameScene.js';
+import { ExpeditionScene } from './ExpeditionScene.js';
 
 /**
  * Phaser Game Configuration.
@@ -38,7 +39,8 @@ const config = {
         LogicPuzzleScene,      // 7. Minigames...
         ScoutMinigameScene,
         HealerMinigameScene,
-        ArtisanMinigameScene
+        ArtisanMinigameScene,
+        ExpeditionScene
     ]
 };
 
