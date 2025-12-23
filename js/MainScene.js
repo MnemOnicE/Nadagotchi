@@ -60,15 +60,6 @@ export class MainScene extends Phaser.Scene {
      * @param {object} [data.newPetData] - Data for creating a new pet, typically from the BreedingScene.
      */
     create(data) {
-        // Define frames for the generated pet texture
-        const petTexture = this.textures.get('pet');
-        if (petTexture && !petTexture.getFrameNames().includes('0')) {
-             petTexture.add(0, 0, 0, 0, 16, 16);
-             petTexture.add(1, 0, 16, 0, 16, 16);
-             petTexture.add(2, 0, 32, 0, 16, 16);
-             petTexture.add(3, 0, 48, 0, 16, 16);
-        }
-
         // --- World Systems Initialization (Pre-Visuals) ---
         this.persistence = new PersistenceManager();
         const loadedCalendar = this.persistence.loadCalendar();
@@ -474,8 +465,10 @@ export class MainScene extends Phaser.Scene {
     updateSpriteMood() {
         if (this.currentMood !== this.nadagotchi.mood) {
             this.currentMood = this.nadagotchi.mood;
-            const moodMap = { 'happy': 0, 'neutral': 1, 'sad': 2, 'angry': 3 };
-            this.sprite.setFrame(moodMap[this.currentMood] ?? 1);
+            // Map game moods to sprite frames:
+            // Happy (0), Angry (1), Tired/Sad (2), Content/Neutral (3)
+            const moodMap = { 'happy': 0, 'angry': 1, 'sad': 2, 'neutral': 3 };
+            this.sprite.setFrame(moodMap[this.currentMood] ?? 3);
             this.startIdleAnimation(this.currentMood);
         }
     }

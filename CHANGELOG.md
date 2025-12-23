@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.33.0] - 2025-12-23
+
+### Changed
+- **Visual Assets:** Replaced the procedurally generated "Bookshelf" world object with a dedicated pixel-art asset (`bookshelf_64x64.png`).
+  - The craftable "Fancy Bookshelf" retains its procedural generation logic as requested.
+  - Updated `PreloaderScene.js` to load the new asset, prioritizing it over the procedural generation for the `bookshelf` key.
+- **Pet Sprites:** Replaced the procedurally generated pet sprite with a new pixel-art spritesheet (`pet_spritesheet.png`).
+  - Updated mood mapping to align with the new assets: Happy, Angry, Tired (Sad), and Content (Neutral).
+
 ## [1.32.0] - 2025-12-07
 
 ### Added
