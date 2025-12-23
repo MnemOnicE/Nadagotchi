@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.36.1] - 2025-12-24
+
+### Fixed
+- **Expedition Scene Hang:** Fixed a critical bug where players would get stuck in the Expedition mini-game after completing the 3 choices. The "Return Home" button logic was corrected to ensure the main scene is resumed before stopping the mini-game scene, preventing a race condition where the scene context was lost. Also removed duplicate "Expedition Complete" text.
+
 ## [1.36.0] - 2025-12-24
 
 ### Performance
