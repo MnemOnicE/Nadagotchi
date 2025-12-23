@@ -1,5 +1,6 @@
 /**
  * @fileoverview Data definitions for the Expedition system.
+ * // Manual Override: Patch Applied.
  * Contains templates for encounters (Nodes) that can appear during an expedition.
  */
 

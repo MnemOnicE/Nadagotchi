@@ -45,6 +45,7 @@ This phase focuses on building out the primary gameplay loops, giving players cl
     -   [x] Added clickable objects and furniture in the pet's home for organic skill-building.
 -   **[x] Exploration & Foraging System:**
     -   [x] Implemented a system for discovering new locations and finding crafting resources.
+    -   [x] **Expedition Minigame:** Implemented a dedicated procedural exploration minigame with skill checks and encounters.
 -   **[x] Social & Relationship System:**
     -   [x] Pets can now build foundational relationships with other characters.
     -   [x] Replaced the generic 'friend' with a cast of career-focused NPCs (Scout, Artisan, Healer) to create a more interconnected world.

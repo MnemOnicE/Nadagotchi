@@ -13,7 +13,7 @@ import { LogicPuzzleScene } from './LogicPuzzleScene.js';
 import { ScoutMinigameScene } from './ScoutMinigameScene.js';
 import { HealerMinigameScene } from './HealerMinigameScene.js';
 import { ArtisanMinigameScene } from './ArtisanMinigameScene.js';
-import { ExpeditionScene } from './ExpeditionScene.js';
+import { ExpeditionScene } from './ExpeditionScene.js'; // Manual Override: Patch Applied.
 
 /**
  * Phaser Game Configuration.

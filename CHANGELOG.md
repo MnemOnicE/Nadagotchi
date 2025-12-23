@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.34.0] - 2025-12-23
+
+### Added
+- **Expedition Minigame:** Implemented a procedural "Expedition" minigame accessible via the `EXPLORE` action.
+  - **Procedural Generation:** Expeditions are generated dynamically based on the current season and weather, utilizing the new `ExpeditionSystem` and `ExpeditionDefinitions`.
+  - **Interactive Encounters:** Players face choices in various nodes (e.g., "Old Oak", "Frozen Pond") that test their skills (Navigation, Resilience, Logic).
+  - **Rewards:** Successful expeditions yield loot, XP, and stat boosts, while failures carry risks.
+  - **Scene Integration:** Added `ExpeditionScene.js` to handle the visuals and wired it to `MainScene.js` via the `EventKeys.EXPLORE` event.
+  - **Unit Tests:** Added `tests/Expedition.test.js` to verify path generation and choice resolution logic.
+
 ## [1.33.0] - 2025-12-23
 
 ### Changed

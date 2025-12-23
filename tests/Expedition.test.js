@@ -1,3 +1,4 @@
+// Manual Override: Patch Applied.
 const { ExpeditionSystem } = require('../js/systems/ExpeditionSystem.js');
 const { SeededRandom } = require('../js/utils/SeededRandom.js');
 
