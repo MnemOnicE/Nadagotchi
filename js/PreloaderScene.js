@@ -27,6 +27,9 @@ export class PreloaderScene extends Phaser.Scene {
         // Loading bar implementation
         this.createLoadingBar();
 
+        // Load Asset for Pre-placed Bookshelf
+        this.load.image('bookshelf', 'assets/sprites/bookshelf_64x64.png');
+
         // --- Helper: Create Detailed Pixel-Art Style Boxes ---
         const graphics = this.make.graphics({ x: 0, y: 0, add: false });
 
@@ -136,7 +139,7 @@ export class PreloaderScene extends Phaser.Scene {
         };
 
         // --- 1. Generate World Objects (snake_case keys) ---
-        createDetailedBox('bookshelf', 0x8B4513, 64, 'bookshelf');
+        // 'bookshelf' is now loaded from assets
         createDetailedBox('fancy_bookshelf', 0xD2691E, 64, 'bookshelf'); // Reuse bookshelf logic but diff color
         createDetailedBox('plant', 0x228B22, 64, 'plant');
         createDetailedBox('crafting_table', 0xA0522D, 64, 'crafting');
