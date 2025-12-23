@@ -137,8 +137,8 @@ describe('Nadagotchi', () => {
 
             pet.updateDominantArchetype();
 
-            // Nurturer comes before Recluse in the object property order, so it should win the tie.
-            expect(pet.dominantArchetype).toBe('Nurturer');
+            // With randomized tie-breaking, any of the tied candidates can be chosen.
+            expect(['Nurturer', 'Recluse']).toContain(pet.dominantArchetype);
         });
 
         test('should correctly handle a three-way tie for dominant archetype', () => {
@@ -153,8 +153,8 @@ describe('Nadagotchi', () => {
 
             pet.updateDominantArchetype();
 
-            // The first in the list of tied archetypes should be chosen (Adventurer).
-            expect(pet.dominantArchetype).toBe('Adventurer');
+            // With randomized tie-breaking, any of the three can be chosen.
+            expect(['Adventurer', 'Nurturer', 'Mischievous']).toContain(pet.dominantArchetype);
         });
     });
 

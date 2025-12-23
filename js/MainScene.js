@@ -187,8 +187,10 @@ export class MainScene extends Phaser.Scene {
             this.updateDateText();
         }
 
+        // UPDATE properties, DO NOT reassign object
         this.worldState.time = this.worldClock.getCurrentPeriod();
         this.worldState.weather = this.weatherSystem.getCurrentWeather();
+        this.worldState.activeEvent = this.eventManager.getActiveEvent();
         this.worldState.season = this.calendar.season;
 
         // Update Managers
