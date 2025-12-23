@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.36.0] - 2025-12-24
+
+### Performance
+- **Main Loop Optimization:** Refactored `MainScene.update` to reuse the `worldState` object instead of recreating it every frame, reducing garbage collection pressure.
+
+### Changed
+- **Quest Safety:** Refactored `QuestSystem.advanceQuest` to validate rewards before consuming quest items, preventing potential item loss if reward application fails ("Transaction Safety").
+- **Personality Logic:** Updated `Nadagotchi.updateDominantArchetype` to use a random shuffle when breaking ties between archetypes, eliminating the previous alphabetical/index bias.
+
+### DevOps
+- **Dependencies:** Moved `playwright` to `devDependencies` in `package.json` to reduce production bundle size/dependencies.
+
 ## [1.35.0] - 2025-12-23
 
 ### Added

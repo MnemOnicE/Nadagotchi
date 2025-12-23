@@ -801,6 +801,12 @@ export class Nadagotchi {
         // If the current dominant archetype is one of the tied contenders, it remains dominant.
         // Otherwise, we break ties based on relevant skills.
         if (potentialDominantArchetypes.length > 0 && !potentialDominantArchetypes.includes(this.dominantArchetype)) {
+            // Shuffle potentialDominantArchetypes to break ties randomly and avoid index bias
+            for (let i = potentialDominantArchetypes.length - 1; i > 0; i--) {
+                const j = this.rng.range(0, i + 1);
+                [potentialDominantArchetypes[i], potentialDominantArchetypes[j]] = [potentialDominantArchetypes[j], potentialDominantArchetypes[i]];
+            }
+
             let bestCandidate = potentialDominantArchetypes[0];
             let highestSkillScore = -1;
 

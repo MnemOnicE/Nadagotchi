@@ -93,6 +93,16 @@ export class QuestSystem {
         const quest = this.pet.quests[questId];
         const stageDef = this.getStageDefinition(questId);
 
+        // Transaction Safety: Validate rewards before consuming items
+        if (stageDef.rewards && stageDef.rewards.skills) {
+            for (const skill of Object.keys(stageDef.rewards.skills)) {
+                if (this.pet.skills[skill] === undefined) {
+                    console.error(`Quest Transaction Aborted: Invalid reward skill '${skill}' in quest '${questId}'`);
+                    return false;
+                }
+            }
+        }
+
         // Consume Items if configured
         if (stageDef.consumeRequirements && stageDef.requirements && stageDef.requirements.items) {
             for (const [item, qty] of Object.entries(stageDef.requirements.items)) {
