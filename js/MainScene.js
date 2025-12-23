@@ -114,19 +114,27 @@ export class MainScene extends Phaser.Scene {
 
         // --- Interactive Objects ---
         // Initial positions; will be updated in resize
-        this.bookshelf = this.add.sprite(80, 80, 'bookshelf').setInteractive({ useHandCursor: true })
+        // Adjusted initial Y positions to 250 to avoid overlapping with top-left/right UI text
+        this.bookshelf = this.add.sprite(80, 250, 'bookshelf').setInteractive({ useHandCursor: true })
             .on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, EventKeys.INTERACT_BOOKSHELF));
-        this.plant = this.add.sprite(this.scale.width - 80, 80, 'plant').setInteractive({ useHandCursor: true })
+        this.plant = this.add.sprite(this.scale.width - 80, 250, 'plant').setInteractive({ useHandCursor: true })
             .on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, EventKeys.INTERACT_PLANT));
-        this.craftingTable = this.add.sprite(80, this.scale.height - 150, 'crafting_table').setInteractive({ useHandCursor: true })
+
+        // Items anchored to bottom will be positioned in resize() to ensure they respect gameHeight
+        this.craftingTable = this.add.sprite(80, 0, 'crafting_table').setInteractive({ useHandCursor: true })
             .on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, EventKeys.OPEN_CRAFTING_MENU));
 
         // Add NPCs to the scene
-        this.npcScout = this.add.sprite(this.scale.width - 150, this.scale.height - 150, 'npc_scout').setInteractive({ useHandCursor: true })
+        // Anchored to bottom, will be set in resize()
+        this.npcScout = this.add.sprite(this.scale.width - 150, 0, 'npc_scout').setInteractive({ useHandCursor: true })
             .on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, EventKeys.INTERACT_SCOUT, 'Grizzled Scout'));
-        this.npcArtisan = this.add.sprite(this.scale.width / 2 + 100, 80, 'npc_artisan').setInteractive({ useHandCursor: true })
+
+        // Anchored to top/center - Y adjusted to 250
+        this.npcArtisan = this.add.sprite(this.scale.width / 2 + 100, 250, 'npc_artisan').setInteractive({ useHandCursor: true })
             .on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, EventKeys.INTERACT_ARTISAN, 'Master Artisan'));
-        this.npcVillager = this.add.sprite(150, this.scale.height / 2, 'npc_villager').setInteractive({ useHandCursor: true })
+
+        // Anchored to Center - Y adjusted to center of game view in resize()
+        this.npcVillager = this.add.sprite(150, 0, 'npc_villager').setInteractive({ useHandCursor: true })
             .on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, EventKeys.INTERACT_VILLAGER, 'Sickly Villager'));
 
         // --- Post-FX & UI ---
@@ -440,12 +448,14 @@ export class MainScene extends Phaser.Scene {
         }
 
         // Reposition Interactive Objects relative to new gameHeight
-        if (this.craftingTable) this.craftingTable.setPosition(80, gameHeight - 150);
-        if (this.npcScout) this.npcScout.setPosition(width - 150, gameHeight - 150);
+        // Ensure they are visible above the dashboard
+        // Adjusted to -70 to prevent overlap with top items (at Y=250) in the compressed gameHeight
+        if (this.craftingTable) this.craftingTable.setPosition(80, gameHeight - 70);
+        if (this.npcScout) this.npcScout.setPosition(width - 150, gameHeight - 70);
         if (this.npcVillager) this.npcVillager.setPosition(150, gameHeight / 2);
 
         // Update Plant/Bookshelf (pinned to top/corners, mostly fine but check X)
-        if (this.plant) this.plant.setPosition(width - 80, 80);
+        if (this.plant) this.plant.setPosition(width - 80, 250);
 
         // Update Date Text
         this.dateText.setPosition(width - 10, 10);

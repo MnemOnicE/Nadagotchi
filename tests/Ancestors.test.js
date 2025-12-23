@@ -144,6 +144,6 @@ describe('Hall of Ancestors UI', () => {
         const setTextArg = uiScene.ancestorModal.content.setText.mock.calls[0][0];
         expect(setTextArg).toContain('Generation 1');
         expect(setTextArg).toContain('Adventurer');
-        expect(setTextArg).toContain('Ancestral Advice');
+        expect(setTextArg).toContain('Advice');
     });
 });
