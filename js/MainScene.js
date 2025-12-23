@@ -269,6 +269,7 @@ export class MainScene extends Phaser.Scene {
                 break;
             case EventKeys.EXPLORE:
                 if (this.nadagotchi.stats.energy >= Config.ACTIONS.EXPEDITION.ENERGY_COST) {
+                    this.nadagotchi.stats.energy -= Config.ACTIONS.EXPEDITION.ENERGY_COST;
                     this.scene.pause();
                     this.scene.launch('ExpeditionScene', {
                         nadagotchi: this.nadagotchi,

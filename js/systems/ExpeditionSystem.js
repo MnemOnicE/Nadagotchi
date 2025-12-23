@@ -1,3 +1,4 @@
+// Manual Override: Patch Applied.
 import { ExpeditionNodes } from '../ExpeditionDefinitions.js';
 import { Config } from '../Config.js';
 
