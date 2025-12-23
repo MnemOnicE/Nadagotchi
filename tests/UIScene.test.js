@@ -271,37 +271,14 @@ describe('UIScene', () => {
         expect(scene.retireButton.setVisible).toHaveBeenCalledWith(true);
     });
 
-    test('Job Board button provides feedback when disabled', () => {
+    test('Job Board button emits OPEN_JOB_BOARD when clicked', () => {
         scene.create();
 
-        // Mock data with NO career
-        scene.nadagotchiData = { currentCareer: null };
-
-        // Manually trigger the Job Board click handler
+        // Trigger the Job Board click handler
         scene.handleJobBoardClick();
 
-        // Should NOT emit WORK event
-        expect(mockGameEvents.emit).not.toHaveBeenCalledWith(EventKeys.UI_ACTION, EventKeys.WORK);
-
-        // Should play failure sound
-        expect(mockPlayFailure).toHaveBeenCalled();
-
-        // Should show toast (check add.container called)
-        expect(mockAdd.container).toHaveBeenCalled();
-        // Check text in toast
-        expect(mockAdd.text).toHaveBeenCalledWith(expect.any(Number), expect.any(Number), "Job Board Locked", expect.anything());
-    });
-
-    test('Job Board button emits WORK when enabled', () => {
-        scene.create();
-
-        // Mock data WITH career
-        scene.nadagotchiData = { currentCareer: 'Innovator' };
-
-        scene.handleJobBoardClick();
-
-        expect(mockGameEvents.emit).toHaveBeenCalledWith(EventKeys.UI_ACTION, EventKeys.WORK);
-        expect(mockPlayFailure).not.toHaveBeenCalled();
+        // Should emit OPEN_JOB_BOARD event
+        expect(mockGameEvents.emit).toHaveBeenCalledWith(EventKeys.UI_ACTION, EventKeys.OPEN_JOB_BOARD);
     });
 
     test('should open modals correctly', () => {

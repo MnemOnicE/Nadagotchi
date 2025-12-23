@@ -194,7 +194,7 @@ export const Config = {
     // Global Settings Defaults
     SETTINGS: {
         DEFAULT_VOLUME: 0.5,
-        DEFAULT_SPEED: 1.0,
+        DEFAULT_SPEED: 0.5,
         SPEED_MULTIPLIERS: {
             NORMAL: 1.0,
             FAST: 2.0,

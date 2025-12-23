@@ -27,6 +27,7 @@ class Scene {
             setScale: jest.fn().mockReturnThis(),
             setBlendMode: jest.fn().mockReturnThis(),
             setSize: jest.fn().mockReturnThis(),
+            setDepth: jest.fn().mockReturnThis(),
             destroy: jest.fn(),
             clear: jest.fn(),
             context: {

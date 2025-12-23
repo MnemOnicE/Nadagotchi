@@ -495,7 +495,7 @@ export class UIScene extends Phaser.Scene {
         const container = this.add.container(this.cameras.main.width/2, this.cameras.main.height/2);
         this.allModals.push(container);
 
-        const bg = this.add.rectangle(0, 0, 400, 300, 0x000000, 0.9).setStrokeStyle(2, 0xFFFFFF);
+        const bg = this.add.rectangle(0, 0, 400, 300, 0x000000, 0.9).setStrokeStyle(2, 0xFFFFFF).setInteractive();
         const title = this.add.text(0, -100, "SYSTEM GREETER", { fontFamily: 'VT323', fontSize: '32px', color: '#00FF00' }).setOrigin(0.5);
         const text = this.add.text(0, -20, "Welcome to Nadagotchi!\n\nWould you like a quick tour\nof the interface?", {
             fontFamily: 'VT323', fontSize: '24px', color: '#FFFFFF', align: 'center'
@@ -569,7 +569,7 @@ export class UIScene extends Phaser.Scene {
         const w = 500, h = 400;
 
         // Local Coordinates: Center is 0,0
-        const modalBg = this.add.rectangle(0, 0, w, h, 0x1a1a1a, 0.95).setStrokeStyle(2, 0xffffff);
+        const modalBg = this.add.rectangle(0, 0, w, h, 0x1a1a1a, 0.95).setStrokeStyle(2, 0xffffff).setInteractive();
         const modalTitle = this.add.text(0, -h/2 + 30, title, { fontFamily: 'VT323, Arial', fontSize: '36px', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5);
         const modalContent = this.add.text(0, 0, '', { fontSize: '24px', fontFamily: 'VT323, Arial', color: '#fff', wordWrap: { width: w - 40 } }).setOrigin(0.5);
 

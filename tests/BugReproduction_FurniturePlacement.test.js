@@ -31,7 +31,8 @@ const mockAddImage = jest.fn(() => ({
     setBlendMode: jest.fn().mockReturnThis(),
     setVisible: jest.fn().mockReturnThis(),
     setPosition: jest.fn().mockReturnThis(),
-    setSize: jest.fn().mockReturnThis()
+    setSize: jest.fn().mockReturnThis(),
+    setDepth: jest.fn().mockReturnThis()
 }));
 
 // Define Color class first to attach static property

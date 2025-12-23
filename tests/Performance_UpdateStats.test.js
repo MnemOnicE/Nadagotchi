@@ -16,6 +16,7 @@ const mockGameObject = () => {
         setText: jest.fn().mockReturnThis(),
         setBlendMode: jest.fn().mockReturnThis(),
         setScale: jest.fn().mockReturnThis(),
+        setDepth: jest.fn().mockReturnThis(),
         setAngle: jest.fn().mockReturnThis(),
         setFrame: jest.fn().mockReturnThis(),
         clear: jest.fn(),
