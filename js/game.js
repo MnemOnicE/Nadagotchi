@@ -14,6 +14,7 @@ import { ScoutMinigameScene } from './ScoutMinigameScene.js';
 import { HealerMinigameScene } from './HealerMinigameScene.js';
 import { ArtisanMinigameScene } from './ArtisanMinigameScene.js';
 import { ExpeditionScene } from './ExpeditionScene.js'; // Manual Override: Patch Applied.
+import { GhostScene } from './GhostScene.js';
 
 /**
  * Phaser Game Configuration.
@@ -40,7 +41,8 @@ const config = {
         ScoutMinigameScene,
         HealerMinigameScene,
         ArtisanMinigameScene,
-        ExpeditionScene
+        ExpeditionScene,
+        GhostScene
     ]
 };
 

@@ -152,7 +152,7 @@ The Nadagotchi project is an evolving digital life simulation. This roadmap outl
 - [x] **Pet Exchange**: Export/Import pets via text strings (DNA "Mystery Eggs").
 - [x] **Pet Passport**: Visual snapshot system for sharing pets.
 - **Leaderboards**: Hall of Fame integration with online high scores (optional).
-- **Ghost Pets**: Visit the "graveyards" of other players' retired pets.
+- [x] **Ghost Pets**: Visit the "graveyards" of other players' retired pets.
 
 ## Long-Term Vision
 - **Visual Overhaul**: Pixel art animations for all actions.
