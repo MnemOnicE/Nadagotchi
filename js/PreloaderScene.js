@@ -30,6 +30,9 @@ export class PreloaderScene extends Phaser.Scene {
         // Load Asset for Pre-placed Bookshelf
         this.load.image('bookshelf', 'assets/sprites/bookshelf_64x64.png');
 
+        // Load Pet Spritesheet
+        this.load.spritesheet('pet', 'assets/sprites/pet_spritesheet.png', { frameWidth: 16, frameHeight: 16 });
+
         // --- Helper: Create Detailed Pixel-Art Style Boxes ---
         const graphics = this.make.graphics({ x: 0, y: 0, add: false });
 
@@ -183,14 +186,6 @@ export class PreloaderScene extends Phaser.Scene {
         graphics.clear();
         graphics.fillStyle(0xFFFFFF); graphics.fillRect(0, 0, 1, 1);
         graphics.generateTexture('pixel', 1, 1);
-
-        // Pet Spritesheet (64x16) - 4 frames of 16x16
-        graphics.clear();
-        graphics.fillStyle(0xFFFF00); graphics.fillRect(0, 0, 16, 16); // Happy (Yellow)
-        graphics.fillStyle(0xFFFFFF); graphics.fillRect(16, 0, 16, 16); // Neutral (White)
-        graphics.fillStyle(0x0000FF); graphics.fillRect(32, 0, 16, 16); // Sad (Blue)
-        graphics.fillStyle(0xFF0000); graphics.fillRect(48, 0, 16, 16); // Angry (Red)
-        graphics.generateTexture('pet', 64, 16);
 
         graphics.destroy();
     }
