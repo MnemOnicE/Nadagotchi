@@ -156,10 +156,6 @@ export class ExpeditionScene extends Phaser.Scene {
         const bg = this.add.rectangle(0, 0, w, h, 0x2e3b2e).setStrokeStyle(2, 0xFFD700);
         this.contentContainer.add(bg);
 
-        this.add.text(0, -h/2 + 40, "EXPEDITION COMPLETE", {
-            fontFamily: 'VT323', fontSize: '40px', color: '#FFD700'
-        }).setOrigin(0.5).setScrollFactor(0).setDepth(1).addToDisplayList(this.contentContainer); // Helper to add to container? No, just add
-
         const title = this.add.text(0, -h/2 + 40, "EXPEDITION COMPLETE", {
             fontFamily: 'VT323', fontSize: '40px', color: '#FFD700'
         }).setOrigin(0.5);
@@ -188,8 +184,8 @@ export class ExpeditionScene extends Phaser.Scene {
 
         const homeBtn = ButtonFactory.createButton(this, 0, 150, "Return Home", () => {
              this.game.events.emit(EventKeys.SCENE_COMPLETE, { type: 'EXPEDITION' });
-             this.scene.stop();
              this.scene.resume('MainScene');
+             this.scene.stop();
         }, { width: 200, height: 50, color: 0x4CAF50 });
         this.contentContainer.add(homeBtn);
     }

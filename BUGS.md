@@ -111,3 +111,13 @@
 **Line:** N/A
 **Description:** Minigame scenes (Logic Puzzle, Scout, Healer, Artisan) rely on fixed coordinates (e.g., `this.cameras.main.width / 2`) calculated only during the `create()` phase. Since the game now supports dynamic resizing (`Phaser.Scale.RESIZE`), resizing the window *during* an active minigame will cause the UI elements to remain in their original positions, potentially becoming off-center or off-screen.
 **Fix:** Implement a `resize` method in each minigame scene to recalculate and update the positions of all interactive elements when the window size changes.
+
+---
+
+**File:** `js/ExpeditionScene.js`
+**Line Number:** 190-192
+**Description:**
+The player was getting stuck in the Expedition mini-game after completing the 3 choices. The "Return Home" button logic was incorrect. It called `this.scene.stop()` before `this.scene.resume('MainScene')`. In many Phaser configurations, `stop()` immediately halts the scene's execution context, preventing the subsequent `resume()` call from executing, effectively trapping the player in a stopped scene with no active MainScene.
+Duplicate text "EXPEDITION COMPLETE" was also being added to the display list in an irregular way (`addToDisplayList`), causing visual clutter or potential errors.
+**Fix:**
+Swapped the order of operations in the "Return Home" button callback to ensure `this.scene.resume('MainScene')` is called *before* `this.scene.stop()`. Also removed the duplicate text generation code.
