@@ -611,19 +611,33 @@ export class MainScene extends Phaser.Scene {
             this.placementIndicator = this.add.graphics();
             this.placementIndicator.lineStyle(2, 0xff0000, 1);
             this.placementIndicator.strokeRect(0, 0, 64, 64);
-            this.input.on('pointermove', (pointer) => {
-                this.placementIndicator.setPosition(pointer.x - 32, pointer.y - 32);
-            });
-            this.input.on('pointerdown', (pointer) => {
+
+            // Store references to handlers so they can be removed specifically
+            this._placementMoveHandler = (pointer) => {
+                if (this.placementIndicator) {
+                    this.placementIndicator.setPosition(pointer.x - 32, pointer.y - 32);
+                }
+            };
+            this._placementDownHandler = (pointer) => {
                 this.game.events.emit(EventKeys.UI_ACTION, EventKeys.PLACE_FURNITURE, { x: pointer.x, y: pointer.y });
-            });
+            };
+
+            this.input.on('pointermove', this._placementMoveHandler);
+            this.input.on('pointerdown', this._placementDownHandler);
         } else {
             if (this.placementIndicator) {
                 this.placementIndicator.destroy();
                 this.placementIndicator = null;
             }
-            this.input.off('pointermove');
-            this.input.off('pointerdown');
+            // Safely remove only our specific listeners
+            if (this._placementMoveHandler) {
+                this.input.off('pointermove', this._placementMoveHandler);
+                this._placementMoveHandler = null;
+            }
+            if (this._placementDownHandler) {
+                this.input.off('pointerdown', this._placementDownHandler);
+                this._placementDownHandler = null;
+            }
         }
     }
 

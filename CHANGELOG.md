@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.37.0] - 2025-12-24
+
+### Added
+- **Scene Verification:** Added `tests/PreloaderScene.test.js` covering 94% of the `PreloaderScene`.
+  - Verifies asset loading, procedural texture generation (including emojis and pixel art), and scene transition logic.
+  - This eliminates a major blind spot in the automated test suite (previously 0% coverage).
+- **Sound Documentation & Validation:** Overhauled `js/utils/SoundSynthesizer.js`.
+  - Added comprehensive JSDoc for all methods (`playTone`, `generateNoise`, `applyEnvelope`).
+  - Implemented strict input validation for frequency, duration, and volume to prevent audio subsystem crashes or errors.
+  - Enforced Singleton pattern usage in tests to prevent state leakage.
+
+### Fixed
+- **Input Leak:** Fixed a bug in `MainScene.js` where disabling "Placement Mode" removed *all* 'pointermove' listeners instead of just the specific handler.
+  - This prevents potential conflicts with other systems that rely on pointer events.
+- **Test Stability:** Fixed regressions in `Security.test.js` and `ExploitScaling.test.js` caused by improper mocking of the `SoundSynthesizer` singleton.
+
 ## [1.36.1] - 2025-12-24
 
 ### Fixed
