@@ -121,6 +121,18 @@ global.Phaser = {
     }
 };
 
+// Mock SoundSynthesizer Singleton
+jest.mock('../js/utils/SoundSynthesizer.js', () => ({
+    SoundSynthesizer: {
+        instance: {
+            playSuccess: jest.fn(),
+            playFailure: jest.fn(),
+            playClick: jest.fn(),
+            playChime: jest.fn()
+        }
+    }
+}));
+
 let Nadagotchi, PersistenceManager, MainScene, ArtisanMinigameScene, Config;
 
 beforeAll(async () => {
