@@ -775,12 +775,10 @@ export class MainScene extends Phaser.Scene {
         }
 
         if (this.nadagotchi.placeItem(this.selectedFurniture)) {
-            const newFurniture = this._createFurnitureSprite(this.selectedFurniture, x, y);
-            this.placedFurniture.push({ key: this.selectedFurniture, x: x, y: y, sprite: newFurniture });
             const furnitureKey = this.selectedFurniture.toLowerCase().replace(' ', '_');
             const newFurniture = this.createPlacedFurnitureSprite(x, y, furnitureKey, this.selectedFurniture);
 
-            this.placedFurniture.push({ key: this.selectedFurniture, x: x, y: y });
+            this.placedFurniture.push({ key: this.selectedFurniture, x: x, y: y, sprite: newFurniture });
             this.saveFurniture();
 
             SoundSynthesizer.instance.playChime();
@@ -850,12 +848,9 @@ export class MainScene extends Phaser.Scene {
         this.placedFurniture = [];
 
         loadedData.forEach(furniture => {
-            const newFurniture = this._createFurnitureSprite(furniture.key, furniture.x, furniture.y);
-            this.placedFurniture.push({ key: furniture.key, x: furniture.x, y: furniture.y, sprite: newFurniture });
-        this.placedFurniture = this.persistence.loadFurniture() || [];
-        this.placedFurniture.forEach(furniture => {
             const furnitureKey = furniture.key.toLowerCase().replace(' ', '_');
-            this.createPlacedFurnitureSprite(furniture.x, furniture.y, furnitureKey, furniture.key);
+            const sprite = this.createPlacedFurnitureSprite(furniture.x, furniture.y, furnitureKey, furniture.key);
+            this.placedFurniture.push({ key: furniture.key, x: furniture.x, y: furniture.y, sprite: sprite });
         });
     }
 }
