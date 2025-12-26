@@ -715,15 +715,6 @@ export class Nadagotchi {
     }
 
     /**
-     * Returns a placed item back to the inventory.
-     * Delegates to InventorySystem (using addItem).
-     * @param {string} itemName - The name of the item to return.
-     */
-    returnItemToInventory(itemName) {
-        this.inventorySystem.addItem(itemName, 1);
-    }
-
-    /**
      * Attempts to craft a specified item.
      * Delegates to InventorySystem.
      * @param {string} itemName - The name of the item to craft.
