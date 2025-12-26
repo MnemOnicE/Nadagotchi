@@ -1,27 +1,41 @@
+
+import time
 from playwright.sync_api import sync_playwright
+import verify_utils
 
 def run(playwright):
-    browser = playwright.chromium.launch(headless=True)
-    page = browser.new_page(viewport={'width': 800, 'height': 600})
+    page, context, browser = verify_utils.setup_browser(playwright)
 
-    page.on("console", lambda msg: print(f"CONSOLE: {msg.text}"))
+    # Inject save for reliability
+    save_data = verify_utils.get_default_save_data()
+    # Add recipes
+    save_data["recipes"] = ["Fancy Bookshelf"]
+    # Actually recipes are saved separately in "nadagotchi_recipes"
 
-    page.goto("http://localhost:5173")
+    verify_utils.inject_save(page, save_data)
+    page.evaluate("localStorage.setItem('nadagotchi_recipes', '[\"Fancy Bookshelf\"]')")
+
+    page.reload()
+
+    if not verify_utils.start_game(page, saved=True):
+        print("Failed to start game.")
+        browser.close()
+        return
 
     # Wait for game to load
-    page.wait_for_timeout(3000)
+    time.sleep(2)
 
     # Click Action Tab
     print("Clicking Action Tab")
     page.mouse.click(210, 477)
-    page.wait_for_timeout(1000)
+    time.sleep(1)
 
     # Click Craft Button
     print("Clicking Craft Button")
     page.mouse.click(324, 520)
-    page.wait_for_timeout(2000)
+    time.sleep(2)
 
-    page.screenshot(path="/home/jules/verification/verification.png")
+    page.screenshot(path="verification_recipes.png") # Updated path to be local
     browser.close()
 
 with sync_playwright() as playwright:
