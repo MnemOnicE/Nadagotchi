@@ -67,6 +67,16 @@ const { MainScene } = require('../js/MainScene.js');
 // Nadagotchi is used inside MainScene, but we might want to inspect it
 const { Nadagotchi } = require('../js/Nadagotchi.js');
 
+jest.mock('../js/utils/SoundSynthesizer.js', () => ({
+    SoundSynthesizer: {
+        instance: {
+            playChime: jest.fn(),
+            playFailure: jest.fn(),
+            playSuccess: jest.fn()
+        }
+    }
+}));
+
 // Mock PersistenceManager
 jest.mock('../js/PersistenceManager.js', () => ({
     PersistenceManager: class {
@@ -106,8 +116,14 @@ describe('MainScene Furniture Placement Bug', () => {
         scene.game = {
             events: {
                 emit: jest.fn(),
-                on: jest.fn()
+                on: jest.fn(),
+                off: jest.fn()
             }
+        };
+        scene.events = {
+            on: jest.fn(),
+            off: jest.fn(),
+            emit: jest.fn()
         };
         scene.cameras = {
             main: {

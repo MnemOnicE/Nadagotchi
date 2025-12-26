@@ -148,11 +148,18 @@ export class MainScene extends Phaser.Scene {
         this.scene.launch('UIScene');
 
         // --- Timers and Event Listeners ---
-        this.time.addEvent({ delay: 5000, callback: () => this.persistence.savePet(this.nadagotchi), loop: true });
-        this.game.events.on(EventKeys.UI_ACTION, this.handleUIAction, this);
-        this.game.events.on(EventKeys.UPDATE_SETTINGS, this.handleUpdateSettings, this);
-        this.game.events.on(EventKeys.WORK_RESULT, this.handleWorkResult, this);
-        this.game.events.on(EventKeys.SCENE_COMPLETE, this.handleSceneComplete, this);
+        this.autoSaveTimer = this.time.addEvent({ delay: 5000, callback: () => this.persistence.savePet(this.nadagotchi), loop: true });
+
+        // Bind listeners to enable proper removal in shutdown
+        this.handleUIActionBound = this.handleUIAction.bind(this);
+        this.handleUpdateSettingsBound = this.handleUpdateSettings.bind(this);
+        this.handleWorkResultBound = this.handleWorkResult.bind(this);
+        this.handleSceneCompleteBound = this.handleSceneComplete.bind(this);
+
+        this.game.events.on(EventKeys.UI_ACTION, this.handleUIActionBound);
+        this.game.events.on(EventKeys.UPDATE_SETTINGS, this.handleUpdateSettingsBound);
+        this.game.events.on(EventKeys.WORK_RESULT, this.handleWorkResultBound);
+        this.game.events.on(EventKeys.SCENE_COMPLETE, this.handleSceneCompleteBound);
         this.scale.on('resize', this.resize, this);
 
         // --- Final Setup ---
@@ -167,6 +174,29 @@ export class MainScene extends Phaser.Scene {
             this.time.delayedCall(500, () => {
                 this.game.events.emit(EventKeys.START_TUTORIAL);
             });
+        }
+
+        // Listen for shutdown to clean up
+        this.events.on('shutdown', this.shutdown, this);
+    }
+
+    /**
+     * Cleans up event listeners and resources when the scene shuts down.
+     */
+    shutdown() {
+        if (this.game) {
+            this.game.events.off(EventKeys.UI_ACTION, this.handleUIActionBound);
+            this.game.events.off(EventKeys.UPDATE_SETTINGS, this.handleUpdateSettingsBound);
+            this.game.events.off(EventKeys.WORK_RESULT, this.handleWorkResultBound);
+            this.game.events.off(EventKeys.SCENE_COMPLETE, this.handleSceneCompleteBound);
+        }
+        this.scale.off('resize', this.resize, this);
+        if (this.autoSaveTimer) this.autoSaveTimer.remove();
+
+        // Clean up placement listeners if active
+        if (this.isPlacementMode) {
+             if (this._placementMoveHandler) this.input.off('pointermove', this._placementMoveHandler);
+             if (this._placementDownHandler) this.input.off('pointerdown', this._placementDownHandler);
         }
     }
 
@@ -620,6 +650,8 @@ export class MainScene extends Phaser.Scene {
             this.placementIndicator.lineStyle(2, 0xff0000, 1);
             this.placementIndicator.strokeRect(0, 0, 64, 64);
 
+            this.showNotification(`Placing: ${item}. Click item to pick up.`, '#00FFFF');
+
             // Store references to handlers so they can be removed specifically
             this._placementMoveHandler = (pointer) => {
                 if (this.placementIndicator) {
@@ -627,6 +659,12 @@ export class MainScene extends Phaser.Scene {
                 }
             };
             this._placementDownHandler = (pointer) => {
+                // Block if we just handled a sprite click (Pickup)
+                if (this.blockPlacement) {
+                    this.blockPlacement = false;
+                    return;
+                }
+
                 this.game.events.emit(EventKeys.UI_ACTION, EventKeys.PLACE_FURNITURE, { x: pointer.x, y: pointer.y });
             };
 
@@ -730,17 +768,68 @@ export class MainScene extends Phaser.Scene {
         if (!this.isPlacementMode || !this.selectedFurniture) return;
 
         // Prevent placement in the dashboard area (bottom 25%)
-        if (y > this.cameras.main.height) return;
+        if (y > this.cameras.main.height) {
+            this.showNotification("Can't place here!", '#FF0000');
+            SoundSynthesizer.instance.playFailure();
+            return;
+        }
 
         if (this.nadagotchi.placeItem(this.selectedFurniture)) {
             const newFurniture = this._createFurnitureSprite(this.selectedFurniture, x, y);
             this.placedFurniture.push({ key: this.selectedFurniture, x: x, y: y, sprite: newFurniture });
+            const furnitureKey = this.selectedFurniture.toLowerCase().replace(' ', '_');
+            const newFurniture = this.createPlacedFurnitureSprite(x, y, furnitureKey, this.selectedFurniture);
+
+            this.placedFurniture.push({ key: this.selectedFurniture, x: x, y: y });
             this.saveFurniture();
 
+            SoundSynthesizer.instance.playChime();
             this.togglePlacementMode(null);
         } else {
+            // Should not happen if UI filtered correctly, but just in case
             this.togglePlacementMode(null);
         }
+    }
+
+    /**
+     * Creates a sprite for placed furniture with interaction logic (Pickup/Interact).
+     * @param {number} x - X coordinate.
+     * @param {number} y - Y coordinate.
+     * @param {string} textureKey - Texture key.
+     * @param {string} itemName - The inventory item name.
+     * @returns {Phaser.GameObjects.Sprite} The created sprite.
+     */
+    createPlacedFurnitureSprite(x, y, textureKey, itemName) {
+        const sprite = this.add.sprite(x, y, textureKey).setInteractive({ useHandCursor: true });
+
+        sprite.on('pointerdown', (pointer) => {
+            if (this.isPlacementMode) {
+                // SIGNAL TO BLOCK SCENE CLICK
+                this.blockPlacement = true;
+
+                // PICK UP LOGIC
+                sprite.destroy();
+
+                const index = this.placedFurniture.findIndex(f => f.key === itemName && f.x === x && f.y === y);
+                if (index > -1) this.placedFurniture.splice(index, 1);
+                this.saveFurniture();
+
+                if (this.selectedFurniture) {
+                    this.nadagotchi.returnItemToInventory(this.selectedFurniture);
+                }
+
+                this.nadagotchi.returnItemToInventory(itemName);
+
+                this.selectedFurniture = itemName;
+                this.showNotification(`Moving: ${itemName}`, '#00FFFF');
+                SoundSynthesizer.instance.playChime();
+
+            } else {
+                this.game.events.emit(EventKeys.UI_ACTION, `INTERACT_${itemName.toUpperCase().replace(' ', '_')}`);
+            }
+        });
+
+        return sprite;
     }
 
     /**
@@ -763,6 +852,10 @@ export class MainScene extends Phaser.Scene {
         loadedData.forEach(furniture => {
             const newFurniture = this._createFurnitureSprite(furniture.key, furniture.x, furniture.y);
             this.placedFurniture.push({ key: furniture.key, x: furniture.x, y: furniture.y, sprite: newFurniture });
+        this.placedFurniture = this.persistence.loadFurniture() || [];
+        this.placedFurniture.forEach(furniture => {
+            const furnitureKey = furniture.key.toLowerCase().replace(' ', '_');
+            this.createPlacedFurnitureSprite(furniture.x, furniture.y, furnitureKey, furniture.key);
         });
     }
 }
