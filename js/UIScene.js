@@ -706,6 +706,21 @@ export class UIScene extends Phaser.Scene {
             this.decorateButtons.push(placeButton);
             yPos += 35;
         });
+
+        // Add "Move Furniture" Toggle Button
+        // Position it at the bottom of the modal content area
+        const moveBtnY = this.getModalHeight() / 2 - 60;
+
+        // Create the button cleanly every time since we destroy all buttons at start of function
+        const toggleBtn = ButtonFactory.createButton(this, 0, moveBtnY, 'Move Furniture', () => {
+                this.game.events.emit(EventKeys.UI_ACTION, EventKeys.TOGGLE_DECORATION_MODE);
+                this.decorateModal.setVisible(false);
+                this.scene.resume('MainScene');
+        }, { width: 160, height: 40, color: 0x4169E1 }); // Royal Blue
+
+        this.decorateModal.add(toggleBtn);
+        this.decorateButtons.push(toggleBtn);
+
         this.decorateModal.content.setText(text);
         this.decorateModal.setVisible(true);
         this.scene.pause('MainScene');

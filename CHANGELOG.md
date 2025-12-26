@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.38.0] - 2025-12-24
+
+### Added
+- **Housing System:** Implemented a draggable furniture system ("Decoration Mode").
+  - **Decoration Mode:** Players can toggle "Move Furniture" in the "Decorate" menu to enter an edit mode where placed furniture can be dragged and repositioned.
+  - **Visual Feedback:** Added a "Placement Indicator" and cursor changes to signal the active mode.
+  - **Persistence:** Furniture positions are saved and restored correctly, maintaining the player's custom layout.
+  - **Testing:** Added `tests/HousingSystem.test.js` to verify mode switching, drag logic, and persistence.
+
 ## [1.37.0] - 2025-12-24
 
 ### Added

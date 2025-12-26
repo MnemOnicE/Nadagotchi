@@ -9,7 +9,7 @@
 - [x] **Minigames:** Skill-based tasks for each career (Logic Puzzles, Pathfinding, Rhythm, Crafting).
 - [x] **Expeditions:** Procedural exploration minigame with risk/reward choices.
 
-## Phase 2: User Experience & Polish (Current)
+## Phase 2: User Experience & Polish (Completed)
 - [x] **UI Overhaul:** Responsive, mobile-friendly "Physical Shell" interface.
 - [x] **Accessibility:** Keyboard navigation, high-contrast assets, screen reader friendly structure.
 - [x] **Code Quality:** Comprehensive JSDoc coverage, unit tests, and rigorous linting.
@@ -18,8 +18,9 @@
 - [x] **Test Coverage:** Critical path verification (90%+ on Systems) and Scene Logic (Preloader/Minigames).
 - [x] **Sound System:** Procedural SFX engine (SoundSynthesizer) with input validation.
 
-## Phase 3: Meta-Game & Expansion (Upcoming)
-- [ ] **Housing System:** Fully customizable room decoration (dragging furniture, changing wallpapers).
+## Phase 3: Meta-Game & Expansion (In Progress)
+- [x] **Housing System:** Drag-and-drop furniture arrangement ("Decoration Mode").
+- [ ] **Housing System II:** Wallpapers, flooring, and room expansions.
 - [ ] **Social Features:** Asynchronous pet visits via QR codes (extending the "Mystery Egg" system).
 - [ ] **Advanced Genetics:** Epigenetics (gameplay affecting gene expression) and 3-trait hybrids.
 - [ ] **Accessibility Suite:** Colorblind modes, text-to-speech integration for narrative events.
