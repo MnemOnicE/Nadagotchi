@@ -35,8 +35,10 @@ export class MainScene extends Phaser.Scene {
         this.isPlacementMode = false;
         /** @type {?string} The name of the furniture item currently selected for placement. */
         this.selectedFurniture = null;
-        /** @type {Array<{key: string, x: number, y: number}>} List of furniture placed in the world. */
+        /** @type {Array<{key: string, x: number, y: number, sprite?: Phaser.GameObjects.Sprite}>} List of furniture placed in the world. */
         this.placedFurniture = [];
+        /** @type {boolean} Whether the player is currently in decoration (edit/move) mode. */
+        this.isDecorationMode = false;
         /** @type {?string} The career associated with the currently active minigame (for validation). */
         this.activeMinigameCareer = null;
         /** @type {?string} Tracks the current visual mood to optimize animation updates. */
@@ -282,6 +284,9 @@ export class MainScene extends Phaser.Scene {
                 break;
             case EventKeys.DECORATE:
                 this.togglePlacementMode(data);
+                break;
+            case EventKeys.TOGGLE_DECORATION_MODE:
+                this.toggleDecorationMode();
                 break;
             case EventKeys.PLACE_FURNITURE:
                 this.placeFurniture(data.x, data.y);
@@ -638,6 +643,9 @@ export class MainScene extends Phaser.Scene {
         this.selectedFurniture = this.isPlacementMode ? item : null;
 
         if (this.isPlacementMode) {
+            // Ensure decoration mode is OFF when entering new placement mode to avoid conflicts
+            if (this.isDecorationMode) this.toggleDecorationMode();
+
             this.placementIndicator = this.add.graphics();
             this.placementIndicator.lineStyle(2, 0xff0000, 1);
             this.placementIndicator.strokeRect(0, 0, 64, 64);
@@ -680,6 +688,78 @@ export class MainScene extends Phaser.Scene {
     }
 
     /**
+     * Toggles the "Decoration Mode" which allows moving existing furniture.
+     */
+    toggleDecorationMode() {
+        this.isDecorationMode = !this.isDecorationMode;
+
+        if (this.isDecorationMode) {
+            this.showNotification("DECORATION MODE: Drag to Move", '#00FFFF');
+            this.input.setDefaultCursor('move');
+        } else {
+            this.showNotification("Exited Decoration Mode", '#00FFFF');
+            this.input.setDefaultCursor('default');
+            this.saveFurniture(); // Save positions on exit
+        }
+
+        // Update interactivity of all placed furniture
+        this.placedFurniture.forEach(item => {
+            if (item.sprite) {
+                if (this.isDecorationMode) {
+                    item.sprite.setTint(0xDDDDDD);
+                    this.input.setDraggable(item.sprite);
+                } else {
+                    item.sprite.clearTint();
+                    this.input.setDraggable(item.sprite, false);
+                }
+            }
+        });
+    }
+
+    /**
+     * Helper method to create a furniture sprite with common behaviors (interactions, drag logic).
+     * @param {string} key - The item key (e.g., 'Fancy Bookshelf').
+     * @param {number} x - The x-coordinate.
+     * @param {number} y - The y-coordinate.
+     * @returns {Phaser.GameObjects.Sprite} The created sprite.
+     * @private
+     */
+    _createFurnitureSprite(key, x, y) {
+        const furnitureKey = key.toLowerCase().replace(' ', '_');
+        const newFurniture = this.add.sprite(x, y, furnitureKey).setInteractive({ useHandCursor: true });
+
+        // Interaction logic
+        newFurniture.on('pointerdown', () => {
+            if (!this.isDecorationMode) {
+                this.game.events.emit(EventKeys.UI_ACTION, `INTERACT_${key.toUpperCase().replace(' ', '_')}`);
+            }
+        });
+
+        // Drag logic
+        newFurniture.on('drag', (pointer, dragX, dragY) => {
+            if (this.isDecorationMode) {
+                // Bound check
+                const maxY = this.cameras.main.height - 32;
+                newFurniture.x = dragX;
+                newFurniture.y = Math.min(dragY, maxY);
+            }
+        });
+
+        newFurniture.on('dragend', () => {
+            if (this.isDecorationMode) {
+                // Update the stored position in the array
+                const entry = this.placedFurniture.find(f => f.sprite === newFurniture);
+                if (entry) {
+                    entry.x = newFurniture.x;
+                    entry.y = newFurniture.y;
+                }
+            }
+        });
+
+        return newFurniture;
+    }
+
+    /**
      * Places the selected furniture item at the specified coordinates.
      * @param {number} x - The x-coordinate for the furniture.
      * @param {number} y - The y-coordinate for the furniture.
@@ -695,6 +775,8 @@ export class MainScene extends Phaser.Scene {
         }
 
         if (this.nadagotchi.placeItem(this.selectedFurniture)) {
+            const newFurniture = this._createFurnitureSprite(this.selectedFurniture, x, y);
+            this.placedFurniture.push({ key: this.selectedFurniture, x: x, y: y, sprite: newFurniture });
             const furnitureKey = this.selectedFurniture.toLowerCase().replace(' ', '_');
             const newFurniture = this.createPlacedFurnitureSprite(x, y, furnitureKey, this.selectedFurniture);
 
@@ -752,15 +834,24 @@ export class MainScene extends Phaser.Scene {
 
     /**
      * Persists the placed furniture data.
+     * Serializes only the necessary data (key, x, y), stripping sprite references.
      */
     saveFurniture() {
-        this.persistence.saveFurniture(this.placedFurniture);
+        const serializable = this.placedFurniture.map(f => ({ key: f.key, x: f.x, y: f.y }));
+        this.persistence.saveFurniture(serializable);
     }
 
     /**
      * Loads and renders previously placed furniture.
      */
     loadFurniture() {
+        const loadedData = this.persistence.loadFurniture() || [];
+        // Clear array but keep data reference logic clean
+        this.placedFurniture = [];
+
+        loadedData.forEach(furniture => {
+            const newFurniture = this._createFurnitureSprite(furniture.key, furniture.x, furniture.y);
+            this.placedFurniture.push({ key: furniture.key, x: furniture.x, y: furniture.y, sprite: newFurniture });
         this.placedFurniture = this.persistence.loadFurniture() || [];
         this.placedFurniture.forEach(furniture => {
             const furnitureKey = furniture.key.toLowerCase().replace(' ', '_');
