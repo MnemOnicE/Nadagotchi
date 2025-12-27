@@ -36,4 +36,12 @@ describe('Nadagotchi Broken Recipes Bug', () => {
 
         expect(lastEntry.text).not.toBe("I tried to craft 'Logic-Boosting Snack', but I don't know the recipe.");
     });
+
+    it('should be able to craft "Stamina-Up Tea" if materials are present', () => {
+        pet.discoveredRecipes.push("Stamina-Up Tea");
+        pet.craftItem("Stamina-Up Tea");
+
+        const lastEntry = pet.journal[pet.journal.length - 1];
+        expect(lastEntry.text).not.toBe("I tried to craft 'Stamina-Up Tea', but I don't know the recipe.");
+    });
 });
