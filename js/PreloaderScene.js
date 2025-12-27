@@ -28,10 +28,10 @@ export class PreloaderScene extends Phaser.Scene {
         this.createLoadingBar();
 
         // Load Asset for Pre-placed Bookshelf
-        this.load.image('bookshelf', 'assets/sprites/bookshelf_64x64.png');
+        this.load.image('bookshelf', 'public/assets/sprites/bookshelf_64x64.png');
 
         // Load Pet Spritesheet
-        this.load.spritesheet('pet', 'assets/sprites/pet_spritesheet.png', { frameWidth: 16, frameHeight: 16 });
+        this.load.spritesheet('pet', 'public/assets/sprites/pet_spritesheet.png', { frameWidth: 16, frameHeight: 16 });
 
         // --- Helper: Create Detailed Pixel-Art Style Boxes ---
         const graphics = this.make.graphics({ x: 0, y: 0, add: false });
