@@ -35,6 +35,8 @@ const mockGameObject = () => {
         strokeRect: jest.fn().mockReturnThis(),
         lineStyle: jest.fn().mockReturnThis(),
         refresh: jest.fn().mockReturnThis(),
+        setTint: jest.fn().mockReturnThis(),
+        clearTint: jest.fn().mockReturnThis(),
         context: {
              createLinearGradient: jest.fn(() => ({ addColorStop: jest.fn() })),
              createRadialGradient: jest.fn(() => ({ addColorStop: jest.fn() })),
@@ -49,7 +51,18 @@ const mockGameObject = () => {
 
 global.Phaser = {
     Scene: class Scene {
-        constructor(config) { this.config = config; }
+        constructor(config) {
+            this.config = config;
+            // Ensure this.events exists for all Scenes
+            this.events = {
+                on: jest.fn(),
+                off: jest.fn(),
+                emit: jest.fn()
+            };
+            this.plugins = {
+                get: jest.fn()
+            };
+        }
     },
     GameObjects: {
         Sprite: class Sprite { constructor() { Object.assign(this, mockGameObject()); } },
@@ -120,7 +133,8 @@ describe('MainScene Coverage', () => {
              gainCareerXP: jest.fn().mockReturnValue(true),
              questSystem: {
                  generateDailyQuest: jest.fn()
-             }
+             },
+             returnItemToInventory: jest.fn()
         };
         Nadagotchi.mockImplementation(() => mockNadagotchi);
 
@@ -165,7 +179,8 @@ describe('MainScene Coverage', () => {
 
         mockGameEvents = {
             on: jest.fn(),
-            emit: jest.fn()
+            emit: jest.fn(),
+            off: jest.fn()
         };
 
         scene = new MainScene();
@@ -182,7 +197,8 @@ describe('MainScene Coverage', () => {
         scene.scale = {
             width: 800,
             height: 600,
-            on: jest.fn()
+            on: jest.fn(),
+            off: jest.fn()
         };
         scene.textures = {
             get: jest.fn().mockReturnValue({
@@ -204,10 +220,23 @@ describe('MainScene Coverage', () => {
             addEvent: jest.fn(),
             delayedCall: jest.fn()
         };
-        scene.input = { on: jest.fn(), off: jest.fn() };
+        scene.input = {
+            on: jest.fn(),
+            off: jest.fn(),
+            setDraggable: jest.fn(),
+            setDefaultCursor: jest.fn()
+        };
         scene.tweens = {
             add: jest.fn(),
             killTweensOf: jest.fn()
+        };
+
+        // Important: Attach the mock events object to the scene instance
+        // This simulates the behavior of the real Phaser.Scene which has this.events
+        scene.events = {
+            on: jest.fn(),
+            off: jest.fn(),
+            emit: jest.fn()
         };
     });
 
