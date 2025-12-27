@@ -118,7 +118,7 @@ describe('ExpeditionScene', () => {
         const stopOrder = scene.scene.stop.mock.invocationCallOrder[0];
         const resumeOrder = scene.scene.resume.mock.invocationCallOrder[0];
 
-        // This expectation asserts the CORRECT behavior (fix not yet applied)
+        // This expectation asserts the CORRECT behavior (fix verified)
         // So this test SHOULD FAIL if the code is buggy.
         expect(resumeOrder).toBeLessThan(stopOrder);
     });
