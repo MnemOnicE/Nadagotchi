@@ -12,8 +12,19 @@
 </head>
 <body>
     <div id="game-container"></div>
-    <script type="module" src="/js/game.js"></script>
+    <script type="module" src="./js/game.js"></script>
     <script>
+        // 2. Service Worker "Killer" - Run this to clean up your development environment
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    console.log('Unregistering found SW:', registration);
+                    registration.unregister();
+                }
+            });
+        }
+
+        /* // ORIGINAL SERVICE WORKER CODE (Commented out for Dev)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./service-worker.js').then(registration => {
@@ -23,6 +34,7 @@
                 });
             });
         }
+        */
     </script>
 </body>
 </html>
