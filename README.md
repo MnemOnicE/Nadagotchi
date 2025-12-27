@@ -1,5 +1,8 @@
 # Nadagotchi
 
+[![Deploy](https://github.com/MnemOnicE/Nadagotchi/actions/workflows/deploy.yml/badge.svg)](https://github.com/MnemOnicE/Nadagotchi/actions/workflows/deploy.yml) ![License](https://img.shields.io/badge/license-ISC-blue?style=flat-square) ![Version](https://img.shields.io/badge/version-1.0.0-blue?style=flat-square)
+![Phaser](https://img.shields.io/badge/Phaser-3.55.2-brightgreen?style=flat-square) ![Vite](https://img.shields.io/badge/Vite-6.2.0-646CFF?style=flat-square&logo=vite&logoColor=white) ![Jest](https://img.shields.io/badge/Jest-30.2.0-C21325?style=flat-square&logo=jest&logoColor=white)
+
 **A complex, reactive virtual pet simulation built with Phaser 3.**
 
 ## High-Level Purpose
