@@ -3,26 +3,40 @@
 
 // 1. Mock Phaser Global
 const mockGameObject = () => {
-    return {
-        on: jest.fn().mockReturnThis(),
-        emit: jest.fn(),
+    const listeners = {};
+    const obj = {
+        on: jest.fn((event, fn) => {
+            listeners[event] = fn;
+            return obj;
+        }),
+        emit: (event, ...args) => {
+            if (listeners[event]) listeners[event](...args);
+        },
         setInteractive: jest.fn().mockReturnThis(),
+        disableInteractive: jest.fn().mockReturnThis(),
         setVisible: jest.fn().mockReturnThis(),
         setOrigin: jest.fn().mockReturnThis(),
+        setBackgroundColor: jest.fn().mockReturnThis(),
         destroy: jest.fn(),
         setSize: jest.fn().mockReturnThis(),
         setAlpha: jest.fn().mockReturnThis(),
         setPosition: jest.fn().mockReturnThis(),
+        setScrollFactor: jest.fn().mockReturnThis(),
+        setDepth: jest.fn().mockReturnThis(),
         setText: jest.fn().mockReturnThis(),
+        setStrokeStyle: jest.fn().mockReturnThis(),
         setBlendMode: jest.fn().mockReturnThis(),
         setScale: jest.fn().mockReturnThis(),
-        setDepth: jest.fn().mockReturnThis(),
         setAngle: jest.fn().mockReturnThis(),
         setFrame: jest.fn().mockReturnThis(),
         clear: jest.fn(),
         fillStyle: jest.fn().mockReturnThis(),
         fillRect: jest.fn().mockReturnThis(),
+        strokeRect: jest.fn().mockReturnThis(),
+        lineStyle: jest.fn().mockReturnThis(),
         refresh: jest.fn().mockReturnThis(),
+        setTint: jest.fn().mockReturnThis(),
+        clearTint: jest.fn().mockReturnThis(),
         context: {
              createLinearGradient: jest.fn(() => ({ addColorStop: jest.fn() })),
              createRadialGradient: jest.fn(() => ({ addColorStop: jest.fn() })),
@@ -32,11 +46,23 @@ const mockGameObject = () => {
         width: 800,
         height: 600
     };
+    return obj;
 };
 
 global.Phaser = {
     Scene: class Scene {
-        constructor(config) { this.config = config; }
+        constructor(config) {
+            this.config = config;
+            // Ensure this.events exists for all Scenes
+            this.events = {
+                on: jest.fn(),
+                off: jest.fn(),
+                emit: jest.fn()
+            };
+            this.plugins = {
+                get: jest.fn()
+            };
+        }
     },
     GameObjects: {
         Sprite: class Sprite { constructor() { Object.assign(this, mockGameObject()); } },
@@ -103,6 +129,7 @@ describe('Performance: Update Stats Throttling', () => {
             savePet: jest.fn(),
             loadCalendar: jest.fn(),
             loadFurniture: jest.fn().mockReturnValue([]),
+            saveFurniture: jest.fn(),
             loadSettings: jest.fn().mockReturnValue({}),
             loadAchievements: jest.fn().mockReturnValue({ unlocked: [], progress: {} })
         }));
@@ -152,7 +179,8 @@ describe('Performance: Update Stats Throttling', () => {
         scene.scale = {
             width: 800,
             height: 600,
-            on: jest.fn()
+            on: jest.fn(),
+            off: jest.fn()
         };
         scene.textures = {
             get: jest.fn().mockReturnValue({
@@ -172,6 +200,17 @@ describe('Performance: Update Stats Throttling', () => {
         scene.tweens = {
             add: jest.fn(),
             killTweensOf: jest.fn()
+        };
+        scene.input = {
+            on: jest.fn(),
+            off: jest.fn(),
+            setDraggable: jest.fn(),
+            setDefaultCursor: jest.fn()
+        };
+        scene.events = {
+            on: jest.fn(),
+            off: jest.fn(),
+            emit: jest.fn()
         };
     });
 

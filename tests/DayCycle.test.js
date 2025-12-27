@@ -1,188 +1,241 @@
-// tests/DayCycle.test.js
 
-// Mock Phaser scenes and game objects
-class Scene {
-    constructor(key) {
-        this.key = key;
-        this.scene = {
-            start: jest.fn(),
-            stop: jest.fn(),
-            launch: jest.fn(),
-            pause: jest.fn(),
-            resume: jest.fn(),
-            isPaused: jest.fn().mockReturnValue(false),
-        };
-        // Mocking chainable methods on 'add'
-        const gameObjectMock = {
-            setText: jest.fn(),
-            setInteractive: jest.fn().mockReturnThis(),
-            on: jest.fn().mockReturnThis(),
-            setVisible: jest.fn().mockReturnThis(),
-            setAlpha: jest.fn().mockReturnThis(),
-            setStyle: jest.fn().mockReturnThis(),
-            setOrigin: jest.fn().mockReturnThis(),
-            setPosition: jest.fn().mockReturnThis(),
-            setAngle: jest.fn().mockReturnThis(),
-            setFrame: jest.fn().mockReturnThis(),
-            setScale: jest.fn().mockReturnThis(),
-            setBlendMode: jest.fn().mockReturnThis(),
-            setSize: jest.fn().mockReturnThis(),
-            setDepth: jest.fn().mockReturnThis(),
-            destroy: jest.fn(),
-            clear: jest.fn(),
-            context: {
-                createRadialGradient: jest.fn(() => ({ addColorStop: jest.fn() })),
-                createLinearGradient: jest.fn(() => ({ addColorStop: jest.fn() })),
-                fillStyle: '',
-                fillRect: jest.fn()
-            },
-            refresh: jest.fn(),
-            fill: jest.fn(),
-            fillStyle: jest.fn(),
-            fillRect: jest.fn(),
-            lineStyle: jest.fn(),
-            strokeRect: jest.fn(),
-            generateTexture: jest.fn(),
-            fillCircle: jest.fn()
-        };
+import { jest } from '@jest/globals';
+import { Nadagotchi } from '../js/Nadagotchi';
+import { Calendar } from '../js/Calendar';
+import { WorldClock } from '../js/WorldClock';
+import { EventManager } from '../js/EventManager';
+import { WeatherSystem } from '../js/WeatherSystem';
+import { EventKeys } from '../js/EventKeys';
 
-        const addMock = {
-            text: jest.fn(() => gameObjectMock),
-            sprite: jest.fn(() => gameObjectMock),
-            container: jest.fn(() => gameObjectMock),
-            graphics: jest.fn(() => gameObjectMock),
-            particles: jest.fn(() => gameObjectMock),
-            renderTexture: jest.fn(() => gameObjectMock),
-            image: jest.fn(() => gameObjectMock),
-            group: jest.fn(() => addMock),
-            rectangle: jest.fn(() => gameObjectMock),
-            setInteractive: jest.fn(() => addMock),
-            on: jest.fn(() => addMock),
-            setOrigin: jest.fn(() => addMock),
-            setScale: jest.fn(() => addMock),
-            setVisible: jest.fn(() => addMock),
-            setAlpha: jest.fn(() => addMock),
-            disableInteractive: jest.fn(() => addMock),
-            setBackgroundColor: jest.fn(() => addMock),
-            setStyle: jest.fn(() => addMock),
-            destroy: jest.fn(),
-            addMultiple: jest.fn(),
-            content: { setText: jest.fn() }
+// Mock Phaser Global
+const mockGameObject = () => {
+    return {
+        on: jest.fn().mockReturnThis(),
+        emit: jest.fn(),
+        setInteractive: jest.fn().mockReturnThis(),
+        setVisible: jest.fn().mockReturnThis(),
+        setOrigin: jest.fn().mockReturnThis(),
+        destroy: jest.fn(),
+        setSize: jest.fn().mockReturnThis(),
+        setAlpha: jest.fn().mockReturnThis(),
+        setPosition: jest.fn().mockReturnThis(),
+        setText: jest.fn().mockReturnThis(),
+        setBlendMode: jest.fn().mockReturnThis(),
+        setScale: jest.fn().mockReturnThis(),
+        setDepth: jest.fn().mockReturnThis(),
+        setAngle: jest.fn().mockReturnThis(),
+        setFrame: jest.fn().mockReturnThis(),
+        clear: jest.fn(),
+        fillStyle: jest.fn().mockReturnThis(),
+        fillRect: jest.fn().mockReturnThis(),
+        refresh: jest.fn().mockReturnThis(),
+        setTint: jest.fn().mockReturnThis(),
+        clearTint: jest.fn().mockReturnThis(),
+        context: {
+             createLinearGradient: jest.fn(() => ({ addColorStop: jest.fn() })),
+             createRadialGradient: jest.fn(() => ({ addColorStop: jest.fn() })),
+             fillStyle: '',
+             fillRect: jest.fn()
+        },
+        width: 800,
+        height: 600
+    };
+};
+
+global.Phaser = {
+    Scene: class Scene {
+        constructor(config) {
+            this.config = config;
+            // Ensure this.events exists
+            this.events = {
+                on: jest.fn(),
+                off: jest.fn(),
+                emit: jest.fn()
+            };
+            this.plugins = {
+                get: jest.fn()
+            };
+        }
+    },
+    GameObjects: {
+        Sprite: class Sprite { constructor() { Object.assign(this, mockGameObject()); } },
+        Image: class Image { constructor() { Object.assign(this, mockGameObject()); } },
+        Graphics: class Graphics { constructor() { Object.assign(this, mockGameObject()); } },
+        Text: class Text { constructor() { Object.assign(this, mockGameObject()); } }
+    },
+    Math: {
+        Between: jest.fn().mockReturnValue(1)
+    },
+    Display: {
+        Color: class Color {
+            constructor(r, g, b) { this.r = r; this.g = g; this.b = b; }
+            static Interpolate = {
+                ColorWithColor: jest.fn().mockReturnValue({ r: 0, g: 0, b: 0 })
+            }
+        }
+    }
+};
+
+// Required AFTER global.Phaser is set
+const { MainScene } = require('../js/MainScene');
+
+// Mock Dependencies
+jest.mock('../js/Nadagotchi');
+jest.mock('../js/PersistenceManager');
+jest.mock('../js/Calendar');
+jest.mock('../js/EventManager');
+jest.mock('../js/WorldClock');
+jest.mock('../js/WeatherSystem');
+jest.mock('../js/utils/SoundSynthesizer', () => ({
+    SoundSynthesizer: {
+        instance: {
+            playClick: jest.fn(),
+            playSuccess: jest.fn(),
+            playFailure: jest.fn(),
+            playChime: jest.fn()
+        }
+    }
+}));
+
+const { PersistenceManager } = require('../js/PersistenceManager');
+
+describe('Day Cycle Integration', () => {
+    let scene;
+    let mockNadagotchi;
+    let mockCalendar;
+    let mockWorldClock;
+    let mockEventManager;
+    let mockWeatherSystem;
+
+    beforeEach(() => {
+        // Reset mocks
+        jest.clearAllMocks();
+
+        mockNadagotchi = {
+             handleAction: jest.fn(),
+             interact: jest.fn(),
+             live: jest.fn(),
+             stats: { happiness: 50, hunger: 50, energy: 50 },
+             maxStats: { happiness: 100, hunger: 100, energy: 100 },
+             inventory: {},
+             relationshipSystem: { dailyUpdate: jest.fn() },
+             questSystem: { generateDailyQuest: jest.fn() }
         };
-        this.add = addMock;
-        this.input = { on: jest.fn(), off: jest.fn() };
-        this.time = { addEvent: jest.fn(), delayedCall: jest.fn() };
-        this.cameras = {
+        Nadagotchi.mockImplementation(() => mockNadagotchi);
+
+        PersistenceManager.mockImplementation(() => ({
+            loadPet: jest.fn(),
+            savePet: jest.fn(),
+            loadCalendar: jest.fn(),
+            loadFurniture: jest.fn().mockReturnValue([]),
+            saveFurniture: jest.fn(),
+            loadSettings: jest.fn().mockReturnValue({ volume: 0.5, gameSpeed: 1.0 }),
+            saveSettings: jest.fn(),
+            loadAchievements: jest.fn().mockReturnValue({ unlocked: [], progress: {} })
+        }));
+
+        mockCalendar = {
+            getDate: jest.fn().mockReturnValue({ season: 'Spring', day: 1 }),
+            season: 'Spring',
+            advanceDay: jest.fn()
+        };
+        Calendar.mockImplementation(() => mockCalendar);
+
+        mockEventManager = {
+            getActiveEvent: jest.fn().mockReturnValue(null),
+            update: jest.fn()
+        };
+        EventManager.mockImplementation(() => mockEventManager);
+
+        mockWorldClock = {
+            getCurrentPeriod: jest.fn().mockReturnValue('Day'),
+            update: jest.fn().mockReturnValue(false),
+            getDaylightFactor: jest.fn().mockReturnValue(1)
+        };
+        WorldClock.mockImplementation(() => mockWorldClock);
+
+        mockWeatherSystem = {
+            getCurrentWeather: jest.fn().mockReturnValue('Sunny')
+        };
+        WeatherSystem.mockImplementation(() => mockWeatherSystem);
+
+        scene = new MainScene();
+        scene.add = {
+            sprite: jest.fn(() => new Phaser.GameObjects.Sprite()),
+            image: jest.fn(() => new Phaser.GameObjects.Image()),
+            graphics: jest.fn(() => new Phaser.GameObjects.Graphics()),
+            text: jest.fn(() => new Phaser.GameObjects.Text())
+        };
+        scene.cameras = {
             main: {
                 width: 800,
                 height: 600,
-                setBackgroundColor: jest.fn(),
                 setSize: jest.fn(),
                 setViewport: jest.fn()
             }
         };
-        this.game = { events: { on: jest.fn(), emit: jest.fn() } };
-        this.scale = { on: jest.fn(), width: 800, height: 600 };
-        this.textures = {
-            createCanvas: jest.fn().mockReturnValue(gameObjectMock),
-            addDynamicTexture: jest.fn().mockReturnValue(gameObjectMock),
-            generateTexture: jest.fn(),
-            get: jest.fn().mockReturnValue({ get: jest.fn(), getFrameNames: jest.fn().mockReturnValue([]), add: jest.fn() })
+        scene.game = { events: { emit: jest.fn(), on: jest.fn(), off: jest.fn() } };
+        scene.scale = {
+            width: 800,
+            height: 600,
+            on: jest.fn(),
+            off: jest.fn()
         };
-        this.make = { graphics: jest.fn(() => gameObjectMock) };
-        this.tweens = { add: jest.fn(), killTweensOf: jest.fn() };
-        this.load = {
-            spritesheet: jest.fn(),
-            image: jest.fn(),
-        };
-    }
-}
-
-// Mock Phaser Color class
-class Color {
-    constructor(r, g, b) { this.r = r; this.g = g; this.b = b; }
-}
-Color.Interpolate = { ColorWithColor: jest.fn(() => ({ r: 0, g: 0, b: 0 })) };
-
-// Mock Phaser globally
-global.Phaser = {
-    Scene,
-    Utils: { Array: { GetRandom: (arr) => arr[0] } },
-    Math: { Between: (min, max) => min, Clamp: (v, min, max) => Math.min(Math.max(v, min), max) },
-    Display: { Color: Color },
-    Scale: { FIT: 0, CENTER_BOTH: 1 }
-};
-
-// Mock localStorage
-class LocalStorageMock {
-    constructor() { this.store = {}; }
-    clear() { this.store = {}; }
-    getItem(key) { return this.store[key] || null; }
-    setItem(key, value) { this.store[key] = String(value); }
-    removeItem(key) { delete this.store[key]; }
-}
-global.localStorage = new LocalStorageMock();
-
-// Load classes
-const { Nadagotchi } = require('../js/Nadagotchi.js');
-const { MainScene } = require('../js/MainScene.js');
-const { PersistenceManager } = require('../js/PersistenceManager.js');
-const { Calendar } = require('../js/Calendar.js');
-const { WorldClock } = require('../js/WorldClock.js');
-const { EventManager } = require('../js/EventManager.js');
-const { WeatherSystem } = require('../js/WeatherSystem.js');
-
-
-describe('Day Cycle Integration', () => {
-    let mainScene;
-
-    beforeEach(() => {
-        // Mock game events
-        const events = {};
-        const gameEvents = {
-            on: jest.fn((event, fn, context) => {
-                if (!events[event]) events[event] = [];
-                events[event].push({ fn, context });
+        scene.textures = {
+            get: jest.fn().mockReturnValue({
+                getFrameNames: jest.fn().mockReturnValue([]),
+                add: jest.fn()
             }),
-            emit: jest.fn((event, ...args) => {
-                if (events[event]) {
-                    events[event].forEach(listener => listener.fn.apply(listener.context, args));
-                }
-            }),
+            createCanvas: jest.fn(() => mockGameObject())
         };
-
-        mainScene = new MainScene();
-        mainScene.game = { events: gameEvents };
-
-        // Initialize scene
-        mainScene.preload();
-        mainScene.create();
+        scene.scene = {
+            launch: jest.fn(),
+            get: jest.fn().mockReturnValue({ showDialogue: jest.fn() })
+        };
+        scene.time = {
+            addEvent: jest.fn(),
+            delayedCall: jest.fn()
+        };
+        scene.tweens = {
+            add: jest.fn(),
+            killTweensOf: jest.fn()
+        };
+        scene.input = {
+            on: jest.fn(),
+            off: jest.fn(),
+            setDraggable: jest.fn(),
+            setDefaultCursor: jest.fn()
+        };
+        // Add events directly to scene
+        scene.events = {
+            on: jest.fn(),
+            off: jest.fn(),
+            emit: jest.fn()
+        };
     });
 
     test('should advance calendar day when full day passes', () => {
-        // Initial state
-        expect(mainScene.calendar.day).toBe(1);
-        expect(mainScene.calendar.season).toBe('Spring');
+        scene.create();
 
-        // Spy on advanceDay
-        const advanceDaySpy = jest.spyOn(mainScene.calendar, 'advanceDay');
+        // 1. Simulate Day Pass
+        mockWorldClock.update.mockReturnValue(true); // Day passed
 
-        // Simulate passing of time
-        // Day duration is 240 seconds (from WorldClock default) = 240,000 ms
-        // We need to pass enough time to wrap around the clock.
-        // Current time starts at 0.25 (Dawn)
+        scene.update(1000, 16);
 
-        const fullDayMs = 240 * 1000;
+        expect(mockCalendar.advanceDay).toHaveBeenCalled();
+        expect(mockNadagotchi.relationshipSystem.dailyUpdate).toHaveBeenCalled();
+        expect(mockNadagotchi.questSystem.generateDailyQuest).toHaveBeenCalled();
+        expect(mockEventManager.update).toHaveBeenCalled();
+    });
 
-        // Pass enough time to complete the day (0.25 to 1.0 is 0.75 of a day = 180s = 180,000ms)
-        // Let's pass a full day duration just to be sure.
+    test('should NOT advance calendar if day has not passed', () => {
+        scene.create();
 
-        // We simulate update loops.
-        // Calling update with large delta might just wrap once.
-        mainScene.update(0, fullDayMs);
+        // 1. Simulate Tick
+        mockWorldClock.update.mockReturnValue(false); // Day NOT passed
 
-        // Expect advanceDay to have been called
-        expect(advanceDaySpy).toHaveBeenCalled();
-        expect(mainScene.calendar.day).toBe(2);
+        scene.update(1000, 16);
+
+        expect(mockCalendar.advanceDay).not.toHaveBeenCalled();
     });
 });

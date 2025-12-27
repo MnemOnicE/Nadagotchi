@@ -1,5 +1,6 @@
 
-// tests/PerformanceRepro.test.js
+import { jest } from '@jest/globals';
+import { Nadagotchi } from '../js/Nadagotchi';
 
 // 1. Mock Phaser Global
 const mockGameObject = () => {
@@ -35,6 +36,8 @@ const mockGameObject = () => {
         strokeRect: jest.fn().mockReturnThis(),
         lineStyle: jest.fn().mockReturnThis(),
         refresh: jest.fn().mockReturnThis(),
+        setTint: jest.fn().mockReturnThis(),
+        clearTint: jest.fn().mockReturnThis(),
         context: {
              createLinearGradient: jest.fn(() => ({ addColorStop: jest.fn() })),
              createRadialGradient: jest.fn(() => ({ addColorStop: jest.fn() })),
@@ -49,7 +52,18 @@ const mockGameObject = () => {
 
 global.Phaser = {
     Scene: class Scene {
-        constructor(config) { this.config = config; }
+        constructor(config) {
+            this.config = config;
+            // Ensure this.events exists
+            this.events = {
+                on: jest.fn(),
+                off: jest.fn(),
+                emit: jest.fn()
+            };
+            this.plugins = {
+                get: jest.fn()
+            };
+        }
     },
     GameObjects: {
         Sprite: class Sprite { constructor() { Object.assign(this, mockGameObject()); } },
@@ -89,7 +103,6 @@ jest.mock('../js/utils/SoundSynthesizer', () => ({
 }));
 
 const { MainScene } = require('../js/MainScene');
-const { Nadagotchi } = require('../js/Nadagotchi');
 const { PersistenceManager } = require('../js/PersistenceManager');
 const { Calendar } = require('../js/Calendar');
 const { EventManager } = require('../js/EventManager');
@@ -99,18 +112,22 @@ const { EventKeys } = require('../js/EventKeys');
 
 describe('Performance Repro: Event Emission', () => {
     let scene;
-    let mockNadagotchi;
-    let mockAdd;
     let mockGameEvents;
 
     beforeEach(() => {
-        mockNadagotchi = {
+        Nadagotchi.mockImplementation(() => ({
+             handleAction: jest.fn(),
+             interact: jest.fn().mockReturnValue("Hello!"),
              live: jest.fn(),
+             addJournalEntry: jest.fn(),
              stats: { happiness: 50, hunger: 50, energy: 50 },
              maxStats: { happiness: 100, hunger: 100, energy: 100 },
-             mood: 'neutral'
-        };
-        Nadagotchi.mockImplementation(() => mockNadagotchi);
+             skills: { logic: 10 },
+             currentCareer: 'Innovator',
+             inventory: {},
+             mood: 'happy',
+             dominantArchetype: 'Adventurer'
+        }));
 
         PersistenceManager.mockImplementation(() => ({
             loadPet: jest.fn(),
@@ -144,20 +161,19 @@ describe('Performance Repro: Event Emission', () => {
             getCurrentWeather: jest.fn().mockReturnValue('Sunny')
         }));
 
-        mockAdd = {
+        mockGameEvents = {
+            on: jest.fn(),
+            emit: jest.fn(),
+            off: jest.fn()
+        };
+
+        scene = new MainScene();
+        scene.add = {
             sprite: jest.fn(() => new Phaser.GameObjects.Sprite()),
             image: jest.fn(() => new Phaser.GameObjects.Image()),
             graphics: jest.fn(() => new Phaser.GameObjects.Graphics()),
             text: jest.fn(() => new Phaser.GameObjects.Text())
         };
-
-        mockGameEvents = {
-            on: jest.fn(),
-            emit: jest.fn()
-        };
-
-        scene = new MainScene();
-        scene.add = mockAdd;
         scene.cameras = {
             main: {
                 width: 800,
@@ -170,7 +186,8 @@ describe('Performance Repro: Event Emission', () => {
         scene.scale = {
             width: 800,
             height: 600,
-            on: jest.fn()
+            on: jest.fn(),
+            off: jest.fn()
         };
         scene.textures = {
             get: jest.fn().mockReturnValue({
@@ -184,38 +201,49 @@ describe('Performance Repro: Event Emission', () => {
             stop: jest.fn(),
             start: jest.fn(),
             pause: jest.fn(),
-            get: jest.fn()
+            get: jest.fn().mockReturnValue({ // Mocking scene.get('UIScene')
+                 showDialogue: jest.fn()
+            })
         };
         scene.time = {
             addEvent: jest.fn(),
             delayedCall: jest.fn()
         };
-        scene.input = { on: jest.fn(), off: jest.fn() };
+        scene.input = {
+            on: jest.fn(),
+            off: jest.fn(),
+            setDraggable: jest.fn(),
+            setDefaultCursor: jest.fn()
+        };
         scene.tweens = {
             add: jest.fn(),
             killTweensOf: jest.fn()
+        };
+        scene.events = {
+            on: jest.fn(),
+            off: jest.fn(),
+            emit: jest.fn()
         };
     });
 
     test('should throttle UPDATE_STATS emissions (Optimized)', () => {
         scene.create();
 
-        // Frame 1: Time 1000. Should Emit (1000 - 0 > 100).
-        scene.update(1000, 16);
+        // 1. Initial Update (Time: 0) -> Should Emit
+        scene.update(0, 16);
+        expect(mockGameEvents.emit).toHaveBeenCalledWith(EventKeys.UPDATE_STATS, expect.anything());
+        mockGameEvents.emit.mockClear();
 
-        // Frame 2: Time 1016. Should NOT Emit (1016 - 1000 < 100).
-        scene.update(1016, 16);
+        // 2. Fast Update (Time: 16ms) -> Should NOT Emit (Throttled)
+        scene.update(16, 16);
+        expect(mockGameEvents.emit).not.toHaveBeenCalled();
 
-        // Frame 3: Time 1032. Should NOT Emit (1032 - 1000 < 100).
-        scene.update(1032, 16);
+        // 3. Fast Update (Time: 50ms) -> Should NOT Emit
+        scene.update(50, 16);
+        expect(mockGameEvents.emit).not.toHaveBeenCalled();
 
-        let updateStatsCalls = mockGameEvents.emit.mock.calls.filter(call => call[0] === EventKeys.UPDATE_STATS);
-        expect(updateStatsCalls.length).toBe(1);
-
-        // Frame 4: Time 1101. Should Emit (1101 - 1000 > 100).
-        scene.update(1101, 16);
-
-        updateStatsCalls = mockGameEvents.emit.mock.calls.filter(call => call[0] === EventKeys.UPDATE_STATS);
-        expect(updateStatsCalls.length).toBe(2);
+        // 4. Slow Update (Time: 101ms) -> Should Emit (> 100ms passed)
+        scene.update(101, 16);
+        expect(mockGameEvents.emit).toHaveBeenCalledWith(EventKeys.UPDATE_STATS, expect.anything());
     });
 });

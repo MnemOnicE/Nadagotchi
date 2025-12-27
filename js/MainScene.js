@@ -800,6 +800,27 @@ export class MainScene extends Phaser.Scene {
     createPlacedFurnitureSprite(x, y, textureKey, itemName) {
         const sprite = this.add.sprite(x, y, textureKey).setInteractive({ useHandCursor: true });
 
+        // Add drag listeners to support Decoration Mode
+        sprite.on('drag', (pointer, dragX, dragY) => {
+            if (this.isDecorationMode) {
+                // Bound check
+                const maxY = this.cameras.main.height - 32;
+                sprite.x = dragX;
+                sprite.y = Math.min(dragY, maxY);
+            }
+        });
+
+        sprite.on('dragend', () => {
+            if (this.isDecorationMode) {
+                // Update the stored position in the array
+                const entry = this.placedFurniture.find(f => f.sprite === sprite);
+                if (entry) {
+                    entry.x = sprite.x;
+                    entry.y = sprite.y;
+                }
+            }
+        });
+
         sprite.on('pointerdown', (pointer) => {
             if (this.isPlacementMode) {
                 // SIGNAL TO BLOCK SCENE CLICK
