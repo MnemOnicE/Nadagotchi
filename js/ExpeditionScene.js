@@ -1,4 +1,3 @@
-// Manual Override: Patch Applied.
 import { ButtonFactory } from './ButtonFactory.js';
 import { ExpeditionSystem } from './systems/ExpeditionSystem.js';
 import { EventKeys } from './EventKeys.js';
