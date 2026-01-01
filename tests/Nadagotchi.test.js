@@ -121,10 +121,34 @@ describe('Nadagotchi', () => {
             // Set Nurturer to the same score.
             pet.personalityPoints.Nurturer = 10;
 
+            // Ensure skills are equal or favor incumbent to test incumbent advantage
+            pet.skills.empathy = 0;
+            pet.skills.logic = 0;
+            pet.skills.research = 0;
+
             pet.updateDominantArchetype();
 
             // The dominant archetype should remain 'Intellectual' because it was the incumbent in the tie.
             expect(pet.dominantArchetype).toBe('Intellectual');
+        });
+
+        test('should switch dominant archetype in a tie if challenger has higher skills', () => {
+            // Intellectual starts at 10 points.
+            pet.dominantArchetype = 'Intellectual';
+            pet.personalityPoints.Intellectual = 10;
+
+            // Set Nurturer to the same score.
+            pet.personalityPoints.Nurturer = 10;
+
+            // Give Nurturer higher relevant skills (Empathy)
+            pet.skills.empathy = 20;
+            pet.skills.logic = 0;
+            pet.skills.research = 0;
+
+            pet.updateDominantArchetype();
+
+            // The dominant archetype should switch to 'Nurturer' because it has higher skills
+            expect(pet.dominantArchetype).toBe('Nurturer');
         });
 
         test('should switch to the first archetype in a tie when the incumbent is not involved', () => {

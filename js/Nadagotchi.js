@@ -807,17 +807,22 @@ export class Nadagotchi {
             }
         }
 
-        // If the current dominant archetype is one of the tied contenders, it remains dominant.
+        // If the current dominant archetype is one of the tied contenders, it remains dominant unless another contender has higher skills.
         // Otherwise, we break ties based on relevant skills.
-        if (potentialDominantArchetypes.length > 0 && !potentialDominantArchetypes.includes(this.dominantArchetype)) {
+        if (potentialDominantArchetypes.length > 0) {
             // Shuffle potentialDominantArchetypes to break ties randomly and avoid index bias
             for (let i = potentialDominantArchetypes.length - 1; i > 0; i--) {
                 const j = this.rng.range(0, i + 1);
                 [potentialDominantArchetypes[i], potentialDominantArchetypes[j]] = [potentialDominantArchetypes[j], potentialDominantArchetypes[i]];
             }
 
-            let bestCandidate = potentialDominantArchetypes[0];
+            // We need to compare against the current archetype as well if it's in the running.
+            // If the current archetype is NOT in the top list, we just pick the best from the list.
+            // If it IS in the list, we only switch if another candidate is strictly better (higher skills).
+
+            let bestCandidate = null;
             let highestSkillScore = -1;
+            let currentArchetypeScore = -1;
 
             potentialDominantArchetypes.forEach(archetype => {
                 let score = 0;
@@ -839,13 +844,25 @@ export class Nadagotchi {
                         break;
                 }
 
+                if (archetype === this.dominantArchetype) {
+                    currentArchetypeScore = score;
+                }
+
                 if (score > highestSkillScore) {
                     highestSkillScore = score;
                     bestCandidate = archetype;
                 }
             });
 
-            this.dominantArchetype = bestCandidate;
+            // If the current archetype is in the list, we prioritize it unless bestCandidate has a higher score.
+            if (potentialDominantArchetypes.includes(this.dominantArchetype)) {
+                if (highestSkillScore > currentArchetypeScore) {
+                     this.dominantArchetype = bestCandidate;
+                }
+                // Else: keep current (tie goes to incumbent)
+            } else {
+                 this.dominantArchetype = bestCandidate;
+            }
         }
     }
 
