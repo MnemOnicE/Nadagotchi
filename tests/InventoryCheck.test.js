@@ -37,11 +37,8 @@ describe('Security Fix: Inventory Check in Breeding', () => {
 
         const hasHighValue = intellectualAlleles.some(val => val > 50);
 
-        // This expectation is what we WANT after the fix.
-        // Before the fix, this might fail (it will have high value).
-        // I will assert what currently happens to confirm vulnerability first?
-        // No, I should write the test that expects the CORRECT behavior, and verify it fails.
-
+        // Assertion: The user does not have the item, so the high value trait should NOT be present.
+        // This confirms that the injection attempt failed.
         expect(hasHighValue).toBe(false);
     });
 
@@ -54,7 +51,7 @@ describe('Security Fix: Inventory Check in Breeding', () => {
 
         const intellectualAlleles = childData.genome.genotype.Intellectual;
 
-        // Should have a high value (~70)
+        // Should have a high value (~70) because the user owns the item
         const hasHighValue = intellectualAlleles.some(val => val > 50);
 
         expect(hasHighValue).toBe(true);
