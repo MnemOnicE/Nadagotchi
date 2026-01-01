@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.39.0] - 2025-12-24
+
+### Security
+- **Verified Fix:** Confirmed and hardened the inventory validation fix in `Nadagotchi.calculateOffspring`.
+  - Refactored `tests/InventoryCheck.test.js` to serve as a permanent regression test, ensuring that breeding logic correctly ignores injected environmental items not present in the user's inventory.
+  - This closes the loop on a previously identified vulnerability where unowned items could be used to manipulate genetic outcomes.
+
 ## [1.38.0] - 2025-12-24
 
 ### Added
@@ -248,7 +255,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Achievement System:** Implemented a headless `AchievementManager` that subscribes to game events to track player milestones.
   - **Achievements:** Defined initial achievements: "First Craft", "Novice Explorer", "Socialite", "Scholar".
   - **UI Toast:** Added a visual "Toast" notification system to `UIScene.js` that slides down from the top of the screen when an achievement is unlocked.
-- **Unit Tests:** Added `tests/SeededRNG.test.js` to verify determinism and `tests/Achievement.test.js` to verify event tracking.
+  - **Unit Tests:** Added `tests/SeededRNG.test.js` to verify determinism and `tests/Achievement.test.js` to verify event tracking.
 
 ### Changed
 - **Genetics System:** Refactored `GeneticsSystem.js` and `Genome` to accept an RNG instance, making breeding outcomes fully deterministic based on the universe seed.
