@@ -148,6 +148,9 @@ export class PreloaderScene extends Phaser.Scene {
         createDetailedBox('crafting_table', 0xA0522D, 64, 'crafting');
         createDetailedBox('masterwork_chair', 0xFFD700, 64, 'chair'); // Gold color for Masterwork
 
+        // Housing Items (Procedural Textures)
+        this._generateHousingTextures();
+
         // NPCs
         createDetailedBox('npc_scout', 0x704214, 48, 'npc');
         createDetailedBox('npc_artisan', 0x4682B4, 48, 'npc');
@@ -188,6 +191,93 @@ export class PreloaderScene extends Phaser.Scene {
         graphics.generateTexture('pixel', 1, 1);
 
         graphics.destroy();
+    }
+
+    /**
+     * Generates textures for housing items (Wallpapers, Flooring).
+     */
+    _generateHousingTextures() {
+        // 1. Cozy Wallpaper (Striped)
+        if (!this.textures.exists('cozy_wallpaper')) {
+            const graphics = this.make.graphics();
+            // Background (Cream)
+            graphics.fillStyle(0xFDF5E6, 1);
+            graphics.fillRect(0, 0, 64, 64);
+            // Stripes (Pale Pink)
+            graphics.fillStyle(0xFFC0CB, 0.5);
+            for (let i = 0; i < 64; i += 16) {
+                graphics.fillRect(i, 0, 8, 64);
+            }
+            graphics.generateTexture('cozy_wallpaper', 64, 64);
+            graphics.destroy();
+        }
+
+        // 2. Wood Flooring (Planks)
+        if (!this.textures.exists('wood_flooring')) {
+            const graphics = this.make.graphics();
+            // Base Color (Wood)
+            graphics.fillStyle(0xDEB887, 1); // Burlywood
+            graphics.fillRect(0, 0, 64, 64);
+            // Plank Lines
+            graphics.lineStyle(2, 0x8B4513, 1); // Saddle Brown
+            for (let i = 0; i < 64; i += 16) {
+                graphics.strokeRect(i, 0, 16, 64);
+                // Random cross lines for plank ends
+                if (i % 32 === 0) graphics.lineBetween(i, 32, i + 16, 32);
+            }
+            graphics.generateTexture('wood_flooring', 64, 64);
+            graphics.destroy();
+        }
+
+        // 3. Grass Flooring (Already exists effectively as logic, but useful for icons)
+        if (!this.textures.exists('grass_flooring')) {
+            const graphics = this.make.graphics();
+            graphics.fillStyle(0x228B22, 1); // Forest Green
+            graphics.fillRect(0, 0, 64, 64);
+            // Texture details
+            graphics.fillStyle(0x32CD32, 1);
+            for (let k = 0; k < 10; k++) {
+                graphics.fillCircle(Phaser.Math.Between(0, 64), Phaser.Math.Between(0, 64), 2);
+            }
+            graphics.generateTexture('grass_flooring', 64, 64);
+            graphics.destroy();
+        }
+
+        // 4. Door (For Transitions)
+        if (!this.textures.exists('door_icon')) {
+            const graphics = this.make.graphics();
+            // Door Frame
+            graphics.fillStyle(0x8B4513, 1);
+            graphics.fillRect(16, 8, 32, 56);
+            // Door Panel
+            graphics.fillStyle(0xD2691E, 1);
+            graphics.fillRect(20, 12, 24, 52);
+            // Knob
+            graphics.fillStyle(0xFFD700, 1);
+            graphics.fillCircle(40, 36, 3);
+            graphics.generateTexture('door_icon', 64, 64);
+            graphics.destroy();
+        }
+
+        // 5. House (For Garden -> Indoor Transition)
+        if (!this.textures.exists('house_icon')) {
+            const graphics = this.make.graphics();
+            // Walls
+            graphics.fillStyle(0xF5DEB3, 1); // Wheat
+            graphics.fillRect(12, 24, 40, 40);
+            // Roof
+            graphics.fillStyle(0xA52A2A, 1); // Brown
+            graphics.beginPath();
+            graphics.moveTo(8, 24);
+            graphics.lineTo(32, 4);
+            graphics.lineTo(56, 24);
+            graphics.fill();
+            // Door
+            graphics.fillStyle(0x8B4513, 1);
+            graphics.fillRect(28, 44, 16, 20);
+            graphics.generateTexture('house_icon', 64, 64);
+            graphics.destroy();
+        }
     }
 
     /**

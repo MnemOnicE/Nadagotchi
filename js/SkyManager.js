@@ -20,7 +20,7 @@ export class SkyManager {
 
         // Initialize texture with full size; resize will adjust it
         this.skyTexture = this.scene.textures.createCanvas('sky', this.scene.scale.width, this.scene.scale.height);
-        this.scene.add.image(0, 0, 'sky').setOrigin(0).setDepth(-10); // Ensure it's at the back
+        this.skyImage = this.scene.add.image(0, 0, 'sky').setOrigin(0).setDepth(-10); // Ensure it's at the back
 
         /** @type {Array<{x: number, y: number}>} Star positions (normalized 0-1) */
         this.stars = Array.from({ length: 100 }, () => ({ x: Math.random(), y: Math.random() }));
@@ -91,6 +91,16 @@ export class SkyManager {
             // Force redraw
             this.lastDaylightFactor = -1;
             this.update();
+        }
+    }
+
+    /**
+     * Sets the visibility of the sky.
+     * @param {boolean} visible - Whether the sky should be visible.
+     */
+    setVisible(visible) {
+        if (this.skyImage) {
+            this.skyImage.setVisible(visible);
         }
     }
 }

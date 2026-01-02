@@ -45,6 +45,21 @@ export class MainScene extends Phaser.Scene {
         this.currentMood = null;
         /** @type {number} Time of the last UI stats update to throttle emissions. */
         this.lastStatsUpdate = -1000;
+
+        // --- Housing System II State ---
+        /** @type {string} Current view location: 'GARDEN' (default), 'INDOOR'. */
+        this.location = 'GARDEN';
+        /** @type {object} Active housing configuration. */
+        this.homeConfig = {
+            wallpaper: 'cozy_wallpaper',
+            flooring: 'wood_flooring'
+        };
+
+        // --- Indoor Navigation State ---
+        /** @type {boolean} Whether the pet is currently moving autonomously. */
+        this.isMoving = false;
+        /** @type {number} Timestamp for the next autonomous move. */
+        this.nextMoveTime = 0;
     }
 
     /**
@@ -88,6 +103,11 @@ export class MainScene extends Phaser.Scene {
         // --- Pet Initialization ---
         const loadedPet = this.persistence.loadPet();
 
+        // Restore home config if available
+        if (loadedPet && loadedPet.homeConfig) {
+            this.homeConfig = loadedPet.homeConfig;
+        }
+
         if (data && data.newPetData) {
             // New Game: Pass null for loadedData to ensure defaults are used
             this.nadagotchi = new Nadagotchi(data.newPetData.dominantArchetype, null);
@@ -96,7 +116,7 @@ export class MainScene extends Phaser.Scene {
             this.nadagotchi = new Nadagotchi('Adventurer', loadedPet);
         }
 
-        if (!loadedPet && !(data && data.newPetData)) this.persistence.savePet(this.nadagotchi);
+        if (!loadedPet && !(data && data.newPetData)) this.persistence.savePet(this.nadagotchi, this.homeConfig);
 
         // --- Settings Initialization ---
         const savedSettings = this.persistence.loadSettings();
@@ -109,12 +129,27 @@ export class MainScene extends Phaser.Scene {
         /** @type {number} Timestamp of the last stats update emission to throttle UI refreshes. */
         this.lastStatsUpdateTime = -1000;
 
+        // --- Housing Visuals (Indoor) ---
+        // Wallpaper (Tiled Sprite would be best, but TileSprite in 3.55 has issues with texture resizing sometimes, using Image for simplicity or Tiled if stable)
+        // Using TiledSprite for repeating patterns
+        this.wallpaper = this.add.tileSprite(0, 0, this.scale.width, this.scale.height, this.homeConfig.wallpaper).setOrigin(0, 0).setVisible(false);
+
+        // Flooring
+        this.flooring = this.add.tileSprite(0, 0, this.scale.width, 100, this.homeConfig.flooring).setOrigin(0, 0).setVisible(false);
+
+        // --- Transition Objects ---
+        this.houseObj = this.add.sprite(0, 0, 'house_icon').setInteractive({ useHandCursor: true }).setVisible(false)
+            .on('pointerdown', () => this.enterHouse());
+
+        this.doorObj = this.add.sprite(0, 0, 'door_icon').setInteractive({ useHandCursor: true }).setVisible(false)
+            .on('pointerdown', () => this.exitHouse());
+
         // --- Game Objects ---
         this.sprite = this.add.sprite(this.scale.width / 2, this.scale.height / 2, 'pet').setScale(4);
         this.thoughtBubble = this.add.sprite(this.sprite.x, this.sprite.y - 40, 'thought_bubble').setVisible(false);
         this.exploreBubble = this.add.sprite(this.sprite.x, this.sprite.y - 40, 'explore_bubble').setVisible(false);
 
-        // --- Interactive Objects ---
+        // --- Interactive Objects (Furniture & NPCs) ---
         // Initial positions; will be updated in resize
         // Adjusted initial Y positions to 250 to avoid overlapping with top-left/right UI text
         this.bookshelf = this.add.sprite(80, 250, 'bookshelf').setInteractive({ useHandCursor: true })
@@ -126,7 +161,7 @@ export class MainScene extends Phaser.Scene {
         this.craftingTable = this.add.sprite(80, 0, 'crafting_table').setInteractive({ useHandCursor: true })
             .on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, EventKeys.OPEN_CRAFTING_MENU));
 
-        // Add NPCs to the scene
+        // Add NPCs to the scene (Only visible in GARDEN)
         // Anchored to bottom, will be set in resize()
         this.npcScout = this.add.sprite(this.scale.width - 150, 0, 'npc_scout').setInteractive({ useHandCursor: true })
             .on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, EventKeys.INTERACT_SCOUT, 'Grizzled Scout'));
@@ -148,7 +183,7 @@ export class MainScene extends Phaser.Scene {
         this.scene.launch('UIScene');
 
         // --- Timers and Event Listeners ---
-        this.autoSaveTimer = this.time.addEvent({ delay: 5000, callback: () => this.persistence.savePet(this.nadagotchi), loop: true });
+        this.autoSaveTimer = this.time.addEvent({ delay: 5000, callback: () => this.persistence.savePet(this.nadagotchi, this.homeConfig), loop: true });
 
         // Bind listeners to enable proper removal in shutdown
         this.handleUIActionBound = this.handleUIAction.bind(this);
@@ -167,6 +202,9 @@ export class MainScene extends Phaser.Scene {
         this.updateDateText();
         this.skyManager.update(); // Initial draw
         this.loadFurniture();
+
+        // Initial Rendering of Location
+        this.renderLocation();
 
         // --- Tutorial Trigger ---
         if (data && data.startTutorial) {
@@ -250,6 +288,7 @@ export class MainScene extends Phaser.Scene {
         this.updateSpriteMood();
         this.checkProactiveBehaviors();
         this.checkCareerUnlock();
+        this.updatePetMovement(time);
 
         this.lightingManager.update();
     }
@@ -475,6 +514,15 @@ export class MainScene extends Phaser.Scene {
         if (this.skyManager) this.skyManager.resize(width, gameHeight);
         if (this.lightingManager) this.lightingManager.resize(width, gameHeight);
 
+        // Resize Wallpaper & Flooring
+        if (this.wallpaper) {
+            this.wallpaper.setSize(width, gameHeight);
+        }
+        if (this.flooring) {
+            this.flooring.setSize(width, 100);
+            this.flooring.setPosition(0, gameHeight - 100);
+        }
+
         // Redraw Ground relative to new gameHeight
         if (this.ground) {
              this.ground.clear();
@@ -492,8 +540,70 @@ export class MainScene extends Phaser.Scene {
         // Update Plant/Bookshelf (pinned to top/corners, mostly fine but check X)
         if (this.plant) this.plant.setPosition(width - 80, 250);
 
+        // Reposition Transition Objects
+        // House -> Garden (Center-Left)
+        if (this.houseObj) this.houseObj.setPosition(100, gameHeight - 80);
+        // Door -> Indoor (Right Side)
+        if (this.doorObj) this.doorObj.setPosition(width - 50, gameHeight - 130);
+
         // Update Date Text
         this.dateText.setPosition(width - 10, 10);
+    }
+
+    /**
+     * Switches the view to 'INDOOR'.
+     */
+    enterHouse() {
+        this.location = 'INDOOR';
+        this.renderLocation();
+        SoundSynthesizer.instance.playChime();
+        this.showNotification("Welcome Home!", '#FFFFFF');
+    }
+
+    /**
+     * Switches the view to 'GARDEN'.
+     */
+    exitHouse() {
+        this.location = 'GARDEN';
+        this.renderLocation();
+        SoundSynthesizer.instance.playChime();
+        this.showNotification("To the Garden!", '#FFFFFF');
+    }
+
+    /**
+     * Updates the visibility of world objects based on the current location.
+     */
+    renderLocation() {
+        const isIndoor = this.location === 'INDOOR';
+
+        // 1. Backgrounds
+        this.skyManager.setVisible(!isIndoor); // Hide Sky Indoors
+        if (this.ground) this.ground.setVisible(!isIndoor);
+
+        if (this.wallpaper) this.wallpaper.setVisible(isIndoor);
+        if (this.flooring) this.flooring.setVisible(isIndoor);
+
+        // 2. Transition Objects
+        if (this.houseObj) this.houseObj.setVisible(!isIndoor);
+        if (this.doorObj) this.doorObj.setVisible(isIndoor);
+
+        // 3. Furniture (Indoor Only)
+        // Toggle placed furniture
+        this.placedFurniture.forEach(item => {
+            if (item.sprite) item.sprite.setVisible(isIndoor);
+        });
+        // Toggle pre-placed furniture (Assumed Indoor)
+        if (this.bookshelf) this.bookshelf.setVisible(isIndoor);
+        if (this.plant) this.plant.setVisible(isIndoor);
+        if (this.craftingTable) this.craftingTable.setVisible(isIndoor);
+
+        // 4. NPCs (Garden Only)
+        if (this.npcScout) this.npcScout.setVisible(!isIndoor);
+        if (this.npcArtisan) this.npcArtisan.setVisible(!isIndoor);
+        if (this.npcVillager) this.npcVillager.setVisible(!isIndoor);
+
+        // 5. FX
+        // Lighting manager stays active (day/night affects indoor too)
     }
 
     /**
@@ -632,6 +742,97 @@ export class MainScene extends Phaser.Scene {
             this.exploreBubble.setVisible(true);
             this.time.delayedCall(2000, () => this.exploreBubble.setVisible(false));
         }
+    }
+
+    /**
+     * Updates autonomous pet movement when Indoors.
+     * @param {number} time - Current game time.
+     */
+    updatePetMovement(time) {
+        // Only move autonomously if Indoors
+        if (this.location !== 'INDOOR') {
+            this.isMoving = false;
+            return;
+        }
+
+        // Do not interrupt existing movement
+        if (this.isMoving) return;
+
+        // Check cooldown
+        if (time < this.nextMoveTime) return;
+
+        // Movement Trigger Chance (approx 1% per frame if cooldown passed)
+        // Mood affects frequency: Happy/Energetic pets move more
+        let chance = 100; // Base 1 in 100
+        if (this.nadagotchi.mood === 'happy') chance = 50;
+        if (this.nadagotchi.mood === 'sad') chance = 300; // Lethargic
+
+        if (Phaser.Math.Between(1, chance) === 1) {
+            const width = this.cameras.main.width;
+            // Pick a random spot within room bounds (leaving 50px buffer)
+            const targetX = Phaser.Math.Between(50, width - 50);
+            this.walkTo(targetX);
+        }
+    }
+
+    /**
+     * Commands the pet to walk to a specific X coordinate.
+     * @param {number} targetX - The target X coordinate.
+     */
+    walkTo(targetX) {
+        this.isMoving = true;
+
+        // Kill idle animations
+        this.tweens.killTweensOf(this.sprite);
+
+        // Determine direction
+        const currentX = this.sprite.x;
+        const distance = Math.abs(targetX - currentX);
+        const direction = targetX > currentX ? 1 : -1;
+
+        // Flip sprite to face direction
+        // Default sprite faces Right. if direction is -1 (Left), flipX = true.
+        this.sprite.setFlipX(direction < 0);
+
+        // Ensure vertical position is correct for walking (slightly lower than idle bounce?)
+        // Let's stick to the current Y or the calculated floor Y
+        const dashboardHeight = Math.floor(this.scale.height * Config.UI.DASHBOARD_HEIGHT_RATIO);
+        const gameHeight = this.scale.height - dashboardHeight;
+        const centerY = gameHeight / 2;
+
+        // Reset scale/rotation from idle anims
+        this.sprite.setAngle(0);
+        this.sprite.setScale(4);
+        this.sprite.y = centerY;
+
+        // Bobbing animation while walking
+        const bobTween = this.tweens.add({
+            targets: this.sprite,
+            y: centerY - 5,
+            duration: 150,
+            yoyo: true,
+            repeat: -1
+        });
+
+        // Movement Tween
+        const speed = 0.1; // pixels per ms
+        const duration = distance / speed;
+
+        this.tweens.add({
+            targets: this.sprite,
+            x: targetX,
+            duration: duration,
+            ease: 'Linear',
+            onComplete: () => {
+                this.isMoving = false;
+                bobTween.stop();
+                this.sprite.y = centerY; // Reset Y
+                this.nextMoveTime = this.time.now + Phaser.Math.Between(2000, 5000); // Wait 2-5s before next move
+
+                // Resume idle
+                if (this.currentMood) this.startIdleAnimation(this.currentMood);
+            }
+        });
     }
 
     /**
