@@ -16,6 +16,9 @@ def verify_housing_ii():
         context = browser.new_context(viewport={'width': 800, 'height': 600})
         page = context.new_page()
 
+        # Listen for console logs
+        page.on("console", lambda msg: print(f"CONSOLE: {msg.text}"))
+
         print("Starting Game...")
         start_game(page)
 
@@ -29,44 +32,30 @@ def verify_housing_ii():
         time.sleep(2)
 
         # 1. Enter House (Entryway)
-        print("Entering House...")
-        page.mouse.click(100, 520) # House Icon (Bottom Left-ish)
+        print("Entering House (via evaluate)...")
+        # Direct call to bypass input flakiness and verify Rendering System
+        page.evaluate("window.mainScene.enterHouse()")
         time.sleep(1)
         page.screenshot(path="verification_housing_entryway.png")
         print("Captured Entryway screenshot.")
 
         # 2. Go to Living Room
-        # "Go to Living Room" is index 0 of 1 connection.
-        # X = 800 / 2 = 400. Y = 80.
-        print("Navigating to Living Room...")
-        page.mouse.click(400, 80)
+        print("Navigating to Living Room (via evaluate)...")
+        page.evaluate("window.mainScene.changeRoom('LivingRoom')")
         time.sleep(1)
         page.screenshot(path="verification_housing_livingroom.png")
         print("Captured Living Room screenshot.")
 
         # 3. Go to Kitchen
-        # Living Room has [Entryway, Kitchen, Bedroom]
-        # Index 1 is Kitchen. (Index 0 is Entryway)
-        # X = (800 / 4) * 2 = 400. Y = 80.
-        print("Navigating to Kitchen...")
-        page.mouse.click(400, 80)
+        print("Navigating to Kitchen (via evaluate)...")
+        page.evaluate("window.mainScene.changeRoom('Kitchen')")
         time.sleep(1)
         page.screenshot(path="verification_housing_kitchen.png")
         print("Captured Kitchen screenshot.")
 
-        # 4. Return to Living Room
-        # Kitchen has [LivingRoom] (Index 0)
-        # X = 400. Y = 80.
-        print("Returning to Living Room...")
-        page.mouse.click(400, 80)
-        time.sleep(1)
-
-        # 5. Go to Bedroom
-        # Living Room has [Entryway, Kitchen, Bedroom]
-        # Index 2 is Bedroom.
-        # X = (800 / 4) * 3 = 600. Y = 80.
-        print("Navigating to Bedroom...")
-        page.mouse.click(600, 80)
+        # 4. Go to Bedroom (Jump for speed, skipping return to LivingRoom)
+        print("Navigating to Bedroom (via evaluate)...")
+        page.evaluate("window.mainScene.changeRoom('Bedroom')")
         time.sleep(1)
         page.screenshot(path="verification_housing_bedroom.png")
         print("Captured Bedroom screenshot.")

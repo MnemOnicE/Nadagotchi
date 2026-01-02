@@ -115,13 +115,6 @@ export class MainScene extends Phaser.Scene {
         // Ensure local references match
         if (loadedPet && loadedPet.homeConfig) {
              // If loadedPet has homeConfig, sync it.
-             // Note: PersistenceManager.loadHomeConfig handles migration, but loadPet just loads raw JSON.
-             // We should prioritize the result of loadHomeConfig if separate, but structure is unified in pet object.
-             // Actually, savePet saves homeConfig inside the object.
-             // So loadedPet.homeConfig is authoritative.
-             // But we need to check for migration there too if it wasn't migrated on load.
-             // Let's assume PersistenceManager.loadHomeConfig() logic is the source of truth for structure.
-             // We can merge it.
              if (!loadedPet.homeConfig.rooms) {
                  // Migration needed on the loaded pet object
                  const migrated = this.persistence.loadHomeConfig(); // This runs migration logic
@@ -150,6 +143,8 @@ export class MainScene extends Phaser.Scene {
         // Sync reference just in case
         this.nadagotchi.homeConfig = this.homeConfig;
 
+        // Expose for verification/testing
+        window.mainScene = this;
 
         // --- Settings Initialization ---
         const savedSettings = this.persistence.loadSettings();
@@ -551,7 +546,6 @@ export class MainScene extends Phaser.Scene {
         const dashboardHeight = Math.floor(height * Config.UI.DASHBOARD_HEIGHT_RATIO);
         const gameHeight = height - dashboardHeight;
 
-        // Resize the Main Camera to only render in the top portion
         this.cameras.main.setSize(width, gameHeight);
         this.cameras.main.setViewport(0, 0, width, gameHeight);
 
@@ -596,24 +590,17 @@ export class MainScene extends Phaser.Scene {
 
         // Reposition Transition Objects
         // House -> Garden (Center-Left)
-        if (this.houseObj) this.houseObj.setPosition(100, gameHeight - 80);
+        if (this.houseObj) {
+            this.houseObj.setPosition(100, gameHeight - 80);
+        }
         // Door -> Indoor (Right Side)
         if (this.doorObj) this.doorObj.setPosition(width - 50, gameHeight - 130);
 
         // Resize Room Doors
-        this._updateRoomDoorsPositions(width, gameHeight);
+        this._refreshRoomDoors();
 
         // Update Date Text
         this.dateText.setPosition(width - 10, 10);
-    }
-
-    _updateRoomDoorsPositions(width, gameHeight) {
-        if (!this.roomDoors) return;
-        this.roomDoors.forEach(door => {
-             // Logic to place doors based on connection direction?
-             // For now, distribute them along top/sides
-             // This is simplified; we'll refine in implementation
-        });
     }
 
     /**
