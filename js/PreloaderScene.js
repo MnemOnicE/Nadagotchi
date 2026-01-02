@@ -141,10 +141,48 @@ export class PreloaderScene extends Phaser.Scene {
             canvasTex.refresh();
         };
 
+        // Housing Textures (Procedural patterns)
+        const createPattern = (key, color1, color2, type) => {
+            graphics.clear();
+            graphics.fillStyle(color1);
+            graphics.fillRect(0, 0, 64, 64);
+
+            graphics.fillStyle(color2);
+            if (type === 'stripes') {
+                for(let i=0; i<64; i+=16) graphics.fillRect(i, 0, 8, 64);
+            } else if (type === 'bricks') {
+                 for(let y=0; y<64; y+=16) {
+                     for(let x=(y%32===0?0:16); x<64; x+=32) {
+                         graphics.fillRect(x, y, 30, 14);
+                     }
+                 }
+            } else if (type === 'planks') {
+                for(let i=0; i<64; i+=8) graphics.fillRect(0, i, 64, 2);
+            } else if (type === 'tiles') {
+                for(let y=0; y<64; y+=32) {
+                    for(let x=0; x<64; x+=32) {
+                        graphics.fillRect(x+2, y+2, 28, 28);
+                    }
+                }
+            } else {
+                 // Solid default
+            }
+            graphics.generateTexture(key, 64, 64);
+        };
+
+        createPattern('wallpaper_default', 0xF5F5DC, 0xE0D6B9, 'solid');
+        createPattern('wallpaper_blue', 0xADD8E6, 0x87CEEB, 'stripes');
+        createPattern('wallpaper_brick', 0xA52A2A, 0x800000, 'bricks');
+
+        createPattern('flooring_default', 0xD2B48C, 0x8B4513, 'solid');
+        createPattern('flooring_wood', 0xDEB887, 0x8B4513, 'planks');
+        createPattern('flooring_tile', 0x808080, 0xA9A9A9, 'tiles');
+
         // --- 1. Generate World Objects (snake_case keys) ---
         // 'bookshelf' is now loaded from assets
         createDetailedBox('fancy_bookshelf', 0xD2691E, 64, 'bookshelf'); // Reuse bookshelf logic but diff color
         createDetailedBox('plant', 0x228B22, 64, 'plant');
+        createDetailedBox('wooden_chair', 0x8B4513, 64, 'chair');
         createDetailedBox('crafting_table', 0xA0522D, 64, 'crafting');
         createDetailedBox('masterwork_chair', 0xFFD700, 64, 'chair'); // Gold color for Masterwork
 
