@@ -140,7 +140,19 @@ const mockAdd = {
         setText: jest.fn().mockReturnThis()
     }),
     image: jest.fn().mockReturnValue(mockSprite),
-    rectangle: jest.fn()
+    rectangle: jest.fn(),
+    tileSprite: jest.fn().mockReturnValue({
+        setDepth: jest.fn().mockReturnThis(),
+        setTexture: jest.fn().mockReturnThis(),
+        setSize: jest.fn().mockReturnThis(),
+        setPosition: jest.fn().mockReturnThis(),
+        setVisible: jest.fn().mockReturnThis(),
+        setOrigin: jest.fn().mockReturnThis(),
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 100
+    })
 };
 
 const mockCameras = {

@@ -53,6 +53,7 @@ export const EventKeys = {
     DECORATE: 'DECORATE',
     TOGGLE_DECORATION_MODE: 'TOGGLE_DECORATION_MODE',
     PLACE_FURNITURE: 'PLACE_FURNITURE',
+    APPLY_HOME_DECOR: 'APPLY_HOME_DECOR',
     NONE: 'NONE',
 
     // Scene Communication (Event Name)

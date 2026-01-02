@@ -692,13 +692,24 @@ export class UIScene extends Phaser.Scene {
         const startX = mw / 2 - 80;
         let yPos = -this.getModalHeight() / 2 + 100;
 
-        const furniture = Object.entries(this.nadagotchiData.inventory).filter(([item, count]) => this.nadagotchiData.recipes[item] && count > 0);
-        let text = "Select an item to place:\n\n" + (furniture.length === 0 ? "You have no furniture." : "");
+        const validTypes = ['FURNITURE', 'WALLPAPER', 'FLOORING'];
+        const furniture = Object.entries(this.nadagotchiData.inventory).filter(([item, count]) => {
+            const def = ItemDefinitions[item];
+            return def && validTypes.includes(def.type) && count > 0;
+        });
+
+        let text = "Select an item to place:\n\n" + (furniture.length === 0 ? "You have no furniture or decor." : "");
 
         furniture.forEach(([itemName, count]) => {
             text += `- ${itemName}: ${count}\n`;
-            const placeButton = ButtonFactory.createButton(this, startX, yPos, 'Place', () => {
-                this.game.events.emit(EventKeys.UI_ACTION, EventKeys.DECORATE, itemName);
+
+            const def = ItemDefinitions[itemName];
+            const isSurface = def && (def.type === 'WALLPAPER' || def.type === 'FLOORING');
+            const actionKey = isSurface ? EventKeys.APPLY_HOME_DECOR : EventKeys.PLACE_FURNITURE;
+            const btnText = isSurface ? 'Apply' : 'Place';
+
+            const placeButton = ButtonFactory.createButton(this, startX, yPos, btnText, () => {
+                this.game.events.emit(EventKeys.UI_ACTION, actionKey, itemName);
                 this.decorateModal.setVisible(false);
                 this.scene.resume('MainScene');
             }, { width: 80, height: 30, color: 0x228B22 });

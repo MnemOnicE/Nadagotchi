@@ -10,6 +10,7 @@ import { AchievementManager } from './AchievementManager.js';
 import { EventKeys } from './EventKeys.js';
 import { Config } from './Config.js';
 import { SoundSynthesizer } from './utils/SoundSynthesizer.js';
+import { ItemDefinitions } from './ItemData.js';
 
 /**
  * @fileoverview The primary game scene.
@@ -81,6 +82,9 @@ export class MainScene extends Phaser.Scene {
         // --- Visual Systems Initialization ---
         // Initialize SkyManager (creates skyTexture and image)
         this.skyManager = new SkyManager(this);
+
+        // --- Indoor Backgrounds (Wallpaper/Flooring) ---
+        this.createIndoorBackgrounds();
 
         this.ground = this.add.graphics();
         // Drawing handled in resize
@@ -167,6 +171,52 @@ export class MainScene extends Phaser.Scene {
         this.updateDateText();
         this.skyManager.update(); // Initial draw
         this.loadFurniture();
+    }
+
+    createIndoorBackgrounds() {
+        // Load config
+        const homeConfig = this.persistence.loadHomeConfig();
+        const wallpaperKey = homeConfig.wallpaper || 'wallpaper_default';
+        const flooringKey = homeConfig.flooring || 'flooring_default';
+
+        // Create TileSprites
+        // Positions will be updated in resize()
+        this.wallpaperLayer = this.add.tileSprite(400, 200, 800, 400, wallpaperKey);
+        this.flooringLayer = this.add.tileSprite(400, 500, 800, 200, flooringKey);
+
+        // Depth: Behind ground (which is around index 5-10?)
+        // Sky is usually 0. Ground is graphics.
+        // We want Wallpaper/Flooring to be BEHIND Furniture/Pet but ABOVE Sky?
+        // Actually, if we are INDOORS, we hide Sky/Ground?
+        // Or we just overlay them?
+        // Let's set depth low.
+        this.wallpaperLayer.setDepth(1);
+        this.flooringLayer.setDepth(1);
+
+        // Hide by default if we assume start in Garden?
+        // Or show if we are INDOORS?
+        // Current logic doesn't strictly switch location visuals yet aside from Sky/Lighting.
+        // For now, let's keep them visible as a "layer" or toggle them.
+        // If the roadmap implies "Housing System", users expect to see it.
+        // Let's rely on renderLocation() if it exists or create one.
+    }
+
+    updateWallpaper(key) {
+        if (this.wallpaperLayer) {
+            this.wallpaperLayer.setTexture(key);
+            const config = this.persistence.loadHomeConfig();
+            config.wallpaper = key;
+            this.persistence.saveHomeConfig(config);
+        }
+    }
+
+    updateFlooring(key) {
+        if (this.flooringLayer) {
+            this.flooringLayer.setTexture(key);
+            const config = this.persistence.loadHomeConfig();
+            config.flooring = key;
+            this.persistence.saveHomeConfig(config);
+        }
 
         // --- Tutorial Trigger ---
         if (data && data.startTutorial) {
@@ -480,6 +530,16 @@ export class MainScene extends Phaser.Scene {
              this.ground.clear();
              this.ground.fillStyle(0x228B22, 1);
              this.ground.fillRect(0, gameHeight - 100, width, 100);
+        }
+
+        // Resize Wallpaper/Flooring
+        if (this.wallpaperLayer) {
+            this.wallpaperLayer.setSize(width, gameHeight - 100); // Floor is 100px high
+            this.wallpaperLayer.setPosition(width / 2, (gameHeight - 100) / 2);
+        }
+        if (this.flooringLayer) {
+            this.flooringLayer.setSize(width, 100);
+            this.flooringLayer.setPosition(width / 2, gameHeight - 50); // Center of bottom 100px
         }
 
         // Reposition Interactive Objects relative to new gameHeight

@@ -133,6 +133,22 @@ export class PersistenceManager {
     }
 
     /**
+     * Saves the home configuration (Wallpaper/Flooring).
+     * @param {object} config - { wallpaper: string, flooring: string }
+     */
+    saveHomeConfig(config) {
+        this._save("nadagotchi_home_config", config);
+    }
+
+    /**
+     * Loads the home configuration.
+     * @returns {object} { wallpaper: string, flooring: string }
+     */
+    loadHomeConfig() {
+        return this._load("nadagotchi_home_config") || { wallpaper: 'wallpaper_default', flooring: 'flooring_default' };
+    }
+
+    /**
      * Saves the global game settings to localStorage.
      * @param {object} settings - The settings object to save.
      */

@@ -26,8 +26,14 @@ export const ItemDefinitions = {
     "Chamomile": { type: "Consumable", description: "A calming tea to slow you down.", emoji: "🍵" },
 
     // Crafted Items (Furniture)
-    "Fancy Bookshelf": { type: "Furniture", description: "A beautiful bookshelf that makes studying more effective.", emoji: "📚" },
-    "Masterwork Chair": { type: "Furniture", description: "A chair of unparalleled craftsmanship.", emoji: "🪑" },
+    "Fancy Bookshelf": { type: "FURNITURE", description: "A beautiful bookshelf that makes studying more effective.", emoji: "📚" },
+    "Masterwork Chair": { type: "FURNITURE", description: "A chair of unparalleled craftsmanship.", emoji: "🪑" },
+
+    // Home Decor
+    "Blue Wallpaper": { type: "WALLPAPER", description: "Calming blue stripes.", emoji: "🟦", assetKey: "wallpaper_blue" },
+    "Brick Wallpaper": { type: "WALLPAPER", description: "Rustic red brick.", emoji: "🧱", assetKey: "wallpaper_brick" },
+    "Wood Flooring": { type: "FLOORING", description: "Polished oak planks.", emoji: "🟫", assetKey: "flooring_wood" },
+    "Tile Flooring": { type: "FLOORING", description: "Cool gray tiles.", emoji: "⬜", assetKey: "flooring_tile" },
 
     // Tools & Artifacts
     "Genetic Scanner": { type: "Tool", description: "Allows analysis of pet genetics.", emoji: "🧬" },
