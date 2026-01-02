@@ -1,4 +1,5 @@
 import { ItemDefinitions } from './ItemData.js';
+import { SoundSynthesizer } from './utils/SoundSynthesizer.js';
 
 /**
  * @fileoverview Preloads game assets.
@@ -360,6 +361,9 @@ export class PreloaderScene extends Phaser.Scene {
      * Transitions to the StartScene once loading is complete.
      */
     create() {
+        // Initialize Audio System (Singleton)
+        new SoundSynthesizer();
+
         // Updated to start StartScene instead of MainScene
         this.scene.start('StartScene');
     }
