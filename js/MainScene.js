@@ -53,7 +53,9 @@ export class MainScene extends Phaser.Scene {
         /** @type {object} Active housing configuration. */
         this.homeConfig = {
             wallpaper: 'cozy_wallpaper',
-            flooring: 'wood_flooring'
+            flooring: 'wood_flooring',
+            wallpaperItem: 'Cozy Wallpaper',
+            flooringItem: 'Wood Flooring'
         };
 
         // --- Indoor Navigation State ---
@@ -107,9 +109,12 @@ export class MainScene extends Phaser.Scene {
         // --- Pet Initialization ---
         const loadedPet = this.persistence.loadPet();
 
-        // Restore home config if available
+        // Restore home config if available, with migration support for new props
         if (loadedPet && loadedPet.homeConfig) {
             this.homeConfig = loadedPet.homeConfig;
+            // Legacy Migration: Ensure wallpaperItem/flooringItem exist if only keys were saved
+            if (!this.homeConfig.wallpaperItem) this.homeConfig.wallpaperItem = 'Default';
+            if (!this.homeConfig.flooringItem) this.homeConfig.flooringItem = 'Default';
         }
 
         if (data && data.newPetData) {
@@ -236,36 +241,35 @@ export class MainScene extends Phaser.Scene {
         // Let's rely on renderLocation() if it exists or create one.
     }
 
+    /**
+     * Updates the wallpaper texture and saves the configuration.
+     * @param {string} key - The new texture key.
+     */
     updateWallpaper(key) {
-        if (this.wallpaperLayer) {
-            this.wallpaperLayer.setTexture(key);
-            const config = this.persistence.loadHomeConfig();
-            config.wallpaper = key;
-            this.persistence.saveHomeConfig(config);
+        if (this.wallpaper) {
+            this.wallpaper.setTexture(key);
+            // Ensure tileSprite size is updated if needed, though usually fixed
+            // Persistence is handled by InventorySystem logic updating homeConfig,
+            // but we ensure synchronization here if called directly.
+            // Note: InventorySystem updates 'pet.homeConfig'.
+            // This scene uses 'this.homeConfig' which is a reference to 'pet.homeConfig'
+            // IF 'this.homeConfig' was assigned from 'loadedPet.homeConfig'.
+            // However, MainScene creates 'this.homeConfig' in constructor.
+            // In 'create', we do: `this.homeConfig = loadedPet.homeConfig;`.
+            // So they reference the same object.
+            // Thus, InventorySystem updates are reflected in 'this.homeConfig'.
+            // We just need to update the visual.
         }
     }
 
+    /**
+     * Updates the flooring texture and saves the configuration.
+     * @param {string} key - The new texture key.
+     */
     updateFlooring(key) {
-        if (this.flooringLayer) {
-            this.flooringLayer.setTexture(key);
-            const config = this.persistence.loadHomeConfig();
-            config.flooring = key;
-            this.persistence.saveHomeConfig(config);
+        if (this.flooring) {
+            this.flooring.setTexture(key);
         }
-
-        // Initial Rendering of Location
-        this.renderLocation();
-
-        // --- Tutorial Trigger ---
-        if (data && data.startTutorial) {
-            // Delay slightly to ensure UIScene is fully ready
-            this.time.delayedCall(500, () => {
-                this.game.events.emit(EventKeys.START_TUTORIAL);
-            });
-        }
-
-        // Listen for shutdown to clean up
-        this.events.on('shutdown', this.shutdown, this);
     }
 
     /**
@@ -380,6 +384,23 @@ export class MainScene extends Phaser.Scene {
             case EventKeys.PLACE_FURNITURE:
                 this.placeFurniture(data.x, data.y);
                 break;
+            case EventKeys.APPLY_HOME_DECOR: {
+                // data IS the itemName string from UIScene
+                const result = this.nadagotchi.inventorySystem.applyHomeDecor(data);
+                if (result.success) {
+                    SoundSynthesizer.instance.playChime();
+                    this.showNotification(result.message, '#00FF00');
+                    if (result.type === 'WALLPAPER') {
+                        this.updateWallpaper(result.assetKey);
+                    } else if (result.type === 'FLOORING') {
+                        this.updateFlooring(result.assetKey);
+                    }
+                } else {
+                    SoundSynthesizer.instance.playFailure();
+                    this.showNotification(result.message, '#FF0000');
+                }
+                break;
+            }
             case EventKeys.INTERACT_SCOUT: {
                 const text = this.nadagotchi.interact('Grizzled Scout');
                 if (text) this.scene.get('UIScene').showDialogue('Grizzled Scout', text);

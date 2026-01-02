@@ -6,7 +6,7 @@
 /**
  * Definitions for all items in the game.
  * Includes type, description, and visual representation.
- * @type {Object.<string, {type: string, description: string, emoji: string}>}
+ * @type {Object.<string, {type: string, description: string, emoji: string, assetKey?: string, consumable?: boolean}>}
  */
 export const ItemDefinitions = {
     // Raw Materials
@@ -29,16 +29,15 @@ export const ItemDefinitions = {
     "Fancy Bookshelf": { type: "FURNITURE", description: "A beautiful bookshelf that makes studying more effective.", emoji: "📚" },
     "Masterwork Chair": { type: "FURNITURE", description: "A chair of unparalleled craftsmanship.", emoji: "🪑" },
 
-    // Home Decor
-    "Blue Wallpaper": { type: "WALLPAPER", description: "Calming blue stripes.", emoji: "🟦", assetKey: "wallpaper_blue" },
-    "Brick Wallpaper": { type: "WALLPAPER", description: "Rustic red brick.", emoji: "🧱", assetKey: "wallpaper_brick" },
-    "Wood Flooring": { type: "FLOORING", description: "Polished oak planks.", emoji: "🟫", assetKey: "flooring_wood" },
-    "Tile Flooring": { type: "FLOORING", description: "Cool gray tiles.", emoji: "⬜", assetKey: "flooring_tile" },
+    // Home Decor (Wallpaper)
+    "Blue Wallpaper": { type: "WALLPAPER", description: "Calming blue stripes.", emoji: "🟦", assetKey: "wallpaper_blue", consumable: false },
+    "Brick Wallpaper": { type: "WALLPAPER", description: "Rustic red brick.", emoji: "🧱", assetKey: "wallpaper_brick", consumable: false },
+    "Cozy Wallpaper": { type: "WALLPAPER", description: "Warm, striped wallpaper that makes a room feel like home.", emoji: "🏠", assetKey: "cozy_wallpaper", consumable: false },
 
-    // Home Decor (Wallpaper & Flooring)
-    "Cozy Wallpaper": { type: "Wallpaper", description: "Warm, striped wallpaper that makes a room feel like home.", emoji: "🏠" },
-    "Wood Flooring": { type: "Flooring", description: "Polished wood planks for a classic look.", emoji: "🪵" },
-    "Grass Flooring": { type: "Flooring", description: "Lush green grass for that outdoor feel.", emoji: "🌿" },
+    // Home Decor (Flooring)
+    "Wood Flooring": { type: "FLOORING", description: "Polished oak planks.", emoji: "🟫", assetKey: "flooring_wood", consumable: false },
+    "Tile Flooring": { type: "FLOORING", description: "Cool gray tiles.", emoji: "⬜", assetKey: "flooring_tile", consumable: false },
+    "Grass Flooring": { type: "FLOORING", description: "Lush green grass for that outdoor feel.", emoji: "🌿", assetKey: "grass_flooring", consumable: false },
 
     // Tools & Artifacts
     "Genetic Scanner": { type: "Tool", description: "Allows analysis of pet genetics.", emoji: "🧬" },
@@ -64,9 +63,25 @@ export const Recipes = {
         materials: { "Berries": 5, "Sticks": 2 }, // Dye + Structure
         description: "Warm, striped wallpaper that makes a room feel like home."
     },
+    "Blue Wallpaper": {
+        materials: { "Berries": 5, "Sticks": 2 }, // Placeholder cost
+        description: "Calming blue stripes."
+    },
+    "Brick Wallpaper": {
+        materials: { "Sticks": 5, "Shiny Stone": 1 },
+        description: "Rustic red brick."
+    },
     "Wood Flooring": {
         materials: { "Sticks": 10 },
         description: "Polished wood planks for a classic look."
+    },
+    "Tile Flooring": {
+         materials: { "Shiny Stone": 2, "Sticks": 2 },
+         description: "Cool gray tiles."
+    },
+    "Grass Flooring": {
+         materials: { "Berries": 2, "Sticks": 2 },
+         description: "Lush green grass."
     },
     "Logic-Boosting Snack": {
         materials: { "Berries": 3 },
