@@ -107,7 +107,8 @@ const mockGraphics = {
     setPosition: jest.fn(),
     clear: jest.fn(),
     fillStyle: jest.fn().mockReturnThis(),
-    fillRect: jest.fn()
+    fillRect: jest.fn(),
+    setVisible: jest.fn().mockReturnThis()
 };
 
 const mockInput = {
@@ -152,6 +153,10 @@ const mockAdd = {
         y: 0,
         width: 100,
         height: 100
+        setOrigin: jest.fn().mockReturnThis(),
+        setVisible: jest.fn().mockReturnThis(),
+        setSize: jest.fn().mockReturnThis(),
+        setPosition: jest.fn().mockReturnThis()
     })
 };
 
@@ -208,6 +213,8 @@ describe('Housing System (MainScene)', () => {
 
         // Mock Managers to avoid instantiation errors
         scene.persistence = mockPersistence;
+        scene.skyManager = { update: jest.fn(), resize: jest.fn(), setVisible: jest.fn() };
+        scene.lightingManager = { update: jest.fn(), resize: jest.fn() };
     });
 
     // Helper to bypass full create() complexity
@@ -221,6 +228,8 @@ describe('Housing System (MainScene)', () => {
 
         // RE-INJECT Mocks after create()
         scene.persistence = mockPersistence;
+        scene.skyManager = { update: jest.fn(), resize: jest.fn(), setVisible: jest.fn() };
+        scene.lightingManager = { update: jest.fn(), resize: jest.fn() };
 
         // Mock Nadagotchi behavior
         scene.nadagotchi = {

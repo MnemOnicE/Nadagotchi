@@ -13,9 +13,15 @@ export class PersistenceManager {
      * Saves the active Nadagotchi's data to localStorage.
      * @param {object} nadagotchiData - The Nadagotchi object to save.
      */
-    savePet(nadagotchiData) {
+    savePet(nadagotchiData, homeConfig = null) {
+        // Merge homeConfig into the save payload if provided
+        const payload = { ...nadagotchiData };
+        if (homeConfig) {
+            payload.homeConfig = homeConfig;
+        }
+
         // Pass the UUID as salt to bind the save file to this specific pet instance
-        this._save("nadagotchi_save", nadagotchiData, nadagotchiData.uuid);
+        this._save("nadagotchi_save", payload, payload.uuid);
     }
 
     /**

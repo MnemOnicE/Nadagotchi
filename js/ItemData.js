@@ -35,6 +35,11 @@ export const ItemDefinitions = {
     "Wood Flooring": { type: "FLOORING", description: "Polished oak planks.", emoji: "🟫", assetKey: "flooring_wood" },
     "Tile Flooring": { type: "FLOORING", description: "Cool gray tiles.", emoji: "⬜", assetKey: "flooring_tile" },
 
+    // Home Decor (Wallpaper & Flooring)
+    "Cozy Wallpaper": { type: "Wallpaper", description: "Warm, striped wallpaper that makes a room feel like home.", emoji: "🏠" },
+    "Wood Flooring": { type: "Flooring", description: "Polished wood planks for a classic look.", emoji: "🪵" },
+    "Grass Flooring": { type: "Flooring", description: "Lush green grass for that outdoor feel.", emoji: "🌿" },
+
     // Tools & Artifacts
     "Genetic Scanner": { type: "Tool", description: "Allows analysis of pet genetics.", emoji: "🧬" },
     "Ancient Tome": { type: "Tool", description: "A dusty book filled with ancient wisdom.", emoji: "📖" },
@@ -51,6 +56,18 @@ export const Recipes = {
         materials: { "Sticks": 5, "Shiny Stone": 1 },
         description: "A beautiful bookshelf that makes studying more effective."
     },
+    "Masterwork Chair": {
+        materials: { "Sticks": 10, "Shiny Stone": 2 },
+        description: "A chair of unparalleled craftsmanship."
+    },
+    "Cozy Wallpaper": {
+        materials: { "Berries": 5, "Sticks": 2 }, // Dye + Structure
+        description: "Warm, striped wallpaper that makes a room feel like home."
+    },
+    "Wood Flooring": {
+        materials: { "Sticks": 10 },
+        description: "Polished wood planks for a classic look."
+    },
     "Logic-Boosting Snack": {
         materials: { "Berries": 3 },
         description: "A tasty snack that fuels the mind."
@@ -62,10 +79,6 @@ export const Recipes = {
     "Stamina-Up Tea": {
         materials: { "Berries": 1, "Sticks": 1 },
         description: "A warm tea that restores energy."
-    },
-    "Masterwork Chair": {
-        materials: { "Sticks": 10, "Shiny Stone": 2 },
-        description: "A chair of unparalleled craftsmanship."
     },
     "Metabolism-Slowing Tonic": {
         materials: { "Frostbloom": 1, "Sticks": 2 },
