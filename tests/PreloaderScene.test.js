@@ -9,6 +9,11 @@ const mockGraphics = () => ({
     fillCircle: jest.fn().mockReturnThis(),
     lineStyle: jest.fn().mockReturnThis(),
     strokeRect: jest.fn().mockReturnThis(),
+    lineBetween: jest.fn().mockReturnThis(),
+    beginPath: jest.fn().mockReturnThis(),
+    moveTo: jest.fn().mockReturnThis(),
+    lineTo: jest.fn().mockReturnThis(),
+    fill: jest.fn().mockReturnThis(),
     generateTexture: jest.fn(),
     destroy: jest.fn()
 });
@@ -25,6 +30,9 @@ const mockCanvas = () => ({
 global.Phaser = {
     Scene: class Scene {
         constructor(config) { this.config = config; }
+    },
+    Math: {
+        Between: jest.fn(() => 0)
     },
     GameObjects: {
         Graphics: class Graphics { constructor() { Object.assign(this, mockGraphics()); } }
@@ -80,6 +88,18 @@ describe('PreloaderScene', () => {
         scene.scene = {
             start: jest.fn()
         };
+    });
+
+    test('create should initialize SoundSynthesizer', () => {
+        // Reset singleton if it exists (from other tests)
+        const { SoundSynthesizer } = require('../js/utils/SoundSynthesizer');
+        SoundSynthesizer.instance = undefined;
+
+        scene.create();
+
+        expect(SoundSynthesizer.instance).toBeDefined();
+        // Since we are mocking everything, verifying instance existence is enough
+        // to prove the constructor was called.
     });
 
     test('preload should load static assets', () => {
