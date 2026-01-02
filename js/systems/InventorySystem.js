@@ -1,4 +1,5 @@
 import { Config } from '../Config.js';
+import { ItemDefinitions } from '../ItemData.js';
 
 /**
  * @fileoverview System for managing items, inventory, crafting, and foraging.
@@ -147,6 +148,55 @@ export class InventorySystem {
 
         this.pet.addJournalEntry(`I went foraging in the ${this.pet.location} and found a ${foundItem}.`);
         this.pet.location = 'Home';
+    }
+
+    /**
+     * Applies a decor item (Wallpaper/Flooring) to the home, swapping the previous item back to inventory.
+     * @param {string} itemName - The name of the item to apply (e.g., "Blue Wallpaper").
+     * @returns {object} Result object { success: boolean, assetKey: string, type: string, message: string }
+     */
+    applyHomeDecor(itemName) {
+        // 1. Validation
+        if (!this.pet.inventory[itemName] || this.pet.inventory[itemName] <= 0) {
+            return { success: false, message: "You don't own this item." };
+        }
+
+        const def = ItemDefinitions[itemName];
+        if (!def || (def.type !== 'WALLPAPER' && def.type !== 'FLOORING')) {
+            return { success: false, message: "This item cannot be used as decor." };
+        }
+
+        // 2. Identify Target Config Property
+        // WALLPAPER -> wallpaperItem, FLOORING -> flooringItem
+        const configKey = def.type === 'WALLPAPER' ? 'wallpaperItem' : 'flooringItem';
+        const assetConfigKey = def.type === 'WALLPAPER' ? 'wallpaper' : 'flooring'; // Legacy asset key
+
+        // 3. Swap Logic
+        // Check if there is a current item to return
+        const currentItemName = this.pet.homeConfig[configKey];
+        if (currentItemName && currentItemName !== 'Default') {
+            // Return old item to inventory
+            this.addItem(currentItemName, 1);
+        }
+
+        // Remove new item from inventory
+        this.removeItem(itemName, 1);
+
+        // 4. Update Config
+        this.pet.homeConfig[configKey] = itemName;
+        this.pet.homeConfig[assetConfigKey] = def.assetKey;
+
+        // Persist immediately
+        this.pet.persistence.saveHomeConfig(this.pet.homeConfig);
+
+        this.pet.addJournalEntry(`I redecorated the room with ${itemName}. Looks cozy!`);
+
+        return {
+            success: true,
+            assetKey: def.assetKey,
+            type: def.type,
+            message: `Applied ${itemName}.`
+        };
     }
 
     /**
