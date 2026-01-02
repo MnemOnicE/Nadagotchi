@@ -12,6 +12,7 @@ export class PersistenceManager {
     /**
      * Saves the active Nadagotchi's data to localStorage.
      * @param {object} nadagotchiData - The Nadagotchi object to save.
+     * @param {object} [homeConfig=null] - The home configuration object.
      */
     savePet(nadagotchiData, homeConfig = null) {
         // Merge homeConfig into the save payload if provided
@@ -69,7 +70,8 @@ export class PersistenceManager {
             "nadagotchi_journal",
             "nadagotchi_recipes",
             "nadagotchi_calendar",
-            "nadagotchi_furniture"
+            "nadagotchi_furniture",
+            "nadagotchi_home_config"
         ];
         keysToClear.forEach(key => localStorage.removeItem(key));
     }
@@ -124,7 +126,7 @@ export class PersistenceManager {
 
     /**
      * Saves the placed furniture data to localStorage.
-     * @param {Array<object>} furnitureData - The array of placed furniture objects.
+     * @param {object} furnitureData - The furniture object keyed by room ID.
      */
     saveFurniture(furnitureData) {
         this._save("nadagotchi_furniture", furnitureData);
@@ -132,15 +134,25 @@ export class PersistenceManager {
 
     /**
      * Loads the placed furniture data from localStorage.
-     * @returns {Array<object>|null} The array of placed furniture objects, or null if no save exists.
+     * Supports migration from legacy array format to room-keyed object.
+     * @returns {object} The furniture object keyed by room ID (e.g., { "Entryway": [] }).
      */
     loadFurniture() {
-        return this._load("nadagotchi_furniture");
+        const data = this._load("nadagotchi_furniture");
+        if (!data) return { "Entryway": [] }; // Default empty state
+
+        // Migration: If data is an Array (Legacy), wrap it in Entryway
+        if (Array.isArray(data)) {
+            console.log("Migrating legacy furniture data to Entryway...");
+            return { "Entryway": data };
+        }
+
+        return data;
     }
 
     /**
      * Saves the home configuration (Wallpaper/Flooring).
-     * @param {object} config - { wallpaper: string, flooring: string }
+     * @param {object} config - { rooms: { "Entryway": { ... } } }
      */
     saveHomeConfig(config) {
         this._save("nadagotchi_home_config", config);
@@ -148,10 +160,40 @@ export class PersistenceManager {
 
     /**
      * Loads the home configuration.
-     * @returns {object} { wallpaper: string, flooring: string }
+     * Supports migration from legacy flat format to room-keyed object.
+     * @returns {object} { rooms: { "Entryway": { ... } } }
      */
     loadHomeConfig() {
-        return this._load("nadagotchi_home_config") || { wallpaper: 'wallpaper_default', flooring: 'flooring_default' };
+        const data = this._load("nadagotchi_home_config");
+
+        // Default State
+        const defaultState = {
+            rooms: {
+                "Entryway": { wallpaper: 'wallpaper_default', flooring: 'flooring_default', wallpaperItem: 'Default', flooringItem: 'Default' }
+            }
+        };
+
+        if (!data) return defaultState;
+
+        // Migration: If data has 'wallpaper' at root level (Legacy)
+        if (data.wallpaper || data.flooring) {
+            console.log("Migrating legacy home config to Entryway...");
+            return {
+                rooms: {
+                    "Entryway": {
+                        wallpaper: data.wallpaper || 'wallpaper_default',
+                        flooring: data.flooring || 'flooring_default',
+                        wallpaperItem: data.wallpaperItem || 'Default',
+                        flooringItem: data.flooringItem || 'Default'
+                    }
+                }
+            };
+        }
+
+        // Ensure rooms object exists if partial data
+        if (!data.rooms) return defaultState;
+
+        return data;
     }
 
     /**
