@@ -1,5 +1,6 @@
 import { Config } from '../Config.js';
 import { ItemDefinitions } from '../ItemData.js';
+import { RoomDefinitions } from '../RoomDefinitions.js';
 
 /**
  * @fileoverview System for managing items, inventory, crafting, and foraging.
@@ -153,9 +154,10 @@ export class InventorySystem {
     /**
      * Applies a decor item (Wallpaper/Flooring) to the home, swapping the previous item back to inventory.
      * @param {string} itemName - The name of the item to apply (e.g., "Blue Wallpaper").
+     * @param {string} [roomId='Entryway'] - The ID of the room to decorate.
      * @returns {object} Result object { success: boolean, assetKey: string, type: string, message: string }
      */
-    applyHomeDecor(itemName) {
+    applyHomeDecor(itemName, roomId = 'Entryway') {
         // 1. Validation
         if (!this.pet.inventory[itemName] || this.pet.inventory[itemName] <= 0) {
             return { success: false, message: "You don't own this item." };
@@ -166,14 +168,30 @@ export class InventorySystem {
             return { success: false, message: "This item cannot be used as decor." };
         }
 
+        // Validate Room
+        if (!RoomDefinitions[roomId]) {
+            return { success: false, message: "Invalid Room." };
+        }
+
+        // Ensure room config exists in pet state (migration/init handle this usually, but safety first)
+        if (!this.pet.homeConfig.rooms) this.pet.homeConfig.rooms = {};
+        if (!this.pet.homeConfig.rooms[roomId]) {
+            this.pet.homeConfig.rooms[roomId] = {
+                wallpaper: RoomDefinitions[roomId].defaultWallpaper,
+                flooring: RoomDefinitions[roomId].defaultFlooring,
+                wallpaperItem: 'Default',
+                flooringItem: 'Default'
+            };
+        }
+
+        const roomConfig = this.pet.homeConfig.rooms[roomId];
+
         // 2. Identify Target Config Property
-        // WALLPAPER -> wallpaperItem, FLOORING -> flooringItem
         const configKey = def.type === 'WALLPAPER' ? 'wallpaperItem' : 'flooringItem';
-        const assetConfigKey = def.type === 'WALLPAPER' ? 'wallpaper' : 'flooring'; // Legacy asset key
+        const assetConfigKey = def.type === 'WALLPAPER' ? 'wallpaper' : 'flooring';
 
         // 3. Swap Logic
-        // Check if there is a current item to return
-        const currentItemName = this.pet.homeConfig[configKey];
+        const currentItemName = roomConfig[configKey];
         if (currentItemName && currentItemName !== 'Default') {
             // Return old item to inventory
             this.addItem(currentItemName, 1);
@@ -183,19 +201,19 @@ export class InventorySystem {
         this.removeItem(itemName, 1);
 
         // 4. Update Config
-        this.pet.homeConfig[configKey] = itemName;
-        this.pet.homeConfig[assetConfigKey] = def.assetKey;
+        roomConfig[configKey] = itemName;
+        roomConfig[assetConfigKey] = def.assetKey;
 
         // Persist immediately
         this.pet.persistence.saveHomeConfig(this.pet.homeConfig);
 
-        this.pet.addJournalEntry(`I redecorated the room with ${itemName}. Looks cozy!`);
+        this.pet.addJournalEntry(`I redecorated the ${RoomDefinitions[roomId].name} with ${itemName}. Looks cozy!`);
 
         return {
             success: true,
             assetKey: def.assetKey,
             type: def.type,
-            message: `Applied ${itemName}.`
+            message: `Applied ${itemName} to ${RoomDefinitions[roomId].name}.`
         };
     }
 

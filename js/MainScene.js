@@ -11,6 +11,7 @@ import { EventKeys } from './EventKeys.js';
 import { Config } from './Config.js';
 import { SoundSynthesizer } from './utils/SoundSynthesizer.js';
 import { ItemDefinitions } from './ItemData.js';
+import { RoomDefinitions } from './RoomDefinitions.js';
 
 /**
  * @fileoverview The primary game scene.
@@ -36,8 +37,8 @@ export class MainScene extends Phaser.Scene {
         this.isPlacementMode = false;
         /** @type {?string} The name of the furniture item currently selected for placement. */
         this.selectedFurniture = null;
-        /** @type {Array<{key: string, x: number, y: number, sprite?: Phaser.GameObjects.Sprite}>} List of furniture placed in the world. */
-        this.placedFurniture = [];
+        /** @type {object} Dictionary of furniture placed in each room. { RoomID: [{key, x, y, sprite?}] } */
+        this.placedFurniture = {};
         /** @type {boolean} Whether the player is currently in decoration (edit/move) mode. */
         this.isDecorationMode = false;
         /** @type {?string} The career associated with the currently active minigame (for validation). */
@@ -50,13 +51,10 @@ export class MainScene extends Phaser.Scene {
         // --- Housing System II State ---
         /** @type {string} Current view location: 'GARDEN' (default), 'INDOOR'. */
         this.location = 'GARDEN';
+        /** @type {string} Current Room ID when location is INDOOR. */
+        this.currentRoom = 'Entryway';
         /** @type {object} Active housing configuration. */
-        this.homeConfig = {
-            wallpaper: 'cozy_wallpaper',
-            flooring: 'wood_flooring',
-            wallpaperItem: 'Cozy Wallpaper',
-            flooringItem: 'Wood Flooring'
-        };
+        this.homeConfig = null; // Loaded in create
 
         // --- Indoor Navigation State ---
         /** @type {boolean} Whether the pet is currently moving autonomously. */
@@ -101,7 +99,9 @@ export class MainScene extends Phaser.Scene {
         this.skyManager = new SkyManager(this);
 
         // --- Indoor Backgrounds (Wallpaper/Flooring) ---
-        this.createIndoorBackgrounds();
+        // Will be initialized in renderLocation / changeRoom
+        this.wallpaperLayer = this.add.tileSprite(400, 200, 800, 400, 'wallpaper_default').setVisible(false).setDepth(1);
+        this.flooringLayer = this.add.tileSprite(400, 500, 800, 200, 'flooring_default').setVisible(false).setDepth(1);
 
         this.ground = this.add.graphics();
         // Drawing handled in resize
@@ -109,23 +109,42 @@ export class MainScene extends Phaser.Scene {
         // --- Pet Initialization ---
         const loadedPet = this.persistence.loadPet();
 
-        // Restore home config if available, with migration support for new props
+        // Load Home Config with Migration
+        this.homeConfig = this.persistence.loadHomeConfig();
+
+        // Ensure local references match
         if (loadedPet && loadedPet.homeConfig) {
-            this.homeConfig = loadedPet.homeConfig;
-            // Legacy Migration: Ensure wallpaperItem/flooringItem exist if only keys were saved
-            if (!this.homeConfig.wallpaperItem) this.homeConfig.wallpaperItem = 'Default';
-            if (!this.homeConfig.flooringItem) this.homeConfig.flooringItem = 'Default';
+             // If loadedPet has homeConfig, sync it.
+             if (!loadedPet.homeConfig.rooms) {
+                 // Migration needed on the loaded pet object
+                 const migrated = this.persistence.loadHomeConfig(); // This runs migration logic
+                 loadedPet.homeConfig = migrated;
+             }
+             this.homeConfig = loadedPet.homeConfig;
         }
 
         if (data && data.newPetData) {
             // New Game: Pass null for loadedData to ensure defaults are used
             this.nadagotchi = new Nadagotchi(data.newPetData.dominantArchetype, null);
+            // Re-initialize homeConfig for new game
+            this.homeConfig = { rooms: { "Entryway": { ...RoomDefinitions["Entryway"] } } };
+            // Ensure visual defaults map to item defaults
+            this.homeConfig.rooms.Entryway.wallpaperItem = 'Default';
+            this.homeConfig.rooms.Entryway.flooringItem = 'Default';
         } else {
             // Resume Game or Default Fallback
             this.nadagotchi = new Nadagotchi('Adventurer', loadedPet);
         }
 
-        if (!loadedPet && !(data && data.newPetData)) this.persistence.savePet(this.nadagotchi, this.homeConfig);
+        if (!loadedPet && !(data && data.newPetData)) {
+             this.persistence.savePet(this.nadagotchi, this.homeConfig);
+        }
+
+        // Sync reference just in case
+        this.nadagotchi.homeConfig = this.homeConfig;
+
+        // Expose for verification/testing
+        window.mainScene = this;
 
         // --- Settings Initialization ---
         const savedSettings = this.persistence.loadSettings();
@@ -138,13 +157,6 @@ export class MainScene extends Phaser.Scene {
         /** @type {number} Timestamp of the last stats update emission to throttle UI refreshes. */
         this.lastStatsUpdateTime = -1000;
 
-        // --- Housing Visuals (Indoor) ---
-        // Wallpaper (Tiled Sprite would be best, but TileSprite in 3.55 has issues with texture resizing sometimes, using Image for simplicity or Tiled if stable)
-        // Using TiledSprite for repeating patterns
-        this.wallpaper = this.add.tileSprite(0, 0, this.scale.width, this.scale.height, this.homeConfig.wallpaper).setOrigin(0, 0).setVisible(false);
-
-        // Flooring
-        this.flooring = this.add.tileSprite(0, 0, this.scale.width, 100, this.homeConfig.flooring).setOrigin(0, 0).setVisible(false);
 
         // --- Transition Objects ---
         this.houseObj = this.add.sprite(0, 0, 'house_icon').setInteractive({ useHandCursor: true }).setVisible(false)
@@ -152,6 +164,9 @@ export class MainScene extends Phaser.Scene {
 
         this.doorObj = this.add.sprite(0, 0, 'door_icon').setInteractive({ useHandCursor: true }).setVisible(false)
             .on('pointerdown', () => this.exitHouse());
+
+        // Room Navigation Zones
+        this.roomDoors = [];
 
         // --- Game Objects ---
         this.sprite = this.add.sprite(this.scale.width / 2, this.scale.height / 2, 'pet').setScale(4);
@@ -213,52 +228,13 @@ export class MainScene extends Phaser.Scene {
         this.loadFurniture();
     }
 
-    createIndoorBackgrounds() {
-        // Load config
-        const homeConfig = this.persistence.loadHomeConfig();
-        const wallpaperKey = homeConfig.wallpaper || 'wallpaper_default';
-        const flooringKey = homeConfig.flooring || 'flooring_default';
-
-        // Create TileSprites
-        // Positions will be updated in resize()
-        this.wallpaperLayer = this.add.tileSprite(400, 200, 800, 400, wallpaperKey);
-        this.flooringLayer = this.add.tileSprite(400, 500, 800, 200, flooringKey);
-
-        // Depth: Behind ground (which is around index 5-10?)
-        // Sky is usually 0. Ground is graphics.
-        // We want Wallpaper/Flooring to be BEHIND Furniture/Pet but ABOVE Sky?
-        // Actually, if we are INDOORS, we hide Sky/Ground?
-        // Or we just overlay them?
-        // Let's set depth low.
-        this.wallpaperLayer.setDepth(1);
-        this.flooringLayer.setDepth(1);
-
-        // Hide by default if we assume start in Garden?
-        // Or show if we are INDOORS?
-        // Current logic doesn't strictly switch location visuals yet aside from Sky/Lighting.
-        // For now, let's keep them visible as a "layer" or toggle them.
-        // If the roadmap implies "Housing System", users expect to see it.
-        // Let's rely on renderLocation() if it exists or create one.
-    }
-
     /**
      * Updates the wallpaper texture and saves the configuration.
      * @param {string} key - The new texture key.
      */
     updateWallpaper(key) {
-        if (this.wallpaper) {
-            this.wallpaper.setTexture(key);
-            // Ensure tileSprite size is updated if needed, though usually fixed
-            // Persistence is handled by InventorySystem logic updating homeConfig,
-            // but we ensure synchronization here if called directly.
-            // Note: InventorySystem updates 'pet.homeConfig'.
-            // This scene uses 'this.homeConfig' which is a reference to 'pet.homeConfig'
-            // IF 'this.homeConfig' was assigned from 'loadedPet.homeConfig'.
-            // However, MainScene creates 'this.homeConfig' in constructor.
-            // In 'create', we do: `this.homeConfig = loadedPet.homeConfig;`.
-            // So they reference the same object.
-            // Thus, InventorySystem updates are reflected in 'this.homeConfig'.
-            // We just need to update the visual.
+        if (this.wallpaperLayer) {
+            this.wallpaperLayer.setTexture(key);
         }
     }
 
@@ -267,8 +243,8 @@ export class MainScene extends Phaser.Scene {
      * @param {string} key - The new texture key.
      */
     updateFlooring(key) {
-        if (this.flooring) {
-            this.flooring.setTexture(key);
+        if (this.flooringLayer) {
+            this.flooringLayer.setTexture(key);
         }
     }
 
@@ -386,7 +362,8 @@ export class MainScene extends Phaser.Scene {
                 break;
             case EventKeys.APPLY_HOME_DECOR: {
                 // data IS the itemName string from UIScene
-                const result = this.nadagotchi.inventorySystem.applyHomeDecor(data);
+                // We pass currentRoom to ensure it applies to the correct context
+                const result = this.nadagotchi.inventorySystem.applyHomeDecor(data, this.currentRoom);
                 if (result.success) {
                     SoundSynthesizer.instance.playChime();
                     this.showNotification(result.message, '#00FF00');
@@ -569,7 +546,6 @@ export class MainScene extends Phaser.Scene {
         const dashboardHeight = Math.floor(height * Config.UI.DASHBOARD_HEIGHT_RATIO);
         const gameHeight = height - dashboardHeight;
 
-        // Resize the Main Camera to only render in the top portion
         this.cameras.main.setSize(width, gameHeight);
         this.cameras.main.setViewport(0, 0, width, gameHeight);
 
@@ -585,22 +561,6 @@ export class MainScene extends Phaser.Scene {
         if (this.skyManager) this.skyManager.resize(width, gameHeight);
         if (this.lightingManager) this.lightingManager.resize(width, gameHeight);
 
-        // Resize Wallpaper & Flooring
-        if (this.wallpaper) {
-            this.wallpaper.setSize(width, gameHeight);
-        }
-        if (this.flooring) {
-            this.flooring.setSize(width, 100);
-            this.flooring.setPosition(0, gameHeight - 100);
-        }
-
-        // Redraw Ground relative to new gameHeight
-        if (this.ground) {
-             this.ground.clear();
-             this.ground.fillStyle(0x228B22, 1);
-             this.ground.fillRect(0, gameHeight - 100, width, 100);
-        }
-
         // Resize Wallpaper/Flooring
         if (this.wallpaperLayer) {
             this.wallpaperLayer.setSize(width, gameHeight - 100); // Floor is 100px high
@@ -609,6 +569,13 @@ export class MainScene extends Phaser.Scene {
         if (this.flooringLayer) {
             this.flooringLayer.setSize(width, 100);
             this.flooringLayer.setPosition(width / 2, gameHeight - 50); // Center of bottom 100px
+        }
+
+        // Redraw Ground relative to new gameHeight
+        if (this.ground) {
+             this.ground.clear();
+             this.ground.fillStyle(0x228B22, 1);
+             this.ground.fillRect(0, gameHeight - 100, width, 100);
         }
 
         // Reposition Interactive Objects relative to new gameHeight
@@ -623,9 +590,14 @@ export class MainScene extends Phaser.Scene {
 
         // Reposition Transition Objects
         // House -> Garden (Center-Left)
-        if (this.houseObj) this.houseObj.setPosition(100, gameHeight - 80);
+        if (this.houseObj) {
+            this.houseObj.setPosition(100, gameHeight - 80);
+        }
         // Door -> Indoor (Right Side)
         if (this.doorObj) this.doorObj.setPosition(width - 50, gameHeight - 130);
+
+        // Resize Room Doors
+        this._refreshRoomDoors();
 
         // Update Date Text
         this.dateText.setPosition(width - 10, 10);
@@ -636,7 +608,8 @@ export class MainScene extends Phaser.Scene {
      */
     enterHouse() {
         this.location = 'INDOOR';
-        this.renderLocation();
+        this.currentRoom = 'Entryway';
+        this.changeRoom('Entryway');
         SoundSynthesizer.instance.playChime();
         this.showNotification("Welcome Home!", '#FFFFFF');
     }
@@ -652,6 +625,75 @@ export class MainScene extends Phaser.Scene {
     }
 
     /**
+     * Switches the current indoor room.
+     * @param {string} roomId
+     */
+    changeRoom(roomId) {
+        if (!RoomDefinitions[roomId]) return;
+
+        // Save furniture for previous room (state is live in placedFurniture object, just ensuring persist call logic knows)
+        // No explicit save needed here, PersistenceManager handles full object.
+
+        this.currentRoom = roomId;
+        const def = RoomDefinitions[roomId];
+
+        // 1. Update Backgrounds
+        // Check homeConfig for this room
+        // Ensure config exists
+        if (!this.homeConfig.rooms[roomId]) {
+             this.homeConfig.rooms[roomId] = {
+                 wallpaper: def.defaultWallpaper,
+                 flooring: def.defaultFlooring,
+                 wallpaperItem: 'Default',
+                 flooringItem: 'Default'
+             };
+        }
+        const config = this.homeConfig.rooms[roomId];
+        this.updateWallpaper(config.wallpaper);
+        this.updateFlooring(config.flooring);
+
+        // 2. Render
+        this.renderLocation();
+
+        // 3. Navigation Doors
+        this._refreshRoomDoors();
+
+        this.showNotification(`${def.name}`, '#FFFFFF');
+    }
+
+    _refreshRoomDoors() {
+        // Clear existing doors
+        if (this.roomDoors) {
+            this.roomDoors.forEach(d => d.destroy());
+        }
+        this.roomDoors = [];
+
+        if (this.location !== 'INDOOR') return;
+
+        const def = RoomDefinitions[this.currentRoom];
+        const connections = def.connections;
+
+        // Create navigation targets
+        connections.forEach((targetId, index) => {
+            if (!RoomDefinitions[targetId].unlocked) return;
+
+            // Simple placement logic: Spaced out at the top
+            // Width/Height available via cameras
+            const w = this.cameras.main.width;
+            const h = this.cameras.main.height;
+            const x = (w / (connections.length + 1)) * (index + 1);
+            const y = 80;
+
+            const door = this.add.text(x, y, `Go to\n${RoomDefinitions[targetId].name}`, {
+                 backgroundColor: '#333', padding: { x: 5, y: 5 }, align: 'center', fontFamily: 'VT323, Arial'
+            }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+            door.on('pointerdown', () => this.changeRoom(targetId));
+            this.roomDoors.push(door);
+        });
+    }
+
+    /**
      * Updates the visibility of world objects based on the current location.
      */
     renderLocation() {
@@ -661,30 +703,49 @@ export class MainScene extends Phaser.Scene {
         this.skyManager.setVisible(!isIndoor); // Hide Sky Indoors
         if (this.ground) this.ground.setVisible(!isIndoor);
 
-        if (this.wallpaper) this.wallpaper.setVisible(isIndoor);
-        if (this.flooring) this.flooring.setVisible(isIndoor);
+        if (this.wallpaperLayer) this.wallpaperLayer.setVisible(isIndoor);
+        if (this.flooringLayer) this.flooringLayer.setVisible(isIndoor);
 
         // 2. Transition Objects
         if (this.houseObj) this.houseObj.setVisible(!isIndoor);
-        if (this.doorObj) this.doorObj.setVisible(isIndoor);
+        if (this.doorObj) this.doorObj.setVisible(isIndoor && this.currentRoom === 'Entryway'); // Only exit from Entryway
 
-        // 3. Furniture (Indoor Only)
-        // Toggle placed furniture
-        this.placedFurniture.forEach(item => {
-            if (item.sprite) item.sprite.setVisible(isIndoor);
+        // 3. Furniture (Indoor Only - Per Room)
+        // Hide ALL placed furniture first
+        Object.values(this.placedFurniture).flat().forEach(item => {
+            if (item.sprite) item.sprite.setVisible(false);
         });
-        // Toggle pre-placed furniture (Assumed Indoor)
-        if (this.bookshelf) this.bookshelf.setVisible(isIndoor);
-        if (this.plant) this.plant.setVisible(isIndoor);
-        if (this.craftingTable) this.craftingTable.setVisible(isIndoor);
+
+        if (isIndoor) {
+            // Show furniture for CURRENT ROOM
+            const roomFurniture = this.placedFurniture[this.currentRoom] || [];
+            roomFurniture.forEach(item => {
+                if (item.sprite) item.sprite.setVisible(true);
+            });
+        }
+
+        // Toggle pre-placed furniture (Only visible in Entryway? Or assume Garden specific?)
+        // Bookshelf/Plant/Crafting Table are currently "Global Indoor" or "Entryway" items in legacy logic.
+        // Let's make them visible only in "Entryway" for now to keep them somewhere.
+        const isEntryway = isIndoor && this.currentRoom === 'Entryway';
+        if (this.bookshelf) this.bookshelf.setVisible(isEntryway);
+        if (this.plant) this.plant.setVisible(isEntryway);
+        if (this.craftingTable) this.craftingTable.setVisible(isEntryway);
 
         // 4. NPCs (Garden Only)
         if (this.npcScout) this.npcScout.setVisible(!isIndoor);
         if (this.npcArtisan) this.npcArtisan.setVisible(!isIndoor);
         if (this.npcVillager) this.npcVillager.setVisible(!isIndoor);
 
-        // 5. FX
-        // Lighting manager stays active (day/night affects indoor too)
+        // 5. Navigation Doors (Refresh visibility)
+        if (!isIndoor) {
+             this.roomDoors.forEach(d => d.destroy());
+             this.roomDoors = [];
+        } else {
+            // Refresh called in changeRoom usually, but if we just toggle Garden->Indoor
+            // we need to ensure they are there.
+            if (this.roomDoors.length === 0) this._refreshRoomDoors();
+        }
     }
 
     /**
@@ -984,8 +1045,9 @@ export class MainScene extends Phaser.Scene {
             this.saveFurniture(); // Save positions on exit
         }
 
-        // Update interactivity of all placed furniture
-        this.placedFurniture.forEach(item => {
+        // Update interactivity of all placed furniture (in current room)
+        const roomFurniture = this.placedFurniture[this.currentRoom] || [];
+        roomFurniture.forEach(item => {
             if (item.sprite) {
                 if (this.isDecorationMode) {
                     item.sprite.setTint(0xDDDDDD);
@@ -996,49 +1058,6 @@ export class MainScene extends Phaser.Scene {
                 }
             }
         });
-    }
-
-    /**
-     * Helper method to create a furniture sprite with common behaviors (interactions, drag logic).
-     * @param {string} key - The item key (e.g., 'Fancy Bookshelf').
-     * @param {number} x - The x-coordinate.
-     * @param {number} y - The y-coordinate.
-     * @returns {Phaser.GameObjects.Sprite} The created sprite.
-     * @private
-     */
-    _createFurnitureSprite(key, x, y) {
-        const furnitureKey = key.toLowerCase().replace(' ', '_');
-        const newFurniture = this.add.sprite(x, y, furnitureKey).setInteractive({ useHandCursor: true });
-
-        // Interaction logic
-        newFurniture.on('pointerdown', () => {
-            if (!this.isDecorationMode) {
-                this.game.events.emit(EventKeys.UI_ACTION, `INTERACT_${key.toUpperCase().replace(' ', '_')}`);
-            }
-        });
-
-        // Drag logic
-        newFurniture.on('drag', (pointer, dragX, dragY) => {
-            if (this.isDecorationMode) {
-                // Bound check
-                const maxY = this.cameras.main.height - 32;
-                newFurniture.x = dragX;
-                newFurniture.y = Math.min(dragY, maxY);
-            }
-        });
-
-        newFurniture.on('dragend', () => {
-            if (this.isDecorationMode) {
-                // Update the stored position in the array
-                const entry = this.placedFurniture.find(f => f.sprite === newFurniture);
-                if (entry) {
-                    entry.x = newFurniture.x;
-                    entry.y = newFurniture.y;
-                }
-            }
-        });
-
-        return newFurniture;
     }
 
     /**
@@ -1060,7 +1079,10 @@ export class MainScene extends Phaser.Scene {
             const furnitureKey = this.selectedFurniture.toLowerCase().replace(' ', '_');
             const newFurniture = this.createPlacedFurnitureSprite(x, y, furnitureKey, this.selectedFurniture);
 
-            this.placedFurniture.push({ key: this.selectedFurniture, x: x, y: y, sprite: newFurniture });
+            if (!this.placedFurniture[this.currentRoom]) {
+                 this.placedFurniture[this.currentRoom] = [];
+            }
+            this.placedFurniture[this.currentRoom].push({ key: this.selectedFurniture, x: x, y: y, sprite: newFurniture });
             this.saveFurniture();
 
             SoundSynthesizer.instance.playChime();
@@ -1095,10 +1117,14 @@ export class MainScene extends Phaser.Scene {
         sprite.on('dragend', () => {
             if (this.isDecorationMode) {
                 // Update the stored position in the array
-                const entry = this.placedFurniture.find(f => f.sprite === sprite);
-                if (entry) {
-                    entry.x = sprite.x;
-                    entry.y = sprite.y;
+                // Find in CURRENT ROOM
+                const roomList = this.placedFurniture[this.currentRoom];
+                if (roomList) {
+                    const entry = roomList.find(f => f.sprite === sprite);
+                    if (entry) {
+                        entry.x = sprite.x;
+                        entry.y = sprite.y;
+                    }
                 }
             }
         });
@@ -1111,8 +1137,12 @@ export class MainScene extends Phaser.Scene {
                 // PICK UP LOGIC
                 sprite.destroy();
 
-                const index = this.placedFurniture.findIndex(f => f.key === itemName && f.x === x && f.y === y);
-                if (index > -1) this.placedFurniture.splice(index, 1);
+                const roomList = this.placedFurniture[this.currentRoom] || [];
+                const index = roomList.findIndex(f => f.key === itemName && f.x === x && f.y === y); // Match original props? No, sprites can move.
+                // Better to match by sprite instance
+                const liveIndex = roomList.findIndex(f => f.sprite === sprite);
+
+                if (liveIndex > -1) roomList.splice(liveIndex, 1);
                 this.saveFurniture();
 
                 if (this.selectedFurniture) {
@@ -1138,7 +1168,10 @@ export class MainScene extends Phaser.Scene {
      * Serializes only the necessary data (key, x, y), stripping sprite references.
      */
     saveFurniture() {
-        const serializable = this.placedFurniture.map(f => ({ key: f.key, x: f.x, y: f.y }));
+        const serializable = {};
+        for (const [roomId, items] of Object.entries(this.placedFurniture)) {
+            serializable[roomId] = items.map(f => ({ key: f.key, x: f.x, y: f.y }));
+        }
         this.persistence.saveFurniture(serializable);
     }
 
@@ -1146,14 +1179,24 @@ export class MainScene extends Phaser.Scene {
      * Loads and renders previously placed furniture.
      */
     loadFurniture() {
-        const loadedData = this.persistence.loadFurniture() || [];
-        // Clear array but keep data reference logic clean
-        this.placedFurniture = [];
+        // loadFurniture returns { RoomID: [...] } now (via PersistenceManager migration)
+        const loadedData = this.persistence.loadFurniture() || { "Entryway": [] };
 
-        loadedData.forEach(furniture => {
-            const furnitureKey = furniture.key.toLowerCase().replace(' ', '_');
-            const sprite = this.createPlacedFurnitureSprite(furniture.x, furniture.y, furnitureKey, furniture.key);
-            this.placedFurniture.push({ key: furniture.key, x: furniture.x, y: furniture.y, sprite: sprite });
-        });
+        // Clear object but keep reference
+        this.placedFurniture = {};
+
+        for (const [roomId, items] of Object.entries(loadedData)) {
+            this.placedFurniture[roomId] = [];
+            items.forEach(furniture => {
+                const furnitureKey = furniture.key.toLowerCase().replace(' ', '_');
+                // Create sprite but keep invisible initially
+                const sprite = this.createPlacedFurnitureSprite(furniture.x, furniture.y, furnitureKey, furniture.key);
+                sprite.setVisible(false); // Default invisible, renderLocation will show current room's
+                this.placedFurniture[roomId].push({ key: furniture.key, x: furniture.x, y: furniture.y, sprite: sprite });
+            });
+        }
+
+        // Trigger initial render to show Entryway furniture
+        this.renderLocation();
     }
 }
