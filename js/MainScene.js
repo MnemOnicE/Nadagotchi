@@ -100,10 +100,10 @@ export class MainScene extends Phaser.Scene {
 
         // --- Indoor Backgrounds (Wallpaper/Flooring) ---
         // Will be initialized in renderLocation / changeRoom
-        this.wallpaperLayer = this.add.tileSprite(400, 200, 800, 400, 'wallpaper_default').setVisible(false).setDepth(1);
-        this.flooringLayer = this.add.tileSprite(400, 500, 800, 200, 'flooring_default').setVisible(false).setDepth(1);
+        this.wallpaperLayer = this.add.tileSprite(400, 200, 800, 400, 'wallpaper_default').setVisible(false).setDepth(0);
+        this.flooringLayer = this.add.tileSprite(400, 500, 800, 200, 'flooring_default').setVisible(false).setDepth(0);
 
-        this.ground = this.add.graphics();
+        this.ground = this.add.graphics().setDepth(0);
         // Drawing handled in resize
 
         // --- Pet Initialization ---
@@ -159,43 +159,43 @@ export class MainScene extends Phaser.Scene {
 
 
         // --- Transition Objects ---
-        this.houseObj = this.add.sprite(0, 0, 'house_icon').setInteractive({ useHandCursor: true }).setVisible(false)
+        this.houseObj = this.add.sprite(0, 0, 'house_icon').setInteractive({ useHandCursor: true }).setVisible(false).setDepth(5)
             .on('pointerdown', () => this.enterHouse());
 
-        this.doorObj = this.add.sprite(0, 0, 'door_icon').setInteractive({ useHandCursor: true }).setVisible(false)
+        this.doorObj = this.add.sprite(0, 0, 'door_icon').setInteractive({ useHandCursor: true }).setVisible(false).setDepth(5)
             .on('pointerdown', () => this.exitHouse());
 
         // Room Navigation Zones
         this.roomDoors = [];
 
         // --- Game Objects ---
-        this.sprite = this.add.sprite(this.scale.width / 2, this.scale.height / 2, 'pet').setScale(4);
-        this.thoughtBubble = this.add.sprite(this.sprite.x, this.sprite.y - 40, 'thought_bubble').setVisible(false);
-        this.exploreBubble = this.add.sprite(this.sprite.x, this.sprite.y - 40, 'explore_bubble').setVisible(false);
+        this.sprite = this.add.sprite(this.scale.width / 2, this.scale.height / 2, 'pet').setScale(4).setDepth(20);
+        this.thoughtBubble = this.add.sprite(this.sprite.x, this.sprite.y - 40, 'thought_bubble').setVisible(false).setDepth(21);
+        this.exploreBubble = this.add.sprite(this.sprite.x, this.sprite.y - 40, 'explore_bubble').setVisible(false).setDepth(21);
 
         // --- Interactive Objects (Furniture & NPCs) ---
         // Initial positions; will be updated in resize
         // Adjusted initial Y positions to 250 to avoid overlapping with top-left/right UI text
-        this.bookshelf = this.add.sprite(80, 250, 'bookshelf').setInteractive({ useHandCursor: true })
+        this.bookshelf = this.add.sprite(80, 250, 'bookshelf').setInteractive({ useHandCursor: true }).setDepth(5)
             .on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, EventKeys.INTERACT_BOOKSHELF));
-        this.plant = this.add.sprite(this.scale.width - 80, 250, 'plant').setInteractive({ useHandCursor: true })
+        this.plant = this.add.sprite(this.scale.width - 80, 250, 'plant').setInteractive({ useHandCursor: true }).setDepth(5)
             .on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, EventKeys.INTERACT_PLANT));
 
         // Items anchored to bottom will be positioned in resize() to ensure they respect gameHeight
-        this.craftingTable = this.add.sprite(80, 0, 'crafting_table').setInteractive({ useHandCursor: true })
+        this.craftingTable = this.add.sprite(80, 0, 'crafting_table').setInteractive({ useHandCursor: true }).setDepth(5)
             .on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, EventKeys.OPEN_CRAFTING_MENU));
 
         // Add NPCs to the scene (Only visible in GARDEN)
         // Anchored to bottom, will be set in resize()
-        this.npcScout = this.add.sprite(this.scale.width - 150, 0, 'npc_scout').setInteractive({ useHandCursor: true })
+        this.npcScout = this.add.sprite(this.scale.width - 150, 0, 'npc_scout').setInteractive({ useHandCursor: true }).setDepth(10)
             .on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, EventKeys.INTERACT_SCOUT, 'Grizzled Scout'));
 
         // Anchored to top/center - Y adjusted to 250
-        this.npcArtisan = this.add.sprite(this.scale.width / 2 + 100, 250, 'npc_artisan').setInteractive({ useHandCursor: true })
+        this.npcArtisan = this.add.sprite(this.scale.width / 2 + 100, 250, 'npc_artisan').setInteractive({ useHandCursor: true }).setDepth(10)
             .on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, EventKeys.INTERACT_ARTISAN, 'Master Artisan'));
 
         // Anchored to Center - Y adjusted to center of game view in resize()
-        this.npcVillager = this.add.sprite(150, 0, 'npc_villager').setInteractive({ useHandCursor: true })
+        this.npcVillager = this.add.sprite(150, 0, 'npc_villager').setInteractive({ useHandCursor: true }).setDepth(10)
             .on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, EventKeys.INTERACT_VILLAGER, 'Sickly Villager'));
 
         // --- Post-FX & UI ---
@@ -203,7 +203,7 @@ export class MainScene extends Phaser.Scene {
         this.lightingManager = new LightingManager(this);
 
         // Date Text (Top-Right)
-        this.dateText = this.add.text(this.scale.width - 10, 10, '', { fontFamily: 'VT323, Arial', fontSize: '20px', color: '#ffffff', backgroundColor: 'rgba(0,0,0,0.5)', padding: { x: 5, y: 3 } }).setOrigin(1, 0);
+        this.dateText = this.add.text(this.scale.width - 10, 10, '', { fontFamily: 'VT323, Arial', fontSize: '20px', color: '#ffffff', backgroundColor: 'rgba(0,0,0,0.5)', padding: { x: 5, y: 3 } }).setOrigin(1, 0).setDepth(100);
         this.scene.launch('UIScene');
 
         // --- Timers and Event Listeners ---
@@ -1102,7 +1102,7 @@ export class MainScene extends Phaser.Scene {
      * @returns {Phaser.GameObjects.Sprite} The created sprite.
      */
     createPlacedFurnitureSprite(x, y, textureKey, itemName) {
-        const sprite = this.add.sprite(x, y, textureKey).setInteractive({ useHandCursor: true });
+        const sprite = this.add.sprite(x, y, textureKey).setInteractive({ useHandCursor: true }).setDepth(5);
 
         // Add drag listeners to support Decoration Mode
         sprite.on('drag', (pointer, dragX, dragY) => {
@@ -1144,10 +1144,6 @@ export class MainScene extends Phaser.Scene {
 
                 if (liveIndex > -1) roomList.splice(liveIndex, 1);
                 this.saveFurniture();
-
-                if (this.selectedFurniture) {
-                    this.nadagotchi.returnItemToInventory(this.selectedFurniture);
-                }
 
                 this.nadagotchi.returnItemToInventory(itemName);
 
