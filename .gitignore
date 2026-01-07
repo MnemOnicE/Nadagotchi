@@ -1,3 +1,6 @@
 node_modules
 coverage/
 server.log
+dist/
+android/app/build/
+android/.gradle/
