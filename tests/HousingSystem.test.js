@@ -134,7 +134,10 @@ const mockPersistence = {
 // MainScene Mocks
 const mockAdd = {
     sprite: jest.fn().mockReturnValue(mockSprite),
-    graphics: jest.fn().mockReturnValue(mockGraphics),
+    graphics: jest.fn().mockReturnValue({
+        ...mockGraphics,
+        setDepth: jest.fn().mockReturnThis()
+    }),
     text: jest.fn().mockReturnValue({
         setOrigin: jest.fn().mockReturnThis(),
         setPosition: jest.fn().mockReturnThis(),
@@ -153,10 +156,6 @@ const mockAdd = {
         y: 0,
         width: 100,
         height: 100
-        setOrigin: jest.fn().mockReturnThis(),
-        setVisible: jest.fn().mockReturnThis(),
-        setSize: jest.fn().mockReturnThis(),
-        setPosition: jest.fn().mockReturnThis()
     })
 };
 

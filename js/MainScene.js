@@ -202,8 +202,7 @@ export class MainScene extends Phaser.Scene {
         // Initialize LightingManager (creates lightTexture and image)
         this.lightingManager = new LightingManager(this);
 
-        // Date Text (Top-Right)
-        this.dateText = this.add.text(this.scale.width - 10, 10, '', { fontFamily: 'VT323, Arial', fontSize: '20px', color: '#ffffff', backgroundColor: 'rgba(0,0,0,0.5)', padding: { x: 5, y: 3 } }).setOrigin(1, 0).setDepth(100);
+        // Date Text removed - handled by UIScene Calendar Dropdown
         this.scene.launch('UIScene');
 
         // --- Timers and Event Listeners ---
@@ -223,7 +222,6 @@ export class MainScene extends Phaser.Scene {
 
         // --- Final Setup ---
         this.resize({ width: this.scale.width, height: this.scale.height });
-        this.updateDateText();
         this.skyManager.update(); // Initial draw
         this.loadFurniture();
     }
@@ -292,7 +290,6 @@ export class MainScene extends Phaser.Scene {
             }
 
             this.eventManager.update();
-            this.updateDateText();
         }
 
         // UPDATE properties, DO NOT reassign object
@@ -311,7 +308,21 @@ export class MainScene extends Phaser.Scene {
         // OPTIMIZATION: Throttle stats updates to ~10Hz (every 100ms)
         // This prevents excessive UI rebuilding in UIScene while keeping the display responsive.
         if (time - this.lastStatsUpdate > 100) {
-            this.game.events.emit(EventKeys.UPDATE_STATS, { nadagotchi: this.nadagotchi, settings: this.gameSettings });
+            // Include full world state for the new calendar dropdown
+            const date = this.calendar.getDate();
+            const fullState = {
+                nadagotchi: this.nadagotchi,
+                settings: this.gameSettings,
+                world: {
+                    timePeriod: this.worldState.time,
+                    season: this.worldState.season,
+                    day: date.day,
+                    year: date.year,
+                    weather: this.worldState.weather,
+                    event: this.worldState.activeEvent
+                }
+            };
+            this.game.events.emit(EventKeys.UPDATE_STATS, fullState);
             this.lastStatsUpdate = time;
         }
 
@@ -599,8 +610,6 @@ export class MainScene extends Phaser.Scene {
         // Resize Room Doors
         this._refreshRoomDoors();
 
-        // Update Date Text
-        this.dateText.setPosition(width - 10, 10);
     }
 
     /**
@@ -749,17 +758,6 @@ export class MainScene extends Phaser.Scene {
     }
 
     /**
-     * Updates the text object that displays the current in-game date and any active events.
-     */
-    updateDateText() {
-        const date = this.calendar.getDate();
-        const activeEvent = this.eventManager.getActiveEvent();
-        let text = `${date.season}, Day ${date.day}`;
-        if (activeEvent) text += `\nEvent: ${activeEvent.description}`;
-        this.dateText.setText(text);
-    }
-
-    /**
      * Checks if a career has just been unlocked and displays a temporary visual notification.
      */
     checkCareerUnlock() {
@@ -808,14 +806,12 @@ export class MainScene extends Phaser.Scene {
         // Kill existing tweens on the sprite to prevent conflicts
         this.tweens.killTweensOf(this.sprite);
 
-        // Calculate center position
-        const dashboardHeight = Math.floor(this.scale.height * Config.UI.DASHBOARD_HEIGHT_RATIO);
-        const gameHeight = this.scale.height - dashboardHeight;
-        const centerX = this.scale.width / 2;
-        const centerY = gameHeight / 2;
+        // Fix for "Movement Warp" bug: Use the sprite's CURRENT position as the base
+        // instead of resetting to screen center.
+        const baseX = this.sprite.x;
+        const baseY = this.sprite.y;
 
-        // Reset properties to base state
-        this.sprite.setPosition(centerX, centerY);
+        // Reset properties to base state (except position)
         this.sprite.setScale(4);
         this.sprite.setAngle(0);
 
@@ -824,7 +820,7 @@ export class MainScene extends Phaser.Scene {
                 // Happy Hop: Squash and Stretch + Jump
                 this.tweens.add({
                     targets: this.sprite,
-                    y: centerY - 15,
+                    y: baseY - 15,
                     scaleY: 3.8,
                     scaleX: 4.2,
                     duration: 400,
@@ -850,7 +846,7 @@ export class MainScene extends Phaser.Scene {
                 // Angry Shake: Fast horizontal vibration
                 this.tweens.add({
                     targets: this.sprite,
-                    x: { from: centerX - 3, to: centerX + 3 },
+                    x: { from: baseX - 3, to: baseX + 3 },
                     duration: 50,
                     yoyo: true,
                     repeat: -1,
@@ -971,7 +967,7 @@ export class MainScene extends Phaser.Scene {
                 this.sprite.y = centerY; // Reset Y
                 this.nextMoveTime = this.time.now + Phaser.Math.Between(2000, 5000); // Wait 2-5s before next move
 
-                // Resume idle
+                // Resume idle with updated position
                 if (this.currentMood) this.startIdleAnimation(this.currentMood);
             }
         });

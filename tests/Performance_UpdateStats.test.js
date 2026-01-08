@@ -131,7 +131,8 @@ describe('Performance: Update Stats Throttling', () => {
             loadFurniture: jest.fn().mockReturnValue([]),
             saveFurniture: jest.fn(),
             loadSettings: jest.fn().mockReturnValue({}),
-            loadAchievements: jest.fn().mockReturnValue({ unlocked: [], progress: {} })
+            loadAchievements: jest.fn().mockReturnValue({ unlocked: [], progress: {} }),
+            loadHomeConfig: jest.fn().mockReturnValue({ rooms: { "Entryway": { wallpaperItem: 'Default', flooringItem: 'Default' } } })
         }));
 
         Calendar.mockImplementation(() => ({
@@ -165,7 +166,8 @@ describe('Performance: Update Stats Throttling', () => {
             sprite: jest.fn(() => new Phaser.GameObjects.Sprite()),
             image: jest.fn(() => new Phaser.GameObjects.Image()),
             graphics: jest.fn(() => new Phaser.GameObjects.Graphics()),
-            text: jest.fn(() => new Phaser.GameObjects.Text())
+            text: jest.fn(() => new Phaser.GameObjects.Text()),
+            tileSprite: jest.fn(() => new Phaser.GameObjects.Sprite())
         };
         scene.cameras = {
             main: {

@@ -14,7 +14,7 @@ export class WorldClock {
      * @param {Phaser.Scene} scene - The Phaser scene this clock is attached to.
      * @param {number} dayDurationInSeconds - The total duration of a 24-hour in-game day in real-world seconds.
      */
-    constructor(scene, dayDurationInSeconds = 240) { // 4 minutes for a full day
+    constructor(scene, dayDurationInSeconds = 420) { // 7 minutes for a full day
         /** @type {Phaser.Scene} Reference to the Phaser scene. */
         this.scene = scene;
         /** @type {number} Duration of a game day in milliseconds. */
