@@ -22,9 +22,7 @@ export class LightingManager {
         this.lightImage = this.scene.add.image(0, 0, 'light').setOrigin(0).setBlendMode('MULTIPLY').setVisible(false).setDepth(100); // High depth to cover everything except UI
 
         /** @type {number} Cache to avoid redundant drawing */
-        this.lastLightX = -9999;
-        /** @type {number} Cache to avoid redundant drawing */
-        this.lastLightY = -9999;
+        this.lastLightHash = '';
     }
 
     /**
@@ -32,12 +30,12 @@ export class LightingManager {
      * Should be called in the scene's update loop.
      */
     update() {
-        // Only render if needed (Night or Dusk) - Logic controlled by MainScene, but we handle the drawing here.
-        // Or better, MainScene controls visibility, we just draw if visible?
-        // The original code in MainScene.update checks time and sets visible.
-        // "if (this.worldState.time === "Night" || this.worldState.time === "Dusk") { this.drawLight(); this.lightImage.setVisible(true); }"
-
-        // We will expose the draw/update logic. MainScene will call it.
+        // Fix for "Entryway dark" bug: Disable lighting mask when INDOORS.
+        // The darkness overlay should only apply outdoors.
+        if (this.scene.location === 'INDOOR') {
+            this.lightImage.setVisible(false);
+            return;
+        }
 
         const worldState = this.scene.worldState;
         if (worldState && (worldState.time === "Night" || worldState.time === "Dusk")) {
@@ -50,25 +48,58 @@ export class LightingManager {
 
     /**
      * Internal method to draw the spotlight gradient.
+     * Supports multiple light sources via 'screen' composite operation.
      */
     drawLight() {
         if (!this.lightTexture) return;
 
-        // OPTIMIZATION: Skip expensive radial gradient creation if the light source (sprite) hasn't moved.
-        if (this.lastLightX === this.scene.sprite.x && this.lastLightY === this.scene.sprite.y) return;
-        this.lastLightX = this.scene.sprite.x;
-        this.lastLightY = this.scene.sprite.y;
+        // Collect all light sources
+        const lights = [];
 
-        this.lightTexture.clear();
-        // Use the current size
+        // 1. Player (Increased Radius)
+        lights.push({ x: this.scene.sprite.x, y: this.scene.sprite.y, r: 250 }); // Increased from 150 to 250
+
+        // 2. NPCs (If visible) - Small ambient lights
+        if (this.scene.npcScout && this.scene.npcScout.visible) lights.push({ x: this.scene.npcScout.x, y: this.scene.npcScout.y, r: 80 });
+        if (this.scene.npcArtisan && this.scene.npcArtisan.visible) lights.push({ x: this.scene.npcArtisan.x, y: this.scene.npcArtisan.y, r: 80 });
+        if (this.scene.npcVillager && this.scene.npcVillager.visible) lights.push({ x: this.scene.npcVillager.x, y: this.scene.npcVillager.y, r: 80 });
+
+        // Generate hash to check for changes (Optimization)
+        const currentHash = lights.map(l => `${Math.floor(l.x)},${Math.floor(l.y)},${l.r}`).join('|');
+        if (this.lastLightHash === currentHash) return;
+        this.lastLightHash = currentHash;
+
+        const ctx = this.lightTexture.context;
         const width = this.lightTexture.width;
         const height = this.lightTexture.height;
 
-        const gradient = this.lightTexture.context.createRadialGradient(this.scene.sprite.x, this.scene.sprite.y, 50, this.scene.sprite.x, this.scene.sprite.y, 150);
-        gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-        gradient.addColorStop(1, 'rgba(0, 0, 0, 1)');
-        this.lightTexture.context.fillStyle = gradient;
-        this.lightTexture.context.fillRect(0, 0, width, height);
+        // Clear with Black (Darkness)
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.fillStyle = 'rgba(0, 0, 0, 1)'; // Full darkness base
+        ctx.fillRect(0, 0, width, height);
+
+        // Cut out lights (White = Transparent in MULTIPLY mode, but here we want to draw Light)
+        // Wait, current implementation uses MULTIPLY blend mode for the Image.
+        // So White pixels in texture = Original Scene Color. Black pixels = Black.
+        // We want to draw White circles on a Black background.
+
+        // Use 'screen' to blend multiple white circles together additively maxing at white
+        ctx.globalCompositeOperation = 'screen';
+
+        lights.forEach(light => {
+            const gradient = ctx.createRadialGradient(light.x, light.y, light.r * 0.2, light.x, light.y, light.r);
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 1)'); // Core brightness
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)'); // Fade to black/transparent
+
+            ctx.fillStyle = gradient;
+            // Draw a rect covering the light area to apply the gradient
+            // Optimization: Don't fill whole screen for small lights
+            ctx.fillRect(light.x - light.r, light.y - light.r, light.r * 2, light.r * 2);
+        });
+
+        // Reset composite
+        ctx.globalCompositeOperation = 'source-over';
+
         this.lightTexture.refresh();
     }
 

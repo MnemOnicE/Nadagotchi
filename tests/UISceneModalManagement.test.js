@@ -87,6 +87,7 @@ jest.mock('../js/ButtonFactory', () => {
                     setAlpha: jest.fn().mockReturnThis(),
                     setVisible: jest.fn().mockReturnThis(),
                     setScale: jest.fn().mockReturnThis(),
+                    setDisabled: jest.fn().mockReturnThis(),
                     destroy: jest.fn(),
                     x: x,
                     y: y

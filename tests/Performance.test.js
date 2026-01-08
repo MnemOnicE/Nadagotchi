@@ -137,7 +137,8 @@ describe('Performance Repro: Event Emission', () => {
             saveFurniture: jest.fn(),
             loadSettings: jest.fn().mockReturnValue({ volume: 0.5, gameSpeed: 1.0 }),
             saveSettings: jest.fn(),
-            loadAchievements: jest.fn().mockReturnValue({ unlocked: [], progress: {} })
+            loadAchievements: jest.fn().mockReturnValue({ unlocked: [], progress: {} }),
+            loadHomeConfig: jest.fn().mockReturnValue({ rooms: { "Entryway": { wallpaperItem: 'Default', flooringItem: 'Default' } } })
         }));
 
         Calendar.mockImplementation(() => ({
@@ -172,7 +173,8 @@ describe('Performance Repro: Event Emission', () => {
             sprite: jest.fn(() => new Phaser.GameObjects.Sprite()),
             image: jest.fn(() => new Phaser.GameObjects.Image()),
             graphics: jest.fn(() => new Phaser.GameObjects.Graphics()),
-            text: jest.fn(() => new Phaser.GameObjects.Text())
+            text: jest.fn(() => new Phaser.GameObjects.Text()),
+            tileSprite: jest.fn(() => new Phaser.GameObjects.Sprite())
         };
         scene.cameras = {
             main: {

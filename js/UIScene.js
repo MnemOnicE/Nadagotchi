@@ -84,6 +84,8 @@ export class UIScene extends Phaser.Scene {
         this.game.events.on(EventKeys.ACHIEVEMENT_UNLOCKED, this.handleAchievementUnlocked, this);
         this.scale.on('resize', this.resize, this);
 
+        // --- Calendar Dropdown ---
+        this.calendarDropdown = this.createCalendarDropdown();
 
         // --- Modals (Containers) ---
         this.journalModal = this.createModal("Journal");
@@ -336,6 +338,11 @@ export class UIScene extends Phaser.Scene {
         if (this.jobBoardButton) this.jobBoardButton.setPosition(width - 130, height - 60);
         if (this.retireButton) this.retireButton.setPosition(width - 10, 50);
 
+        // Update Calendar Dropdown Position (Top-Right)
+        if (this.calendarDropdown) {
+             this.calendarDropdown.setPosition(width - 160, 0); // Anchored top-right
+        }
+
         // Refresh Tabs (Action Buttons)
         this.showTab(this.currentTab);
 
@@ -428,12 +435,20 @@ export class UIScene extends Phaser.Scene {
      * @param {object} data - The entire Nadagotchi object from MainScene.
      */
     updateStatsUI(data) {
+        // Handle both old and new data structures temporarily for robustness
+        let worldState = null;
         if (data.nadagotchi) {
             this.nadagotchiData = data.nadagotchi;
             this.settingsData = data.settings;
+            worldState = data.world;
         } else {
             this.nadagotchiData = data;
         }
+
+        if (worldState) {
+            this.updateCalendarDropdown(worldState);
+        }
+
         const { stats, skills, mood, dominantArchetype, currentCareer, location, isLegacyReady, newCareerUnlocked } = this.nadagotchiData;
         const moodEmoji = this.getMoodEmoji(mood);
         const text = `Location: ${location}\n` +
@@ -486,6 +501,76 @@ export class UIScene extends Phaser.Scene {
             { fontFamily: 'VT323, Arial', fontSize: '32px', color: '#000', backgroundColor: '#fff', padding: { x: 10, y: 5 }, align: 'center' }
         ).setOrigin(0.5);
         this.time.delayedCall(3000, () => txt.destroy());
+    }
+
+    createCalendarDropdown() {
+        const width = 150;
+        const collapsedHeight = 30;
+        const expandedHeight = 120;
+
+        const container = this.add.container(0, 0); // Position set in resize
+
+        // Background
+        const bg = this.add.rectangle(0, 0, width, collapsedHeight, 0x000000, 0.7)
+            .setOrigin(0, 0)
+            .setStrokeStyle(2, 0xFFFFFF)
+            .setInteractive({ useHandCursor: true });
+
+        // Text (Collapsed) - "Clock Icon + Day/Night"
+        const headerText = this.add.text(10, 5, "🕒 Day", {
+            fontFamily: 'VT323, monospace', fontSize: '20px', color: '#FFFFFF'
+        });
+
+        // Expanded Content Container (Hidden by default)
+        const contentContainer = this.add.container(0, collapsedHeight);
+        contentContainer.setVisible(false);
+
+        // Expanded BG
+        const contentBg = this.add.rectangle(0, 0, width, expandedHeight - collapsedHeight, 0x222222, 0.9)
+            .setOrigin(0, 0)
+            .setStrokeStyle(1, 0x888888);
+
+        // Expanded Text
+        const detailsText = this.add.text(10, 10, "Year: 1\nSpring\nDay 1\nWeather: Sunny", {
+            fontFamily: 'VT323, monospace', fontSize: '16px', color: '#CCCCCC', lineSpacing: 5
+        });
+
+        contentContainer.add([contentBg, detailsText]);
+        container.add([bg, headerText, contentContainer]);
+
+        // Interaction
+        container.isExpanded = false;
+        container.headerText = headerText;
+        container.detailsText = detailsText;
+        container.contentContainer = contentContainer;
+        container.bg = bg;
+
+        bg.on('pointerdown', () => {
+            container.isExpanded = !container.isExpanded;
+            contentContainer.setVisible(container.isExpanded);
+            bg.setSize(width, container.isExpanded ? expandedHeight : collapsedHeight);
+            // Bring to top
+            container.setDepth(200);
+        });
+
+        return container;
+    }
+
+    updateCalendarDropdown(worldState) {
+        if (!this.calendarDropdown) return;
+
+        const { timePeriod, season, day, year, weather, event } = worldState;
+
+        // Update Header
+        const timeIcon = (timePeriod === 'Night' || timePeriod === 'Dusk' || timePeriod === 'Dawn') ? '🌙' : '☀️';
+        this.calendarDropdown.headerText.setText(`${timeIcon} ${timePeriod}`);
+
+        // Update Details
+        let details = `Year ${year}\n${season}, Day ${day}\n${weather}`;
+        if (event) {
+            details += `\nEvent: ${event.name}`;
+        }
+        this.calendarDropdown.detailsText.setText(details);
     }
 
     startTutorial() {
@@ -601,10 +686,63 @@ export class UIScene extends Phaser.Scene {
     openJournal() {
         this.closeAllModals();
         const entries = new PersistenceManager().loadJournal();
-        const text = entries.length ? entries.slice().reverse().map(e => `[${e.date}]\n${e.text}`).join('\n\n---\n\n') : "No entries yet.";
-        this.journalModal.content.setText(text);
+
+        // Pagination State attached to the modal
+        const modal = this.journalModal;
+        modal.entries = entries.slice().reverse(); // Newest first
+        modal.currentPage = 0;
+        modal.entriesPerPage = 3;
+
+        // Create Navigation Buttons if they don't exist
+        if (!modal.navButtons) {
+            const mw = this.getModalWidth();
+            const mh = this.getModalHeight();
+            const yPos = mh/2 - 40;
+
+            modal.btnPrev = ButtonFactory.createButton(this, -80, yPos, "< Prev", () => this.changeJournalPage(-1), { width: 80, height: 30 });
+            modal.btnNext = ButtonFactory.createButton(this, 80, yPos, "Next >", () => this.changeJournalPage(1), { width: 80, height: 30 });
+            modal.pageIndicator = this.add.text(0, yPos, "1/1", { fontFamily: 'VT323', fontSize: '20px' }).setOrigin(0.5);
+
+            modal.add([modal.btnPrev, modal.btnNext, modal.pageIndicator]);
+            modal.navButtons = true; // Flag to avoid recreation
+        }
+
+        this.updateJournalPage();
         this.journalModal.setVisible(true);
         this.scene.pause('MainScene');
+    }
+
+    changeJournalPage(delta) {
+        const modal = this.journalModal;
+        const totalPages = Math.ceil(modal.entries.length / modal.entriesPerPage) || 1;
+
+        let newPage = modal.currentPage + delta;
+        if (newPage < 0) newPage = 0;
+        if (newPage >= totalPages) newPage = totalPages - 1;
+
+        modal.currentPage = newPage;
+        this.updateJournalPage();
+    }
+
+    updateJournalPage() {
+        const modal = this.journalModal;
+        const totalPages = Math.ceil(modal.entries.length / modal.entriesPerPage) || 1;
+        const start = modal.currentPage * modal.entriesPerPage;
+        const pageEntries = modal.entries.slice(start, start + modal.entriesPerPage);
+
+        const text = pageEntries.length ? pageEntries.map(e => `[${e.date}]\n${e.text}`).join('\n\n---\n\n') : "No entries yet.";
+
+        modal.content.setText(text);
+        modal.pageIndicator.setText(`${modal.currentPage + 1}/${totalPages}`);
+
+        // Update Button States
+        modal.btnPrev.setDisabled(modal.currentPage === 0);
+        modal.btnNext.setDisabled(modal.currentPage >= totalPages - 1);
+
+        // Visual feedback for disabled buttons handled by ButtonFactory usually,
+        // but we can add extra alpha here if needed.
+        modal.btnPrev.setAlpha(modal.currentPage === 0 ? 0.5 : 1);
+        modal.btnNext.setAlpha(modal.currentPage >= totalPages - 1 ? 0.5 : 1);
     }
 
     openRecipeBook() {

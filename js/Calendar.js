@@ -20,9 +20,12 @@ export class Calendar {
             this.day = loadedData.day;
             /** @type {string} The current season (Spring, Summer, Autumn, Winter). */
             this.season = loadedData.season;
+            /** @type {number} The current year. */
+            this.year = loadedData.year || 1;
         } else {
             this.day = 1;
             this.season = 'Spring';
+            this.year = 1;
         }
         /** @type {number} The number of days per season. */
         this.daysPerSeason = 28; // For example, 4 weeks
@@ -50,13 +53,18 @@ export class Calendar {
         const currentSeasonIndex = seasons.indexOf(this.season);
         const nextSeasonIndex = (currentSeasonIndex + 1) % seasons.length;
         this.season = seasons[nextSeasonIndex];
+
+        // If we wrapped back to Spring, increment the year
+        if (this.season === 'Spring') {
+            this.year++;
+        }
     }
 
     /**
      * Retrieves the current date.
-     * @returns {{day: number, season: string}} An object containing the current day and season.
+     * @returns {{day: number, season: string, year: number}} An object containing the current day, season, and year.
      */
     getDate() {
-        return { day: this.day, season: this.season };
+        return { day: this.day, season: this.season, year: this.year };
     }
 }
