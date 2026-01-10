@@ -256,7 +256,7 @@ describe('Housing System (MainScene)', () => {
         initScene();
         // Add some dummy furniture
         const sprite1 = { ...mockSprite };
-        scene.placedFurniture = [{ key: 'Chair', x: 10, y: 10, sprite: sprite1 }];
+        scene.placedFurniture = { "Entryway": [{ key: 'Chair', x: 10, y: 10, sprite: sprite1 }] };
 
         scene.toggleDecorationMode(); // Enable
 
@@ -267,7 +267,7 @@ describe('Housing System (MainScene)', () => {
     test('toggleDecorationMode should disable drag and save when disabled', () => {
         initScene();
         const sprite1 = { ...mockSprite };
-        scene.placedFurniture = [{ key: 'Chair', x: 10, y: 10, sprite: sprite1 }];
+        scene.placedFurniture = { "Entryway": [{ key: 'Chair', x: 10, y: 10, sprite: sprite1 }] };
         scene.isDecorationMode = true;
 
         scene.toggleDecorationMode(); // Disable
@@ -297,8 +297,8 @@ describe('Housing System (MainScene)', () => {
         expect(newSprite.on).toHaveBeenCalledWith('dragend', expect.any(Function));
 
         // Verify it was added to the list
-        expect(scene.placedFurniture).toHaveLength(1);
-        expect(scene.placedFurniture[0].sprite).toBe(newSprite);
+        expect(scene.placedFurniture['Entryway']).toHaveLength(1);
+        expect(scene.placedFurniture['Entryway'][0].sprite).toBe(newSprite);
     });
 
     test('Drag event handler should update sprite position in Decoration Mode', () => {

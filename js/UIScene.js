@@ -533,6 +533,12 @@ export class UIScene extends Phaser.Scene {
             container.setDepth(200);
         });
 
+        // Add method to update text
+        container.updateText = (header, details) => {
+            headerText.setText(header);
+            detailsText.setText(details);
+        };
+
         return container;
     }
 
@@ -543,14 +549,22 @@ export class UIScene extends Phaser.Scene {
 
         // Update Header
         const timeIcon = (timePeriod === 'Night' || timePeriod === 'Dusk' || timePeriod === 'Dawn') ? '🌙' : '☀️';
-        this.calendarDropdown.headerText.setText(`${timeIcon} ${timePeriod}`);
+        const header = `${timeIcon} ${timePeriod}`;
 
         // Update Details
         let details = `Year ${year}\n${season}, Day ${day}\n${weather}`;
         if (event) {
             details += `\nEvent: ${event.name}`;
         }
-        this.calendarDropdown.detailsText.setText(details);
+
+        // Use the new updateText method if available (it handles child access safely)
+        if (this.calendarDropdown.updateText) {
+            this.calendarDropdown.updateText(header, details);
+        } else {
+            // Fallback for older instances or if updateText undefined
+            this.calendarDropdown.headerText.setText(header);
+            this.calendarDropdown.detailsText.setText(details);
+        }
     }
 
     startTutorial() {

@@ -215,21 +215,28 @@ describe('Feature Enhancements', () => {
             expect(pet.dominantArchetype).toBe('Recluse');
         });
 
-        test('Incumbent wins tie even with lower skills', () => {
-            // Verify existing logic still holds: Incumbent preference overrides skill check
+        test('Incumbent wins tie unless challenger has strictly higher skills', () => {
+            // Verify tie breaking logic
             pet.personalityPoints = {
                 Adventurer: 20,
                 Intellectual: 20,
-                N:10, M:10, R:10
+                Nurturer: 10, Mischievous: 10, Recluse: 10
             };
 
+            // Scenario 1: Challenger (Adventurer) has strictly higher skills -> Challenger Wins
             pet.skills.logic = 5; // Intellectual Score
             pet.skills.navigation = 10; // Adventurer Score (Higher)
-
             pet.dominantArchetype = 'Intellectual'; // Incumbent
 
             pet.updateDominantArchetype();
-            // Should stay Intellectual because it is one of the max scorers
+            expect(pet.dominantArchetype).toBe('Adventurer');
+
+            // Scenario 2: Challenger has equal skills -> Incumbent Wins
+            pet.skills.logic = 10;
+            pet.skills.navigation = 10;
+            pet.dominantArchetype = 'Intellectual';
+
+            pet.updateDominantArchetype();
             expect(pet.dominantArchetype).toBe('Intellectual');
         });
     });

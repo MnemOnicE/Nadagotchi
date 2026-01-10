@@ -145,6 +145,18 @@ export class InventorySystem {
             potentialItems.push('Muse Flower');
         }
 
+        // Rare Artifact Drop (2% chance) - Fix for "Missing Items" unobtainable bug
+        if (this.pet.rng.random() < 0.02) {
+             const artifacts = ['Ancient Tome', 'Heart Amulet', 'Genetic Scanner'];
+             const foundArtifact = this.pet.rng.choice(artifacts);
+             this.addItem(foundArtifact, 1);
+             this.pet.addJournalEntry(`Wow! I unearthed a rare artifact: ${foundArtifact}!`);
+             // Grants bonus XP when finding rare items
+             this.pet.skills.navigation += 0.5;
+             this.pet.location = 'Home';
+             return;
+        }
+
         // Use RNG to select item
         const foundItem = this.pet.rng.choice(potentialItems);
         this.addItem(foundItem, 1);

@@ -53,8 +53,7 @@ export class MainScene extends Phaser.Scene {
         this.location = 'GARDEN';
         /** @type {string} Current Room ID when location is INDOOR. */
         this.currentRoom = 'Entryway';
-        /** @type {object} Active housing configuration. */
-        this.homeConfig = null; // Loaded in create
+        // Note: homeConfig is now accessed via this.nadagotchi.homeConfig, not stored on scene
 
         // --- Indoor Navigation State ---
         /** @type {boolean} Whether the pet is currently moving autonomously. */
@@ -109,39 +108,17 @@ export class MainScene extends Phaser.Scene {
         // --- Pet Initialization ---
         const loadedPet = this.persistence.loadPet();
 
-        // Load Home Config with Migration
-        this.homeConfig = this.persistence.loadHomeConfig();
-
-        // Ensure local references match
-        if (loadedPet && loadedPet.homeConfig) {
-             // If loadedPet has homeConfig, sync it.
-             if (!loadedPet.homeConfig.rooms) {
-                 // Migration needed on the loaded pet object
-                 const migrated = this.persistence.loadHomeConfig(); // This runs migration logic
-                 loadedPet.homeConfig = migrated;
-             }
-             this.homeConfig = loadedPet.homeConfig;
-        }
-
         if (data && data.newPetData) {
             // New Game: Pass null for loadedData to ensure defaults are used
             this.nadagotchi = new Nadagotchi(data.newPetData.dominantArchetype, null);
-            // Re-initialize homeConfig for new game
-            this.homeConfig = { rooms: { "Entryway": { ...RoomDefinitions["Entryway"] } } };
-            // Ensure visual defaults map to item defaults
-            this.homeConfig.rooms.Entryway.wallpaperItem = 'Default';
-            this.homeConfig.rooms.Entryway.flooringItem = 'Default';
         } else {
             // Resume Game or Default Fallback
             this.nadagotchi = new Nadagotchi('Adventurer', loadedPet);
         }
 
         if (!loadedPet && !(data && data.newPetData)) {
-             this.persistence.savePet(this.nadagotchi, this.homeConfig);
+             this.persistence.savePet(this.nadagotchi);
         }
-
-        // Sync reference just in case
-        this.nadagotchi.homeConfig = this.homeConfig;
 
         // Expose for verification/testing
         window.mainScene = this;
@@ -206,7 +183,8 @@ export class MainScene extends Phaser.Scene {
         this.scene.launch('UIScene');
 
         // --- Timers and Event Listeners ---
-        this.autoSaveTimer = this.time.addEvent({ delay: 5000, callback: () => this.persistence.savePet(this.nadagotchi, this.homeConfig), loop: true });
+        // Note: savePet(nadagotchi) now includes homeConfig internally
+        this.autoSaveTimer = this.time.addEvent({ delay: 5000, callback: () => this.persistence.savePet(this.nadagotchi), loop: true });
 
         // Bind listeners to enable proper removal in shutdown
         this.handleUIActionBound = this.handleUIAction.bind(this);
@@ -307,7 +285,7 @@ export class MainScene extends Phaser.Scene {
 
         // OPTIMIZATION: Throttle stats updates to ~10Hz (every 100ms)
         // This prevents excessive UI rebuilding in UIScene while keeping the display responsive.
-        if (time - this.lastStatsUpdate > 100) {
+        if (time - this.lastStatsUpdate > Config.TIMING.UI_THROTTLE_MS) {
             // Include full world state for the new calendar dropdown
             const date = this.calendar.getDate();
             const fullState = {
@@ -467,60 +445,17 @@ export class MainScene extends Phaser.Scene {
         }
         this.activeMinigameCareer = null; // Reset flag
 
-        let skillUp = '';
-        if (data.success) {
+        // Delegated logic to Nadagotchi (Core Business Logic)
+        const summary = this.nadagotchi.completeWorkShift(data);
+        if (!summary) return; // Should not happen given check above
+
+        if (summary.success) {
             SoundSynthesizer.instance.playSuccess();
-            // Calculate happiness gain with diminishing returns based on current happiness
-            const maxHappiness = this.nadagotchi.maxStats.happiness;
-            const currentHappiness = this.nadagotchi.stats.happiness;
-            // 25 base, scales down as you get closer to max. Min gain of 5.
-            const happinessGain = Math.max(5, 25 * (1 - (currentHappiness / maxHappiness)));
-            this.nadagotchi.stats.happiness += happinessGain;
-
-            const calculateSkillGain = (currentLevel, baseGain) => {
-                // Diminishing returns: Gain decreases as level increases.
-                // Formula: Base * (20 / (20 + Level))
-                return baseGain * (20 / (20 + currentLevel));
-            };
-
-            switch (data.career) {
-                case 'Innovator':
-                    skillUp = 'logic';
-                    this.nadagotchi.skills.logic += calculateSkillGain(this.nadagotchi.skills.logic, 1.5);
-                    break;
-                case 'Scout':
-                    skillUp = 'navigation';
-                    this.nadagotchi.skills.navigation += calculateSkillGain(this.nadagotchi.skills.navigation, 1.5);
-                    break;
-                case 'Archaeologist':
-                    skillUp = 'research & navigation';
-                    this.nadagotchi.skills.research += calculateSkillGain(this.nadagotchi.skills.research, 1.0);
-                    this.nadagotchi.skills.navigation += calculateSkillGain(this.nadagotchi.skills.navigation, 1.0);
-                    break;
-                case 'Healer':
-                    skillUp = 'empathy';
-                    this.nadagotchi.skills.empathy += calculateSkillGain(this.nadagotchi.skills.empathy, 1.5);
-                    break;
-                case 'Artisan':
-                    skillUp = 'crafting';
-                    this.nadagotchi.skills.crafting += calculateSkillGain(this.nadagotchi.skills.crafting, 1.5);
-                    if (data.craftedItem) {
-                        this.nadagotchi.handleAction(EventKeys.CRAFT_ITEM, data.craftedItem);
-                    }
-                    break;
-            }
-
-            // Career XP & Promotion
-            const promoted = this.nadagotchi.gainCareerXP(Config.CAREER.XP_PER_WORK);
-            if (promoted) {
+            if (summary.promoted) {
                 this.showNotification("PROMOTION!!", '#00FF00');
             }
-
-            this.nadagotchi.addJournalEntry(`I had a successful day at my ${data.career} job! My ${skillUp} skill increased.`);
         } else {
             SoundSynthesizer.instance.playFailure();
-            this.nadagotchi.stats.happiness -= 10;
-            this.nadagotchi.addJournalEntry(`I struggled at my ${data.career} job today. It was frustrating.`);
         }
     }
 
@@ -650,15 +585,15 @@ export class MainScene extends Phaser.Scene {
         // 1. Update Backgrounds
         // Check homeConfig for this room
         // Ensure config exists
-        if (!this.homeConfig.rooms[roomId]) {
-             this.homeConfig.rooms[roomId] = {
+        if (!this.nadagotchi.homeConfig.rooms[roomId]) {
+             this.nadagotchi.homeConfig.rooms[roomId] = {
                  wallpaper: def.defaultWallpaper,
                  flooring: def.defaultFlooring,
                  wallpaperItem: 'Default',
                  flooringItem: 'Default'
              };
         }
-        const config = this.homeConfig.rooms[roomId];
+        const config = this.nadagotchi.homeConfig.rooms[roomId];
         this.updateWallpaper(config.wallpaper);
         this.updateFlooring(config.flooring);
 
@@ -799,8 +734,8 @@ export class MainScene extends Phaser.Scene {
     }
 
     /**
-     * Starts a procedural idle animation based on the pet's mood.
-     * Uses Phaser Tweens to create life-like movement (bouncing, swaying, breathing).
+     * Starts a procedural idle animation based on the pet's mood and archetype.
+     * Uses Phaser Tweens to create life-like movement.
      * @param {string} mood - The current mood ('happy', 'sad', 'angry', 'neutral').
      */
     startIdleAnimation(mood) {
@@ -808,17 +743,74 @@ export class MainScene extends Phaser.Scene {
         this.tweens.killTweensOf(this.sprite);
 
         // Fix for "Movement Warp" bug: Use the sprite's CURRENT position as the base
-        // instead of resetting to screen center.
         const baseX = this.sprite.x;
         const baseY = this.sprite.y;
 
         // Reset properties to base state (except position)
         this.sprite.setScale(4);
         this.sprite.setAngle(0);
+        this.sprite.setAlpha(1);
 
-        switch (mood) {
-            case 'happy':
-                // Happy Hop: Squash and Stretch + Jump
+        const archetype = this.nadagotchi.dominantArchetype;
+
+        if (mood === 'happy') {
+            // Archetype-Specific Happy Animations
+            if (archetype === 'Adventurer') {
+                 // Jump and Shake (Excitement)
+                 this.tweens.add({
+                    targets: this.sprite,
+                    y: baseY - 20,
+                    angle: { from: -5, to: 5 },
+                    duration: 300,
+                    yoyo: true,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                 });
+            } else if (archetype === 'Nurturer') {
+                 // Gentle Sway / Swell with pride
+                 this.tweens.add({
+                    targets: this.sprite,
+                    scaleX: 4.3,
+                    scaleY: 3.7,
+                    angle: { from: -2, to: 2 },
+                    duration: 1000,
+                    yoyo: true,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                 });
+            } else if (archetype === 'Mischievous') {
+                 // Fast Jitter/Flip
+                 this.tweens.add({
+                    targets: this.sprite,
+                    x: { from: baseX - 5, to: baseX + 5 },
+                    scaleY: { from: 4, to: 3.5 }, // Squash
+                    duration: 100,
+                    yoyo: true,
+                    repeat: -1,
+                    ease: 'Bounce.easeInOut'
+                 });
+            } else if (archetype === 'Intellectual') {
+                 // Hover (Sine Wave)
+                 this.tweens.add({
+                    targets: this.sprite,
+                    y: baseY - 10,
+                    duration: 1000,
+                    yoyo: true,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                 });
+            } else if (archetype === 'Recluse') {
+                 // Subtle, content bounce
+                 this.tweens.add({
+                    targets: this.sprite,
+                    y: baseY - 5,
+                    duration: 600,
+                    yoyo: true,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                 });
+            } else {
+                // Default Happy Hop
                 this.tweens.add({
                     targets: this.sprite,
                     y: baseY - 15,
@@ -829,10 +821,22 @@ export class MainScene extends Phaser.Scene {
                     repeat: -1,
                     ease: 'Sine.easeInOut'
                 });
-                break;
+            }
 
-            case 'sad':
-                // Sad Sway: Slow rotation
+        } else if (mood === 'sad') {
+             if (archetype === 'Recluse') {
+                 // Fade / Shrink slightly
+                 this.tweens.add({
+                     targets: this.sprite,
+                     alpha: 0.7,
+                     scaleX: 3.8,
+                     scaleY: 3.8,
+                     duration: 1000,
+                     yoyo: true,
+                     repeat: -1
+                 });
+             } else {
+                 // Default Sad Sway
                 this.tweens.add({
                     targets: this.sprite,
                     angle: { from: -5, to: 5 },
@@ -841,33 +845,28 @@ export class MainScene extends Phaser.Scene {
                     repeat: -1,
                     ease: 'Sine.easeInOut'
                 });
-                break;
-
-            case 'angry':
-                // Angry Shake: Fast horizontal vibration
-                this.tweens.add({
-                    targets: this.sprite,
-                    x: { from: baseX - 3, to: baseX + 3 },
-                    duration: 50,
-                    yoyo: true,
-                    repeat: -1,
-                    ease: 'Linear'
-                });
-                break;
-
-            case 'neutral':
-            default:
-                // Breathing: Subtle Scale Y
-                this.tweens.add({
-                    targets: this.sprite,
-                    scaleY: 4.1, // Slight stretch up
-                    scaleX: 3.9, // Slight squash in
-                    duration: 1500,
-                    yoyo: true,
-                    repeat: -1,
-                    ease: 'Sine.easeInOut'
-                });
-                break;
+             }
+        } else if (mood === 'angry') {
+             // Angry Shake
+             this.tweens.add({
+                 targets: this.sprite,
+                 x: { from: baseX - 3, to: baseX + 3 },
+                 duration: 50,
+                 yoyo: true,
+                 repeat: -1,
+                 ease: 'Linear'
+             });
+        } else {
+             // Neutral / Breathing
+            this.tweens.add({
+                targets: this.sprite,
+                scaleY: 4.1, // Slight stretch up
+                scaleX: 3.9, // Slight squash in
+                duration: 1500,
+                yoyo: true,
+                repeat: -1,
+                ease: 'Sine.easeInOut'
+            });
         }
     }
 

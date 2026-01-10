@@ -28,6 +28,9 @@ export const Config = {
         BASE_PAYOUT: 10,
         XP_PER_WORK: 20, // 5 days to reach lvl 2
         PROMOTION_BONUS: 50,
+        WORK_HAPPINESS_BASE: 25,
+        WORK_HAPPINESS_MIN: 5,
+        SKILL_GAIN_BASE: 1.5,
         LEVEL_MULTIPLIERS: {
             1: 1.0,
             2: 1.1,
@@ -206,6 +209,12 @@ export const Config = {
     GAME_LOOP: {
         TARGET_FPS: 60,
         MS_PER_FRAME: 1000 / 60
+    },
+
+    // Timing Constants
+    TIMING: {
+        MOOD_OVERRIDE_MS: 3000,
+        UI_THROTTLE_MS: 100
     },
 
     // Security & Hashing
