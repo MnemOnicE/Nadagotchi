@@ -164,7 +164,12 @@ describe('Day Cycle Integration', () => {
             sprite: jest.fn(() => new Phaser.GameObjects.Sprite()),
             image: jest.fn(() => new Phaser.GameObjects.Image()),
             graphics: jest.fn(() => new Phaser.GameObjects.Graphics()),
-            text: jest.fn(() => new Phaser.GameObjects.Text())
+            text: jest.fn(() => new Phaser.GameObjects.Text()),
+            tileSprite: jest.fn(() => {
+                const sprite = new Phaser.GameObjects.Sprite();
+                sprite.setTilePosition = jest.fn().mockReturnThis();
+                return sprite;
+            })
         };
         scene.cameras = {
             main: {

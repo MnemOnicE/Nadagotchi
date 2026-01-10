@@ -131,6 +131,7 @@ describe('MainScene Coverage', () => {
              mood: 'happy',
              dominantArchetype: 'Adventurer',
              gainCareerXP: jest.fn().mockReturnValue(true),
+             completeWorkShift: jest.fn().mockReturnValue({ success: true, happinessChange: 10, skillUp: 'logic', promoted: false, message: 'Work done' }),
              questSystem: {
                  generateDailyQuest: jest.fn()
              },
@@ -174,7 +175,12 @@ describe('MainScene Coverage', () => {
             sprite: jest.fn(() => new Phaser.GameObjects.Sprite()),
             image: jest.fn(() => new Phaser.GameObjects.Image()),
             graphics: jest.fn(() => new Phaser.GameObjects.Graphics()),
-            text: jest.fn(() => new Phaser.GameObjects.Text())
+            text: jest.fn(() => new Phaser.GameObjects.Text()),
+            tileSprite: jest.fn(() => {
+                const sprite = new Phaser.GameObjects.Sprite();
+                sprite.setTilePosition = jest.fn().mockReturnThis();
+                return sprite;
+            })
         };
 
         mockGameEvents = {
@@ -268,15 +274,14 @@ describe('MainScene Coverage', () => {
          expect(mockNadagotchi.handleAction).toHaveBeenCalledWith('FEED', undefined);
     });
 
-    test('handleWorkResult should improve skills on success', () => {
+    test('handleWorkResult should call completeWorkShift on success', () => {
         scene.create();
 
         // Bypass security check by setting the active minigame
         scene.activeMinigameCareer = 'Innovator';
         scene.handleWorkResult({ success: true, career: 'Innovator' });
 
-        expect(mockNadagotchi.skills.logic).toBeGreaterThan(10);
-        expect(mockNadagotchi.addJournalEntry).toHaveBeenCalled();
+        expect(mockNadagotchi.completeWorkShift).toHaveBeenCalled();
     });
 
     test('resize should update viewports', () => {
@@ -295,7 +300,11 @@ describe('MainScene Coverage', () => {
         scene.update(1000, 16);
 
         expect(mockNadagotchi.live).toHaveBeenCalled();
-        expect(mockGameEvents.emit).toHaveBeenCalledWith(EventKeys.UPDATE_STATS, { nadagotchi: mockNadagotchi, settings: scene.gameSettings });
+        expect(mockGameEvents.emit).toHaveBeenCalledWith(EventKeys.UPDATE_STATS, expect.objectContaining({
+            nadagotchi: mockNadagotchi,
+            settings: scene.gameSettings,
+            world: expect.any(Object)
+        }));
     });
 
     test('furniture placement logic', () => {
@@ -310,7 +319,7 @@ describe('MainScene Coverage', () => {
         scene.handleUIAction(EventKeys.PLACE_FURNITURE, { x: 100, y: 100 });
 
         expect(mockNadagotchi.placeItem).toHaveBeenCalledWith('Fancy Chair');
-        expect(scene.placedFurniture.length).toBe(1);
+        expect(scene.placedFurniture['Entryway'].length).toBe(1);
         expect(scene.isPlacementMode).toBe(false);
     });
 });

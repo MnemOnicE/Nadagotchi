@@ -12,10 +12,10 @@ export class PersistenceManager {
     /**
      * Saves the active Nadagotchi's data to localStorage.
      * @param {object} nadagotchiData - The Nadagotchi object to save.
-     * @param {object} [homeConfig=null] - The home configuration object.
+     * @param {object} [homeConfig=null] - DEPRECATED: The home configuration object. Now part of nadagotchiData.
      */
     savePet(nadagotchiData, homeConfig = null) {
-        // Merge homeConfig into the save payload if provided
+        // Merge homeConfig into the save payload if provided as a separate argument (Legacy support)
         const payload = { ...nadagotchiData };
         if (homeConfig) {
             payload.homeConfig = homeConfig;
@@ -152,6 +152,7 @@ export class PersistenceManager {
 
     /**
      * Saves the home configuration (Wallpaper/Flooring).
+     * @deprecated Home Config is now stored in the pet data.
      * @param {object} config - { rooms: { "Entryway": { ... } } }
      */
     saveHomeConfig(config) {
@@ -161,6 +162,7 @@ export class PersistenceManager {
     /**
      * Loads the home configuration.
      * Supports migration from legacy flat format to room-keyed object.
+     * @deprecated Home Config is now loaded via loadPet(). Use for migration only.
      * @returns {object} { rooms: { "Entryway": { ... } } }
      */
     loadHomeConfig() {

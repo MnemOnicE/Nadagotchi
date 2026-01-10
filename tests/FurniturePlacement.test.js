@@ -257,7 +257,7 @@ describe('Furniture Placement Logic (Bug Repro)', () => {
         scene.placeFurniture(100, dashboardY);
 
         expect(scene.nadagotchi.placeItem).not.toHaveBeenCalled();
-        expect(scene.placedFurniture).toHaveLength(0);
+        expect(scene.placedFurniture['Entryway']).toHaveLength(0);
     });
 
     test('Should allow placement if Y < gameHeight (Game Area)', () => {
@@ -273,6 +273,6 @@ describe('Furniture Placement Logic (Bug Repro)', () => {
         scene.placeFurniture(100, gameY);
 
         expect(scene.nadagotchi.placeItem).toHaveBeenCalled();
-        expect(scene.placedFurniture).toHaveLength(1);
+        expect(scene.placedFurniture['Entryway']).toHaveLength(1);
     });
 });

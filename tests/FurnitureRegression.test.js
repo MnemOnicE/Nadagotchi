@@ -64,12 +64,23 @@ global.Phaser = {
 jest.mock('../js/Config.js', () => ({
     Config: {
         UI: { DASHBOARD_HEIGHT_RATIO: 0.35 },
+        INITIAL_STATE: {
+            STATS: { hunger: 100, energy: 100, happiness: 100 },
+            SKILLS: { logic: 0, research: 0, empathy: 0, navigation: 0, crafting: 0, focus: 0, communication: 0 },
+            PERSONALITY_POINTS_STARTER: 10,
+            MOOD_SENSITIVITY_DEFAULT: 5,
+            GENOME_STARTER_VAL: 10
+        },
         ACTIONS: {
             CRAFT: { ENERGY_COST: 10 },
             FORAGE: { ENERGY_COST: 10 },
             EXPEDITION: { ENERGY_COST: 20 },
             INTERACT_NPC: { ENERGY_COST: 5 }
         },
+        LIMITS: { MAX_STATS: 100 },
+        GENETICS: { HOMOZYGOUS_ENERGY_BONUS: 5, METABOLISM_NORMALIZER: 5 },
+        DECAY: { AGE_INCREMENT: 0.001 },
+        THRESHOLDS: { AGE_LEGACY: 50 },
         SETTINGS: { DEFAULT_VOLUME: 0.5, DEFAULT_SPEED: 1.0 },
         CAREER: { XP_PER_WORK: 10 }
     }
@@ -117,8 +128,19 @@ describe('MainScene Duplication Bug', () => {
 
         // Mock Scene properties
         scene.add = {
-            sprite: jest.fn(() => new Phaser.GameObjects.Sprite()),
-            graphics: jest.fn(() => new Phaser.GameObjects.Graphics()),
+            sprite: jest.fn(() => {
+                const s = new Phaser.GameObjects.Sprite();
+                s.setScale = jest.fn().mockReturnThis();
+                s.setDepth = jest.fn().mockReturnThis();
+                s.setVisible = jest.fn().mockReturnThis();
+                return s;
+            }),
+            graphics: jest.fn(() => {
+                const g = new Phaser.GameObjects.Graphics();
+                g.setDepth = jest.fn().mockReturnThis();
+                g.setVisible = jest.fn().mockReturnThis();
+                return g;
+            }),
             text: jest.fn(() => new Phaser.GameObjects.Text()),
             tileSprite: jest.fn(() => new Phaser.GameObjects.TileSprite()),
             image: jest.fn(() => ({ setOrigin: () => ({ setDepth: () => {} }) }))
@@ -138,6 +160,8 @@ describe('MainScene Duplication Bug', () => {
         PersistenceManager.prototype.loadHomeConfig.mockReturnValue({ rooms: { 'Entryway': {} } });
         PersistenceManager.prototype.loadSettings.mockReturnValue({});
         PersistenceManager.prototype.loadFurniture.mockReturnValue({});
+        PersistenceManager.prototype.loadRecipes.mockReturnValue([]); // Fix: Return empty array for recipes
+        PersistenceManager.prototype.loadJournal.mockReturnValue([]);
 
         // Manually trigger create to setup nadagotchi
         scene.create();

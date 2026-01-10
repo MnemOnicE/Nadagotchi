@@ -77,7 +77,17 @@ describe('Housing Decor System', () => {
         // Mock the genome/traits to prevent errors if Nadagotchi constructor tries to access them
         if (!pet.genome) pet.genome = { genotype: {}, phenotype: {} };
 
-        pet.homeConfig = { wallpaper: 'default_key', flooring: 'default_key', wallpaperItem: 'Default', flooringItem: 'Default' };
+        // Mock the NEW room-based homeConfig structure
+        pet.homeConfig = {
+            rooms: {
+                "Entryway": {
+                    wallpaper: 'default_key',
+                    flooring: 'default_key',
+                    wallpaperItem: 'Default',
+                    flooringItem: 'Default'
+                }
+            }
+        };
         inventorySystem = new InventorySystem(pet);
         pet.inventorySystem = inventorySystem; // Circular ref for testing
     });
@@ -104,14 +114,14 @@ describe('Housing Decor System', () => {
         expect(result.success).toBe(true);
         expect(result.assetKey).toBe(ItemDefinitions['Blue Wallpaper'].assetKey);
         expect(pet.inventory['Blue Wallpaper']).toBeUndefined(); // Should be removed (0 -> delete)
-        expect(pet.homeConfig.wallpaperItem).toBe('Blue Wallpaper');
+        expect(pet.homeConfig.rooms.Entryway.wallpaperItem).toBe('Blue Wallpaper');
         expect(pet.persistence.saveHomeConfig).toHaveBeenCalled();
     });
 
     it('should swap wallpapers correctly', () => {
         // Setup: Current is Blue, Inventory has Cozy
-        pet.homeConfig.wallpaperItem = 'Blue Wallpaper';
-        pet.homeConfig.wallpaper = ItemDefinitions['Blue Wallpaper'].assetKey;
+        pet.homeConfig.rooms.Entryway.wallpaperItem = 'Blue Wallpaper';
+        pet.homeConfig.rooms.Entryway.wallpaper = ItemDefinitions['Blue Wallpaper'].assetKey;
         pet.inventory = { 'Cozy Wallpaper': 1 };
 
         // Act: Apply Cozy
@@ -119,7 +129,7 @@ describe('Housing Decor System', () => {
 
         // Assert
         expect(result.success).toBe(true);
-        expect(pet.homeConfig.wallpaperItem).toBe('Cozy Wallpaper');
+        expect(pet.homeConfig.rooms.Entryway.wallpaperItem).toBe('Cozy Wallpaper');
 
         // Cozy removed
         expect(pet.inventory['Cozy Wallpaper']).toBeUndefined();
@@ -135,13 +145,13 @@ describe('Housing Decor System', () => {
 
         expect(result.success).toBe(true);
         expect(result.type).toBe('FLOORING');
-        expect(pet.homeConfig.flooringItem).toBe('Wood Flooring');
+        expect(pet.homeConfig.rooms.Entryway.flooringItem).toBe('Wood Flooring');
         expect(pet.inventory['Wood Flooring']).toBeUndefined();
     });
 
     it('should not return "Default" item to inventory', () => {
         // Setup: Current is Default
-        pet.homeConfig.wallpaperItem = 'Default';
+        pet.homeConfig.rooms.Entryway.wallpaperItem = 'Default';
         pet.inventory = { 'Blue Wallpaper': 1 };
 
         // Act

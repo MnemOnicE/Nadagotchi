@@ -4,6 +4,7 @@ import { NarrativeSystem } from './NarrativeSystem.js';
 import { Config } from './Config.js';
 import { Recipes } from './ItemData.js';
 import { CareerDefinitions } from './CareerDefinitions.js';
+import { RoomDefinitions } from './RoomDefinitions.js';
 import { SeededRandom } from './utils/SeededRandom.js';
 import { RelationshipSystem } from './systems/RelationshipSystem.js';
 import { InventorySystem } from './systems/InventorySystem.js';
@@ -127,6 +128,20 @@ export class Nadagotchi {
                 this.genome = new Genome(null, null, this.rng);
             }
 
+            // --- Home Config Migration ---
+            if (loadedData.homeConfig && loadedData.homeConfig.rooms) {
+                 this.homeConfig = loadedData.homeConfig;
+            } else if (loadedData.homeConfig) {
+                 // Partially migrated or legacy flat structure
+                 this.homeConfig = this._migrateHomeConfig(loadedData.homeConfig);
+            } else {
+                 // Load default or try Persistence (for very old saves where it was separate)
+                 // NOTE: Ideally PersistenceManager should have passed it in `loadedData`.
+                 // If not, we initialize defaults.
+                 this.homeConfig = this._migrateHomeConfig({});
+            }
+
+
         } else {
             // This is a brand new game. Start from defaults.
             this.uuid = this._generateUUID();
@@ -164,6 +179,18 @@ export class Nadagotchi {
             }
             // Recalculate phenotype after manual genotype modification
             this.genome.phenotype = this.genome.calculatePhenotype(this.rng);
+
+            // Initialize Home Config
+            this.homeConfig = {
+                rooms: {
+                    "Entryway": {
+                        wallpaper: 'wallpaper_default',
+                        flooring: 'flooring_default',
+                        wallpaperItem: 'Default',
+                        flooringItem: 'Default'
+                    }
+                }
+            };
         }
 
         /** @type {{hunger: number, energy: number, happiness: number}} Maximum values for stats. */
@@ -235,6 +262,52 @@ export class Nadagotchi {
         this.previousAge = Math.floor(this.age);
         /** @type {string} Tracks the current season for seasonal logic. */
         this.currentSeason = 'Spring';
+
+        /** @type {?string} Temporarily overrides the calculated mood (e.g., 'happy' after playing). */
+        this.moodOverride = null;
+        /** @type {number} Time in ms remaining for the mood override. */
+        this.moodOverrideTimer = 0;
+    }
+
+    /**
+     * Helper to migrate legacy home config data to the new room-based structure.
+     * @param {object} data
+     * @returns {object}
+     * @private
+     */
+    _migrateHomeConfig(data) {
+        // Default State
+        const defaultState = {
+            rooms: {
+                "Entryway": {
+                    wallpaper: 'wallpaper_default',
+                    flooring: 'flooring_default',
+                    wallpaperItem: 'Default',
+                    flooringItem: 'Default'
+                }
+            }
+        };
+
+        if (!data) return defaultState;
+
+        // Migration: If data has 'wallpaper' at root level (Legacy)
+        if (data.wallpaper || data.flooring) {
+            return {
+                rooms: {
+                    "Entryway": {
+                        wallpaper: data.wallpaper || 'wallpaper_default',
+                        flooring: data.flooring || 'flooring_default',
+                        wallpaperItem: data.wallpaperItem || 'Default',
+                        flooringItem: data.flooringItem || 'Default'
+                    }
+                }
+            };
+        }
+
+        // Ensure rooms object exists if partial data
+        if (!data.rooms) return defaultState;
+
+        return data;
     }
 
     /**
@@ -314,6 +387,19 @@ export class Nadagotchi {
             newLegacyTraits.push(childPhenotype.specialAbility);
         }
 
+        // Initialize Home Config for Child (Inherit nothing? Or default?)
+        // Default for new life.
+        const initialHomeConfig = {
+            rooms: {
+                "Entryway": {
+                    wallpaper: 'wallpaper_default',
+                    flooring: 'flooring_default',
+                    wallpaperItem: 'Default',
+                    flooringItem: 'Default'
+                }
+            }
+        };
+
         return {
             uuid: this._generateUUID(), // New UUID for the child
             mood: 'neutral',
@@ -337,6 +423,7 @@ export class Nadagotchi {
             quests: {}, // Quests reset for new generation
             location: 'Home',
             genome: childGenome,
+            homeConfig: initialHomeConfig,
             // Pass the parent's universe seed to the child to maintain the "Timeline"?
             // Or let the child generate a new one?
             // "If you share an 'Egg' (a seed), the recipient must generate the exact same pet."
@@ -444,22 +531,32 @@ export class Nadagotchi {
         if (this.stats.happiness < 0) this.stats.happiness = 0;
         if (this.stats.happiness > this.maxStats.happiness) this.stats.happiness = this.maxStats.happiness;
 
-        // Mood Calculation - Use moodSensitivity from phenotype
-        const sensitivity = (this.genome && this.genome.phenotype) ? this.genome.phenotype.moodSensitivity : Config.INITIAL_STATE.MOOD_SENSITIVITY_DEFAULT;
-        // Homozygous MoodSensitivity Bonus: Faster recovery (lower threshold for happiness)
-        let happyThreshold = Config.THRESHOLDS.HAPPY_MOOD;
-        if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousMoodSensitivity) {
-            happyThreshold = Config.THRESHOLDS.HAPPY_MOOD_HOMOZYGOUS;
-        }
-
-        if (this.stats.hunger < Config.THRESHOLDS.HUNGER_ANGRY) {
-            this.mood = 'angry';
-        } else if (this.stats.hunger < Config.THRESHOLDS.HUNGER_SAD || this.stats.energy < Config.THRESHOLDS.ENERGY_SAD) {
-            this.mood = 'sad';
-        } else if (this.stats.hunger > happyThreshold && this.stats.energy > happyThreshold) {
-            this.mood = 'happy';
+        // Mood Calculation with Override Logic
+        if (this.moodOverrideTimer > 0) {
+            this.mood = this.moodOverride;
+            this.moodOverrideTimer -= dt;
+            if (this.moodOverrideTimer <= 0) {
+                this.moodOverride = null;
+                // Mood will naturally recalculate next frame
+            }
         } else {
-            this.mood = 'neutral';
+            // Standard Stat-based Mood Calculation
+            const sensitivity = (this.genome && this.genome.phenotype) ? this.genome.phenotype.moodSensitivity : Config.INITIAL_STATE.MOOD_SENSITIVITY_DEFAULT;
+            // Homozygous MoodSensitivity Bonus: Faster recovery (lower threshold for happiness)
+            let happyThreshold = Config.THRESHOLDS.HAPPY_MOOD;
+            if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousMoodSensitivity) {
+                happyThreshold = Config.THRESHOLDS.HAPPY_MOOD_HOMOZYGOUS;
+            }
+
+            if (this.stats.hunger < Config.THRESHOLDS.HUNGER_ANGRY) {
+                this.mood = 'angry';
+            } else if (this.stats.hunger < Config.THRESHOLDS.HUNGER_SAD || this.stats.energy < Config.THRESHOLDS.ENERGY_SAD) {
+                this.mood = 'sad';
+            } else if (this.stats.hunger > happyThreshold && this.stats.energy > happyThreshold) {
+                this.mood = 'happy';
+            } else {
+                this.mood = 'neutral';
+            }
         }
 
         this.age += Config.DECAY.AGE_INCREMENT * ticksPassed;
@@ -508,12 +605,14 @@ export class Nadagotchi {
      */
     handleAction(actionType, item = null) {
         let moodMultiplier;
+        let actionSetMood = null; // Track if we set a mood to trigger override
 
         switch (actionType.toUpperCase()) {
             case 'FEED':
                 this.stats.hunger = Math.min(this.maxStats.hunger, this.stats.hunger + Config.ACTIONS.FEED.HUNGER_RESTORE);
                 this.stats.happiness = Math.min(this.maxStats.happiness, this.stats.happiness + Config.ACTIONS.FEED.HAPPINESS_RESTORE);
                 if (this.dominantArchetype === 'Nurturer') this.personalityPoints.Nurturer++;
+                actionSetMood = 'happy'; // Food makes you happy!
                 break;
 
             case 'PLAY':
@@ -527,11 +626,13 @@ export class Nadagotchi {
                 }
 
                 if (['Adventurer', 'Mischievous'].includes(this.dominantArchetype)) {
-                    this.mood = 'happy';
+                    actionSetMood = 'happy';
                     this.personalityPoints[this.dominantArchetype]++;
                 } else if (this.dominantArchetype === 'Recluse') {
-                    this.mood = 'sad';
+                    actionSetMood = 'sad';
                     this.stats.happiness -= Config.ACTIONS.PLAY.RECLUSE_HAPPINESS_PENALTY;
+                } else {
+                    actionSetMood = 'happy'; // General play is happy for most
                 }
                 break;
 
@@ -551,7 +652,7 @@ export class Nadagotchi {
                 }
 
                 if (this.dominantArchetype === 'Intellectual') {
-                    this.mood = 'happy';
+                    actionSetMood = 'happy';
                     this.personalityPoints.Intellectual++;
                     this.stats.happiness += Config.ACTIONS.STUDY.HAPPINESS_RESTORE_INTELLECTUAL;
                 } else {
@@ -574,7 +675,7 @@ export class Nadagotchi {
                 this.stats.happiness -= Config.ACTIONS.INTERACT_BOOKSHELF.HAPPINESS_COST;
                 if (this.dominantArchetype === 'Intellectual') {
                     this.stats.happiness += Config.ACTIONS.INTERACT_BOOKSHELF.HAPPINESS_RESTORE_INTELLECTUAL;
-                    this.mood = 'happy';
+                    actionSetMood = 'happy';
                 }
                 moodMultiplier = this.getMoodMultiplier();
                 this.skills.logic += (Config.ACTIONS.INTERACT_BOOKSHELF.SKILL_GAIN * moodMultiplier);
@@ -589,8 +690,13 @@ export class Nadagotchi {
                 this.stats.happiness += Config.ACTIONS.INTERACT_PLANT.HAPPINESS_RESTORE;
                 if (this.dominantArchetype === 'Nurturer') {
                     this.stats.happiness += Config.ACTIONS.INTERACT_PLANT.HAPPINESS_RESTORE_NURTURER;
-                    this.mood = 'happy';
+                    actionSetMood = 'happy';
+                } else {
+                    actionSetMood = 'happy'; // Plants are nice
                 }
+                // Apply mood immediately for calculation if this action makes us happy
+                if (actionSetMood) this.mood = actionSetMood;
+
                 moodMultiplier = this.getMoodMultiplier();
                 this.skills.empathy += (Config.ACTIONS.INTERACT_PLANT.SKILL_GAIN * moodMultiplier);
 
@@ -609,7 +715,7 @@ export class Nadagotchi {
                 this.stats.happiness += Config.ACTIONS.INTERACT_FANCY_BOOKSHELF.HAPPINESS_RESTORE; // It's a nice bookshelf!
                 if (this.dominantArchetype === 'Intellectual') {
                     this.stats.happiness += Config.ACTIONS.INTERACT_FANCY_BOOKSHELF.HAPPINESS_RESTORE_INTELLECTUAL; // Even better for intellectuals
-                    this.mood = 'happy';
+                    actionSetMood = 'happy';
                 }
                 moodMultiplier = this.getMoodMultiplier();
                 this.skills.logic += (Config.ACTIONS.INTERACT_FANCY_BOOKSHELF.SKILL_GAIN * moodMultiplier); // Higher buff
@@ -629,17 +735,18 @@ export class Nadagotchi {
                 }
 
                 if (this.dominantArchetype === 'Adventurer') {
-                    this.mood = 'happy';
+                    actionSetMood = 'happy';
                     this.stats.happiness += Config.ACTIONS.EXPLORE.HAPPINESS_RESTORE_ADVENTURER;
                     this.personalityPoints.Adventurer += 2;
                     this.skills.navigation += Config.ACTIONS.EXPLORE.SKILL_GAIN;
                     // Use RNG for recipe discovery
                     if (this.rng.random() < 0.1) this.discoverRecipe("Stamina-Up Tea");
                 } else if (this.dominantArchetype === 'Recluse') {
-                    this.mood = 'sad';
+                    actionSetMood = 'sad';
                     this.stats.happiness -= Config.ACTIONS.EXPLORE.HAPPINESS_PENALTY_RECLUSE;
                 } else {
                     this.stats.happiness += Config.ACTIONS.EXPLORE.HAPPINESS_RESTORE_DEFAULT;
+                    actionSetMood = 'happy';
                 }
                 break;
 
@@ -648,7 +755,10 @@ export class Nadagotchi {
                 this.stats.happiness += Config.ACTIONS.MEDITATE.HAPPINESS_RESTORE;
                 moodMultiplier = this.getMoodMultiplier();
                 this.skills.focus += (Config.ACTIONS.MEDITATE.SKILL_GAIN * moodMultiplier);
-                if (this.dominantArchetype === "Recluse") this.personalityPoints.Recluse += Config.ACTIONS.MEDITATE.PERSONALITY_GAIN_RECLUSE;
+                if (this.dominantArchetype === "Recluse") {
+                    this.personalityPoints.Recluse += Config.ACTIONS.MEDITATE.PERSONALITY_GAIN_RECLUSE;
+                    actionSetMood = 'happy';
+                }
 
                 // Homozygous Recluse Bonus: Boost Focus Gain
                 if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousRecluse) {
@@ -660,6 +770,7 @@ export class Nadagotchi {
 
             case "CRAFT_ITEM":
                 this.craftItem(item);
+                actionSetMood = 'happy';
                 break;
 
             case "CONSUME_ITEM":
@@ -668,16 +779,105 @@ export class Nadagotchi {
 
             case 'PRACTICE_HOBBY':
                 this.practiceHobby(item);
+                actionSetMood = 'happy';
                 break;
 
             case 'FORAGE':
                 this.forage();
+                actionSetMood = 'happy';
                 break;
+        }
+
+        // Apply Mood Override
+        if (actionSetMood) {
+            this.mood = actionSetMood;
+            this.moodOverride = actionSetMood;
+            this.moodOverrideTimer = Config.TIMING.MOOD_OVERRIDE_MS;
         }
 
         this.stats.happiness = Math.max(0, Math.min(this.maxStats.happiness, this.stats.happiness));
         this.updateDominantArchetype();
         this.updateCareer();
+    }
+
+    /**
+     * Processes the results of a work shift.
+     * Calculates stats, skills, and promotion logic, removing "God Class" logic from MainScene.
+     * @param {object} result - The work result object { success, career, craftedItem }.
+     * @returns {object} Summary of changes { happinessGain, skillUp, promoted, message }.
+     */
+    completeWorkShift(result) {
+        if (!result.career) return null;
+
+        const summary = {
+            success: result.success,
+            happinessChange: 0,
+            skillUp: '',
+            promoted: false,
+            message: ''
+        };
+
+        if (result.success) {
+            // Happiness with diminishing returns
+            const maxHappiness = this.maxStats.happiness;
+            const currentHappiness = this.stats.happiness;
+            // 25 * (1 - ratio), min 5
+            const rawGain = Config.CAREER.WORK_HAPPINESS_BASE * (1 - (currentHappiness / maxHappiness));
+            summary.happinessChange = Math.max(Config.CAREER.WORK_HAPPINESS_MIN, rawGain);
+            this.stats.happiness = Math.min(maxHappiness, currentHappiness + summary.happinessChange);
+
+            // Skill Gain with diminishing returns based on level
+            // Formula: Base * (20 / (20 + Level))
+            const calculateSkillGain = (currentLevel, baseGain) => {
+                return baseGain * (20 / (20 + currentLevel));
+            };
+            const baseSkillGain = Config.CAREER.SKILL_GAIN_BASE;
+
+            switch (result.career) {
+                case 'Innovator':
+                    summary.skillUp = 'logic';
+                    this.skills.logic += calculateSkillGain(this.skills.logic, baseSkillGain);
+                    break;
+                case 'Scout':
+                    summary.skillUp = 'navigation';
+                    this.skills.navigation += calculateSkillGain(this.skills.navigation, baseSkillGain);
+                    break;
+                case 'Archaeologist':
+                    summary.skillUp = 'research & navigation';
+                    this.skills.research += calculateSkillGain(this.skills.research, 1.0); // Slightly lower split gain
+                    this.skills.navigation += calculateSkillGain(this.skills.navigation, 1.0);
+                    break;
+                case 'Healer':
+                    summary.skillUp = 'empathy';
+                    this.skills.empathy += calculateSkillGain(this.skills.empathy, baseSkillGain);
+                    break;
+                case 'Artisan':
+                    summary.skillUp = 'crafting';
+                    this.skills.crafting += calculateSkillGain(this.skills.crafting, baseSkillGain);
+                    if (result.craftedItem) {
+                        this.handleAction("CRAFT_ITEM", result.craftedItem);
+                    }
+                    break;
+            }
+
+            // Career XP & Promotion
+            summary.promoted = this.gainCareerXP(Config.CAREER.XP_PER_WORK);
+
+            this.addJournalEntry(`I had a successful day at my ${result.career} job! My ${summary.skillUp} skill increased.`);
+            this.mood = 'happy';
+            this.moodOverride = 'happy';
+            this.moodOverrideTimer = Config.TIMING.MOOD_OVERRIDE_MS;
+
+        } else {
+            summary.happinessChange = -10;
+            this.stats.happiness = Math.max(0, this.stats.happiness - 10);
+            this.addJournalEntry(`I struggled at my ${result.career} job today. It was frustrating.`);
+            this.mood = 'sad';
+            this.moodOverride = 'sad';
+            this.moodOverrideTimer = Config.TIMING.MOOD_OVERRIDE_MS;
+        }
+
+        return summary;
     }
 
     /**
@@ -822,7 +1022,7 @@ export class Nadagotchi {
 
             let bestCandidate = null;
             let highestSkillScore = -1;
-            let currentArchetypeScore = -1;
+            let currentArchetypeScore = 0; // Fix: Initialize to 0 instead of -1 to avoid brittle logic
 
             potentialDominantArchetypes.forEach(archetype => {
                 let score = 0;
@@ -854,14 +1054,20 @@ export class Nadagotchi {
                 }
             });
 
-            // If the current archetype is in the list, we prioritize it unless bestCandidate has a higher score.
-            if (potentialDominantArchetypes.includes(this.dominantArchetype)) {
-                if (highestSkillScore > currentArchetypeScore) {
+            // If we found a candidate (list not empty)
+            if (bestCandidate) {
+                // If the current archetype is in the list, we prioritize it unless bestCandidate has a higher score.
+                if (potentialDominantArchetypes.includes(this.dominantArchetype)) {
+                    if (highestSkillScore > currentArchetypeScore) {
+                         this.dominantArchetype = bestCandidate;
+                    }
+                    // Else: keep current (tie goes to incumbent)
+                } else {
                      this.dominantArchetype = bestCandidate;
                 }
-                // Else: keep current (tie goes to incumbent)
             } else {
-                 this.dominantArchetype = bestCandidate;
+                 // Fallback if no candidate found (should be impossible given length > 0 check)
+                 this.dominantArchetype = potentialDominantArchetypes[0];
             }
         }
     }
@@ -1014,6 +1220,18 @@ export class Nadagotchi {
         const initialPoints = {};
         personalityKeys.forEach(key => initialPoints[key] = phenotype[key]);
 
+        // Default home config for new pet
+        const initialHomeConfig = {
+            rooms: {
+                "Entryway": {
+                    wallpaper: 'wallpaper_default',
+                    flooring: 'flooring_default',
+                    wallpaperItem: 'Default',
+                    flooringItem: 'Default'
+                }
+            }
+        };
+
         // Construct Data Object
         return {
             uuid: null, // Will be generated by constructor
@@ -1042,6 +1260,7 @@ export class Nadagotchi {
             quests: {},
             location: 'Home',
             genome: { genotype: genome.genotype, phenotype: phenotype },
+            homeConfig: initialHomeConfig,
             universeSeed: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
         };
     }
