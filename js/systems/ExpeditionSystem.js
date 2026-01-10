@@ -17,10 +17,11 @@ export class ExpeditionSystem {
      * Generates a path of encounter nodes for an expedition.
      * @param {string} season - The current season (Spring, Summer, Autumn, Winter).
      * @param {string} weather - The current weather (Sunny, Rainy, etc).
+     * @param {string} biome - The current biome (Forest, Desert, etc).
      * @param {number} length - Number of nodes in the path (default 3).
      * @returns {Array<object>} An array of node objects.
      */
-    generatePath(season, weather, length = 3) {
+    generatePath(season, weather, biome = 'Forest', length = 3) {
         const validNodes = [];
 
         // Filter nodes based on criteria
@@ -38,20 +39,46 @@ export class ExpeditionSystem {
                 isValid = false;
             }
 
+            // Check Biome
+            if (node.biomes && !node.biomes.includes(biome)) {
+                isValid = false;
+            }
+
             if (isValid) {
                 validNodes.push(node);
             }
         }
 
-        // Select nodes
         const path = [];
-        for (let i = 0; i < length; i++) {
-            if (validNodes.length === 0) break;
+        if (validNodes.length === 0) return path;
 
-            // Weighted selection could go here, for now simple random
-            // If we want unique nodes per path, we should splice them out
-            // But repeats might be okay for generic ones. Let's allow repeats for now.
-            const selected = this.rng.choice(validNodes);
+        // Calculate total weight once
+        const totalWeight = validNodes.reduce((sum, node) => sum + (node.weight !== undefined ? node.weight : 1.0), 0);
+
+        for (let i = 0; i < length; i++) {
+            // Weighted Random Selection
+            let randomValue;
+            if (typeof this.rng.random === 'function') {
+                randomValue = this.rng.random() * totalWeight;
+            } else {
+                 // Fallback if random() not exposed but range is.
+                 randomValue = (this.rng.range(0, 10000) / 10000) * totalWeight;
+            }
+
+            let selected = null;
+            let currentWeight = 0;
+
+            for (const node of validNodes) {
+                currentWeight += (node.weight !== undefined ? node.weight : 1.0);
+                if (randomValue <= currentWeight) {
+                    selected = node;
+                    break;
+                }
+            }
+
+            // Fallback for floating point precision edge cases
+            if (!selected) selected = validNodes[validNodes.length - 1];
+
             path.push(selected);
         }
 

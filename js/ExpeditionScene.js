@@ -22,8 +22,11 @@ export class ExpeditionScene extends Phaser.Scene {
         // Initialize System
         this.system = new ExpeditionSystem(this.pet.rng);
 
+        // Extract biome or default to Forest
+        const biome = data.biome || 'Forest';
+
         // Generate Path
-        this.path = this.system.generatePath(this.season, this.weather, 3);
+        this.path = this.system.generatePath(this.season, this.weather, biome, 3);
         this.currentIndex = 0;
         this.loot = {};
         this.xpGained = 0;

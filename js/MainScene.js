@@ -416,7 +416,8 @@ export class MainScene extends Phaser.Scene {
                     this.scene.pause();
                     this.scene.launch('ExpeditionScene', {
                         nadagotchi: this.nadagotchi,
-                        weather: this.worldState.weather
+                        weather: this.worldState.weather,
+                        biome: 'Forest' // Default for Garden expeditions
                     });
                 } else {
                      this.showNotification("Too Tired for Expedition", '#FF0000');
