@@ -144,7 +144,7 @@ export class UIScene extends Phaser.Scene {
 
         tabs.forEach(tab => {
             const btn = ButtonFactory.createButton(this, 0, 0, tab.label, () => {
-                this.showTab(tab.id);
+                this.showTab(tab.id, true);
             }, { width: 100, height: 35, color: 0xD8A373, fontSize: '24px' });
             btn.tabId = tab.id;
             this.tabButtons.push(btn);
@@ -215,8 +215,9 @@ export class UIScene extends Phaser.Scene {
     /**
      * Switches the active tab and populates the dashboard with relevant actions.
      * @param {string} tabId - The ID of the tab to switch to (e.g., 'CARE', 'ACTION').
+     * @param {boolean} force - If true, forces a UI rebuild even if the state matches.
      */
-    showTab(tabId) {
+    showTab(tabId, force = false) {
         this.currentTab = tabId;
 
         // Update Tab Visuals (Highlight active)
@@ -236,22 +237,10 @@ export class UIScene extends Phaser.Scene {
         const signature = visibleActions.map(a => a.text).join('|');
 
         // OPTIMIZATION: If we are calling showTab but the buttons are already correct, skip rebuild.
-        // NOTE: If the user manually clicked the tab, we might want to force rebuild?
-        // But usually showTab is called by UI clicks or updateStatsUI.
-        // If the signature matches, we don't need to destroy and recreate buttons.
-        // However, we must ensure that if this method is called via a Tab Click, we verify we are actually ON that tab.
-        // Since we destroyed actionButtons previously in the old logic, we need to be careful.
-        // In this logic: "Is the current displayed UI matching the requested UI?"
-
-        // If the actionButtons array is populated and the signature matches, we can return early?
-        // But we need to make sure we are not switching tabs (which clears buttons).
-        // Let's rely on updateStatsUI to handle the optimization conditional call.
-        // BUT, if showTab is called explicitly (e.g. click), we should proceed.
-        // To be safe, let's just implement the rendering logic here and let updateStatsUI decide when to call it.
-        // Wait, if I click 'Action' tab, showTab('ACTION') is called. Buttons are built.
-        // Then updateStatsUI is called. It checks signature. Signature matches. It SKIPS calling showTab.
-        // This is the desired behavior.
-        // So showTab's job is just to BUILD.
+        // We bypass this check if 'force' is true (e.g. manual tab click).
+        if (!force && signature === this.lastActionSignature) {
+            return;
+        }
 
         // Clear existing action buttons
         this.actionButtons.forEach(btn => btn.destroy());
@@ -467,17 +456,8 @@ export class UIScene extends Phaser.Scene {
             this.lastStatsText = text;
         }
 
-        if (this.currentTab === 'ACTION' || this.currentTab === 'SYSTEM') {
-            // OPTIMIZATION: Check if the visible buttons actually changed before rebuilding
-            const allActions = this.getTabActions(this.currentTab);
-            const visibleActions = allActions.filter(item => !item.condition || item.condition());
-            const signature = visibleActions.map(a => a.text).join('|');
-
-            // Only rebuild if the signature differs from the last rendered state
-            if (signature !== this.lastActionSignature) {
-                this.showTab(this.currentTab);
-            }
-        }
+        // Delegate UI update to showTab with optimization enabled (force = false)
+        this.showTab(this.currentTab, false);
 
         if (currentCareer) {
             this.jobBoardButton.setAlpha(1.0);

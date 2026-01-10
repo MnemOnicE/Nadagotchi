@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.42.0] - 2025-12-24
+
+### Added
+- **UI Optimization & Stability:** Implemented a centralized optimization pattern for the "Physical Shell" UI.
+  - **Logic:** The `UIScene.showTab` method now intelligently skips redundant UI rebuilds if the visible action buttons (signature) haven't changed.
+  - **Manual Refresh:** Added a `force` parameter to `showTab`. Manual clicks on a tab now explicitly force a rebuild, ensuring the UI remains responsive to user intent even if the state appears unchanged.
+  - **Refactoring:** Removed duplicated optimization logic from `updateStatsUI`, unifying the behavior across all update paths.
+  - **Testing:** Added `tests/UISceneRebuild.test.js` to verify the optimization and force-rebuild logic.
+
 ## [1.41.0] - 2025-12-24
 
 ### Added
