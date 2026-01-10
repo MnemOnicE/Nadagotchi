@@ -98,6 +98,12 @@ export class InventorySystem {
                 this.pet.addJournalEntry("I drank some Stamina-Up Tea. I feel refreshed!");
                 consumed = true;
                 break;
+            case 'Clear Water':
+                this.pet.stats.energy = Math.min(this.pet.maxStats.energy, this.pet.stats.energy + 5);
+                this.pet.stats.happiness = Math.min(this.pet.maxStats.happiness, this.pet.stats.happiness + 2);
+                this.pet.addJournalEntry("I drank some Clear Water. Refreshing!");
+                consumed = true;
+                break;
             case 'Metabolism-Slowing Tonic':
                 // Gene Therapy: Reduces metabolism gene values permanently (for this life/lineage)
                 if (this.pet.genome && this.pet.genome.genotype && this.pet.genome.genotype.metabolism) {

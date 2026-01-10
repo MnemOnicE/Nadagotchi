@@ -24,6 +24,7 @@ export const ItemDefinitions = {
     "Nutrient Bar": { type: "Consumable", description: "A dense bar packed with vitamins.", emoji: "🍫" },
     "Espresso": { type: "Consumable", description: "A strong coffee to speed you up.", emoji: "☕" },
     "Chamomile": { type: "Consumable", description: "A calming tea to slow you down.", emoji: "🍵" },
+    "Clear Water": { type: "Consumable", description: "Fresh, cold water from a frozen pond.", emoji: "💧" },
 
     // Crafted Items (Furniture)
     "Fancy Bookshelf": { type: "FURNITURE", description: "A beautiful bookshelf that makes studying more effective.", emoji: "📚" },

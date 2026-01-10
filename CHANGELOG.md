@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.41.0] - 2025-12-24
+
+### Added
+- **New Item:** Added "Clear Water" (Consumable) to `js/ItemData.js`.
+  - **Functionality:** Consuming "Clear Water" restores 5 Energy and 2 Happiness.
+  - **Integration:** This resolves a data integrity issue where "Clear Water" was used as a reward in `ExpeditionDefinitions.js` but was not defined as a real item.
+  - **Testing:** Added `tests/ClearWater.test.js` to verify the item definition and consumption logic.
+
 ## [1.40.0] - 2025-12-24
 
 ### Added
