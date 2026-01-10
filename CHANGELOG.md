@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.40.0] - 2025-12-24
+
+### Added
+- **Expedition Enhancements:** Implemented weighted node selection and biome filtering for the Expedition system.
+  - **Weighted Selection:** Nodes now have weighted probabilities (e.g., Rare nodes appear less frequently), allowing for more controlled encounter rarity.
+  - **Biome Filtering:** Added `biome` support to `ExpeditionSystem.generatePath`. Nodes can now be restricted to specific biomes (e.g., "Forest", "Desert"), or remain generic if no biome is specified.
+  - **Logic:** Refactored `generatePath` to accept a `biome` argument (defaulting to 'Forest') and filter nodes strictly based on the biome's `biomes` list.
+  - **Tests:** Updated `tests/Expedition.test.js` to verify weighted selection probabilities and correct biome filtering.
+
 ## [1.39.0] - 2025-12-24
 
 ### Security
