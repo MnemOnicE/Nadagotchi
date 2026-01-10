@@ -986,8 +986,14 @@ export class Nadagotchi {
      */
     static generateDataFromDNA(dnaString) {
         const genome = GeneticsSystem.deserialize(dnaString);
-        // Use a temporary RNG for initial phenotype calculation
-        const tempRng = new SeededRandom(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER));
+
+        // Extract checksum for seeding to ensure deterministic phenotype from the same DNA
+        const parts = dnaString.split('.');
+        // Default to full string if split fails (should be caught by deserialize, but safe fallback)
+        const seedSource = parts.length === 2 ? parts[1] : dnaString;
+
+        // Use a temporary RNG seeded by the DNA checksum for deterministic initial phenotype calculation
+        const tempRng = new SeededRandom(seedSource);
         const phenotype = genome.calculatePhenotype(tempRng);
 
         // Determine dominant archetype (simplified logic from calculateOffspring)
