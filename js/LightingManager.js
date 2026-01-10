@@ -30,8 +30,8 @@ export class LightingManager {
      * Should be called in the scene's update loop.
      */
     update() {
-        // Fix for "Entryway dark" bug: Disable lighting mask when INDOORS.
-        // The darkness overlay should only apply outdoors.
+        // Lighting effects should only be active in outdoor locations (GARDEN).
+        // Indoor locations (INDOOR) should rely on their own lighting/mood.
         if (this.scene.location === 'INDOOR') {
             this.lightImage.setVisible(false);
             return;
