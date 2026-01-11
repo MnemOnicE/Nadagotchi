@@ -14,84 +14,55 @@ import { Achievements } from './AchievementData.js';
  * Renders on top of the MainScene.
  */
 
-/**
- * @class UIScene
- * @extends Phaser.Scene
- * @classdesc
- * A dedicated Phaser Scene for managing and displaying all UI elements.
- * It implements the "Physical Shell" dashboard layout using a Neo-Retro aesthetic.
- */
 export class UIScene extends Phaser.Scene {
-    /**
-     * Creates an instance of UIScene.
-     */
     constructor() {
         super({ key: 'UIScene' });
-        /** @type {string} Stores the signature of the last rendered action buttons to prevent redundant rebuilds. */
         this.lastActionSignature = '';
+        this.craftingGridState = new Array(9).fill(null);
+        this.selectedInventoryItem = null;
     }
 
-    /**
-     * Phaser lifecycle method called once, after `preload`.
-     * Initializes UI state, creates the dashboard background, action buttons, and all modals.
-     */
     create() {
-        // --- State ---
         this.currentTab = 'CARE';
         this.tabButtons = [];
         this.actionButtons = [];
-        this.allModals = []; // Track all modals for exclusive management
+        this.allModals = [];
 
-        // --- Dashboard Background ---
-        this.dashboardBg = this.add.rectangle(0, 0, 1, 1, 0xA3B8A2).setOrigin(0); // Soft Olive Green
-        this.dashboardBorder = this.add.rectangle(0, 0, 1, 1, 0x4A4A4A).setOrigin(0); // Border line
+        this.dashboardBg = this.add.rectangle(0, 0, 1, 1, 0xA3B8A2).setOrigin(0);
+        this.dashboardBorder = this.add.rectangle(0, 0, 1, 1, 0x4A4A4A).setOrigin(0);
 
-        // --- Stats Display ---
-        // Stats overlay on top of the game view (top left)
         this.statsText = this.add.text(10, 10, '', {
             fontFamily: 'VT323, monospace', fontSize: '24px', color: '#ffffff', stroke: '#000000', strokeThickness: 3
         });
-        /** @type {string} Cache the last text value to prevent redundant setText calls. */
         this.lastStatsText = '';
 
-        // --- Action Buttons ---
         this.actionButtons = [];
 
-        // --- Job Board ---
-        // Positioned at bottom-right, with increased size for touch
-        // Palette UX Improvement: Use ButtonFactory for consistency and better "Disabled" feedback
         this.jobBoardButton = ButtonFactory.createButton(this, 0, 0, 'Job Board', () => {
             this.handleJobBoardClick();
         }, { width: 120, height: 50, color: 0x6A0DAD, fontSize: '20px' });
-
-        // Initial state: Dimmed but interactive
         this.jobBoardButton.setAlpha(0.6);
 
-        // --- Retire Button ---
-        // Positioned at top-right
         this.retireButton = this.add.text(0, 50, 'Retire', {
             fontFamily: 'Arial', fontSize: '16px', padding: { x: 15, y: 10 }, backgroundColor: '#ff00ff', color: '#ffffff'
-        })
-            .setOrigin(1, 0) // Anchor to top-right
-            .setInteractive({ useHandCursor: true })
-            .setVisible(false)
-            .on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, EventKeys.RETIRE));
+        }).setOrigin(1, 0).setInteractive({ useHandCursor: true }).setVisible(false)
+          .on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, EventKeys.RETIRE));
 
-        // --- Event Listeners ---
         this.game.events.on(EventKeys.UPDATE_STATS, this.updateStatsUI, this);
         this.game.events.on(EventKeys.UI_ACTION, this.handleUIActions, this);
         this.game.events.on(EventKeys.START_TUTORIAL, this.startTutorial, this);
         this.game.events.on(EventKeys.ACHIEVEMENT_UNLOCKED, this.handleAchievementUnlocked, this);
         this.scale.on('resize', this.resize, this);
 
-        // --- Calendar Dropdown ---
         this.calendarDropdown = this.createCalendarDropdown();
 
-        // --- Modals (Containers) ---
         this.journalModal = this.createModal("Journal");
         this.recipeModal = this.createModal("Recipe Book");
         this.hobbyModal = this.createModal("Hobbies");
-        this.craftingModal = this.createModal("Crafting");
+
+        // Crafting Modal
+        this.craftingModal = this.createModal("Crafting Table");
+
         this.relationshipModal = this.createModal("Relationships");
         this.decorateModal = this.createModal("Decorate");
         this.ancestorModal = this.createModal("Hall of Ancestors");
@@ -103,284 +74,94 @@ export class UIScene extends Phaser.Scene {
         this.careerModal = this.createModal("Career Profile");
         this.jobBoardModal = this.createModal("Job Board");
 
-        // --- Initial Layout ---
         this.createTabs();
-        this.resize(this.scale); // Initial resize to set positions
+        this.resize(this.scale);
         this.showTab('CARE');
 
-        // --- Keyboard Shortcuts (Palette UX) ---
-        // Quick access to tabs using number keys 1-4
         this.input.keyboard.on('keydown-ONE', () => this.showTab('CARE'));
         this.input.keyboard.on('keydown-TWO', () => this.showTab('ACTION'));
         this.input.keyboard.on('keydown-THREE', () => this.showTab('SYSTEM'));
         this.input.keyboard.on('keydown-FOUR', () => this.showTab('ANCESTORS'));
     }
 
-    /**
-     * Helper method to close all tracked modals.
-     * Call this before opening any new modal to ensure exclusive visibility.
-     */
-    closeAllModals() {
-        this.allModals.forEach(modal => modal.setVisible(false));
-    }
-
-    /**
-     * Handles clicks on the Job Board button.
-     */
-    handleJobBoardClick() {
-        this.game.events.emit(EventKeys.UI_ACTION, EventKeys.OPEN_JOB_BOARD);
-    }
-
-    /**
-     * Creates the permanent category tabs (Care, Action, System).
-     */
+    closeAllModals() { this.allModals.forEach(modal => modal.setVisible(false)); }
+    handleJobBoardClick() { this.game.events.emit(EventKeys.UI_ACTION, EventKeys.OPEN_JOB_BOARD); }
     createTabs() {
-        const tabs = [
-            { label: '❤️ CARE', id: 'CARE' },
-            { label: '🎒 ACTION', id: 'ACTION' },
-            { label: '⚙️ SYSTEM', id: 'SYSTEM' },
-            { label: '🏺 ANCESTORS', id: 'ANCESTORS' }
-        ];
-
+        const tabs = [{ label: '❤️ CARE', id: 'CARE' }, { label: '🎒 ACTION', id: 'ACTION' }, { label: '⚙️ SYSTEM', id: 'SYSTEM' }, { label: '🏺 ANCESTORS', id: 'ANCESTORS' }];
         tabs.forEach(tab => {
-            const btn = ButtonFactory.createButton(this, 0, 0, tab.label, () => {
-                this.showTab(tab.id, true);
-            }, { width: 100, height: 35, color: 0xD8A373, fontSize: '24px' });
-            btn.tabId = tab.id;
-            this.tabButtons.push(btn);
+            const btn = ButtonFactory.createButton(this, 0, 0, tab.label, () => { this.showTab(tab.id, true); }, { width: 100, height: 35, color: 0xD8A373, fontSize: '24px' });
+            btn.tabId = tab.id; this.tabButtons.push(btn);
         });
     }
-
-    /**
-     * Retrieves the list of actions (buttons) for a given tab ID.
-     * @param {string} tabId - The ID of the tab (e.g., 'CARE', 'ACTION').
-     * @returns {Array<object>} List of action definitions.
-     */
     getTabActions(tabId) {
         let actions = [];
-        if (tabId === 'CARE') {
-            actions = [
-                { text: 'Feed', action: EventKeys.FEED },
-                { text: 'Play', action: EventKeys.PLAY },
-                { text: 'Meditate', action: EventKeys.MEDITATE }
-            ];
-        } else if (tabId === 'ACTION') {
-            actions = [
-                { text: 'Explore', action: EventKeys.EXPLORE },
-                { text: 'Study', action: EventKeys.STUDY },
-                {
-                    text: 'Work',
-                    action: EventKeys.WORK,
-                    condition: () => this.nadagotchiData && this.nadagotchiData.currentCareer,
-                    disabledMessage: "You need a Career first!\nTry Studying or Exploring."
-                },
-                { text: 'Craft', action: EventKeys.OPEN_CRAFTING_MENU }
-            ];
-        } else if (tabId === 'SYSTEM') {
-            actions = [
-                { text: 'Passport', action: EventKeys.OPEN_SHOWCASE },
-                { text: 'Career', action: EventKeys.OPEN_CAREER_MENU },
-                { text: 'Journal', action: EventKeys.OPEN_JOURNAL },
-                { text: 'Inventory', action: EventKeys.OPEN_INVENTORY },
-                { text: 'Recipes', action: EventKeys.OPEN_RECIPES },
-                { text: 'Hobbies', action: EventKeys.OPEN_HOBBIES },
-                { text: 'Achievements', action: EventKeys.OPEN_ACHIEVEMENTS },
-                { text: 'Showcase', action: EventKeys.OPEN_SHOWCASE },
-                { text: 'Decorate', action: EventKeys.DECORATE },
-                { text: 'Settings', action: EventKeys.OPEN_SETTINGS },
-                {
-                    text: 'Retire',
-                    action: EventKeys.RETIRE,
-                    condition: () => this.nadagotchiData && this.nadagotchiData.isLegacyReady,
-                    disabledMessage: "Not ready to retire yet."
-                }
-            ];
-        } else if (tabId === 'ANCESTORS') {
+        if (tabId === 'CARE') actions = [{ text: 'Feed', action: EventKeys.FEED }, { text: 'Play', action: EventKeys.PLAY }, { text: 'Meditate', action: EventKeys.MEDITATE }];
+        else if (tabId === 'ACTION') actions = [{ text: 'Explore', action: EventKeys.EXPLORE }, { text: 'Study', action: EventKeys.STUDY }, { text: 'Work', action: EventKeys.WORK, condition: () => this.nadagotchiData && this.nadagotchiData.currentCareer, disabledMessage: "You need a Career first!" }, { text: 'Craft', action: EventKeys.OPEN_CRAFTING_MENU }];
+        else if (tabId === 'SYSTEM') actions = [{ text: 'Passport', action: EventKeys.OPEN_SHOWCASE }, { text: 'Career', action: EventKeys.OPEN_CAREER_MENU }, { text: 'Journal', action: EventKeys.OPEN_JOURNAL }, { text: 'Inventory', action: EventKeys.OPEN_INVENTORY }, { text: 'Recipes', action: EventKeys.OPEN_RECIPES }, { text: 'Hobbies', action: EventKeys.OPEN_HOBBIES }, { text: 'Achievements', action: EventKeys.OPEN_ACHIEVEMENTS }, { text: 'Showcase', action: EventKeys.OPEN_SHOWCASE }, { text: 'Decorate', action: EventKeys.DECORATE }, { text: 'Settings', action: EventKeys.OPEN_SETTINGS }, { text: 'Retire', action: EventKeys.RETIRE, condition: () => this.nadagotchiData && this.nadagotchiData.isLegacyReady, disabledMessage: "Not ready yet." }];
+        else if (tabId === 'ANCESTORS') {
             const ancestors = new PersistenceManager().loadHallOfFame();
-            if (ancestors.length === 0) {
-                 actions = [{ text: 'No Ancestors Yet', action: EventKeys.NONE, condition: () => true }];
-            } else {
-                ancestors.forEach((ancestor) => {
-                    actions.push({
-                        text: `Gen ${ancestor.generation}: ${ancestor.dominantArchetype}`,
-                        action: EventKeys.OPEN_ANCESTOR_MODAL,
-                        data: ancestor
-                    });
-                });
-            }
+            if (ancestors.length === 0) actions = [{ text: 'No Ancestors Yet', action: EventKeys.NONE, condition: () => true }];
+            else ancestors.forEach((ancestor) => { actions.push({ text: `Gen ${ancestor.generation}: ${ancestor.dominantArchetype}`, action: EventKeys.OPEN_ANCESTOR_MODAL, data: ancestor }); });
         }
         return actions;
     }
-
-    /**
-     * Switches the active tab and populates the dashboard with relevant actions.
-     * @param {string} tabId - The ID of the tab to switch to (e.g., 'CARE', 'ACTION').
-     * @param {boolean} force - If true, forces a UI rebuild even if the state matches.
-     */
     showTab(tabId, force = false) {
         this.currentTab = tabId;
-
-        // Update Tab Visuals (Highlight active)
-        this.tabButtons.forEach(btn => {
-            const isSelected = btn.tabId === tabId;
-            btn.setAlpha(isSelected ? 1.0 : 0.7);
-        });
-
-        // Get Actions
+        this.tabButtons.forEach(btn => { btn.setAlpha(btn.tabId === tabId ? 1.0 : 0.7); });
         const allActions = this.getTabActions(tabId);
-
-        // Filter actions based on conditions to determine what will be shown
-        // We do this here so we can generate the signature from the *visible* buttons
         const visibleActions = allActions.filter(item => !item.condition || item.condition());
-
-        // Generate Signature (e.g., "Feed|Play|Meditate")
         const signature = visibleActions.map(a => a.text).join('|');
-
-        // OPTIMIZATION: If we are calling showTab but the buttons are already correct, skip rebuild.
-        // We bypass this check if 'force' is true (e.g. manual tab click).
-        if (!force && signature === this.lastActionSignature) {
-            return;
-        }
-
-        // Clear existing action buttons
+        if (!force && signature === this.lastActionSignature) return;
         this.actionButtons.forEach(btn => btn.destroy());
         this.actionButtons = [];
-
-        // Update signature for next comparison
         this.lastActionSignature = signature;
-
-        // Layout buttons based on current screen size
         const dashboardHeight = Math.floor(this.cameras.main.height * Config.UI.DASHBOARD_HEIGHT_RATIO);
         const dashboardY = this.cameras.main.height - dashboardHeight;
-
-        this.layoutActionButtons(visibleActions, dashboardY + 50); // Start below tabs
+        this.layoutActionButtons(visibleActions, dashboardY + 50);
     }
-
-    /**
-     * Lays out the action buttons in a responsive grid.
-     */
     layoutActionButtons(actions, startY) {
         const width = this.cameras.main.width;
-        let currentX = 20;
-        let currentY = startY;
-        const spacing = 15;
-        const btnHeight = 40;
-
+        let currentX = 20, currentY = startY;
         actions.forEach(item => {
-            // Condition check already done in showTab filtering
-            // Palette UX: Show disabled buttons instead of hiding them for better discoverability
-            const isDisabled = item.condition && !item.condition();
             const btnWidth = (item.text.length * 12) + 40;
-
-            if (currentX + btnWidth > width - 20) {
-                currentX = 20;
-                currentY += btnHeight + spacing;
-            }
-
-            const btn = ButtonFactory.createButton(this, currentX, currentY, item.text, () => {
-                this.game.events.emit(EventKeys.UI_ACTION, item.action, item.data);
-            }, {
-                width: btnWidth, height: btnHeight, color: 0x6A0DAD, fontSize: '24px', textColor: '#FFFFFF',
-                onDisabledClick: () => {
-                    this.showToast("Action Locked", item.disabledMessage || "Not available yet.", "🔒");
-                }
-            });
-
-            if (isDisabled) btn.setDisabled(true);
-
+            if (currentX + btnWidth > width - 20) { currentX = 20; currentY += 55; }
+            const btn = ButtonFactory.createButton(this, currentX, currentY, item.text, () => { this.game.events.emit(EventKeys.UI_ACTION, item.action, item.data); }, { width: btnWidth, height: 40, color: 0x6A0DAD, fontSize: '24px', textColor: '#FFFFFF', onDisabledClick: () => { this.showToast("Action Locked", item.disabledMessage || "Not available yet.", "🔒"); } });
+            if (item.condition && !item.condition()) btn.setDisabled(true);
             this.actionButtons.push(btn);
-            currentX += btnWidth + spacing;
+            currentX += btnWidth + 15;
         });
     }
-
-    /**
-     * Handles the resize event.
-     * Repositions UI elements to fit the new game size.
-     */
     resize(gameSize) {
-        const width = gameSize.width;
-        const height = gameSize.height;
+        const width = gameSize.width, height = gameSize.height;
         const dashboardHeight = Math.floor(height * Config.UI.DASHBOARD_HEIGHT_RATIO);
         const dashboardY = height - dashboardHeight;
-
         this.cameras.main.setSize(width, height);
-
-        // Update Dashboard Background
-        this.dashboardBg.setPosition(0, dashboardY);
-        this.dashboardBg.setSize(width, dashboardHeight);
-        this.dashboardBorder.setPosition(0, dashboardY);
-        this.dashboardBorder.setSize(width, 4);
-
-        // Layout Tabs
+        this.dashboardBg.setPosition(0, dashboardY); this.dashboardBg.setSize(width, dashboardHeight);
+        this.dashboardBorder.setPosition(0, dashboardY); this.dashboardBorder.setSize(width, 4);
         const tabWidth = Math.min(120, (width - 40) / 4);
-        const tabSpacing = 10;
         let tabX = 20;
-        const tabY = dashboardY + 10;
-
-        this.tabButtons.forEach(btn => {
-            btn.setPosition(tabX, tabY);
-            // btn.setSize() is not strictly exposed on Container from ButtonFactory easily, but we rely on fixed size
-            tabX += tabWidth + tabSpacing;
-        });
-
-        // Update Job Board & Retire Button
+        this.tabButtons.forEach(btn => { btn.setPosition(tabX, dashboardY + 10); tabX += tabWidth + 10; });
         if (this.jobBoardButton) this.jobBoardButton.setPosition(width - 130, height - 60);
         if (this.retireButton) this.retireButton.setPosition(width - 10, 50);
-
-        // Update Calendar Dropdown Position (Top-Right)
-        if (this.calendarDropdown) {
-             this.calendarDropdown.setPosition(width - 160, 0); // Anchored top-right
-        }
-
-        // Refresh Tabs (Action Buttons)
+        if (this.calendarDropdown) this.calendarDropdown.setPosition(width - 160, 0);
         this.showTab(this.currentTab);
-
-        // Resize Modals (The Core Fix)
         this.resizeModals(width, height);
     }
-
-    /**
-     * Updates the position and size of all modals to stay centered and responsive.
-     * @param {number} width - Current screen width.
-     * @param {number} height - Current screen height.
-     */
     resizeModals(width, height) {
         const modalWidth = Math.min(500, width - 40);
         const modalHeight = Math.min(400, height - 100);
-
         this.allModals.forEach(container => {
-            if (!container.active) return; // Skip destroyed
-
-            // Center the container
+            if (!container.active) return;
             container.setPosition(width / 2, height / 2);
-
-            // Update standard elements if they exist
-            if (container.bg) {
-                container.bg.setSize(modalWidth, modalHeight);
-            }
-            if (container.modalTitle) {
-                container.modalTitle.setPosition(0, -modalHeight / 2 + 30);
-            }
-            if (container.closeButton) {
-                container.closeButton.setPosition(modalWidth / 2 - 40, -modalHeight / 2 + 30);
-            }
-            if (container.content) {
-                // Content stays at 0,0 (center)
-                container.content.setStyle({ wordWrap: { width: modalWidth - 40 } });
-            }
+            if (container.bg) container.bg.setSize(modalWidth, modalHeight);
+            if (container.modalTitle) container.modalTitle.setPosition(0, -modalHeight / 2 + 30);
+            if (container.closeButton) container.closeButton.setPosition(modalWidth / 2 - 40, -modalHeight / 2 + 30);
+            if (container.content) container.content.setStyle({ wordWrap: { width: modalWidth - 40 } });
         });
     }
-
-    /**
-     * Handles specific UI actions.
-     */
     handleUIActions(action, data) {
         switch (action) {
-            case EventKeys.OPEN_SHOWCASE:
-                this.scene.pause('MainScene');
-                this.scene.sleep();
-                this.scene.launch('ShowcaseScene', { nadagotchi: this.nadagotchiData });
-                break;
+            case EventKeys.OPEN_SHOWCASE: this.scene.pause('MainScene'); this.scene.sleep(); this.scene.launch('ShowcaseScene', { nadagotchi: this.nadagotchiData }); break;
             case EventKeys.OPEN_JOURNAL: this.openJournal(); break;
             case EventKeys.OPEN_RECIPES: this.openRecipeBook(); break;
             case EventKeys.OPEN_HOBBIES: this.openHobbyMenu(); break;
@@ -390,819 +171,184 @@ export class UIScene extends Phaser.Scene {
             case EventKeys.OPEN_ANCESTOR_MODAL: this.openAncestorModal(data); break;
             case EventKeys.OPEN_INVENTORY: this.openInventoryMenu(); break;
             case EventKeys.OPEN_ACHIEVEMENTS: this.openAchievementsModal(); break;
-            case EventKeys.OPEN_SHOWCASE: this.openShowcase(); break;
             case EventKeys.OPEN_SETTINGS: this.openSettingsMenu(); break;
             case EventKeys.OPEN_CAREER_MENU: this.openCareerMenu(); break;
             case EventKeys.OPEN_JOB_BOARD: this.openJobBoardMenu(); break;
         }
     }
-
-    /**
-     * Generates a signature string for the current tab's state.
-     * Used to avoid rebuilding UI when state hasn't changed.
-     * @param {string} tabId - The ID of the tab.
-     * @returns {string} A signature representing relevant state.
-     */
     getTabStateSignature(tabId) {
         if (!this.nadagotchiData) return '';
         switch (tabId) {
-            case 'ACTION':
-                // 'Work' button enabled state depends on currentCareer existence
-                return `career:${!!this.nadagotchiData.currentCareer}`;
-            case 'SYSTEM':
-                // 'Retire' button enabled state depends on isLegacyReady
-                return `legacy:${!!this.nadagotchiData.isLegacyReady}`;
-            default:
-                // Other tabs (CARE, ANCESTORS) don't have dynamic enabled states in the main button grid
-                return 'static';
+            case 'ACTION': return `career:${!!this.nadagotchiData.currentCareer}`;
+            case 'SYSTEM': return `legacy:${!!this.nadagotchiData.isLegacyReady}`;
+            default: return 'static';
         }
     }
-
-    /**
-     * Updates all UI elements with the latest data from the Nadagotchi.
-     * This method is the callback for the 'updateStats' event.
-     * @param {object} data - The entire Nadagotchi object from MainScene.
-     */
     updateStatsUI(data) {
-        // Handle both old and new data structures temporarily for robustness
         let worldState = null;
-        if (data.nadagotchi) {
-            this.nadagotchiData = data.nadagotchi;
-            this.settingsData = data.settings;
-            worldState = data.world;
-        } else {
-            this.nadagotchiData = data;
-        }
-
-        if (worldState) {
-            this.updateCalendarDropdown(worldState);
-        }
-
+        if (data.nadagotchi) { this.nadagotchiData = data.nadagotchi; this.settingsData = data.settings; worldState = data.world; } else { this.nadagotchiData = data; }
+        if (worldState) this.updateCalendarDropdown(worldState);
         const { stats, skills, mood, dominantArchetype, currentCareer, location, isLegacyReady, newCareerUnlocked } = this.nadagotchiData;
         const moodEmoji = this.getMoodEmoji(mood);
-        const text = `Location: ${location}\n` +
-                     `Archetype: ${dominantArchetype}\n` +
-                     `Mood: ${mood} ${moodEmoji}\n` +
-                     `Career: ${currentCareer || 'None'}\n` +
-                     `Hunger: ${Math.floor(stats.hunger)}\n` +
-                     `Energy: ${Math.floor(stats.energy)}\n` +
-                     `Happiness: ${Math.floor(stats.happiness)}\n` +
-                     `Logic: ${skills.logic.toFixed(2)} | Nav: ${skills.navigation.toFixed(2)} | Research: ${skills.research.toFixed(2)}`;
-
-        // OPTIMIZATION: Only update text object if the string content has actually changed.
-        // This runs 10 times a second, so avoiding texture regeneration is a win.
-        if (this.lastStatsText !== text) {
-            this.statsText.setText(text);
-            this.lastStatsText = text;
-        }
-
-        // Delegate UI update to showTab with optimization enabled (force = false)
+        const text = `Location: ${location}\nArchetype: ${dominantArchetype}\nMood: ${mood} ${moodEmoji}\nCareer: ${currentCareer || 'None'}\nHunger: ${Math.floor(stats.hunger)}\nEnergy: ${Math.floor(stats.energy)}\nHappiness: ${Math.floor(stats.happiness)}\nLogic: ${skills.logic.toFixed(2)} | Nav: ${skills.navigation.toFixed(2)} | Research: ${skills.research.toFixed(2)}`;
+        if (this.lastStatsText !== text) { this.statsText.setText(text); this.lastStatsText = text; }
         this.showTab(this.currentTab, false);
-
-        if (currentCareer) {
-            this.jobBoardButton.setAlpha(1.0);
-        } else {
-            // Palette UX: Dimmed but interactive
-            this.jobBoardButton.setAlpha(0.6);
-        }
-
+        if (currentCareer) this.jobBoardButton.setAlpha(1.0); else this.jobBoardButton.setAlpha(0.6);
         this.retireButton.setVisible(isLegacyReady);
-
-        if (newCareerUnlocked) {
-            this.showCareerNotification(newCareerUnlocked);
-            this.mainScene.nadagotchi.newCareerUnlocked = null;
-        }
+        if (newCareerUnlocked) { this.showCareerNotification(newCareerUnlocked); this.mainScene.nadagotchi.newCareerUnlocked = null; }
     }
-
     getMoodEmoji(mood) { return ({ 'happy': '😊', 'sad': '😢', 'angry': '😠', 'neutral': '😐' })[mood] || '❓'; }
-
-    showCareerNotification(message) {
-        const txt = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2 - 30, `Career Unlocked: ${message}!`,
-            { fontFamily: 'VT323, Arial', fontSize: '32px', color: '#000', backgroundColor: '#fff', padding: { x: 10, y: 5 }, align: 'center' }
-        ).setOrigin(0.5);
-        this.time.delayedCall(3000, () => txt.destroy());
-    }
-
+    showCareerNotification(message) { const txt = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2 - 30, `Career Unlocked: ${message}!`, { fontFamily: 'VT323, Arial', fontSize: '32px', color: '#000', backgroundColor: '#fff', padding: { x: 10, y: 5 }, align: 'center' }).setOrigin(0.5); this.time.delayedCall(3000, () => txt.destroy()); }
     createCalendarDropdown() {
-        const width = 150;
-        const collapsedHeight = 30;
-        const expandedHeight = 120;
-
-        const container = this.add.container(0, 0); // Position set in resize
-
-        // Background
-        const bg = this.add.rectangle(0, 0, width, collapsedHeight, 0x000000, 0.7)
-            .setOrigin(0, 0)
-            .setStrokeStyle(2, 0xFFFFFF)
-            .setInteractive({ useHandCursor: true });
-
-        // Text (Collapsed) - "Clock Icon + Day/Night"
-        const headerText = this.add.text(10, 5, "🕒 Day", {
-            fontFamily: 'VT323, monospace', fontSize: '20px', color: '#FFFFFF'
-        });
-
-        // Expanded Content Container (Hidden by default)
-        const contentContainer = this.add.container(0, collapsedHeight);
-        contentContainer.setVisible(false);
-
-        // Expanded BG
-        const contentBg = this.add.rectangle(0, 0, width, expandedHeight - collapsedHeight, 0x222222, 0.9)
-            .setOrigin(0, 0)
-            .setStrokeStyle(1, 0x888888);
-
-        // Expanded Text
-        const detailsText = this.add.text(10, 10, "Year: 1\nSpring\nDay 1\nWeather: Sunny", {
-            fontFamily: 'VT323, monospace', fontSize: '16px', color: '#CCCCCC', lineSpacing: 5
-        });
-
-        contentContainer.add([contentBg, detailsText]);
-        container.add([bg, headerText, contentContainer]);
-
-        // Interaction
-        container.isExpanded = false;
-        container.headerText = headerText;
-        container.detailsText = detailsText;
-        container.contentContainer = contentContainer;
-        container.bg = bg;
-
-        bg.on('pointerdown', () => {
-            container.isExpanded = !container.isExpanded;
-            contentContainer.setVisible(container.isExpanded);
-            bg.setSize(width, container.isExpanded ? expandedHeight : collapsedHeight);
-            // Bring to top
-            container.setDepth(200);
-        });
-
-        // Add method to update text
-        container.updateText = (header, details) => {
-            headerText.setText(header);
-            detailsText.setText(details);
-        };
-
+        const width = 150, collapsedHeight = 30, expandedHeight = 120;
+        const container = this.add.container(0, 0);
+        const bg = this.add.rectangle(0, 0, width, collapsedHeight, 0x000000, 0.7).setOrigin(0, 0).setStrokeStyle(2, 0xFFFFFF).setInteractive({ useHandCursor: true });
+        const headerText = this.add.text(10, 5, "🕒 Day", { fontFamily: 'VT323, monospace', fontSize: '20px', color: '#FFFFFF' });
+        const contentContainer = this.add.container(0, collapsedHeight).setVisible(false);
+        const contentBg = this.add.rectangle(0, 0, width, expandedHeight - collapsedHeight, 0x222222, 0.9).setOrigin(0, 0).setStrokeStyle(1, 0x888888);
+        const detailsText = this.add.text(10, 10, "Year: 1\nSpring\nDay 1\nWeather: Sunny", { fontFamily: 'VT323, monospace', fontSize: '16px', color: '#CCCCCC', lineSpacing: 5 });
+        contentContainer.add([contentBg, detailsText]); container.add([bg, headerText, contentContainer]);
+        container.isExpanded = false; container.headerText = headerText; container.detailsText = detailsText;
+        bg.on('pointerdown', () => { container.isExpanded = !container.isExpanded; contentContainer.setVisible(container.isExpanded); bg.setSize(width, container.isExpanded ? expandedHeight : collapsedHeight); container.setDepth(200); });
+        container.updateText = (header, details) => { headerText.setText(header); detailsText.setText(details); };
         return container;
     }
-
-    updateCalendarDropdown(worldState) {
-        if (!this.calendarDropdown) return;
-
-        const { timePeriod, season, day, year, weather, event } = worldState;
-
-        // Update Header
-        const timeIcon = (timePeriod === 'Night' || timePeriod === 'Dusk' || timePeriod === 'Dawn') ? '🌙' : '☀️';
-        const header = `${timeIcon} ${timePeriod}`;
-
-        // Update Details
-        let details = `Year ${year}\n${season}, Day ${day}\n${weather}`;
-        if (event) {
-            details += `\nEvent: ${event.name}`;
-        }
-
-        // Use the new updateText method if available (it handles child access safely)
-        if (this.calendarDropdown.updateText) {
-            this.calendarDropdown.updateText(header, details);
-        } else {
-            // Fallback for older instances or if updateText undefined
-            this.calendarDropdown.headerText.setText(header);
-            this.calendarDropdown.detailsText.setText(details);
-        }
-    }
-
-    startTutorial() {
-        this.closeAllModals();
-        this.scene.pause('MainScene');
-        // Use Container for tutorial modal too
-        const container = this.add.container(this.cameras.main.width/2, this.cameras.main.height/2);
-        this.allModals.push(container);
-
-        const bg = this.add.rectangle(0, 0, 400, 300, 0x000000, 0.9).setStrokeStyle(2, 0xFFFFFF).setInteractive();
-        const title = this.add.text(0, -100, "SYSTEM GREETER", { fontFamily: 'VT323', fontSize: '32px', color: '#00FF00' }).setOrigin(0.5);
-        const text = this.add.text(0, -20, "Welcome to Nadagotchi!\n\nWould you like a quick tour\nof the interface?", {
-            fontFamily: 'VT323', fontSize: '24px', color: '#FFFFFF', align: 'center'
-        }).setOrigin(0.5);
-
-        const yesBtn = ButtonFactory.createButton(this, -60, 80, "Yes", () => {
-             container.destroy();
-             this.allModals = this.allModals.filter(m => m !== container);
-             this.runTutorialSequence();
-        }, { width: 100, height: 40, color: 0x4CAF50 });
-
-        const noBtn = ButtonFactory.createButton(this, 60, 80, "No", () => {
-             container.destroy();
-             this.allModals = this.allModals.filter(m => m !== container);
-             this.scene.resume('MainScene');
-        }, { width: 100, height: 40, color: 0xF44336 });
-
-        container.add([bg, title, text, yesBtn, noBtn]);
-        // Tag for resize
-        container.bg = bg;
-    }
-
-    runTutorialSequence() {
-        // ... (Tutorial logic unchanged as it uses full-screen graphics overlay) ...
-        // Keeping original implementation for brevity, it's resilient enough (overlay).
-        let step = 0;
-        const graphics = this.add.graphics();
-        const textBg = this.add.rectangle(0, 0, 0, 0, 0x000000, 0.8).setOrigin(0.5);
-        const instructionText = this.add.text(0, 0, '', { fontFamily: 'VT323', fontSize: '24px', color: '#FFFFFF', align: 'center' }).setOrigin(0.5);
-
-        const nextStep = () => { step++; runStep(); };
-        const highlight = (x, y, w, h, text) => {
-            graphics.clear(); graphics.fillStyle(0x000000, 0.7); graphics.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height);
-            const gameW = this.cameras.main.width; const gameH = this.cameras.main.height;
-            graphics.fillRect(0, 0, gameW, y); graphics.fillRect(0, y + h, gameW, gameH - (y + h));
-            graphics.fillRect(0, y, x, h); graphics.fillRect(x + w, y, gameW - (x + w), h);
-            graphics.lineStyle(4, 0x00FF00); graphics.strokeRect(x, y, w, h);
-            textBg.setPosition(gameW / 2, gameH / 2); textBg.setSize(400, 100); textBg.setVisible(true);
-            instructionText.setPosition(gameW / 2, gameH / 2); instructionText.setText(text + "\n\n(Click to continue)"); instructionText.setVisible(true);
-            graphics.setDepth(1000); textBg.setDepth(1001); instructionText.setDepth(1002);
-        };
-        const runStep = () => {
-            if (step === 1) highlight(5, 5, 400, 200, "Here you can see your Pet's\nStats, Mood, and Skills.");
-            else if (step === 2) {
-                this.showTab('CARE');
-                const dashboardY = this.cameras.main.height - Math.floor(this.cameras.main.height * Config.UI.DASHBOARD_HEIGHT_RATIO);
-                highlight(10, dashboardY, 500, 50, "Use these tabs to switch between\nCare, Actions, and Systems.");
-            } else if (step === 3) {
-                const dashboardY = this.cameras.main.height - Math.floor(this.cameras.main.height * Config.UI.DASHBOARD_HEIGHT_RATIO);
-                highlight(10, dashboardY + 60, 600, 100, "These buttons let you interact\nwith your Nadagotchi.");
-                highlight(10, this.cameras.main.height - Math.floor(this.cameras.main.height * 0.25), 500, 50, "Use these tabs to switch between\nCare, Actions, and Systems.");
-            } else if (step === 3) {
-                 highlight(10, this.cameras.main.height - Math.floor(this.cameras.main.height * 0.25) + 60, 600, 100, "These buttons let you interact\nwith your Nadagotchi.");
-            } else {
-                graphics.destroy(); textBg.destroy(); instructionText.destroy(); this.scene.resume('MainScene');
-            }
-        };
-        this.input.on('pointerdown', () => { if (step > 0 && step < 4) nextStep(); });
-        step = 1; runStep();
-    }
-
-    /**
-     * Creates a generic modal using a Container for responsive layout.
-     */
+    updateCalendarDropdown(worldState) { if (!this.calendarDropdown) return; const { timePeriod, season, day, year, weather, event } = worldState; const timeIcon = (timePeriod === 'Night' || timePeriod === 'Dusk' || timePeriod === 'Dawn') ? '🌙' : '☀️'; const header = `${timeIcon} ${timePeriod}`; let details = `Year ${year}\n${season}, Day ${day}\n${weather}`; if (event) details += `\nEvent: ${event.name}`; if (this.calendarDropdown.updateText) this.calendarDropdown.updateText(header, details); }
     createModal(title) {
-        // Start centered. Resize will update this.
-        const container = this.add.container(this.cameras.main.width / 2, this.cameras.main.height / 2);
-        this.allModals.push(container);
-
-        // Initial Dimensions (will be updated by resize)
+        const container = this.add.container(this.cameras.main.width / 2, this.cameras.main.height / 2); this.allModals.push(container);
         const w = 500, h = 400;
-
-        // Local Coordinates: Center is 0,0
         const modalBg = this.add.rectangle(0, 0, w, h, 0x1a1a1a, 0.95).setStrokeStyle(2, 0xffffff).setInteractive();
         const modalTitle = this.add.text(0, -h/2 + 30, title, { fontFamily: 'VT323, Arial', fontSize: '36px', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5);
         const modalContent = this.add.text(0, 0, '', { fontSize: '24px', fontFamily: 'VT323, Arial', color: '#fff', wordWrap: { width: w - 40 } }).setOrigin(0.5);
-
-        const closeButton = ButtonFactory.createButton(this, w/2 - 40, -h/2 + 30, 'X', () => {
-             container.setVisible(false);
-             if (this.scene.isPaused('MainScene')) this.scene.resume('MainScene');
-        }, { width: 40, height: 40, color: 0x800000 });
-
-        container.add([modalBg, modalTitle, modalContent, closeButton]);
-        container.setVisible(false);
-
-        // References for logic & resizing
-        container.bg = modalBg;
-        container.modalTitle = modalTitle;
-        container.content = modalContent;
-        container.closeButton = closeButton;
-
+        const closeButton = ButtonFactory.createButton(this, w/2 - 40, -h/2 + 30, 'X', () => { container.setVisible(false); if (this.scene.isPaused('MainScene')) this.scene.resume('MainScene'); }, { width: 40, height: 40, color: 0x800000 });
+        container.add([modalBg, modalTitle, modalContent, closeButton]); container.setVisible(false);
+        container.bg = modalBg; container.modalTitle = modalTitle; container.content = modalContent; container.closeButton = closeButton;
         return container;
     }
+    getModalWidth() { return Math.min(500, this.cameras.main.width - 40); }
+    getModalHeight() { return Math.min(400, this.cameras.main.height - 100); }
 
-    showDialogue(npcName, text) {
-        this.closeAllModals();
-        this.dialogueModal.modalTitle.setText(npcName);
-        this.dialogueModal.content.setText(`"${text}"`);
-        this.dialogueModal.setVisible(true);
-        this.scene.pause('MainScene');
-    }
-
-    openJournal() {
-        this.closeAllModals();
-        const entries = new PersistenceManager().loadJournal();
-
-        // Pagination State attached to the modal
-        const modal = this.journalModal;
-        modal.entries = entries.slice().reverse(); // Newest first
-        modal.currentPage = 0;
-        modal.entriesPerPage = 3;
-
-        // Create Navigation Buttons if they don't exist
-        if (!modal.navButtons) {
-            const mw = this.getModalWidth();
-            const mh = this.getModalHeight();
-            const yPos = mh/2 - 40;
-
-            modal.btnPrev = ButtonFactory.createButton(this, -80, yPos, "< Prev", () => this.changeJournalPage(-1), { width: 80, height: 30 });
-            modal.btnNext = ButtonFactory.createButton(this, 80, yPos, "Next >", () => this.changeJournalPage(1), { width: 80, height: 30 });
-            modal.pageIndicator = this.add.text(0, yPos, "1/1", { fontFamily: 'VT323', fontSize: '20px' }).setOrigin(0.5);
-
-            modal.add([modal.btnPrev, modal.btnNext, modal.pageIndicator]);
-            modal.navButtons = true; // Flag to avoid recreation
-        }
-
-        this.updateJournalPage();
-        this.journalModal.setVisible(true);
-        this.scene.pause('MainScene');
-    }
-
-    changeJournalPage(delta) {
-        const modal = this.journalModal;
-        const totalPages = Math.ceil(modal.entries.length / modal.entriesPerPage) || 1;
-
-        let newPage = modal.currentPage + delta;
-        if (newPage < 0) newPage = 0;
-        if (newPage >= totalPages) newPage = totalPages - 1;
-
-        modal.currentPage = newPage;
-        this.updateJournalPage();
-    }
-
-    updateJournalPage() {
-        const modal = this.journalModal;
-        const totalPages = Math.ceil(modal.entries.length / modal.entriesPerPage) || 1;
-        const start = modal.currentPage * modal.entriesPerPage;
-        const pageEntries = modal.entries.slice(start, start + modal.entriesPerPage);
-
-        const text = pageEntries.length ? pageEntries.map(e => `[${e.date}]\n${e.text}`).join('\n\n---\n\n') : "No entries yet.";
-
-        modal.content.setText(text);
-        modal.pageIndicator.setText(`${modal.currentPage + 1}/${totalPages}`);
-
-        // Update Button States
-        modal.btnPrev.setDisabled(modal.currentPage === 0);
-        modal.btnNext.setDisabled(modal.currentPage >= totalPages - 1);
-
-        // Visual feedback for disabled buttons handled by ButtonFactory usually,
-        // but we can add extra alpha here if needed.
-        modal.btnPrev.setAlpha(modal.currentPage === 0 ? 0.5 : 1);
-        modal.btnNext.setAlpha(modal.currentPage >= totalPages - 1 ? 0.5 : 1);
-    }
-
-    openRecipeBook() {
-        this.closeAllModals();
-        const discovered = (this.nadagotchiData && this.nadagotchiData.discoveredRecipes) || new PersistenceManager().loadRecipes();
-        const allRecipes = (this.nadagotchiData && this.nadagotchiData.recipes) || {};
-        let text = (!discovered || discovered.length === 0) ? "No recipes discovered yet." : "Discovered Recipes:\n\n" + discovered.map(name => {
-            const r = allRecipes[name];
-            return r ? `• ${name}\n  "${r.description}"\n  Req: ${Object.entries(r.materials).map(([m,c]) => `${c} ${m}`).join(', ')}` : `• ${name}`;
-        }).join('\n\n');
-        this.recipeModal.content.setText(text);
-        this.recipeModal.setVisible(true);
-        this.scene.pause('MainScene');
-    }
-
-    openHobbyMenu() {
-        this.closeAllModals();
-        if (!this.nadagotchiData) return;
-        this.hobbyModal.content.setText(Object.entries(this.nadagotchiData.hobbies).map(([h, l]) => `${h}: Level ${l}`).join('\n'));
-        this.hobbyModal.setVisible(true);
-        this.scene.pause('MainScene');
-    }
-
-    /**
-     * Helper to get current dynamic modal width.
-     */
-    getModalWidth() {
-        return Math.min(500, this.cameras.main.width - 40);
-    }
-    getModalHeight() {
-        return Math.min(400, this.cameras.main.height - 100);
-    }
-
+    // --- UPDATED CRAFTING MENU (GRID) ---
     openCraftingMenu() {
         this.closeAllModals();
         if (!this.nadagotchiData) return;
-        if (this.craftingButtons) this.craftingButtons.forEach(btn => btn.destroy());
-        this.craftingButtons = [];
 
-        const mw = this.getModalWidth();
-        const startX = mw / 2 - 80; // Right side relative to center
-        let yPos = -this.getModalHeight() / 2 + 100;
+        this.craftingGridState = new Array(9).fill(null);
+        this.selectedInventoryItem = null;
 
-        const inventoryText = "Inventory:\n" + Object.entries(this.nadagotchiData.inventory).map(([item, count]) => `- ${item}: ${count}`).join('\n');
-        let recipeText = "\n\nRecipes:\n";
+        const container = this.craftingModal;
+        if (this.craftingDynamicItems) { this.craftingDynamicItems.forEach(i => i.destroy()); }
+        this.craftingDynamicItems = [];
 
-        for (const recipeName in this.nadagotchiData.recipes) {
-            const recipe = this.nadagotchiData.recipes[recipeName];
-            const materials = Object.entries(recipe.materials).map(([mat, count]) => `${count} ${mat}`).join(', ');
-            recipeText += `- ${recipeName}: ${recipe.description} (Req: ${materials})\n`;
-            const canCraft = Object.entries(recipe.materials).every(([mat, count]) => (this.nadagotchiData.inventory[mat] || 0) >= count);
+        container.content.setText("");
 
-            if (canCraft) {
-                // Use relative coords
-                const craftButton = ButtonFactory.createButton(this, startX, yPos, 'Craft', () => {
-                    this.game.events.emit(EventKeys.UI_ACTION, EventKeys.CRAFT_ITEM, recipeName);
-                    this.craftingModal.setVisible(false);
-                    this.scene.resume('MainScene');
-                }, { width: 80, height: 30, color: 0x228B22 });
-                this.craftingModal.add(craftButton);
-                this.craftingButtons.push(craftButton);
-                yPos += 35;
-            }
-        }
-        this.craftingModal.content.setText(inventoryText + recipeText);
-        this.craftingModal.setVisible(true);
-        this.scene.pause('MainScene');
-    }
+        const items = Object.entries(this.nadagotchiData.inventory).filter(([k,v]) => v > 0);
+        let startY = -150;
 
-    openRelationshipMenu() {
-        this.closeAllModals();
-        if (!this.nadagotchiData) return;
-        this.relationshipModal.content.setText(Object.entries(this.nadagotchiData.relationships).map(([n, d]) => `${n}: Friendship ${d.level}`).join('\n'));
-        this.relationshipModal.setVisible(true);
-        this.scene.pause('MainScene');
-    }
+        const invTitle = this.add.text(-200, -180, "Inventory:", { fontSize: '18px', fontFamily: 'VT323' });
+        container.add(invTitle);
+        this.craftingDynamicItems.push(invTitle);
 
-    openDecorateMenu() {
-        this.closeAllModals();
-        if (!this.nadagotchiData) return;
-        if (this.decorateButtons) this.decorateButtons.forEach(btn => btn.destroy());
-        this.decorateButtons = [];
-
-        const mw = this.getModalWidth();
-        const startX = mw / 2 - 80;
-        let yPos = -this.getModalHeight() / 2 + 100;
-
-        const validTypes = ['FURNITURE', 'WALLPAPER', 'FLOORING'];
-        const furniture = Object.entries(this.nadagotchiData.inventory).filter(([item, count]) => {
-            const def = ItemDefinitions[item];
-            return def && validTypes.includes(def.type) && count > 0;
+        items.forEach(([item, count]) => {
+            const btn = ButtonFactory.createButton(this, -200, startY, `${item} (${count})`, () => {
+                this.selectedInventoryItem = item;
+                this.showToast("Selected", item, "🪵");
+            }, { width: 140, height: 30, fontSize: '16px', color: 0x444444 });
+            container.add(btn);
+            this.craftingDynamicItems.push(btn);
+            startY += 40;
         });
 
-        let text = "Select an item to place:\n\n" + (furniture.length === 0 ? "You have no furniture or decor." : "");
+        const gridStartX = -50;
+        const gridStartY = -100;
+        const cellSize = 60;
 
-        furniture.forEach(([itemName, count]) => {
-            text += `- ${itemName}: ${count}\n`;
+        for(let i=0; i<9; i++) {
+            const row = Math.floor(i / 3);
+            const col = i % 3;
+            const x = gridStartX + (col * (cellSize + 5));
+            const y = gridStartY + (row * (cellSize + 5));
 
-            const def = ItemDefinitions[itemName];
-            const isSurface = def && (def.type === 'WALLPAPER' || def.type === 'FLOORING');
-            const actionKey = isSurface ? EventKeys.APPLY_HOME_DECOR : EventKeys.PLACE_FURNITURE;
-            const btnText = isSurface ? 'Apply' : 'Place';
+            const slot = this.add.rectangle(x, y, cellSize, cellSize, 0x333333).setStrokeStyle(2, 0x888888).setInteractive();
+            const slotText = this.add.text(x, y, "", { fontSize: '12px', fontFamily: 'Arial', color: '#FFF' }).setOrigin(0.5);
 
-            const placeButton = ButtonFactory.createButton(this, startX, yPos, btnText, () => {
-                this.game.events.emit(EventKeys.UI_ACTION, actionKey, itemName);
-                this.decorateModal.setVisible(false);
-                this.scene.resume('MainScene');
-            }, { width: 80, height: 30, color: 0x228B22 });
-            this.decorateModal.add(placeButton);
-            this.decorateButtons.push(placeButton);
-            yPos += 35;
-        });
-
-        // Add "Move Furniture" Toggle Button
-        // Position it at the bottom of the modal content area
-        const moveBtnY = this.getModalHeight() / 2 - 60;
-
-        // Create the button cleanly every time since we destroy all buttons at start of function
-        const toggleBtn = ButtonFactory.createButton(this, 0, moveBtnY, 'Move Furniture', () => {
-                this.game.events.emit(EventKeys.UI_ACTION, EventKeys.TOGGLE_DECORATION_MODE);
-                this.decorateModal.setVisible(false);
-                this.scene.resume('MainScene');
-        }, { width: 160, height: 40, color: 0x4169E1 }); // Royal Blue
-
-        this.decorateModal.add(toggleBtn);
-        this.decorateButtons.push(toggleBtn);
-
-        this.decorateModal.content.setText(text);
-        this.decorateModal.setVisible(true);
-        this.scene.pause('MainScene');
-    }
-
-    openInventoryMenu() {
-        this.closeAllModals();
-        if (!this.nadagotchiData) return;
-        if (this.inventoryButtons) this.inventoryButtons.forEach(btn => btn.destroy());
-        this.inventoryButtons = [];
-        if (this.inventoryTexts) this.inventoryTexts.forEach(t => t.destroy());
-        this.inventoryTexts = [];
-
-        const items = Object.entries(this.nadagotchiData.inventory || {});
-        this.inventoryModal.content.setText(items.length === 0 ? "Empty." : "");
-
-        const mw = this.getModalWidth();
-        let currentY = -this.getModalHeight() / 2 + 60;
-        const startX = -mw / 2 + 20;
-
-        items.forEach(([itemName, count]) => {
-            const def = ItemDefinitions[itemName] || { description: "Unknown", emoji: "❓", type: "Misc" };
-            const itemStr = `${def.emoji} ${itemName} (x${count})`;
-            const itemText = this.add.text(startX, currentY, itemStr, { font: '20px monospace', color: '#ffffff' });
-            const descText = this.add.text(startX + 20, currentY + 25, def.description, { font: '16px monospace', color: '#aaaaaa', wordWrap: { width: mw - 150 } });
-
-            this.inventoryModal.add([itemText, descText]);
-            this.inventoryTexts.push(itemText, descText);
-
-            if (def.type === 'Consumable' && count > 0) {
-                 const useButton = ButtonFactory.createButton(this, mw/2 - 60, currentY + 10, 'Use', () => {
-                    this.game.events.emit(EventKeys.UI_ACTION, EventKeys.CONSUME_ITEM, itemName);
-                    this.inventoryModal.setVisible(false);
-                    this.scene.resume('MainScene');
-                }, { width: 60, height: 30, color: 0x228B22 });
-                this.inventoryModal.add(useButton);
-                this.inventoryButtons.push(useButton);
-            }
-            currentY += 60;
-        });
-        this.inventoryModal.setVisible(true);
-        this.scene.pause('MainScene');
-    }
-
-    openAncestorModal(ancestorData) {
-        this.closeAllModals();
-        if (!ancestorData) return;
-        const advice = NarrativeSystem.getAdvice(ancestorData.dominantArchetype);
-        const text = `Name: Generation ${ancestorData.generation}\nArchetype: ${ancestorData.dominantArchetype}\nCareer: ${ancestorData.currentCareer || 'None'}\n\nStats:\nHappiness: ${Math.floor(ancestorData.stats.happiness)}\nLogic: ${ancestorData.skills.logic.toFixed(1)}\nEmpathy: ${ancestorData.skills.empathy.toFixed(1)}\n\nAdvice:\n"${advice}"`;
-        this.ancestorModal.content.setText(text);
-        this.ancestorModal.setVisible(true);
-        this.scene.pause('MainScene');
-    }
-
-    openAchievementsModal() {
-        this.closeAllModals();
-        const unlockedIds = new PersistenceManager().loadAchievements().unlocked || [];
-        const text = Achievements.map(ach => unlockedIds.includes(ach.id) ? `${ach.icon} ${ach.name}\n${ach.description}` : `🔒 ${ach.name}\n(Locked)`).join('\n\n');
-        this.achievementsModal.content.setText(text);
-        this.achievementsModal.setVisible(true);
-        this.scene.pause('MainScene');
-    }
-
-    handleAchievementUnlocked(achievement) {
-        SoundSynthesizer.instance.playChime();
-        this.showToast("Achievement Unlocked!", achievement.name, achievement.icon);
-    }
-
-    showToast(title, message, icon = '') {
-        const width = this.cameras.main.width;
-        // Toasts are global, so using simple container logic at top is fine
-        const toastWidth = 300, toastHeight = 80;
-        const container = this.add.container(width / 2 - toastWidth / 2, -toastHeight - 20);
-        const bg = this.add.rectangle(0, 0, toastWidth, toastHeight, 0xFFD700).setOrigin(0).setStrokeStyle(2, 0xFFFFFF);
-        const iconText = this.add.text(10, 15, icon, { fontSize: '40px' });
-        const titleText = this.add.text(70, 10, title, { fontSize: '16px', color: '#000', fontStyle: 'bold', fontFamily: 'VT323' });
-        const msgText = this.add.text(70, 35, message, { fontSize: '24px', color: '#000', fontFamily: 'VT323' });
-        container.add([bg, iconText, titleText, msgText]);
-        this.tweens.add({ targets: container, y: 20, duration: 500, ease: 'Back.out', hold: 3000, yoyo: true, onComplete: () => container.destroy() });
-    }
-
-    createSettingsModal() {
-        const modal = this.createModal("Settings");
-        const h = 400; // default height from createModal
-
-        // Add to Container using local coords (0,0 is center)
-        const volLabel = this.add.text(0, -80, "Volume", { fontSize: '24px', fontFamily: 'VT323', monospace: true }).setOrigin(0.5);
-        const volDown = ButtonFactory.createButton(this, -80, -40, "-", () => {
-             const newVol = Math.max(0, (this.settingsData?.volume ?? 0.5) - 0.1);
-             this.game.events.emit(EventKeys.UPDATE_SETTINGS, { volume: newVol });
-             this.settingsModal.volDisplay.setText(`${Math.round(newVol * 100)}%`);
-             if (!this.settingsData) this.settingsData = {}; this.settingsData.volume = newVol;
-        }, { width: 40, height: 40, color: 0x808080 });
-
-        const volUp = ButtonFactory.createButton(this, 80, -40, "+", () => {
-             const newVol = Math.min(1, (this.settingsData?.volume ?? 0.5) + 0.1);
-             this.game.events.emit(EventKeys.UPDATE_SETTINGS, { volume: newVol });
-             this.settingsModal.volDisplay.setText(`${Math.round(newVol * 100)}%`);
-             if (!this.settingsData) this.settingsData = {}; this.settingsData.volume = newVol;
-        }, { width: 40, height: 40, color: 0x808080 });
-
-        const volDisplay = this.add.text(0, -40, "50%", { fontSize: '24px', fontFamily: 'VT323' }).setOrigin(0.5);
-        const speedLabel = this.add.text(0, 20, "Game Speed", { fontSize: '24px', fontFamily: 'VT323' }).setOrigin(0.5);
-
-        const speedButtons = [];
-        const speeds = [{ l: "1x", v: Config.SETTINGS.SPEED_MULTIPLIERS.NORMAL }, { l: "2x", v: Config.SETTINGS.SPEED_MULTIPLIERS.FAST }, { l: "5x", v: Config.SETTINGS.SPEED_MULTIPLIERS.HYPER }];
-        let startX = -80;
-        speeds.forEach(s => {
-            const btn = ButtonFactory.createButton(this, startX, 60, s.l, () => {
-                 this.game.events.emit(EventKeys.UPDATE_SETTINGS, { gameSpeed: s.v });
-                 this.updateSpeedButtons(s.v);
-                 if (!this.settingsData) this.settingsData = {}; this.settingsData.gameSpeed = s.v;
-            }, { width: 60, height: 40, fontSize: '20px', color: 0x008080 });
-            btn.speedVal = s.v;
-            speedButtons.push(btn);
-            startX += 80;
-        });
-
-        modal.add([volLabel, volDown, volUp, volDisplay, speedLabel, ...speedButtons]);
-        modal.volDisplay = volDisplay;
-        modal.speedButtons = speedButtons;
-        return modal;
-    }
-
-    updateSpeedButtons(speed) {
-        this.settingsModal.speedButtons.forEach(btn => {
-            if (Math.abs(btn.speedVal - speed) < 0.01) { btn.setAlpha(1); btn.setScale(1.1); }
-            else { btn.setAlpha(0.6); btn.setScale(1.0); }
-        });
-    }
-
-    openSettingsMenu() {
-        this.closeAllModals();
-        if (!this.settingsData) this.settingsData = { volume: Config.SETTINGS.DEFAULT_VOLUME, gameSpeed: Config.SETTINGS.DEFAULT_SPEED };
-        const vol = Math.round((this.settingsData.volume ?? 0.5) * 100);
-        this.settingsModal.volDisplay.setText(`${vol}%`);
-        this.updateSpeedButtons(this.settingsData.gameSpeed || 1.0);
-        this.settingsModal.setVisible(true);
-        this.scene.pause('MainScene');
-    }
-
-    /**
-     * Creates the Showcase (Passport) modal.
-     * @returns {Phaser.GameObjects.Group} The modal group.
-     */
-    createShowcaseModal() {
-        const modal = this.createModal("Pet Passport");
-        // Create a passport container for the content
-        const passportContainer = this.add.container(this.cameras.main.width / 2, this.cameras.main.height / 2);
-        modal.add(passportContainer);
-        modal.passportContainer = passportContainer;
-        return modal;
-    }
-
-    /**
-     * Opens the Showcase modal and renders the pet passport.
-     */
-    openShowcase() {
-        this.closeAllModals();
-        if (!this.nadagotchiData) return;
-
-        // Clear previous content
-        const container = this.showcaseModal.passportContainer;
-        container.removeAll(true);
-
-        const width = 400;
-        const height = 250;
-
-        // 1. Background Card (Gold/Official looking)
-        const cardBg = this.add.rectangle(0, 0, width, height, 0xFFF8E7).setStrokeStyle(4, 0xD4AF37); // Ivory with Gold border
-
-        // 2. Pet Sprite (Left Side)
-        // We use the 'pet' texture and the frame corresponding to current mood
-        const moodMap = { 'happy': 0, 'neutral': 1, 'sad': 2, 'angry': 3 };
-        const frame = moodMap[this.nadagotchiData.mood] ?? 1;
-        const sprite = this.add.image(-120, 0, 'pet', frame).setScale(8); // Big sprite
-
-        // 3. Info Text (Right Side)
-        const name = `Archetype: ${this.nadagotchiData.dominantArchetype}`;
-        const gen = `Generation: ${this.nadagotchiData.generation || 1}`;
-        const career = `Career: ${this.nadagotchiData.currentCareer || 'Unemployed'}`;
-        const age = `Age: ${Math.floor(this.nadagotchiData.age || 0)} Days`;
-
-        const infoText = this.add.text(0, -60, `${name}\n${gen}\n${career}\n${age}`, {
-            fontFamily: 'VT323, monospace',
-            fontSize: '24px',
-            color: '#000000',
-            lineSpacing: 10
-        }).setOrigin(0, 0); // Align left
-
-        // 4. Footer
-        const footer = this.add.text(0, 80, "OFFICIAL NADAGOTCHI PASSPORT", {
-            fontFamily: 'Arial',
-            fontSize: '12px',
-            color: '#888888',
-            fontStyle: 'italic'
-        }).setOrigin(0.5);
-
-        container.add([cardBg, sprite, infoText, footer]);
-
-        this.showcaseModal.setVisible(true);
-        this.scene.pause('MainScene');
-    }
-
-    openCareerMenu() {
-        this.closeAllModals();
-        if (!this.nadagotchiData) return;
-        const container = this.careerModal;
-        // Clean up previous dynamic content
-        if (this.careerDynamicItems) {
-             this.careerDynamicItems.forEach(i => i.destroy());
-        }
-        this.careerDynamicItems = [];
-
-        const mw = this.getModalWidth();
-        const mh = this.getModalHeight();
-        let yPos = -mh / 2 + 80;
-
-        // 1. Current Career Info
-        const career = this.nadagotchiData.currentCareer;
-        let infoText = "";
-        if (career) {
-            const level = this.nadagotchiData.careerLevels[career] || 1;
-            const xp = this.nadagotchiData.careerXP[career] || 0;
-            const title = CareerDefinitions.TITLES[career] ? CareerDefinitions.TITLES[career][level] : 'Employee';
-            const nextThreshold = CareerDefinitions.XP_THRESHOLDS[level + 1] || 'MAX';
-
-            // Perks info
-            const payBonus = (Config.CAREER.LEVEL_MULTIPLIERS[level] - 1) * 100; // e.g., 0.1 -> 10%
-
-            infoText = `Current Job: ${career}\nTitle: ${title} (Lvl ${level})\nXP: ${xp} / ${nextThreshold}\nBonuses: +${Math.round(payBonus)}% Efficiency`;
-        } else {
-            infoText = "No Active Career.\nStudy or Explore to unlock paths!";
-        }
-
-        const statsText = this.add.text(0, yPos, infoText, {
-            fontFamily: 'VT323, monospace', fontSize: '24px', color: '#ffffff', align: 'center', wordWrap: { width: mw - 60 }
-        }).setOrigin(0.5, 0);
-        container.add(statsText);
-        this.careerDynamicItems.push(statsText);
-
-        yPos += 140;
-
-        // 2. Unlocked Careers List
-        const listTitle = this.add.text(0, yPos, "Unlocked Career Paths:", {
-             fontFamily: 'VT323', fontSize: '20px', color: '#AAAAAA'
-        }).setOrigin(0.5);
-        container.add(listTitle);
-        this.careerDynamicItems.push(listTitle);
-
-        yPos += 30;
-
-        const unlocked = this.nadagotchiData.unlockedCareers || [];
-        if (unlocked.length === 0) {
-             const noneText = this.add.text(0, yPos, "(None yet)", { fontFamily: 'VT323', fontSize: '18px', color: '#888' }).setOrigin(0.5);
-             container.add(noneText);
-             this.careerDynamicItems.push(noneText);
-        } else {
-            unlocked.forEach(c => {
-                 const isCurrent = c === career;
-                 const lvl = this.nadagotchiData.careerLevels[c] || 1;
-                 const label = `${c} (Lvl ${lvl})`;
-
-                 // Row container
-                 // Left aligned text
-                 const rowText = this.add.text(-mw/2 + 60, yPos + 10, label, { fontFamily: 'VT323', fontSize: '24px', color: isCurrent ? '#00FF00' : '#FFF' });
-                 container.add(rowText);
-                 this.careerDynamicItems.push(rowText);
-
-                 if (!isCurrent) {
-                     const switchBtn = ButtonFactory.createButton(this, mw/2 - 80, yPos + 20, "Switch", () => {
-                          this.game.events.emit(EventKeys.UI_ACTION, EventKeys.SWITCH_CAREER, c);
-                          // Close or Refresh? Switching triggers generic update.
-                          // Let's close modal to see the Toast notification.
-                          container.setVisible(false);
-                          this.scene.resume('MainScene');
-                     }, { width: 80, height: 30, color: 0x4CAF50, fontSize: '18px' });
-                     container.add(switchBtn);
-                     this.careerDynamicItems.push(switchBtn);
-                 } else {
-                     const activeLbl = this.add.text(mw/2 - 80, yPos + 10, "[Active]", { fontFamily: 'VT323', fontSize: '18px', color: '#00FF00' });
-                     container.add(activeLbl);
-                     this.careerDynamicItems.push(activeLbl);
-                 }
-
-                 yPos += 45;
+            slot.on('pointerdown', () => {
+                if (this.selectedInventoryItem) {
+                    this.craftingGridState[i] = this.selectedInventoryItem;
+                    slotText.setText(this.selectedInventoryItem.substring(0, 6) + ".");
+                    slot.setFillStyle(0x555555);
+                } else {
+                    this.craftingGridState[i] = null;
+                    slotText.setText("");
+                    slot.setFillStyle(0x333333);
+                }
             });
+
+            container.add([slot, slotText]);
+            this.craftingDynamicItems.push(slot, slotText);
         }
 
-        container.setVisible(true);
-        this.scene.pause('MainScene');
-    }
+        const craftBtn = ButtonFactory.createButton(this, 180, 0, "CRAFT!", () => {
+             const mainScene = this.scene.get('MainScene');
+             const result = mainScene.nadagotchi.inventorySystem.craftFromGrid(this.craftingGridState);
 
-    openJobBoardMenu() {
-        this.closeAllModals();
-        if (!this.nadagotchiData) return;
-        const container = this.jobBoardModal;
-        // Clean
-        if (this.jobBoardDynamicItems) { this.jobBoardDynamicItems.forEach(i => i.destroy()); }
-        this.jobBoardDynamicItems = [];
-
-        const career = this.nadagotchiData.currentCareer;
-        let text = "";
-
-        if (career) {
-            text = `Active Assignment:\n${career}`;
-        } else {
-            text = "No Active Career Assignment.";
-        }
-
-        const infoText = this.add.text(0, -50, text, {
-            fontFamily: 'VT323', fontSize: '32px', color: '#FFF', align: 'center'
-        }).setOrigin(0.5);
-        container.add(infoText);
-        this.jobBoardDynamicItems.push(infoText);
-
-        // Start Shift Button
-        const startBtn = ButtonFactory.createButton(this, 0, 30, "Start Shift", () => {
-             if (career) {
-                 this.game.events.emit(EventKeys.UI_ACTION, EventKeys.WORK);
-                 container.setVisible(false); // Minigame starts
+             if (result.success) {
+                 this.showToast("Crafted!", result.item, "✨");
+                 this.openCraftingMenu(); // Refresh
              } else {
-                 this.showToast("No Job", "Select a career first!", "🚫");
+                 this.showToast("Failed", result.message, "❌");
              }
-        }, { width: 160, height: 50, color: career ? 0x6A0DAD : 0x555555, fontSize: '24px' });
-
-        if (!career) startBtn.setDisabled(true); // Soft disable
-
-        container.add(startBtn);
-        this.jobBoardDynamicItems.push(startBtn);
-
-        // Career Info Button
-        const careerBtn = ButtonFactory.createButton(this, 0, 100, "Career Profiles", () => {
-             this.openCareerMenu();
-        }, { width: 160, height: 40, color: 0xD8A373, fontSize: '20px' });
-        container.add(careerBtn);
-        this.jobBoardDynamicItems.push(careerBtn);
+        }, { width: 100, height: 60, color: 0x228B22 });
+        container.add(craftBtn);
+        this.craftingDynamicItems.push(craftBtn);
 
         container.setVisible(true);
         this.scene.pause('MainScene');
     }
+
+    showDialogue(npcName, dialogueData) {
+        this.closeAllModals();
+        let text = "";
+        let options = [];
+        if (typeof dialogueData === 'string') { text = dialogueData; options = [{ label: "Close", action: null }]; } else { text = dialogueData.text; options = dialogueData.options || [{ label: "Close", action: null }]; }
+        if (this.dialogueButtons) { this.dialogueButtons.forEach(btn => btn.destroy()); }
+        this.dialogueButtons = [];
+        this.dialogueModal.modalTitle.setText(npcName);
+        this.dialogueModal.content.setText(`"${text}"`);
+        const startY = 100;
+        let yOffset = 0;
+        options.forEach(opt => {
+            const btn = ButtonFactory.createButton(this, 0, startY + yOffset, opt.label, () => {
+                 this.dialogueModal.setVisible(false);
+                 this.scene.resume('MainScene');
+                 if (opt.action) {
+                     if (opt.action === 'GIFT_CALLBACK') { this.game.events.emit(EventKeys.UI_ACTION, EventKeys.INTERACT_NPC, { npc: npcName, type: 'GIFT' }); } else { opt.action(); }
+                 }
+            }, { width: 200, height: 40, color: 0x4444AA });
+            this.dialogueModal.add(btn);
+            this.dialogueButtons.push(btn);
+            yOffset += 50;
+        });
+        this.dialogueModal.setVisible(true);
+        this.scene.pause('MainScene');
+    }
+    openJournal() { this.closeAllModals(); const entries = new PersistenceManager().loadJournal(); const modal = this.journalModal; modal.entries = entries.slice().reverse(); modal.currentPage = 0; modal.entriesPerPage = 3; if (!modal.navButtons) { const mw = this.getModalWidth(); const mh = this.getModalHeight(); const yPos = mh/2 - 40; modal.btnPrev = ButtonFactory.createButton(this, -80, yPos, "< Prev", () => this.changeJournalPage(-1), { width: 80, height: 30 }); modal.btnNext = ButtonFactory.createButton(this, 80, yPos, "Next >", () => this.changeJournalPage(1), { width: 80, height: 30 }); modal.pageIndicator = this.add.text(0, yPos, "1/1", { fontFamily: 'VT323', fontSize: '20px' }).setOrigin(0.5); modal.add([modal.btnPrev, modal.btnNext, modal.pageIndicator]); modal.navButtons = true; } this.updateJournalPage(); this.journalModal.setVisible(true); this.scene.pause('MainScene'); }
+    changeJournalPage(delta) { const modal = this.journalModal; const totalPages = Math.ceil(modal.entries.length / modal.entriesPerPage) || 1; let newPage = modal.currentPage + delta; if (newPage < 0) newPage = 0; if (newPage >= totalPages) newPage = totalPages - 1; modal.currentPage = newPage; this.updateJournalPage(); }
+    updateJournalPage() { const modal = this.journalModal; const totalPages = Math.ceil(modal.entries.length / modal.entriesPerPage) || 1; const start = modal.currentPage * modal.entriesPerPage; const pageEntries = modal.entries.slice(start, start + modal.entriesPerPage); const text = pageEntries.length ? pageEntries.map(e => `[${e.date}]\n${e.text}`).join('\n\n---\n\n') : "No entries yet."; modal.content.setText(text); modal.pageIndicator.setText(`${modal.currentPage + 1}/${totalPages}`); modal.btnPrev.setDisabled(modal.currentPage === 0); modal.btnNext.setDisabled(modal.currentPage >= totalPages - 1); modal.btnPrev.setAlpha(modal.currentPage === 0 ? 0.5 : 1); modal.btnNext.setAlpha(modal.currentPage >= totalPages - 1 ? 0.5 : 1); }
+    openRecipeBook() { this.closeAllModals(); const discovered = (this.nadagotchiData && this.nadagotchiData.discoveredRecipes) || new PersistenceManager().loadRecipes(); const allRecipes = (this.nadagotchiData && this.nadagotchiData.recipes) || {}; let text = (!discovered || discovered.length === 0) ? "No recipes discovered yet." : "Discovered Recipes:\n\n" + discovered.map(name => { const r = allRecipes[name]; return r ? `• ${name}\n  "${r.description}"\n  Req: ${Object.entries(r.materials).map(([m,c]) => `${c} ${m}`).join(', ')}` : `• ${name}`; }).join('\n\n'); this.recipeModal.content.setText(text); this.recipeModal.setVisible(true); this.scene.pause('MainScene'); }
+    openHobbyMenu() { this.closeAllModals(); if (!this.nadagotchiData) return; this.hobbyModal.content.setText(Object.entries(this.nadagotchiData.hobbies).map(([h, l]) => `${h}: Level ${l}`).join('\n')); this.hobbyModal.setVisible(true); this.scene.pause('MainScene'); }
+    openRelationshipMenu() { this.closeAllModals(); if (!this.nadagotchiData) return; this.relationshipModal.content.setText(Object.entries(this.nadagotchiData.relationships).map(([n, d]) => `${n}: Friendship ${d.level}`).join('\n')); this.relationshipModal.setVisible(true); this.scene.pause('MainScene'); }
+    openDecorateMenu() { this.closeAllModals(); if (!this.nadagotchiData) return; if (this.decorateButtons) this.decorateButtons.forEach(btn => btn.destroy()); this.decorateButtons = []; const mw = this.getModalWidth(); const startX = mw / 2 - 80; let yPos = -this.getModalHeight() / 2 + 100; const validTypes = ['FURNITURE', 'WALLPAPER', 'FLOORING']; const furniture = Object.entries(this.nadagotchiData.inventory).filter(([item, count]) => { const def = ItemDefinitions[item]; return def && validTypes.includes(def.type) && count > 0; }); let text = "Select an item to place:\n\n" + (furniture.length === 0 ? "You have no furniture or decor." : ""); furniture.forEach(([itemName, count]) => { text += `- ${itemName}: ${count}\n`; const def = ItemDefinitions[itemName]; const isSurface = def && (def.type === 'WALLPAPER' || def.type === 'FLOORING'); const actionKey = isSurface ? EventKeys.APPLY_HOME_DECOR : EventKeys.PLACE_FURNITURE; const btnText = isSurface ? 'Apply' : 'Place'; const placeButton = ButtonFactory.createButton(this, startX, yPos, btnText, () => { this.game.events.emit(EventKeys.UI_ACTION, actionKey, itemName); this.decorateModal.setVisible(false); this.scene.resume('MainScene'); }, { width: 80, height: 30, color: 0x228B22 }); this.decorateModal.add(placeButton); this.decorateButtons.push(placeButton); yPos += 35; }); const moveBtnY = this.getModalHeight() / 2 - 60; const toggleBtn = ButtonFactory.createButton(this, 0, moveBtnY, 'Move Furniture', () => { this.game.events.emit(EventKeys.UI_ACTION, EventKeys.TOGGLE_DECORATION_MODE); this.decorateModal.setVisible(false); this.scene.resume('MainScene'); }, { width: 160, height: 40, color: 0x4169E1 }); this.decorateModal.add(toggleBtn); this.decorateButtons.push(toggleBtn); this.decorateModal.content.setText(text); this.decorateModal.setVisible(true); this.scene.pause('MainScene'); }
+    openInventoryMenu() { this.closeAllModals(); if (!this.nadagotchiData) return; if (this.inventoryButtons) this.inventoryButtons.forEach(btn => btn.destroy()); this.inventoryButtons = []; if (this.inventoryTexts) this.inventoryTexts.forEach(t => t.destroy()); this.inventoryTexts = []; const items = Object.entries(this.nadagotchiData.inventory || {}); this.inventoryModal.content.setText(items.length === 0 ? "Empty." : ""); const mw = this.getModalWidth(); let currentY = -this.getModalHeight() / 2 + 60; const startX = -mw / 2 + 20; items.forEach(([itemName, count]) => { const def = ItemDefinitions[itemName] || { description: "Unknown", emoji: "❓", type: "Misc" }; const itemStr = `${def.emoji} ${itemName} (x${count})`; const itemText = this.add.text(startX, currentY, itemStr, { font: '20px monospace', color: '#ffffff' }); const descText = this.add.text(startX + 20, currentY + 25, def.description, { font: '16px monospace', color: '#aaaaaa', wordWrap: { width: mw - 150 } }); this.inventoryModal.add([itemText, descText]); this.inventoryTexts.push(itemText, descText); if (def.type === 'Consumable' && count > 0) { const useButton = ButtonFactory.createButton(this, mw/2 - 60, currentY + 10, 'Use', () => { this.game.events.emit(EventKeys.UI_ACTION, EventKeys.CONSUME_ITEM, itemName); this.inventoryModal.setVisible(false); this.scene.resume('MainScene'); }, { width: 60, height: 30, color: 0x228B22 }); this.inventoryModal.add(useButton); this.inventoryButtons.push(useButton); } currentY += 60; }); this.inventoryModal.setVisible(true); this.scene.pause('MainScene'); }
+    openAncestorModal(ancestorData) { this.closeAllModals(); if (!ancestorData) return; const advice = NarrativeSystem.getAdvice(ancestorData.dominantArchetype); const text = `Name: Generation ${ancestorData.generation}\nArchetype: ${ancestorData.dominantArchetype}\nCareer: ${ancestorData.currentCareer || 'None'}\n\nStats:\nHappiness: ${Math.floor(ancestorData.stats.happiness)}\nLogic: ${ancestorData.skills.logic.toFixed(1)}\nEmpathy: ${ancestorData.skills.empathy.toFixed(1)}\n\nAdvice:\n"${advice}"`; this.ancestorModal.content.setText(text); this.ancestorModal.setVisible(true); this.scene.pause('MainScene'); }
+    openAchievementsModal() { this.closeAllModals(); const unlockedIds = new PersistenceManager().loadAchievements().unlocked || []; const text = Achievements.map(ach => unlockedIds.includes(ach.id) ? `${ach.icon} ${ach.name}\n${ach.description}` : `🔒 ${ach.name}\n(Locked)`).join('\n\n'); this.achievementsModal.content.setText(text); this.achievementsModal.setVisible(true); this.scene.pause('MainScene'); }
+    handleAchievementUnlocked(achievement) { SoundSynthesizer.instance.playChime(); this.showToast("Achievement Unlocked!", achievement.name, achievement.icon); }
+    showToast(title, message, icon = '') { const width = this.cameras.main.width; const toastWidth = 300, toastHeight = 80; const container = this.add.container(width / 2 - toastWidth / 2, -toastHeight - 20); const bg = this.add.rectangle(0, 0, toastWidth, toastHeight, 0xFFD700).setOrigin(0).setStrokeStyle(2, 0xFFFFFF); const iconText = this.add.text(10, 15, icon, { fontSize: '40px' }); const titleText = this.add.text(70, 10, title, { fontSize: '16px', color: '#000', fontStyle: 'bold', fontFamily: 'VT323' }); const msgText = this.add.text(70, 35, message, { fontSize: '24px', color: '#000', fontFamily: 'VT323' }); container.add([bg, iconText, titleText, msgText]); this.tweens.add({ targets: container, y: 20, duration: 500, ease: 'Back.out', hold: 3000, yoyo: true, onComplete: () => container.destroy() }); }
+    createSettingsModal() { const modal = this.createModal("Settings"); const h = 400; const volLabel = this.add.text(0, -80, "Volume", { fontSize: '24px', fontFamily: 'VT323', monospace: true }).setOrigin(0.5); const volDown = ButtonFactory.createButton(this, -80, -40, "-", () => { const newVol = Math.max(0, (this.settingsData?.volume ?? 0.5) - 0.1); this.game.events.emit(EventKeys.UPDATE_SETTINGS, { volume: newVol }); this.settingsModal.volDisplay.setText(`${Math.round(newVol * 100)}%`); if (!this.settingsData) this.settingsData = {}; this.settingsData.volume = newVol; }, { width: 40, height: 40, color: 0x808080 }); const volUp = ButtonFactory.createButton(this, 80, -40, "+", () => { const newVol = Math.min(1, (this.settingsData?.volume ?? 0.5) + 0.1); this.game.events.emit(EventKeys.UPDATE_SETTINGS, { volume: newVol }); this.settingsModal.volDisplay.setText(`${Math.round(newVol * 100)}%`); if (!this.settingsData) this.settingsData = {}; this.settingsData.volume = newVol; }, { width: 40, height: 40, color: 0x808080 }); const volDisplay = this.add.text(0, -40, "50%", { fontSize: '24px', fontFamily: 'VT323' }).setOrigin(0.5); const speedLabel = this.add.text(0, 20, "Game Speed", { fontSize: '24px', fontFamily: 'VT323' }).setOrigin(0.5); const speedButtons = []; const speeds = [{ l: "1x", v: Config.SETTINGS.SPEED_MULTIPLIERS.NORMAL }, { l: "2x", v: Config.SETTINGS.SPEED_MULTIPLIERS.FAST }, { l: "5x", v: Config.SETTINGS.SPEED_MULTIPLIERS.HYPER }]; let startX = -80; speeds.forEach(s => { const btn = ButtonFactory.createButton(this, startX, 60, s.l, () => { this.game.events.emit(EventKeys.UPDATE_SETTINGS, { gameSpeed: s.v }); this.updateSpeedButtons(s.v); if (!this.settingsData) this.settingsData = {}; this.settingsData.gameSpeed = s.v; }, { width: 60, height: 40, fontSize: '20px', color: 0x008080 }); btn.speedVal = s.v; speedButtons.push(btn); startX += 80; }); modal.add([volLabel, volDown, volUp, volDisplay, speedLabel, ...speedButtons]); modal.volDisplay = volDisplay; modal.speedButtons = speedButtons; return modal; }
+    updateSpeedButtons(speed) { this.settingsModal.speedButtons.forEach(btn => { if (Math.abs(btn.speedVal - speed) < 0.01) { btn.setAlpha(1); btn.setScale(1.1); } else { btn.setAlpha(0.6); btn.setScale(1.0); } }); }
+    openSettingsMenu() { this.closeAllModals(); if (!this.settingsData) this.settingsData = { volume: Config.SETTINGS.DEFAULT_VOLUME, gameSpeed: Config.SETTINGS.DEFAULT_SPEED }; const vol = Math.round((this.settingsData.volume ?? 0.5) * 100); this.settingsModal.volDisplay.setText(`${vol}%`); this.updateSpeedButtons(this.settingsData.gameSpeed || 1.0); this.settingsModal.setVisible(true); this.scene.pause('MainScene'); }
+    createShowcaseModal() { const modal = this.createModal("Pet Passport"); const passportContainer = this.add.container(this.cameras.main.width / 2, this.cameras.main.height / 2); modal.add(passportContainer); modal.passportContainer = passportContainer; return modal; }
+    openShowcase() { this.closeAllModals(); if (!this.nadagotchiData) return; const container = this.showcaseModal.passportContainer; container.removeAll(true); const width = 400; const height = 250; const cardBg = this.add.rectangle(0, 0, width, height, 0xFFF8E7).setStrokeStyle(4, 0xD4AF37); const moodMap = { 'happy': 0, 'neutral': 1, 'sad': 2, 'angry': 3 }; const frame = moodMap[this.nadagotchiData.mood] ?? 1; const sprite = this.add.image(-120, 0, 'pet', frame).setScale(8); const name = `Archetype: ${this.nadagotchiData.dominantArchetype}`; const gen = `Generation: ${this.nadagotchiData.generation || 1}`; const career = `Career: ${this.nadagotchiData.currentCareer || 'Unemployed'}`; const age = `Age: ${Math.floor(this.nadagotchiData.age || 0)} Days`; const infoText = this.add.text(0, -60, `${name}\n${gen}\n${career}\n${age}`, { fontFamily: 'VT323', monospace: fontSize: '24px', color: '#000000', lineSpacing: 10 }).setOrigin(0, 0); const footer = this.add.text(0, 80, "OFFICIAL NADAGOTCHI PASSPORT", { fontFamily: 'Arial', fontSize: '12px', color: '#888888', fontStyle: 'italic' }).setOrigin(0.5); container.add([cardBg, sprite, infoText, footer]); this.showcaseModal.setVisible(true); this.scene.pause('MainScene'); }
+    openCareerMenu() { this.closeAllModals(); if (!this.nadagotchiData) return; const container = this.careerModal; if (this.careerDynamicItems) { this.careerDynamicItems.forEach(i => i.destroy()); } this.careerDynamicItems = []; const mw = this.getModalWidth(); const mh = this.getModalHeight(); let yPos = -mh / 2 + 80; const career = this.nadagotchiData.currentCareer; let infoText = ""; if (career) { const level = this.nadagotchiData.careerLevels[career] || 1; const xp = this.nadagotchiData.careerXP[career] || 0; const title = CareerDefinitions.TITLES[career] ? CareerDefinitions.TITLES[career][level] : 'Employee'; const nextThreshold = CareerDefinitions.XP_THRESHOLDS[level + 1] || 'MAX'; const payBonus = (Config.CAREER.LEVEL_MULTIPLIERS[level] - 1) * 100; infoText = `Current Job: ${career}\nTitle: ${title} (Lvl ${level})\nXP: ${xp} / ${nextThreshold}\nBonuses: +${Math.round(payBonus)}% Efficiency`; } else { infoText = "No Active Career.\nStudy or Explore to unlock paths!"; } const statsText = this.add.text(0, yPos, infoText, { fontFamily: 'VT323', monospace: fontSize: '24px', color: '#ffffff', align: 'center', wordWrap: { width: mw - 60 } }).setOrigin(0.5, 0); container.add(statsText); this.careerDynamicItems.push(statsText); yPos += 140; const listTitle = this.add.text(0, yPos, "Unlocked Career Paths:", { fontFamily: 'VT323', fontSize: '20px', color: '#AAAAAA' }).setOrigin(0.5); container.add(listTitle); this.careerDynamicItems.push(listTitle); yPos += 30; const unlocked = this.nadagotchiData.unlockedCareers || []; if (unlocked.length === 0) { const noneText = this.add.text(0, yPos, "(None yet)", { fontFamily: 'VT323', fontSize: '18px', color: '#888' }).setOrigin(0.5); container.add(noneText); this.careerDynamicItems.push(noneText); } else { unlocked.forEach(c => { const isCurrent = c === career; const lvl = this.nadagotchiData.careerLevels[c] || 1; const label = `${c} (Lvl ${lvl})`; const rowText = this.add.text(-mw/2 + 60, yPos + 10, label, { fontFamily: 'VT323', fontSize: '24px', color: isCurrent ? '#00FF00' : '#FFF' }); container.add(rowText); this.careerDynamicItems.push(rowText); if (!isCurrent) { const switchBtn = ButtonFactory.createButton(this, mw/2 - 80, yPos + 20, "Switch", () => { this.game.events.emit(EventKeys.UI_ACTION, EventKeys.SWITCH_CAREER, c); container.setVisible(false); this.scene.resume('MainScene'); }, { width: 80, height: 30, color: 0x4CAF50, fontSize: '18px' }); container.add(switchBtn); this.careerDynamicItems.push(switchBtn); } else { const activeLbl = this.add.text(mw/2 - 80, yPos + 10, "[Active]", { fontFamily: 'VT323', fontSize: '18px', color: '#00FF00' }); container.add(activeLbl); this.careerDynamicItems.push(activeLbl); } yPos += 45; }); } container.setVisible(true); this.scene.pause('MainScene'); }
+    openJobBoardMenu() { this.closeAllModals(); if (!this.nadagotchiData) return; const container = this.jobBoardModal; if (this.jobBoardDynamicItems) { this.jobBoardDynamicItems.forEach(i => i.destroy()); } this.jobBoardDynamicItems = []; const career = this.nadagotchiData.currentCareer; let text = ""; if (career) { text = `Active Assignment:\n${career}`; } else { text = "No Active Career Assignment."; } const infoText = this.add.text(0, -50, text, { fontFamily: 'VT323', fontSize: '32px', color: '#FFF', align: 'center' }).setOrigin(0.5); container.add(infoText); this.jobBoardDynamicItems.push(infoText); const startBtn = ButtonFactory.createButton(this, 0, 30, "Start Shift", () => { if (career) { this.game.events.emit(EventKeys.UI_ACTION, EventKeys.WORK); container.setVisible(false); } else { this.showToast("No Job", "Select a career first!", "🚫"); } }, { width: 160, height: 50, color: career ? 0x6A0DAD : 0x555555, fontSize: '24px' }); if (!career) startBtn.setDisabled(true); container.add(startBtn); this.jobBoardDynamicItems.push(startBtn); const careerBtn = ButtonFactory.createButton(this, 0, 100, "Career Profiles", () => { this.openCareerMenu(); }, { width: 160, height: 40, color: 0xD8A373, fontSize: '20px' }); container.add(careerBtn); this.jobBoardDynamicItems.push(careerBtn); container.setVisible(true); this.scene.pause('MainScene'); }
 }
