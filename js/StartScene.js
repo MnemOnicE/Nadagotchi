@@ -46,14 +46,15 @@ export class StartScene extends Phaser.Scene {
         let buttonY = height * 0.5;
 
         if (existingPet) {
-            const resumeBtn = ButtonFactory.createButton(this, width / 2, buttonY, 'ENTER WORLD', () => {
+            // Fix: ButtonFactory creates container at x. To center button of width 250, we need x = width/2 - 125.
+            const resumeBtn = ButtonFactory.createButton(this, (width / 2) - 125, buttonY, 'ENTER WORLD', () => {
                 this.scene.start('MainScene');
             }, { width: 250, height: 60, fontSize: '32px', color: 0x4CAF50 });
             this.menuContainer.add(resumeBtn);
             buttonY += 80;
         }
 
-        const newGameBtn = ButtonFactory.createButton(this, width / 2, buttonY, 'ARRIVE (New Game)', () => {
+        const newGameBtn = ButtonFactory.createButton(this, (width / 2) - 125, buttonY, 'ARRIVE (New Game)', () => {
             this.showArchetypeSelection();
         }, { width: 250, height: 60, fontSize: '32px', color: 0x2196F3 });
         this.menuContainer.add(newGameBtn);
@@ -61,6 +62,10 @@ export class StartScene extends Phaser.Scene {
         // --- Archetype Selection Container (Hidden initially) ---
         this.selectionContainer = this.add.container(0, 0);
         this.selectionContainer.setVisible(false);
+
+        // --- Name Input Container (Hidden initially) ---
+        this.nameInputContainer = this.add.container(0, 0);
+        this.nameInputContainer.setVisible(false);
     }
 
     /**
@@ -102,7 +107,7 @@ export class StartScene extends Phaser.Scene {
             // Hover effects
             basket.on('pointerover', () => basket.setScale(1.7));
             basket.on('pointerout', () => basket.setScale(1.5));
-            basket.on('pointerdown', () => this.startGame(arch.key));
+            basket.on('pointerdown', () => this.showNameInput(arch.key));
 
             // Label
             const label = this.add.text(x, y + 60, arch.key, {
@@ -134,15 +139,110 @@ export class StartScene extends Phaser.Scene {
     }
 
     /**
-     * Starts the main game with the selected archetype and tutorial enabled.
+     * Shows the pet naming screen.
      * @param {string} archetype
      */
-    startGame(archetype) {
+    showNameInput(archetype) {
+        this.selectionContainer.setVisible(false);
+        this.nameInputContainer.setVisible(true);
+        this.nameInputContainer.removeAll(true);
+
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
+
+        const title = this.add.text(width / 2, height * 0.3, 'Name Your Companion', {
+            fontFamily: 'VT323, monospace',
+            fontSize: '40px',
+            color: '#ffffff',
+            stroke: '#000000',
+            strokeThickness: 4
+        }).setOrigin(0.5);
+        this.nameInputContainer.add(title);
+
+        // Name Display
+        let currentName = '';
+        const nameDisplay = this.add.text(width / 2, height * 0.5, 'Type Name...', {
+            fontFamily: 'VT323, monospace',
+            fontSize: '48px',
+            color: '#FFD700',
+            backgroundColor: '#000000',
+            padding: { x: 20, y: 10 },
+            stroke: '#FFFFFF',
+            strokeThickness: 2
+        }).setOrigin(0.5);
+        this.nameInputContainer.add(nameDisplay);
+
+        // Blinking cursor effect
+        this.tweens.add({
+            targets: nameDisplay,
+            alpha: { from: 1, to: 0.7 },
+            duration: 800,
+            yoyo: true,
+            repeat: -1
+        });
+
+        // Instructions
+        const instructions = this.add.text(width / 2, height * 0.6, '(Type using your keyboard. Max 12 chars.)', {
+            fontFamily: 'VT323, monospace',
+            fontSize: '20px',
+            color: '#cccccc'
+        }).setOrigin(0.5);
+        this.nameInputContainer.add(instructions);
+
+        // Confirm Button
+        const confirmBtn = ButtonFactory.createButton(this, (width / 2) - 100, height * 0.75, 'Begin Journey', () => {
+            if (currentName.length > 0) {
+                // Cleanup listener before starting
+                this.input.keyboard.off('keydown', keyHandler);
+                this.startGame(archetype, currentName);
+            }
+        }, { width: 200, height: 50, color: 0x4CAF50, fontSize: '28px' });
+        this.nameInputContainer.add(confirmBtn);
+
+        // Back Button
+        const backBtn = ButtonFactory.createButton(this, (width / 2) - 50, height - 80, 'Back', () => {
+            this.input.keyboard.off('keydown', keyHandler);
+            this.nameInputContainer.setVisible(false);
+            this.selectionContainer.setVisible(true);
+        }, { width: 100, height: 40, color: 0x888888 });
+        this.nameInputContainer.add(backBtn);
+
+        // Keyboard Logic
+        const keyHandler = (event) => {
+            if (event.key.length === 1 && currentName.length < 12) {
+                // Alphanumeric check regex
+                if (/[a-zA-Z0-9 ]/.test(event.key)) {
+                    currentName += event.key;
+                }
+            } else if (event.key === 'Backspace') {
+                currentName = currentName.slice(0, -1);
+            } else if (event.key === 'Enter') {
+                 if (currentName.length > 0) {
+                    this.input.keyboard.off('keydown', keyHandler);
+                    this.startGame(archetype, currentName);
+                }
+            }
+
+            nameDisplay.setText(currentName.length > 0 ? currentName : 'Type Name...');
+        };
+
+        this.input.keyboard.on('keydown', keyHandler);
+    }
+
+    /**
+     * Starts the main game with the selected archetype and tutorial enabled.
+     * @param {string} archetype
+     * @param {string} name
+     */
+    startGame(archetype, name) {
         // Clear existing save to ensure fresh start
         this.persistence.clearAllData();
 
         this.scene.start('MainScene', {
-            newPetData: { dominantArchetype: archetype },
+            newPetData: {
+                dominantArchetype: archetype,
+                name: name
+            },
             startTutorial: true
         });
     }

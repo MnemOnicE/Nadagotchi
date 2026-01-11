@@ -50,8 +50,8 @@ export class EventManager {
             // --- RARE, SPONTANEOUS EVENTS ---
             'TravelingMerchant': {
                 type: 'spontaneous',
-                // This event has a 1% chance of triggering each day.
-                trigger: () => Math.random() < 0.01,
+                // Force spawn on Day 2 of Spring Year 1, otherwise 1% chance.
+                trigger: (date) => (date.year === 1 && date.season === 'Spring' && date.day === 2) || Math.random() < 0.01,
                 description: 'A mysterious Traveling Merchant has arrived in town, offering rare goods.'
             },
             'MeteorShower': {
