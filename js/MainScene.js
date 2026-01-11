@@ -620,7 +620,7 @@ export class MainScene extends Phaser.Scene {
 
         // Create navigation targets
         connections.forEach((targetId, index) => {
-            if (!RoomDefinitions[targetId].unlocked) return;
+            const isUnlocked = this.nadagotchi.isRoomUnlocked(targetId);
 
             // Simple placement logic: Spaced out at the top
             // Width/Height available via cameras
@@ -629,12 +629,31 @@ export class MainScene extends Phaser.Scene {
             const x = (w / (connections.length + 1)) * (index + 1);
             const y = 80;
 
-            const door = this.add.text(x, y, `Go to\n${RoomDefinitions[targetId].name}`, {
-                 backgroundColor: '#333', padding: { x: 5, y: 5 }, align: 'center', fontFamily: 'VT323, Arial'
-            }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+            if (isUnlocked) {
+                const door = this.add.text(x, y, `Go to\n${RoomDefinitions[targetId].name}`, {
+                     backgroundColor: '#333', padding: { x: 5, y: 5 }, align: 'center', fontFamily: 'VT323, Arial'
+                }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
-            door.on('pointerdown', () => this.changeRoom(targetId));
-            this.roomDoors.push(door);
+                door.on('pointerdown', () => this.changeRoom(targetId));
+                this.roomDoors.push(door);
+            } else {
+                // Locked Door Logic
+                // Find Deed Name
+                // In a real app, maybe add 'Deed' to RoomDef or loop ItemDefs.
+                // Hardcoding mapping for speed/simplicity as logic is in InventorySystem reverse-lookup.
+                // Or show "Locked"
+                const door = this.add.text(x, y, `Locked\n${RoomDefinitions[targetId].name}\n(Needs Deed)`, {
+                     backgroundColor: '#555', color: '#AAA', padding: { x: 5, y: 5 }, align: 'center', fontFamily: 'VT323, Arial'
+                }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+                // Add Padlock Icon/Emoji?
+                // Visual feedback on click
+                door.on('pointerdown', () => {
+                    this.showNotification(`Locked! Requires Deed.`, '#FF0000');
+                    SoundSynthesizer.instance.playFailure();
+                });
+                this.roomDoors.push(door);
+            }
         });
     }
 

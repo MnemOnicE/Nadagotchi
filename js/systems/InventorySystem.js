@@ -68,7 +68,7 @@ export class InventorySystem {
      * @param {string} itemName - The name of the item to consume.
      */
     consumeItem(itemName) {
-        if (!this.pet.inventory[itemName] || this.pet.inventory[itemName] <= 0) return;
+        if (!this.pet.inventory[itemName] || this.pet.inventory[itemName] <= 0) return { success: false, message: "Item not in inventory" };
 
         let consumed = false;
 
@@ -117,14 +117,32 @@ export class InventorySystem {
                 }
                 break;
             default:
-                // Item is not consumable
+                // Check for generic item types (DEED)
+                const def = ItemDefinitions[itemName];
+                if (def && def.type === 'DEED') {
+                    // Deed Logic
+                    const targetRoom = def.targetRoom;
+                    if (targetRoom && RoomDefinitions[targetRoom]) {
+                        // Check Linear Progression: Ensure at least one connected room is unlocked.
+                        const canUnlock = RoomDefinitions[targetRoom].connections.some(connId => this.pet.isRoomUnlocked(connId));
+
+                        if (!canUnlock) {
+                            return { success: false, message: "You must unlock a connecting room first!" };
+                        }
+
+                        this.pet.unlockRoom(targetRoom);
+                        consumed = true;
+                    }
+                }
                 break;
         }
 
         if (consumed) {
             this.removeItem(itemName, 1);
-            // Stats will be updated in UI on next tick/event
+            return { success: true };
         }
+
+        return { success: false, message: "Item cannot be consumed." };
     }
 
     /**
