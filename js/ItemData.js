@@ -54,67 +54,41 @@ export const ItemDefinitions = {
 /**
  * Recipes for crafting items.
  * Keys match ItemDefinitions.
- * @type {Object.<string, {materials: Object.<string, number>, description: string}>}
+ * Now supports 'pattern' for grid crafting (3x3 array, flattened).
+ * Null means empty slot.
  */
 export const Recipes = {
     "Fancy Bookshelf": {
         materials: { "Sticks": 5, "Shiny Stone": 1 },
-        description: "A beautiful bookshelf that makes studying more effective."
+        pattern: [
+            "Sticks", "Sticks", "Sticks",
+            "Sticks", "Shiny Stone", "Sticks",
+            "Sticks", "Sticks", "Sticks"
+        ],
+        description: "A beautiful bookshelf."
     },
     "Masterwork Chair": {
-        materials: { "Sticks": 10, "Shiny Stone": 2 },
+        materials: { "Sticks": 4, "Shiny Stone": 1 },
+        pattern: [
+            null, "Sticks", null,
+            "Sticks", "Shiny Stone", "Sticks",
+            "Sticks", null, "Sticks"
+        ],
         description: "A chair of unparalleled craftsmanship."
-    },
-    "Cozy Wallpaper": {
-        materials: { "Berries": 5, "Sticks": 2 }, // Dye + Structure
-        description: "Warm, striped wallpaper that makes a room feel like home."
-    },
-    "Blue Wallpaper": {
-        materials: { "Berries": 5, "Sticks": 2 }, // Placeholder cost
-        description: "Calming blue stripes."
-    },
-    "Brick Wallpaper": {
-        materials: { "Sticks": 5, "Shiny Stone": 1 },
-        description: "Rustic red brick."
-    },
-    "Wood Flooring": {
-        materials: { "Sticks": 10 },
-        description: "Polished wood planks for a classic look."
-    },
-    "Tile Flooring": {
-         materials: { "Shiny Stone": 2, "Sticks": 2 },
-         description: "Cool gray tiles."
-    },
-    "Grass Flooring": {
-         materials: { "Berries": 2, "Sticks": 2 },
-         description: "Lush green grass."
     },
     "Logic-Boosting Snack": {
         materials: { "Berries": 3 },
-        description: "A tasty snack that fuels the mind."
+        pattern: [
+            null, "Berries", null,
+            "Berries", "Berries", "Berries",
+            null, "Berries", null
+        ],
+        description: "A tasty snack."
     },
+    // Fallbacks for non-grid logic (or simple center placement)
     "Hot Cocoa": {
         materials: { "Berries": 2, "Sticks": 1 },
-        description: "A rich, warm drink perfect for rainy days."
-    },
-    "Stamina-Up Tea": {
-        materials: { "Berries": 1, "Sticks": 1 },
-        description: "A warm tea that restores energy."
-    },
-    "Metabolism-Slowing Tonic": {
-        materials: { "Frostbloom": 1, "Sticks": 2 },
-        description: "A tonic that slows metabolism, helping to conserve energy."
-    },
-    "Living Room Deed": {
-        materials: { "Sticks": 50, "Shiny Stone": 5 },
-        description: "Unlock the Living Room expansion."
-    },
-    "Kitchen Deed": {
-        materials: { "Sticks": 100, "Shiny Stone": 10 },
-        description: "Unlock the Kitchen expansion."
-    },
-    "Bedroom Deed": {
-        materials: { "Sticks": 100, "Shiny Stone": 10 },
-        description: "Unlock the Bedroom expansion."
+        pattern: [null, null, null, "Berries", "Sticks", "Berries", null, null, null],
+        description: "A rich, warm drink."
     }
 };

@@ -53,6 +53,38 @@ export class QuestSystem {
     }
 
     /**
+     * Checks if a specific NPC has any NEW quests available.
+     * Used for UI indicators (!).
+     * @param {string} npcName
+     * @returns {boolean}
+     */
+    hasNewQuest(npcName) {
+        // Check Main Quests
+        // Currently only 'Masterwork Crafting' is defined
+        // Logic: Is it started? If not, is this the starting NPC?
+        // Hardcoding mapping for now or iterate definitions? Iterate is better.
+        // But definitions don't explicitly list "Starting NPC".
+        // Based on logic: Master Artisan starts Masterwork Crafting.
+        if (npcName === 'Master Artisan') {
+            if (!this.pet.quests['masterwork_crafting']) {
+                // Requirements to START? In legacy it was "Relationship Level >= 5"
+                if (this.pet.relationships['Master Artisan'] && this.pet.relationships['Master Artisan'].level >= 5) {
+                    return true;
+                }
+            }
+        }
+
+        // Check Daily Quest
+        if (this.pet.dailyQuest && !this.pet.dailyQuest.completed && this.pet.dailyQuest.npc === npcName) {
+            // It's available/active. Is it "New"?
+            // We can consider an active daily quest as worthy of a "!" until completed.
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Checks if the requirements for advancing the current stage are met.
      * @param {string} questId
      * @returns {boolean}

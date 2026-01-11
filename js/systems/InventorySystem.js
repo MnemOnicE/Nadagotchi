@@ -1,5 +1,5 @@
 import { Config } from '../Config.js';
-import { ItemDefinitions } from '../ItemData.js';
+import { ItemDefinitions, Recipes } from '../ItemData.js';
 import { RoomDefinitions } from '../RoomDefinitions.js';
 
 /**
@@ -61,6 +61,73 @@ export class InventorySystem {
         const moodMultiplier = this.pet.getMoodMultiplier();
         this.pet.skills.crafting += (Config.ACTIONS.CRAFT.SKILL_GAIN * moodMultiplier);
         this.pet.addJournalEntry(`I successfully crafted a ${itemName}!`);
+    }
+
+    /**
+     * Crafts an item using a 3x3 grid input.
+     * @param {Array<string|null>} inputGrid - Flattened 3x3 array of item names.
+     * @returns {object} Result { success, message, item }
+     */
+    craftFromGrid(inputGrid) {
+        // Find matching recipe
+        let matchedRecipeName = null;
+
+        // Iterate all known recipes
+        for (const recipeName of this.pet.discoveredRecipes) {
+            const recipe = Recipes[recipeName];
+            if (!recipe || !recipe.pattern) continue;
+
+            if (this._matchesPattern(inputGrid, recipe.pattern)) {
+                matchedRecipeName = recipeName;
+                break;
+            }
+        }
+
+        if (!matchedRecipeName) {
+            return { success: false, message: "Invalid Pattern" };
+        }
+
+        // Check Inventory
+        const requiredTotals = {};
+        inputGrid.forEach(item => {
+            if (item) requiredTotals[item] = (requiredTotals[item] || 0) + 1;
+        });
+
+        for (const [item, count] of Object.entries(requiredTotals)) {
+            if ((this.pet.inventory[item] || 0) < count) {
+                return { success: false, message: `Not enough ${item}` };
+            }
+        }
+
+        // Consume
+        for (const [item, count] of Object.entries(requiredTotals)) {
+            this.removeItem(item, count);
+        }
+
+        // Add Result
+        this.addItem(matchedRecipeName, 1);
+
+        // Stats
+        this.pet.stats.energy -= Config.ACTIONS.CRAFT.ENERGY_COST;
+        this.pet.stats.happiness += Config.ACTIONS.CRAFT.HAPPINESS_RESTORE;
+        const moodMultiplier = this.pet.getMoodMultiplier();
+        this.pet.skills.crafting += (Config.ACTIONS.CRAFT.SKILL_GAIN * moodMultiplier);
+
+        // Quest Hooks
+        if (matchedRecipeName === 'Masterwork Chair') {
+            this.pet.questSystem.setQuestFlag('masterwork_crafting', 'hasCraftedChair');
+        }
+
+        this.pet.addJournalEntry(`I successfully crafted a ${matchedRecipeName}!`);
+        return { success: true, message: `Crafted ${matchedRecipeName}!`, item: matchedRecipeName };
+    }
+
+    _matchesPattern(input, target) {
+        if (input.length !== 9 || target.length !== 9) return false;
+        for (let i = 0; i < 9; i++) {
+            if (input[i] !== target[i]) return false;
+        }
+        return true;
     }
 
     /**

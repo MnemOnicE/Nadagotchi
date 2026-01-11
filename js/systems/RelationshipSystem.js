@@ -1,5 +1,6 @@
 import { Config } from '../Config.js';
 import { NarrativeSystem } from '../NarrativeSystem.js';
+import { EventKeys } from '../EventKeys.js';
 
 /**
  * @fileoverview System for managing NPC relationships and interactions.
@@ -18,7 +19,7 @@ export class RelationshipSystem {
      * Manages interaction with an NPC, updating relationship status and stats.
      * @param {string} npcName - The name of the NPC being interacted with.
      * @param {string} [interactionType='CHAT'] - The type of interaction (e.g., 'CHAT', 'GIFT').
-     * @returns {string|null} The dialogue text to display, or null if interaction failed.
+     * @returns {object|null} The dialogue object { text, options } or null if interaction failed.
      */
     interact(npcName, interactionType = 'CHAT') {
         if (!this.pet.relationships.hasOwnProperty(npcName)) {
@@ -28,7 +29,7 @@ export class RelationshipSystem {
         // Check for energy cost
         if (this.pet.stats.energy < Config.ACTIONS.INTERACT_NPC.ENERGY_COST) {
             this.pet.addJournalEntry("I'm too tired to interact right now.");
-            return null;
+            return { text: "I'm too tired to interact right now.", options: [{ label: "Close", action: null }] };
         }
 
         this.pet.stats.energy -= Config.ACTIONS.INTERACT_NPC.ENERGY_COST;
@@ -36,98 +37,122 @@ export class RelationshipSystem {
         // Mark interaction for the day to prevent friendship decay
         this.pet.relationships[npcName].interactedToday = true;
 
-        // Check Daily Quest
+        // --- Interaction Logic ---
+        let resultText = "";
+        let options = [];
+
+        // 1. Daily Quests
         if (this.pet.dailyQuest && this.pet.dailyQuest.npc === npcName && !this.pet.dailyQuest.completed) {
-            if (this.pet.questSystem.completeDailyQuest()) {
-                const text = "Oh, you brought it! Thank you so much!";
-                this.pet.addJournalEntry(`Completed request for ${npcName}: "${text}"`);
-                return text;
+            // Check if can complete
+            const q = this.pet.dailyQuest;
+            const hasItems = (this.pet.inventory[q.item] || 0) >= q.qty;
+
+            if (hasItems) {
+                // Offer completion
+                resultText = `${npcName}: "${q.text}"\n(You have the ${q.item}!)`;
+                options.push({
+                    label: "Complete Quest",
+                    action: () => {
+                         this.pet.questSystem.completeDailyQuest();
+                         // UI will refresh on next interaction or we can trigger update
+                         // For now, simpler to just let the action happen.
+                         // Ideally we'd return a new state, but callback logic in UIScene handles closing/refreshing usually.
+                    }
+                });
             } else {
-                // If not completed, remind player
-                const text = this.pet.dailyQuest.text;
-                this.pet.addJournalEntry(`${npcName} reminded me: "${text}"`);
-                return text;
+                resultText = `${npcName}: "${q.text}"\n(Requires: ${q.qty} ${q.item})`;
             }
+            options.push({ label: "Leave", action: null });
+            return { text: resultText, options: options };
         }
 
+        // 2. Main Quests (Master Artisan)
+        if (npcName === 'Master Artisan') {
+             // Start Quest Check
+             if (!this.pet.quests['masterwork_crafting'] && this.pet.relationships['Master Artisan'].level >= 5) {
+                 const qDef = this.pet.questSystem.getStageDefinition('masterwork_crafting'); // N/A yet
+                 resultText = "Master Artisan: 'You show promise. Prove your dedication.'";
+                 options.push({
+                     label: "Accept Quest",
+                     action: () => {
+                         this.pet.questSystem.startQuest('masterwork_crafting');
+                     }
+                 });
+                 options.push({ label: "Maybe Later", action: null });
+                 return { text: resultText, options: options };
+             }
+
+             // Continue Quest Check
+             if (this.pet.quests['masterwork_crafting']) {
+                 const q = this.pet.quests['masterwork_crafting'];
+                 const stageDef = this.pet.questSystem.getStageDefinition('masterwork_crafting');
+
+                 if (!stageDef.isComplete) {
+                      const canAdvance = this.pet.questSystem.checkRequirements('masterwork_crafting');
+                      if (canAdvance) {
+                           resultText = `Master Artisan: "${stageDef.description}"\n(Requirements Met!)`;
+                           options.push({
+                               label: "Complete Stage",
+                               action: () => {
+                                   this.pet.questSystem.advanceQuest('masterwork_crafting');
+                               }
+                           });
+                      } else {
+                           resultText = `Master Artisan: "${stageDef.description}"`;
+                      }
+                      options.push({ label: "Leave", action: null });
+                      return { text: resultText, options: options };
+                 }
+             }
+        }
+
+        // 3. Standard Interactions (Chat/Gift)
         if (interactionType === 'GIFT' && this.pet.inventory['Berries'] > 0) {
             this.pet.inventorySystem.removeItem('Berries', 1);
             this.pet.relationships[npcName].level += Config.ACTIONS.INTERACT_NPC.GIFT_RELATIONSHIP;
             this.pet.stats.happiness += Config.ACTIONS.INTERACT_NPC.GIFT_HAPPINESS;
             this.pet.skills.empathy += Config.ACTIONS.INTERACT_NPC.GIFT_SKILL_GAIN;
-            const text = "Thanks for the gift!";
+            resultText = "Thanks for the gift!";
             this.pet.addJournalEntry(`I gave Berries to ${npcName}. They seemed to like it!`);
-            return text;
-        }
+            options.push({ label: "Chat", action: () => { /* Trigger Chat Logic? Re-interact? */ }});
+        } else {
+            // CHAT
+            const moodMultiplier = this.pet.getMoodMultiplier();
+            this.pet.relationships[npcName].level += Config.ACTIONS.INTERACT_NPC.CHAT_RELATIONSHIP;
+            this.pet.stats.happiness += Config.ACTIONS.INTERACT_NPC.CHAT_HAPPINESS;
+            this.pet.skills.communication += Config.ACTIONS.INTERACT_NPC.CHAT_SKILL_GAIN;
 
-        const moodMultiplier = this.pet.getMoodMultiplier();
-
-        this.pet.relationships[npcName].level += Config.ACTIONS.INTERACT_NPC.CHAT_RELATIONSHIP;
-        this.pet.stats.happiness += Config.ACTIONS.INTERACT_NPC.CHAT_HAPPINESS;
-        this.pet.skills.communication += Config.ACTIONS.INTERACT_NPC.CHAT_SKILL_GAIN;
-
-        switch (npcName) {
-            case 'Grizzled Scout':
-                this.pet.skills.navigation += Config.ACTIONS.INTERACT_NPC.SCOUT_SKILL_GAIN * moodMultiplier;
-                break;
-            case 'Master Artisan':
-                if (this.pet.relationships['Master Artisan'].level >= 5) {
-                    const questId = 'masterwork_crafting';
-                    const qs = this.pet.questSystem;
-                    const q = qs.getQuest(questId);
-
-                    if (!q) {
-                        qs.startQuest(questId);
-                    } else {
-                        const stageDef = qs.getStageDefinition(questId);
-                        if (stageDef && stageDef.isComplete) {
-                            // Recurring Interaction for Completed Quest
-                            if (stageDef.recurringInteraction) {
-                                const recurring = stageDef.recurringInteraction;
-                                if (recurring.rewards && recurring.rewards.skills && recurring.rewards.skills.crafting) {
-                                    this.pet.skills.crafting += recurring.rewards.skills.crafting * moodMultiplier;
-                                }
-                                if (recurring.journalEntry) {
-                                    this.pet.addJournalEntry(recurring.journalEntry);
-                                }
-                            }
-                        } else {
-                            // Try to advance quest
-                            if (!qs.advanceQuest(questId)) {
-                                // Failed to advance (requirements not met)
-                                if (stageDef && stageDef.description) {
-                                    this.pet.addJournalEntry(stageDef.description);
-                                }
-                            }
-                        }
-                    }
-                } else {
+            // Apply Skill Bonuses
+             switch (npcName) {
+                case 'Grizzled Scout':
+                    this.pet.skills.navigation += Config.ACTIONS.INTERACT_NPC.SCOUT_SKILL_GAIN * moodMultiplier;
+                    break;
+                case 'Master Artisan':
                     this.pet.skills.crafting += Config.ACTIONS.INTERACT_NPC.ARTISAN_SKILL_GAIN * moodMultiplier;
-                }
-                break;
-            case 'Sickly Villager':
-                this.pet.skills.empathy += Config.ACTIONS.INTERACT_NPC.VILLAGER_SKILL_GAIN * moodMultiplier;
-                break;
-        }
-
-        const relLevel = this.pet.relationships[npcName].level;
-        // Check quest active state via QuestSystem
-        const quest = this.pet.questSystem.getQuest('masterwork_crafting');
-        // Legacy: check if stage < 3. Definitions say stage 3 is isComplete=true.
-        // NarrativeSystem expects 'hasQuest' to mean "Quest is In Progress"
-        // So we check if quest exists AND is not complete.
-        let hasQuest = false;
-        if (npcName === 'Master Artisan' && quest) {
-            const stageDef = this.pet.questSystem.getStageDefinition('masterwork_crafting');
-            if (stageDef && !stageDef.isComplete) {
-                hasQuest = true;
+                    break;
+                case 'Sickly Villager':
+                    this.pet.skills.empathy += Config.ACTIONS.INTERACT_NPC.VILLAGER_SKILL_GAIN * moodMultiplier;
+                    break;
             }
+
+            const relLevel = this.pet.relationships[npcName].level;
+            // Legacy quest flag check for dialogue content
+            let hasQuest = false;
+            if (npcName === 'Master Artisan' && this.pet.quests['masterwork_crafting']) {
+                 const stageDef = this.pet.questSystem.getStageDefinition('masterwork_crafting');
+                 if (stageDef && !stageDef.isComplete) hasQuest = true;
+            }
+
+            const dialogueText = NarrativeSystem.getNPCDialogue(npcName, relLevel, hasQuest);
+            this.pet.addJournalEntry(`Chatted with ${npcName}: "${dialogueText}"`);
+            resultText = dialogueText;
         }
 
-        const dialogueText = NarrativeSystem.getNPCDialogue(npcName, relLevel, hasQuest);
-        this.pet.addJournalEntry(`Chatted with ${npcName}: "${dialogueText}"`);
+        // Default Buttons
+        options.push({ label: "Gift (Berries)", action: 'GIFT_CALLBACK' }); // Special flag for UI to callback with GIFT type
+        options.push({ label: "Goodbye", action: null });
 
-        return dialogueText;
+        return { text: resultText, options: options };
     }
 
     /**
@@ -149,54 +174,6 @@ export class RelationshipSystem {
 
             // Reset flag for the new day
             rel.interactedToday = false;
-        }
-    }
-
-    /**
-     * Handles the logic for the Master Artisan's quest line.
-     * @private
-     */
-    _handleArtisanQuest() {
-        if (!this.pet.quests['masterwork_crafting']) {
-            this.pet.quests['masterwork_crafting'] = { stage: 1, name: 'Masterwork Crafting' };
-            this.pet.addJournalEntry("The Master Artisan sees potential in me. He asked for 5 Sticks to prove my dedication.");
-            return;
-        }
-
-        const quest = this.pet.quests['masterwork_crafting'];
-
-        if (quest.stage === 1) {
-            if ((this.pet.inventory['Sticks'] || 0) >= 5) {
-                // Check if we already know the recipe (unlikely if in stage 1, but safe)
-                // Accessing InventorySystem directly
-                if (this.pet.inventorySystem.discoverRecipe("Masterwork Chair")) {
-                    this.pet.inventorySystem.removeItem('Sticks', 5);
-                    quest.stage = 2;
-                    this.pet.addJournalEntry("I gave the Sticks to the Artisan. He taught me how to make a Masterwork Chair! I need to craft one to show him.");
-                } else {
-                     // Should not happen unless they learned it elsewhere
-                     // Advance quest anyway if they already know it
-                    this.pet.inventorySystem.removeItem('Sticks', 5);
-                    quest.stage = 2;
-                }
-            } else {
-                this.pet.addJournalEntry("The Master Artisan is waiting for 5 Sticks.");
-            }
-        } else if (quest.stage === 2) {
-            if (quest.hasCraftedChair && this.pet.inventory['Masterwork Chair'] && this.pet.inventory['Masterwork Chair'] > 0) {
-                this.pet.inventorySystem.removeItem('Masterwork Chair', 1);
-                quest.stage = 3;
-                this.pet.skills.crafting += Config.ACTIONS.INTERACT_NPC.QUEST_CRAFTING_GAIN;
-                this.pet.stats.happiness += Config.ACTIONS.INTERACT_NPC.QUEST_HAPPINESS_GAIN;
-                this.pet.addJournalEntry("The Master Artisan was impressed by my chair! He declared me a true craftsman.");
-            } else {
-                this.pet.addJournalEntry("I need to craft a Masterwork Chair to show the Artisan.");
-            }
-        } else {
-            // Completed
-            const moodMultiplier = this.pet.getMoodMultiplier();
-            this.pet.skills.crafting += 0.2 * moodMultiplier;
-            this.pet.addJournalEntry("The Master Artisan greeted me warmly as a fellow master. We discussed advanced crafting theory.");
         }
     }
 }

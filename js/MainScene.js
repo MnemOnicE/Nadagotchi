@@ -179,6 +179,16 @@ export class MainScene extends Phaser.Scene {
         this.npcVillager = this.add.sprite(150, 0, 'npc_villager').setInteractive({ useHandCursor: true }).setDepth(10)
             .on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, EventKeys.INTERACT_VILLAGER, 'Sickly Villager'));
 
+        // Quest Indicators (!)
+        this.questIndicators = {};
+        ['npcScout', 'npcArtisan', 'npcVillager'].forEach(npcKey => {
+             const indicator = this.add.text(0, 0, '!', { font: '40px Arial', color: '#FFFF00', stroke: '#000000', strokeThickness: 4 }).setOrigin(0.5).setDepth(100).setVisible(false);
+             // Bobbing animation
+             this.tweens.add({ targets: indicator, y: '-=10', duration: 800, yoyo: true, repeat: -1 });
+             this.questIndicators[npcKey] = indicator;
+        });
+
+
         // --- Post-FX & UI ---
         // Initialize LightingManager (creates lightTexture and image)
         this.lightingManager = new LightingManager(this);
@@ -306,6 +316,9 @@ export class MainScene extends Phaser.Scene {
             };
             this.game.events.emit(EventKeys.UPDATE_STATS, fullState);
             this.lastStatsUpdate = time;
+
+            // Check for Quest Indicators periodically
+            this.updateQuestIndicators();
         }
 
         this.updateSpriteMood();
@@ -314,6 +327,28 @@ export class MainScene extends Phaser.Scene {
         this.updatePetMovement(time);
 
         this.lightingManager.update();
+    }
+
+    updateQuestIndicators() {
+        if (!this.nadagotchi.questSystem) return;
+
+        const checkNPC = (npcName, indicatorKey) => {
+             const hasQuest = this.nadagotchi.questSystem.hasNewQuest(npcName);
+             const indicator = this.questIndicators[indicatorKey];
+             const npcSprite = this[indicatorKey];
+
+             // Only show if NPC is visible (i.e. we are in Garden)
+             if (indicator && npcSprite && npcSprite.visible) {
+                 indicator.setVisible(hasQuest);
+                 indicator.setPosition(npcSprite.x, npcSprite.y - 60);
+             } else if (indicator) {
+                 indicator.setVisible(false);
+             }
+        };
+
+        checkNPC('Grizzled Scout', 'npcScout');
+        checkNPC('Master Artisan', 'npcArtisan');
+        checkNPC('Sickly Villager', 'npcVillager');
     }
 
     /**
@@ -372,21 +407,50 @@ export class MainScene extends Phaser.Scene {
                 break;
             }
             case EventKeys.INTERACT_SCOUT: {
-                const text = this.nadagotchi.interact('Grizzled Scout');
-                if (text) this.scene.get('UIScene').showDialogue('Grizzled Scout', text);
+                const result = this.nadagotchi.interact('Grizzled Scout');
+                if (result) this.scene.get('UIScene').showDialogue('Grizzled Scout', result);
                 break;
             }
             case EventKeys.INTERACT_ARTISAN: {
-                const text = this.nadagotchi.interact('Master Artisan');
-                if (text) this.scene.get('UIScene').showDialogue('Master Artisan', text);
+                const result = this.nadagotchi.interact('Master Artisan');
+                if (result) this.scene.get('UIScene').showDialogue('Master Artisan', result);
                 break;
             }
             case EventKeys.INTERACT_VILLAGER: {
-                const text = this.nadagotchi.interact('Sickly Villager');
-                if (text) this.scene.get('UIScene').showDialogue('Sickly Villager', text);
+                const result = this.nadagotchi.interact('Sickly Villager');
+                if (result) this.scene.get('UIScene').showDialogue('Sickly Villager', result);
                 break;
             }
             case EventKeys.INTERACT_BOOKSHELF:
+                // Launch Study Minigame (Bookworm)
+                this.scene.pause();
+                this.scene.launch('StudyMinigameScene', { nadagotchi: this.nadagotchi });
+                break;
+            case EventKeys.PLAY:
+                // Launch Dance Minigame
+                this.scene.pause();
+                this.scene.launch('DanceMinigameScene', { nadagotchi: this.nadagotchi });
+                break;
+            case 'PLAY_COMPLETE':
+                // Handle result from Dance Minigame
+                // data.score contains the score
+                this.scene.stop('DanceMinigameScene'); // Ensure it's stopped
+                this.nadagotchi.handleAction('PLAY'); // Trigger stats effect
+                // Bonus based on score?
+                if (data.score > 500) {
+                    this.nadagotchi.stats.happiness += 10;
+                    this.showNotification("Great Dancing!", "#FF00FF");
+                }
+                break;
+            case 'STUDY_COMPLETE':
+                // Handle result from Study Minigame
+                this.scene.stop('StudyMinigameScene');
+                this.nadagotchi.handleAction('STUDY'); // Trigger stats effect
+                if (data.score > 5) { // 5 words
+                     this.nadagotchi.skills.logic += 0.5;
+                     this.showNotification("Brain Power Up!", "#00FFFF");
+                }
+                break;
             case EventKeys.INTERACT_PLANT:
             case EventKeys.OPEN_CRAFTING_MENU:
                 // These specific cases fall through to default handler or are handled by sprite events directly emitting specific actions
@@ -718,6 +782,12 @@ export class MainScene extends Phaser.Scene {
             // we need to ensure they are there.
             if (this.roomDoors.length === 0) this._refreshRoomDoors();
         }
+
+        // 6. Quest Indicators (Garden Only)
+        Object.values(this.questIndicators).forEach(i => i.setVisible(false)); // Hide all first
+        if (!isIndoor) {
+             this.updateQuestIndicators(); // Refresh valid ones
+        }
     }
 
     /**
@@ -847,7 +917,7 @@ export class MainScene extends Phaser.Scene {
                     yoyo: true,
                     repeat: -1,
                     ease: 'Sine.easeInOut'
-                });
+                 });
             }
 
         } else if (mood === 'sad') {
