@@ -111,6 +111,10 @@ export class MainScene extends Phaser.Scene {
         if (data && data.newPetData) {
             // New Game: Pass null for loadedData to ensure defaults are used
             this.nadagotchi = new Nadagotchi(data.newPetData.dominantArchetype, null);
+            // Assign name if passed
+            if (data.newPetData.name) {
+                this.nadagotchi.name = data.newPetData.name;
+            }
         } else {
             // Resume Game or Default Fallback
             this.nadagotchi = new Nadagotchi('Adventurer', loadedPet);
@@ -389,8 +393,12 @@ export class MainScene extends Phaser.Scene {
                 this.nadagotchi.handleAction(actionType, data);
                 break;
             case EventKeys.EXPLORE:
+                // Check if affordable first
                 if (this.nadagotchi.stats.energy >= Config.ACTIONS.EXPEDITION.ENERGY_COST) {
-                    this.nadagotchi.stats.energy -= Config.ACTIONS.EXPEDITION.ENERGY_COST;
+                    // Perform action logic (Energy deduction, Archetype bonuses, Recipes)
+                    // We must call this to trigger "Expectations" (Archetype behaviors)
+                    this.nadagotchi.handleAction(EventKeys.EXPLORE);
+
                     this.scene.pause();
                     this.scene.launch('ExpeditionScene', {
                         nadagotchi: this.nadagotchi,
