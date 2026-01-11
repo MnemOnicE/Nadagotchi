@@ -283,7 +283,8 @@ export class Nadagotchi {
                     wallpaper: 'wallpaper_default',
                     flooring: 'flooring_default',
                     wallpaperItem: 'Default',
-                    flooringItem: 'Default'
+                    flooringItem: 'Default',
+                    unlocked: true
                 }
             }
         };
@@ -298,7 +299,8 @@ export class Nadagotchi {
                         wallpaper: data.wallpaper || 'wallpaper_default',
                         flooring: data.flooring || 'flooring_default',
                         wallpaperItem: data.wallpaperItem || 'Default',
-                        flooringItem: data.flooringItem || 'Default'
+                        flooringItem: data.flooringItem || 'Default',
+                        unlocked: true
                     }
                 }
             };
@@ -395,7 +397,8 @@ export class Nadagotchi {
                     wallpaper: 'wallpaper_default',
                     flooring: 'flooring_default',
                     wallpaperItem: 'Default',
-                    flooringItem: 'Default'
+                        flooringItem: 'Default',
+                        unlocked: true
                 }
             }
         };
@@ -899,9 +902,10 @@ export class Nadagotchi {
      * Consumes an item, applying its effects to the Nadagotchi.
      * Delegates to InventorySystem.
      * @param {string} itemName - The name of the item to consume.
+     * @returns {object} Result of the consumption { success, message }.
      */
     consumeItem(itemName) {
-        this.inventorySystem.consumeItem(itemName);
+        return this.inventorySystem.consumeItem(itemName);
     }
 
     /**
@@ -981,6 +985,42 @@ export class Nadagotchi {
      */
     discoverRecipe(recipeName) {
         return this.inventorySystem.discoverRecipe(recipeName);
+    }
+
+    /**
+     * Checks if a room is unlocked.
+     * Falls back to RoomDefinitions defaults if not found in persistent config.
+     * @param {string} roomId
+     * @returns {boolean}
+     */
+    isRoomUnlocked(roomId) {
+        if (this.homeConfig.rooms[roomId] && this.homeConfig.rooms[roomId].unlocked !== undefined) {
+            return this.homeConfig.rooms[roomId].unlocked;
+        }
+        return RoomDefinitions[roomId] ? RoomDefinitions[roomId].unlocked : false;
+    }
+
+    /**
+     * Unlocks a room permanently.
+     * @param {string} roomId
+     */
+    unlockRoom(roomId) {
+        if (!RoomDefinitions[roomId]) return;
+
+        // Ensure room object exists in config
+        if (!this.homeConfig.rooms[roomId]) {
+            this.homeConfig.rooms[roomId] = {
+                wallpaper: RoomDefinitions[roomId].defaultWallpaper,
+                flooring: RoomDefinitions[roomId].defaultFlooring,
+                wallpaperItem: 'Default',
+                flooringItem: 'Default',
+                unlocked: false
+            };
+        }
+
+        this.homeConfig.rooms[roomId].unlocked = true;
+        this.addJournalEntry(`I unlocked the ${RoomDefinitions[roomId].name}! More space to decorate.`);
+        this.persistence.savePet(this);
     }
 
     /**

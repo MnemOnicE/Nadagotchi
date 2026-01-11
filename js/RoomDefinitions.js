@@ -17,7 +17,7 @@ export const RoomDefinitions = {
         connections: ["Entryway", "Kitchen", "Bedroom"],
         defaultWallpaper: "cozy_wallpaper",
         defaultFlooring: "wood_flooring",
-        unlocked: true // For testing
+        unlocked: false // Must be unlocked via Deed
     },
     "Kitchen": {
         name: "Kitchen",
@@ -25,7 +25,7 @@ export const RoomDefinitions = {
         connections: ["LivingRoom"],
         defaultWallpaper: "wallpaper_brick",
         defaultFlooring: "flooring_tile",
-        unlocked: true // For testing
+        unlocked: false // Must be unlocked via Deed
     },
     "Bedroom": {
         name: "Bedroom",
@@ -33,6 +33,6 @@ export const RoomDefinitions = {
         connections: ["LivingRoom"],
         defaultWallpaper: "wallpaper_blue",
         defaultFlooring: "flooring_wood",
-        unlocked: true // For testing
+        unlocked: false // Must be unlocked via Deed
     }
 };

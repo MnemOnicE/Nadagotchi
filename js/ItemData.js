@@ -43,7 +43,12 @@ export const ItemDefinitions = {
     // Tools & Artifacts
     "Genetic Scanner": { type: "Tool", description: "Allows analysis of pet genetics.", emoji: "🧬" },
     "Ancient Tome": { type: "Tool", description: "A dusty book filled with ancient wisdom.", emoji: "📖" },
-    "Heart Amulet": { type: "Tool", description: "A warm amulet that pulses with kindness.", emoji: "❤️" }
+    "Heart Amulet": { type: "Tool", description: "A warm amulet that pulses with kindness.", emoji: "❤️" },
+
+    // Room Deeds
+    "Living Room Deed": { type: "DEED", description: "Legal document granting access to the Living Room.", emoji: "📜", targetRoom: "LivingRoom" },
+    "Kitchen Deed": { type: "DEED", description: "Legal document granting access to the Kitchen.", emoji: "🍳", targetRoom: "Kitchen" },
+    "Bedroom Deed": { type: "DEED", description: "Legal document granting access to the Bedroom.", emoji: "🛌", targetRoom: "Bedroom" }
 };
 
 /**
@@ -99,5 +104,17 @@ export const Recipes = {
     "Metabolism-Slowing Tonic": {
         materials: { "Frostbloom": 1, "Sticks": 2 },
         description: "A tonic that slows metabolism, helping to conserve energy."
+    },
+    "Living Room Deed": {
+        materials: { "Sticks": 50, "Shiny Stone": 5 },
+        description: "Unlock the Living Room expansion."
+    },
+    "Kitchen Deed": {
+        materials: { "Sticks": 100, "Shiny Stone": 10 },
+        description: "Unlock the Kitchen expansion."
+    },
+    "Bedroom Deed": {
+        materials: { "Sticks": 100, "Shiny Stone": 10 },
+        description: "Unlock the Bedroom expansion."
     }
 };
