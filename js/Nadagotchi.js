@@ -9,6 +9,7 @@ import { SeededRandom } from './utils/SeededRandom.js';
 import { RelationshipSystem } from './systems/RelationshipSystem.js';
 import { InventorySystem } from './systems/InventorySystem.js';
 import { QuestSystem } from './systems/QuestSystem.js';
+import { DebrisSystem } from './systems/DebrisSystem.js';
 
 /**
  * @fileoverview Core logic for the Nadagotchi pet.
@@ -252,6 +253,16 @@ export class Nadagotchi {
         // Initialize Quest System (Logic Extracted)
         Object.defineProperty(this, 'questSystem', {
             value: new QuestSystem(this),
+            enumerable: false,
+            writable: true
+        });
+
+        /** @type {Array<object>} Debris items in the world (weeds, rocks, etc.). */
+        this.debris = loadedData ? (loadedData.debris || []) : [];
+
+        // Initialize Debris System
+        Object.defineProperty(this, 'debrisSystem', {
+            value: new DebrisSystem(this),
             enumerable: false,
             writable: true
         });
@@ -529,9 +540,16 @@ export class Nadagotchi {
         }
 
         // 4. Apply Final Decays
+        // Debris Penalties
+        let cleanlinessPenalty = 0;
+        this.debris.forEach(d => {
+            if (d.type === 'weed') cleanlinessPenalty += Config.DEBRIS.HAPPINESS_PENALTY_PER_WEED;
+            if (d.type === 'poop') cleanlinessPenalty += Config.DEBRIS.HAPPINESS_PENALTY_PER_POOP;
+        });
+
         this.stats.hunger -= (hungerDecay * metabolismMult);
         this.stats.energy -= (energyDecay * metabolismMult * traitModifier);
-        this.stats.happiness += happinessChange;
+        this.stats.happiness += (happinessChange - (cleanlinessPenalty * ticksPassed));
 
         if (this.stats.hunger < 0) this.stats.hunger = 0;
         if (this.stats.energy < 0) this.stats.energy = 0;
@@ -1002,6 +1020,15 @@ export class Nadagotchi {
             return this.homeConfig.rooms[roomId].unlocked;
         }
         return RoomDefinitions[roomId] ? RoomDefinitions[roomId].unlocked : false;
+    }
+
+    /**
+     * Cleans up a specific debris item.
+     * @param {string} id
+     * @returns {object} Result
+     */
+    cleanDebris(id) {
+        return this.debrisSystem.clean(id);
     }
 
     /**

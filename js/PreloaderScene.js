@@ -317,6 +317,72 @@ export class PreloaderScene extends Phaser.Scene {
             graphics.generateTexture('house_icon', 64, 64);
             graphics.destroy();
         }
+
+        // --- NEW ASSETS FOR LIVING GARDEN ---
+        // Weed
+        if (!this.textures.exists('weed')) {
+             const g = this.make.graphics();
+             g.fillStyle(0x228B22); // Green
+             g.beginPath();
+             g.moveTo(16, 32); g.lineTo(8, 16); g.lineTo(20, 28); g.lineTo(24, 10); g.lineTo(28, 28); g.lineTo(40, 16); g.lineTo(32, 32);
+             g.fill();
+             g.generateTexture('weed', 32, 32);
+             g.destroy();
+        }
+        // Small Rock
+        if (!this.textures.exists('rock_small')) {
+             const g = this.make.graphics();
+             g.fillStyle(0x808080); g.fillCircle(16, 16, 10);
+             g.fillStyle(0x555555); g.fillCircle(12, 12, 3);
+             g.generateTexture('rock_small', 32, 32);
+             g.destroy();
+        }
+        // Poop (Classic Coil)
+        if (!this.textures.exists('poop')) {
+             const g = this.make.graphics();
+             g.fillStyle(0x8B4513);
+             g.fillCircle(16, 24, 10); // Base
+             g.fillCircle(16, 16, 7);  // Mid
+             g.fillCircle(16, 8, 4);   // Top
+             // Flies?
+             g.fillStyle(0x000000); g.fillRect(4, 4, 2, 2); g.fillRect(28, 10, 2, 2);
+             g.generateTexture('poop', 32, 32);
+             g.destroy();
+        }
+        // Merchant NPC
+        if (!this.textures.exists('npc_merchant')) {
+             const g = this.make.graphics();
+             // Robe
+             g.fillStyle(0x800080); // Purple
+             g.fillRect(12, 12, 24, 36);
+             // Hood
+             g.fillStyle(0x4B0082); // Indigo
+             g.fillRect(10, 4, 28, 16);
+             // Pack
+             g.fillStyle(0x8B4513); g.fillRect(4, 16, 8, 20);
+             g.generateTexture('npc_merchant', 48, 48);
+             g.destroy();
+        }
+        // Particles
+        if (!this.textures.exists('rain_drop')) {
+             const g = this.make.graphics();
+             g.fillStyle(0x00BFFF); g.fillRect(0,0,2,6);
+             g.generateTexture('rain_drop', 2, 6);
+             g.destroy();
+        }
+        if (!this.textures.exists('snow_flake')) {
+             const g = this.make.graphics();
+             g.fillStyle(0xFFFFFF); g.fillRect(0,0,3,3);
+             g.generateTexture('snow_flake', 3, 3);
+             g.destroy();
+        }
+        if (!this.textures.exists('leaf')) {
+             const g = this.make.graphics();
+             g.fillStyle(0xD2691E);
+             g.fillCircle(3,3,3);
+             g.generateTexture('leaf', 6, 6);
+             g.destroy();
+        }
     }
 
     /**
