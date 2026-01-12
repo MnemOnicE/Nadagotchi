@@ -6,12 +6,14 @@ import { WorldClock } from './WorldClock.js';
 import { WeatherSystem } from './WeatherSystem.js';
 import { SkyManager } from './SkyManager.js';
 import { LightingManager } from './LightingManager.js';
+import { WeatherParticleManager } from './WeatherParticleManager.js';
 import { AchievementManager } from './AchievementManager.js';
 import { EventKeys } from './EventKeys.js';
 import { Config } from './Config.js';
 import { SoundSynthesizer } from './utils/SoundSynthesizer.js';
 import { ItemDefinitions } from './ItemData.js';
 import { RoomDefinitions } from './RoomDefinitions.js';
+import { ButtonFactory } from './ButtonFactory.js';
 
 /**
  * @fileoverview The primary game scene.
@@ -96,6 +98,7 @@ export class MainScene extends Phaser.Scene {
         // --- Visual Systems Initialization ---
         // Initialize SkyManager (creates skyTexture and image)
         this.skyManager = new SkyManager(this);
+        this.weatherParticles = new WeatherParticleManager(this);
 
         // --- Indoor Backgrounds (Wallpaper/Flooring) ---
         // Will be initialized in renderLocation / changeRoom
@@ -166,6 +169,9 @@ export class MainScene extends Phaser.Scene {
         this.craftingTable = this.add.sprite(80, 0, 'crafting_table').setInteractive({ useHandCursor: true }).setDepth(5)
             .on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, EventKeys.OPEN_CRAFTING_MENU));
 
+        // Debris Group
+        this.debrisGroup = this.add.group();
+
         // Add NPCs to the scene (Only visible in GARDEN)
         // Anchored to bottom, will be set in resize()
         this.npcScout = this.add.sprite(this.scale.width - 150, 0, 'npc_scout').setInteractive({ useHandCursor: true }).setDepth(10)
@@ -178,6 +184,10 @@ export class MainScene extends Phaser.Scene {
         // Anchored to Center - Y adjusted to center of game view in resize()
         this.npcVillager = this.add.sprite(150, 0, 'npc_villager').setInteractive({ useHandCursor: true }).setDepth(10)
             .on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, EventKeys.INTERACT_VILLAGER, 'Sickly Villager'));
+
+        // Special NPC: Traveling Merchant (Hidden by default)
+        this.npcMerchant = this.add.sprite(0, 0, 'npc_merchant').setInteractive({ useHandCursor: true }).setDepth(15).setVisible(false)
+            .on('pointerdown', () => this.handleMerchantInteraction());
 
         // Quest Indicators (!)
         this.questIndicators = {};
@@ -216,6 +226,7 @@ export class MainScene extends Phaser.Scene {
         this.resize({ width: this.scale.width, height: this.scale.height });
         this.skyManager.update(); // Initial draw
         this.loadFurniture();
+        this.renderDebris(); // Initial render of debris
     }
 
     /**
@@ -281,7 +292,15 @@ export class MainScene extends Phaser.Scene {
                 }
             }
 
+            // Spawn Debris
+            if (this.nadagotchi.debrisSystem) {
+                this.nadagotchi.debrisSystem.spawnDaily(this.calendar.season, this.weatherSystem.getCurrentWeather());
+                if (this.nadagotchi.stats.hunger < 50) this.nadagotchi.debrisSystem.spawnPoop(); // Simple rule
+                this.renderDebris();
+            }
+
             this.eventManager.update();
+            this.checkMerchantVisibility();
         }
 
         // UPDATE properties, DO NOT reassign object
@@ -292,6 +311,7 @@ export class MainScene extends Phaser.Scene {
 
         // Update Managers
         this.skyManager.update();
+        this.weatherParticles.update(this.worldState.weather, this.worldState.season);
 
         // Apply game speed multiplier to delta time
         const simDelta = delta * (this.gameSettings.gameSpeed || 1.0);
@@ -603,6 +623,7 @@ export class MainScene extends Phaser.Scene {
         if (this.craftingTable) this.craftingTable.setPosition(80, gameHeight - 70);
         if (this.npcScout) this.npcScout.setPosition(width - 150, gameHeight - 70);
         if (this.npcVillager) this.npcVillager.setPosition(150, gameHeight / 2);
+        if (this.npcMerchant) this.npcMerchant.setPosition(300, gameHeight / 2); // Center-Left
 
         // Update Plant/Bookshelf (pinned to top/corners, mostly fine but check X)
         if (this.plant) this.plant.setPosition(width - 80, 250);
@@ -615,9 +636,86 @@ export class MainScene extends Phaser.Scene {
         // Door -> Indoor (Right Side)
         if (this.doorObj) this.doorObj.setPosition(width - 50, gameHeight - 130);
 
+        // Re-render debris to match new screen coordinates
+        this.renderDebris();
+
         // Resize Room Doors
         this._refreshRoomDoors();
 
+    }
+
+    /**
+     * Renders debris sprites based on screen coordinates.
+     */
+    renderDebris() {
+        this.debrisGroup.clear(true, true); // Clear old sprites
+
+        if (this.location === 'INDOOR') return; // Don't render if indoors
+
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
+
+        this.nadagotchi.debris.forEach(d => {
+            const x = d.x * width;
+            const y = d.y * height;
+
+            const sprite = this.add.sprite(x, y, d.type).setInteractive({ useHandCursor: true }).setDepth(15);
+
+            sprite.on('pointerdown', () => {
+                const res = this.nadagotchi.cleanDebris(d.id);
+                if (res.success) {
+                    SoundSynthesizer.instance.playChime();
+                    this.showNotification(res.message, '#00FF00');
+                    sprite.destroy();
+                    // Force UI update
+                    this.game.events.emit(EventKeys.UPDATE_STATS, { nadagotchi: this.nadagotchi, settings: this.gameSettings });
+                } else {
+                    SoundSynthesizer.instance.playFailure();
+                    this.showNotification(res.message, '#FF0000');
+                }
+            });
+
+            this.debrisGroup.add(sprite);
+        });
+    }
+
+    checkMerchantVisibility() {
+        const event = this.eventManager.getActiveEvent();
+        this.isMerchantActive = event && event.name === 'TravelingMerchant';
+        if (this.npcMerchant) {
+             this.npcMerchant.setVisible(this.isMerchantActive && this.location !== 'INDOOR');
+        }
+        if (this.isMerchantActive) {
+            this.showNotification("A Traveling Merchant has arrived!", "#800080");
+        }
+    }
+
+    handleMerchantInteraction() {
+        // Simple Barter Dialog
+        // In a full implementation, this would open a Shop UI.
+        // For now, simple interaction: Trade 5 Berries for a Rare Candy?
+
+        const hasBerries = (this.nadagotchi.inventory['Berries'] || 0) >= 5;
+
+        const dialogue = {
+             speaker: "Merchant",
+             text: "Greetings. I seek rare fruits. I will trade a Rare Candy for 5 Berries.",
+             choices: [
+                 { text: "Trade (5 Berries)", action: () => {
+                      if (hasBerries) {
+                           this.nadagotchi.inventorySystem.removeItem('Berries', 5);
+                           this.nadagotchi.inventorySystem.addItem('Rare Candy', 1);
+                           SoundSynthesizer.instance.playSuccess();
+                           this.showNotification("Traded!", '#FFFF00');
+                      } else {
+                           this.showNotification("Not enough Berries!", '#FF0000');
+                      }
+                 }},
+                 { text: "Leave", action: null }
+             ]
+        };
+
+        this.scene.get('UIScene').showDialogue('Merchant', dialogue.text, dialogue.choices);
     }
 
     /**

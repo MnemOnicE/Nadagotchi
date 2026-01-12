@@ -222,6 +222,16 @@ export const Config = {
         DNA_SALT: "NADAGOTCHI_GENETICS_V1_SALT"
     },
 
+    // Debris & Environment
+    DEBRIS: {
+        SPAWN_CHANCE_DAILY: 0.8,
+        MAX_COUNT: 10,
+        HAPPINESS_PENALTY_PER_WEED: 0.005,
+        HAPPINESS_PENALTY_PER_POOP: 0.02,
+        CLEAN_ENERGY_COST: 5,
+        CLEAN_SKILL_GAIN: 0.1
+    },
+
     // UI Configuration
     UI: {
         DASHBOARD_HEIGHT_RATIO: 0.35 // Increased from 0.25 to prevent button overlap on mobile
