@@ -126,11 +126,21 @@ export class QuestSystem {
         const stageDef = this.getStageDefinition(questId);
 
         // Transaction Safety: Validate rewards before consuming items
-        if (stageDef.rewards && stageDef.rewards.skills) {
-            for (const skill of Object.keys(stageDef.rewards.skills)) {
-                if (this.pet.skills[skill] === undefined) {
-                    console.error(`Quest Transaction Aborted: Invalid reward skill '${skill}' in quest '${questId}'`);
-                    return false;
+        if (stageDef.rewards) {
+            if (stageDef.rewards.skills) {
+                for (const skill of Object.keys(stageDef.rewards.skills)) {
+                    if (this.pet.skills[skill] === undefined) {
+                        console.error(`Quest Transaction Aborted: Invalid reward skill '${skill}' in quest '${questId}'`);
+                        return false;
+                    }
+                }
+            }
+            if (stageDef.rewards.items) {
+                for (const [item, qty] of Object.entries(stageDef.rewards.items)) {
+                    if (!this.pet.inventorySystem.canAddItem(item, qty)) {
+                        console.error(`Quest Transaction Aborted: Cannot add item '${item}' in quest '${questId}' (Inventory Full/Limit)`);
+                        return false;
+                    }
                 }
             }
         }
@@ -180,6 +190,11 @@ export class QuestSystem {
         }
         if (rewards.happiness) {
             this.pet.stats.happiness += rewards.happiness;
+        }
+        if (rewards.items) {
+            for (const [item, qty] of Object.entries(rewards.items)) {
+                this.pet.inventorySystem.addItem(item, qty);
+            }
         }
     }
 

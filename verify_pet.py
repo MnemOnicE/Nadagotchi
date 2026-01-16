@@ -7,8 +7,13 @@ def verify_pet():
     with sync_playwright() as p:
         page, context, browser = verify_utils.setup_browser(p)
 
-        if not verify_utils.start_game(page, saved=False):
-            print("Failed to start game.")
+        try:
+            # Clear storage to ensure new game
+            page.goto("http://localhost:5173")
+            page.evaluate("localStorage.clear()")
+            verify_utils.start_game(page)
+        except Exception as e:
+            print(f"Failed to start game: {e}")
             browser.close()
             return
 

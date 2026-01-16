@@ -151,34 +151,61 @@ describe('Nadagotchi', () => {
             expect(pet.dominantArchetype).toBe('Nurturer');
         });
 
-        test('should switch to the first archetype in a tie when the incumbent is not involved', () => {
-            // Intellectual starts at 10 points. Drop its score so it's not in the running.
-            pet.personalityPoints.Intellectual = 5;
+        test('should use a random tie-breaker when incumbent is not involved (Statistical Test)', () => {
+            // Statistical Test for Randomness
+            // We run the tie-breaker multiple times to ensure the distribution isn't fixed.
+            const results = {};
+            const iterations = 100;
 
-            // Nurturer and Recluse tie for the highest score.
-            pet.personalityPoints.Nurturer = 15;
-            pet.personalityPoints.Recluse = 15;
+            for (let i = 0; i < iterations; i++) {
+                // Reset State
+                pet.dominantArchetype = 'Intellectual';
+                pet.personalityPoints.Intellectual = 5; // Not in running
+                pet.personalityPoints.Nurturer = 15;
+                pet.personalityPoints.Recluse = 15;
 
-            pet.updateDominantArchetype();
+                // Equalize skills
+                pet.skills.empathy = 0;
+                pet.skills.focus = 0;
+                pet.skills.crafting = 0;
 
-            // With randomized tie-breaking, any of the tied candidates can be chosen.
-            expect(['Nurturer', 'Recluse']).toContain(pet.dominantArchetype);
+                pet.updateDominantArchetype();
+
+                const result = pet.dominantArchetype;
+                results[result] = (results[result] || 0) + 1;
+            }
+
+            // Assert that we got both results at least once
+            expect(results['Nurturer']).toBeGreaterThan(0);
+            expect(results['Recluse']).toBeGreaterThan(0);
         });
 
-        test('should correctly handle a three-way tie for dominant archetype', () => {
-            pet.personalityPoints.Intellectual = 5; // Demote the current dominant
-            pet.personalityPoints.Adventurer = 20;
-            pet.personalityPoints.Nurturer = 20;
-            pet.personalityPoints.Mischievous = 20;
+        test('should randomly break three-way ties (Statistical Test)', () => {
+            const results = {};
+            const iterations = 100;
 
-            // Equalize skills to test deterministic fallback
-            pet.skills.communication = 0;
-            // Adventurer (Nav: 0), Nurturer (Emp: 0), Mischievous (Comm: 0)
+            for (let i = 0; i < iterations; i++) {
+                pet.dominantArchetype = 'Intellectual';
+                pet.personalityPoints.Intellectual = 5;
+                pet.personalityPoints.Adventurer = 20;
+                pet.personalityPoints.Nurturer = 20;
+                pet.personalityPoints.Mischievous = 20;
 
-            pet.updateDominantArchetype();
+                // Equalize skills
+                pet.skills.navigation = 0;
+                pet.skills.empathy = 0;
+                pet.skills.communication = 0;
 
-            // With randomized tie-breaking, any of the three can be chosen.
-            expect(['Adventurer', 'Nurturer', 'Mischievous']).toContain(pet.dominantArchetype);
+                pet.updateDominantArchetype();
+
+                const result = pet.dominantArchetype;
+                results[result] = (results[result] || 0) + 1;
+            }
+
+            // Assert distribution
+            expect(results['Adventurer']).toBeGreaterThan(0);
+            expect(results['Nurturer']).toBeGreaterThan(0);
+            expect(results['Mischievous']).toBeGreaterThan(0);
         });
     });
 

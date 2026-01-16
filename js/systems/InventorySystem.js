@@ -334,6 +334,18 @@ export class InventorySystem {
     }
 
     /**
+     * Checks if an item can be added to the inventory.
+     * Currently returns true as there is no hard limit, but enables validation logic and testing.
+     * @param {string} itemName - The name of the item to add.
+     * @param {number} quantity - The number of items to add.
+     * @returns {boolean} True if the item can be added.
+     */
+    canAddItem(itemName, quantity) {
+        // Future proofing: Check limits here if implemented.
+        return true;
+    }
+
+    /**
      * Adds a specified quantity of an item to the inventory.
      * @param {string} itemName - The name of the item to add.
      * @param {number} quantity - The number of items to add.
