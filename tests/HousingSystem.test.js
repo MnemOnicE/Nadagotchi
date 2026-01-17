@@ -1,22 +1,10 @@
 
 import { jest } from '@jest/globals';
 import { Nadagotchi } from '../js/Nadagotchi.js';
+import { setupPhaserMock, createMockAdd } from './helpers/mockPhaser';
 
-// Mock Phaser first
-global.Phaser = {
-    Scene: class {},
-    Math: { Between: jest.fn() },
-    Utils: { Array: { GetRandom: jest.fn() } },
-    GameObjects: { Sprite: class {} },
-    Display: {
-        Color: class {
-            constructor() {}
-            static Interpolate = { ColorWithColor: jest.fn().mockReturnValue({ r: 0, g: 0, b: 0 }) };
-            static ComponentToHex = jest.fn();
-            static GetColor = jest.fn();
-        }
-    }
-};
+// 1. Setup Phaser Mock
+setupPhaserMock();
 
 // Now require MainScene after global.Phaser is set
 const { MainScene } = require('../js/MainScene');

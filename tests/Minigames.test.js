@@ -2,21 +2,29 @@
 import { jest } from '@jest/globals';
 
 // 1. Setup Global Phaser Mock
-const createMockGameObject = () => ({
-    setOrigin: jest.fn().mockReturnThis(),
-    setDepth: jest.fn().mockReturnThis(),
-    setVisible: jest.fn().mockReturnThis(),
-    setInteractive: jest.fn().mockReturnThis(),
-    on: jest.fn().mockReturnThis(),
-    emit: jest.fn(),
-    setData: jest.fn(),
-    getData: jest.fn(),
-    setFillStyle: jest.fn().mockReturnThis(),
+const createMockGameObject = () => {
+    const handlers = {};
+    return {
+        setOrigin: jest.fn().mockReturnThis(),
+        setDepth: jest.fn().mockReturnThis(),
+        setVisible: jest.fn().mockReturnThis(),
+        setInteractive: jest.fn().mockReturnThis(),
+        on: jest.fn((event, fn) => {
+            handlers[event] = fn;
+            return this;
+        }),
+        emit: jest.fn((event, ...args) => {
+            if (handlers[event]) handlers[event](...args);
+        }),
+        setData: jest.fn(),
+        getData: jest.fn(),
+        setFillStyle: jest.fn().mockReturnThis(),
     setStrokeStyle: jest.fn().mockReturnThis(),
     setPosition: jest.fn().mockReturnThis(),
     setSize: jest.fn().mockReturnThis(),
     destroy: jest.fn()
-});
+    };
+};
 
 const createMockText = () => ({
     setOrigin: jest.fn().mockReturnThis(),
