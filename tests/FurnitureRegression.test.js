@@ -141,9 +141,26 @@ describe('MainScene Duplication Bug', () => {
                 g.setVisible = jest.fn().mockReturnThis();
                 return g;
             }),
-            text: jest.fn(() => new Phaser.GameObjects.Text()),
+            text: jest.fn(() => {
+                const t = new Phaser.GameObjects.Text();
+                t.setDepth = jest.fn().mockReturnThis();
+                t.setVisible = jest.fn().mockReturnThis();
+                t.setOrigin = jest.fn().mockReturnThis();
+                return t;
+            }),
             tileSprite: jest.fn(() => new Phaser.GameObjects.TileSprite()),
-            image: jest.fn(() => ({ setOrigin: () => ({ setDepth: () => {} }) }))
+            image: jest.fn(() => ({ setOrigin: () => ({ setDepth: () => {} }) })),
+            group: jest.fn().mockReturnValue({ get: jest.fn(), create: jest.fn(), add: jest.fn(), clear: jest.fn() }),
+            particles: jest.fn().mockReturnValue({
+                createEmitter: jest.fn().mockReturnValue({
+                    start: jest.fn(),
+                    stop: jest.fn(),
+                    setPosition: jest.fn(),
+                    setDepth: jest.fn().mockReturnThis()
+                }),
+                setDepth: jest.fn().mockReturnThis(),
+                destroy: jest.fn()
+            })
         };
         scene.cameras = { main: { width: 800, height: 600, setSize: jest.fn(), setViewport: jest.fn() } };
         scene.scale = { width: 800, height: 600, on: jest.fn(), off: jest.fn() };

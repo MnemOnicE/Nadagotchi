@@ -141,10 +141,23 @@ const mockAdd = {
     text: jest.fn().mockReturnValue({
         setOrigin: jest.fn().mockReturnThis(),
         setPosition: jest.fn().mockReturnThis(),
-        setText: jest.fn().mockReturnThis()
+        setText: jest.fn().mockReturnThis(),
+        setDepth: jest.fn().mockReturnThis(),
+        setVisible: jest.fn().mockReturnThis()
     }),
     image: jest.fn().mockReturnValue(mockSprite),
-    rectangle: jest.fn(),
+    rectangle: jest.fn().mockReturnValue({
+        setOrigin: jest.fn().mockReturnThis(),
+        setInteractive: jest.fn().mockReturnThis(),
+        on: jest.fn().mockReturnThis(),
+        setDepth: jest.fn().mockReturnThis(),
+        fillColor: 0x000000,
+        setPosition: jest.fn().mockReturnThis(),
+        setSize: jest.fn().mockReturnThis(),
+        setStrokeStyle: jest.fn().mockReturnThis(),
+        setVisible: jest.fn().mockReturnThis(),
+        destroy: jest.fn()
+    }),
     tileSprite: jest.fn().mockReturnValue({
         setDepth: jest.fn().mockReturnThis(),
         setTexture: jest.fn().mockReturnThis(),
@@ -156,6 +169,17 @@ const mockAdd = {
         y: 0,
         width: 100,
         height: 100
+    }),
+    group: jest.fn().mockReturnValue({ get: jest.fn(), create: jest.fn(), add: jest.fn(), clear: jest.fn() }),
+    particles: jest.fn().mockReturnValue({
+        createEmitter: jest.fn().mockReturnValue({
+            start: jest.fn(),
+            stop: jest.fn(),
+            setPosition: jest.fn(),
+            setDepth: jest.fn().mockReturnThis()
+        }),
+        setDepth: jest.fn().mockReturnThis(),
+        destroy: jest.fn()
     })
 };
 

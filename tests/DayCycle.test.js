@@ -118,8 +118,12 @@ describe('Day Cycle Integration', () => {
              stats: { happiness: 50, hunger: 50, energy: 50 },
              maxStats: { happiness: 100, hunger: 100, energy: 100 },
              inventory: {},
+             debris: [],
              relationshipSystem: { dailyUpdate: jest.fn() },
-             questSystem: { generateDailyQuest: jest.fn() }
+             questSystem: {
+                 generateDailyQuest: jest.fn(),
+                 hasNewQuest: jest.fn().mockReturnValue(false)
+             }
         };
         Nadagotchi.mockImplementation(() => mockNadagotchi);
 
@@ -169,6 +173,17 @@ describe('Day Cycle Integration', () => {
                 const sprite = new Phaser.GameObjects.Sprite();
                 sprite.setTilePosition = jest.fn().mockReturnThis();
                 return sprite;
+            }),
+            group: jest.fn().mockReturnValue({ get: jest.fn(), create: jest.fn(), add: jest.fn(), clear: jest.fn() }),
+            particles: jest.fn().mockReturnValue({
+                createEmitter: jest.fn().mockReturnValue({
+                    start: jest.fn(),
+                    stop: jest.fn(),
+                    setPosition: jest.fn(),
+                    setDepth: jest.fn().mockReturnThis()
+                }),
+                setDepth: jest.fn().mockReturnThis(),
+                destroy: jest.fn()
             })
         };
         scene.cameras = {

@@ -43,7 +43,8 @@ describe('ExpeditionScene', () => {
             text: jest.fn().mockReturnThis(),
             container: jest.fn().mockReturnValue({
                 add: jest.fn(),
-                removeAll: jest.fn()
+                removeAll: jest.fn(),
+                setVisible: jest.fn().mockReturnThis()
             }),
             sprite: jest.fn().mockReturnThis()
         };
@@ -95,11 +96,15 @@ describe('ExpeditionScene', () => {
         scene.init({ nadagotchi: mockPet, weather: 'Sunny' });
 
         // Ensure container and loot exist (normally done in create/init)
-        scene.contentContainer = scene.add.container();
         scene.loot = {};
+        scene.headerText = { setText: jest.fn() };
 
-        // Manually call showSummary to expose the "Return Home" button logic
-        scene.showSummary();
+        // Mock containers required by endExpedition
+        scene.mapContainer = scene.add.container();
+        scene.encounterContainer = scene.add.container();
+
+        // Manually call endExpedition (which shows summary) to expose the "Return Home" button logic
+        scene.endExpedition();
 
         // Find the "Return Home" button creation call
         const calls = ButtonFactory.createButton.mock.calls;

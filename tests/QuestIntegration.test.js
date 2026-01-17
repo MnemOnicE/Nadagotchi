@@ -34,41 +34,51 @@ describe('Quest Integration', () => {
         pet.relationships['Master Artisan'] = { level: 5 };
 
         // 1. Start Quest
-        let dialogue = pet.interact('Master Artisan');
+        let result = pet.interact('Master Artisan');
+        // Expect Option to Accept
+        const acceptOption = result.options.find(o => o.label === "Accept Quest");
+        expect(acceptOption).toBeDefined();
+        // Execute
+        acceptOption.action();
+
         expect(pet.questSystem.getQuest('masterwork_crafting')).toBeDefined();
         expect(pet.questSystem.getQuest('masterwork_crafting').stage).toBe(1);
-        expect(dialogue).toBeTruthy();
 
         // 2. Try to advance without Sticks
-        dialogue = pet.interact('Master Artisan');
-        // Should log "waiting for 5 Sticks" in journal (pushed before the chat log)
-        let journalEntries = pet.journal.map(j => j.text);
-        expect(journalEntries.some(t => t.includes("waiting for 5 Sticks"))).toBe(true);
+        result = pet.interact('Master Artisan');
+        // Should show status text but NO "Complete Stage" option
+        expect(result.text).toContain("waiting for 5 Sticks");
+        expect(result.options.find(o => o.label === "Complete Stage")).toBeUndefined();
         expect(pet.questSystem.getQuest('masterwork_crafting').stage).toBe(1);
 
         // 3. Get Sticks
         pet.inventory['Sticks'] = 5;
 
         // 4. Interact to Advance
-        pet.interact('Master Artisan');
+        result = pet.interact('Master Artisan');
+        expect(result.text).toContain("(Requirements Met!)");
+        const completeStage1 = result.options.find(o => o.label === "Complete Stage");
+        expect(completeStage1).toBeDefined();
+
+        completeStage1.action();
+
         expect(pet.questSystem.getQuest('masterwork_crafting').stage).toBe(2);
         expect(pet.inventory['Sticks']).toBeUndefined(); // Consumed
         expect(pet.discoveredRecipes).toContain("Masterwork Chair");
 
         // Verify Journal Update for Stage 2
-        journalEntries = pet.journal.map(j => j.text);
+        let journalEntries = pet.journal.map(j => j.text);
         expect(journalEntries.some(t => t.includes("I gave the Sticks"))).toBe(true);
 
         // 5. Try to advance without Chair
-        pet.interact('Master Artisan');
+        result = pet.interact('Master Artisan');
+        expect(result.text).toContain("I need to craft a Masterwork Chair");
+        expect(result.options.find(o => o.label === "Complete Stage")).toBeUndefined();
         expect(pet.questSystem.getQuest('masterwork_crafting').stage).toBe(2);
-        // Should log status for stage 2
-        journalEntries = pet.journal.map(j => j.text);
-        expect(journalEntries.some(t => t.includes("I need to craft a Masterwork Chair"))).toBe(true);
 
         // 6. Craft Chair
         // Need materials for chair (Def from ItemData.js/Recipes)
-        // Masterwork Chair: { 'Sticks': 10, 'Shiny Stone': 2 }
+        // Masterwork Chair: { 'Sticks': 4, 'Shiny Stone': 1 }
         pet.inventory['Sticks'] = 10;
         pet.inventory['Shiny Stone'] = 5;
         // Also need energy/happiness for crafting
@@ -81,7 +91,13 @@ describe('Quest Integration', () => {
         expect(pet.questSystem.getQuest('masterwork_crafting').hasCraftedChair).toBe(true);
 
         // 7. Interact to Complete
-        pet.interact('Master Artisan');
+        result = pet.interact('Master Artisan');
+        expect(result.text).toContain("(Requirements Met!)");
+        const completeStage2 = result.options.find(o => o.label === "Complete Stage");
+        expect(completeStage2).toBeDefined();
+
+        completeStage2.action();
+
         expect(pet.questSystem.getQuest('masterwork_crafting').stage).toBe(3);
         expect(pet.inventory['Masterwork Chair']).toBeUndefined(); // Consumed
         journalEntries = pet.journal.map(j => j.text);
@@ -89,9 +105,10 @@ describe('Quest Integration', () => {
 
         // 8. Recurring Interaction
         const initialCrafting = pet.skills.crafting;
-        pet.interact('Master Artisan');
+        result = pet.interact('Master Artisan');
+        // Just chatting now
+        expect(result.text).toContain("fellow master");
+        // Skill gain happens automatically on interaction type 'CHAT' inside interact()
         expect(pet.skills.crafting).toBeGreaterThan(initialCrafting);
-        journalEntries = pet.journal.map(j => j.text);
-        expect(journalEntries.some(t => t.includes("greeted me warmly"))).toBe(true);
     });
 });

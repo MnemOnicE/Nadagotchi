@@ -121,7 +121,12 @@ describe('Performance: Update Stats Throttling', () => {
              live: jest.fn(),
              stats: { happiness: 50, hunger: 50, energy: 50 },
              maxStats: { happiness: 100, hunger: 100, energy: 100 },
-             inventory: {}
+             inventory: {},
+             debris: [],
+             questSystem: {
+                 generateDailyQuest: jest.fn(),
+                 hasNewQuest: jest.fn().mockReturnValue(false)
+             }
         }));
 
         PersistenceManager.mockImplementation(() => ({
@@ -167,7 +172,18 @@ describe('Performance: Update Stats Throttling', () => {
             image: jest.fn(() => new Phaser.GameObjects.Image()),
             graphics: jest.fn(() => new Phaser.GameObjects.Graphics()),
             text: jest.fn(() => new Phaser.GameObjects.Text()),
-            tileSprite: jest.fn(() => new Phaser.GameObjects.Sprite())
+            tileSprite: jest.fn(() => new Phaser.GameObjects.Sprite()),
+            group: jest.fn().mockReturnValue({ get: jest.fn(), create: jest.fn(), add: jest.fn(), clear: jest.fn() }),
+            particles: jest.fn().mockReturnValue({
+                createEmitter: jest.fn().mockReturnValue({
+                    start: jest.fn(),
+                    stop: jest.fn(),
+                    setPosition: jest.fn(),
+                    setDepth: jest.fn().mockReturnThis()
+                }),
+                setDepth: jest.fn().mockReturnThis(),
+                destroy: jest.fn()
+            })
         };
         scene.cameras = {
             main: {

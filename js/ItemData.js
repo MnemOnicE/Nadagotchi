@@ -90,5 +90,15 @@ export const Recipes = {
         materials: { "Berries": 2, "Sticks": 1 },
         pattern: [null, null, null, "Berries", "Sticks", "Berries", null, null, null],
         description: "A rich, warm drink."
+    },
+    "Stamina-Up Tea": {
+        materials: { "Berries": 4 },
+        pattern: [null, "Berries", null, "Berries", "Berries", "Berries", null, null, null],
+        description: "A warm tea that restores energy."
+    },
+    "Metabolism-Slowing Tonic": {
+        materials: { "Frostbloom": 2, "Berries": 1 },
+        pattern: [null, "Frostbloom", null, "Frostbloom", "Berries", null, null, null, null],
+        description: "A tonic that slows metabolism."
     }
 };

@@ -128,12 +128,14 @@ describe('MainScene Coverage', () => {
              skills: { logic: 10, navigation: 10, research: 10, empathy: 10, crafting: 10 },
              currentCareer: 'Innovator',
              inventory: {},
+             debris: [],
              mood: 'happy',
              dominantArchetype: 'Adventurer',
              gainCareerXP: jest.fn().mockReturnValue(true),
              completeWorkShift: jest.fn().mockReturnValue({ success: true, happinessChange: 10, skillUp: 'logic', promoted: false, message: 'Work done' }),
              questSystem: {
-                 generateDailyQuest: jest.fn()
+                 generateDailyQuest: jest.fn(),
+                 hasNewQuest: jest.fn().mockReturnValue(false)
              },
              returnItemToInventory: jest.fn()
         };
@@ -180,6 +182,17 @@ describe('MainScene Coverage', () => {
                 const sprite = new Phaser.GameObjects.Sprite();
                 sprite.setTilePosition = jest.fn().mockReturnThis();
                 return sprite;
+            }),
+            group: jest.fn().mockReturnValue({ get: jest.fn(), create: jest.fn(), add: jest.fn(), clear: jest.fn() }),
+            particles: jest.fn().mockReturnValue({
+                createEmitter: jest.fn().mockReturnValue({
+                    start: jest.fn(),
+                    stop: jest.fn(),
+                    setPosition: jest.fn(),
+                    setDepth: jest.fn().mockReturnThis()
+                }),
+                setDepth: jest.fn().mockReturnThis(),
+                destroy: jest.fn()
             })
         };
 

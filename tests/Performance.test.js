@@ -125,6 +125,11 @@ describe('Performance Repro: Event Emission', () => {
              skills: { logic: 10 },
              currentCareer: 'Innovator',
              inventory: {},
+             debris: [],
+             questSystem: {
+                 generateDailyQuest: jest.fn(),
+                 hasNewQuest: jest.fn().mockReturnValue(false)
+             },
              mood: 'happy',
              dominantArchetype: 'Adventurer'
         }));
@@ -174,7 +179,18 @@ describe('Performance Repro: Event Emission', () => {
             image: jest.fn(() => new Phaser.GameObjects.Image()),
             graphics: jest.fn(() => new Phaser.GameObjects.Graphics()),
             text: jest.fn(() => new Phaser.GameObjects.Text()),
-            tileSprite: jest.fn(() => new Phaser.GameObjects.Sprite())
+            tileSprite: jest.fn(() => new Phaser.GameObjects.Sprite()),
+            group: jest.fn().mockReturnValue({ get: jest.fn(), create: jest.fn(), add: jest.fn(), clear: jest.fn() }),
+            particles: jest.fn().mockReturnValue({
+                createEmitter: jest.fn().mockReturnValue({
+                    start: jest.fn(),
+                    stop: jest.fn(),
+                    setPosition: jest.fn(),
+                    setDepth: jest.fn().mockReturnThis()
+                }),
+                setDepth: jest.fn().mockReturnThis(),
+                destroy: jest.fn()
+            })
         };
         scene.cameras = {
             main: {

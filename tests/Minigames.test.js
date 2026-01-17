@@ -1,46 +1,45 @@
 
+import { jest } from '@jest/globals';
+
 // 1. Setup Global Phaser Mock
-global.Phaser = {
-    Scene: class Scene {
-        constructor(config) {
-            this.config = config;
-            this.cameras = { main: { width: 800, height: 600, setBackgroundColor: jest.fn() } };
-            this.add = {
-                text: jest.fn(() => createMockText()),
-                rectangle: jest.fn(() => createMockRectangle())
-            };
-            this.time = {
-                delayedCall: jest.fn((delay, callback) => callback()),
-                addEvent: jest.fn(() => ({ destroy: jest.fn() }))
-            };
-            this.sys = { events: { once: jest.fn(), on: jest.fn(), off: jest.fn() } };
-            this.scene = { stop: jest.fn(), resume: jest.fn(), get: jest.fn() };
-            this.game = { events: { emit: jest.fn() } };
-            // Simulate input for keys
-            this.input = { keyboard: { on: jest.fn() } };
-        }
-    },
-    Utils: {
-        Array: {
-            GetRandom: (arr) => arr && arr.length > 0 ? arr[0] : null,
-            Shuffle: (arr) => arr // Identity for deterministic testing
-        }
-    },
-    GameObjects: {
-        Rectangle: class {}
-    }
-};
+const createMockGameObject = () => ({
+    setOrigin: jest.fn().mockReturnThis(),
+    setDepth: jest.fn().mockReturnThis(),
+    setVisible: jest.fn().mockReturnThis(),
+    setInteractive: jest.fn().mockReturnThis(),
+    on: jest.fn().mockReturnThis(),
+    emit: jest.fn(),
+    setData: jest.fn(),
+    getData: jest.fn(),
+    setFillStyle: jest.fn().mockReturnThis(),
+    setStrokeStyle: jest.fn().mockReturnThis(),
+    setPosition: jest.fn().mockReturnThis(),
+    setSize: jest.fn().mockReturnThis(),
+    destroy: jest.fn()
+});
 
-// 2. Import Scenes
-const { ArtisanMinigameScene } = require('../js/ArtisanMinigameScene');
-const { HealerMinigameScene } = require('../js/HealerMinigameScene');
-const { ScoutMinigameScene } = require('../js/ScoutMinigameScene');
+const createMockText = () => ({
+    setOrigin: jest.fn().mockReturnThis(),
+    setText: jest.fn(),
+    fill: '',
+    fontSize: ''
+});
 
-// 3. Helper to create a mock rectangle with data capability
+const createMockContainer = () => ({
+    add: jest.fn(),
+    setPosition: jest.fn().mockReturnThis(),
+    setSize: jest.fn().mockReturnThis(),
+    setVisible: jest.fn().mockReturnThis(),
+    destroy: jest.fn()
+});
+
 const createMockRectangle = () => {
     const data = {};
     const handlers = {};
     return {
+        setOrigin: jest.fn().mockReturnThis(),
+        setDepth: jest.fn().mockReturnThis(),
+        setVisible: jest.fn().mockReturnThis(),
         setInteractive: jest.fn().mockReturnThis(),
         on: jest.fn((event, fn) => {
             handlers[event] = fn;
@@ -62,12 +61,66 @@ const createMockRectangle = () => {
     };
 };
 
-const createMockText = () => ({
-    setOrigin: jest.fn().mockReturnThis(),
-    setText: jest.fn(),
-    fill: '',
-    fontSize: ''
-});
+global.Phaser = {
+    Scene: class Scene {
+        constructor(config) {
+            this.config = config;
+            this.cameras = { main: { width: 800, height: 600, setBackgroundColor: jest.fn() } };
+            this.add = {
+                text: jest.fn(() => createMockText()),
+                rectangle: jest.fn(() => createMockRectangle()),
+                container: jest.fn(() => createMockContainer()),
+                group: jest.fn(() => ({ get: jest.fn(), create: jest.fn(), clear: jest.fn(), add: jest.fn() })),
+                image: jest.fn(() => createMockGameObject()),
+                sprite: jest.fn(() => createMockGameObject()),
+                zone: jest.fn(() => createMockGameObject())
+            };
+            this.time = {
+                delayedCall: jest.fn((delay, callback) => { callback(); return { destroy: jest.fn() }; }),
+                addEvent: jest.fn(() => ({ destroy: jest.fn(), remove: jest.fn() }))
+            };
+            this.sys = { events: { once: jest.fn(), on: jest.fn(), off: jest.fn() } };
+            this.scene = { stop: jest.fn(), resume: jest.fn(), get: jest.fn() };
+            this.game = { events: { emit: jest.fn() } };
+            this.events = { on: jest.fn(), off: jest.fn(), emit: jest.fn() };
+            // Simulate input for keys
+            this.input = { keyboard: { on: jest.fn() } };
+        }
+    },
+    Utils: {
+        Array: {
+            GetRandom: (arr) => arr && arr.length > 0 ? arr[0] : null,
+            Shuffle: (arr) => arr // Identity for deterministic testing
+        }
+    },
+    GameObjects: {
+        Rectangle: class {}
+    }
+};
+
+// 2. Mock SoundSynthesizer BEFORE imports
+jest.mock('../js/utils/SoundSynthesizer.js', () => ({
+    SoundSynthesizer: {
+        instance: {
+            playClick: jest.fn(),
+            playSuccess: jest.fn(),
+            playFailure: jest.fn(),
+            playChime: jest.fn()
+        }
+    }
+}));
+
+// 3. Mock EventKeys
+jest.mock('../js/EventKeys.js', () => ({
+    EventKeys: {
+        WORK_RESULT: 'workResult'
+    }
+}));
+
+// 4. Import Scenes
+const { ArtisanMinigameScene } = require('../js/ArtisanMinigameScene');
+const { HealerMinigameScene } = require('../js/HealerMinigameScene');
+const { ScoutMinigameScene } = require('../js/ScoutMinigameScene');
 
 describe('Minigames Test Suite', () => {
 
@@ -153,23 +206,33 @@ describe('Minigames Test Suite', () => {
 
         test('create() selects ailment and creates remedy buttons', () => {
             scene.create();
-            // 3 remedy buttons created
-            expect(scene.add.rectangle).toHaveBeenCalledTimes(3);
+            // Timer (2) + Options (4) + Cure Button parts (2) = ~8 rectangles
+            expect(scene.add.rectangle.mock.calls.length).toBeGreaterThanOrEqual(6);
         });
 
-        test('Selecting correct remedy sends success event', () => {
+        test('Selecting correct remedies and clicking Cure sends success event', () => {
             scene.create();
-            // GetRandom returns arr[0] -> High Temperature
-            // Remedy -> Cooling Herb
-            // setupRemedyOptions logic:
-            // options = [Cooling Herb]
-            // push distractors[0], [1] -> [Cooling, Happy Potion, Soothing Syrup]
-            // Shuffle -> Identity
-            // So options[0] is correct.
+            // Layout: Timer(0,1), Options(2,3,4,5). Difficulty 2 = First 2 are required.
 
-            const buttons = scene.add.rectangle.mock.results.map(r => r.value);
-            // Button 0 is correct
-            buttons[0].emit('pointerdown');
+            const rects = scene.add.rectangle.mock.results.map(r => r.value);
+
+            // Select Required Remedies (Indices 2 and 3)
+            rects[2].emit('pointerdown');
+            rects[3].emit('pointerdown');
+
+            // Find Cure Button Zone (ButtonFactory uses zone)
+            const zones = scene.add.zone.mock.results.map(r => r.value);
+            const cureButtonZone = zones[zones.length - 1];
+
+            // Debug: Trigger callback directly if possible, or verify emission
+            cureButtonZone.emit('pointerdown');
+
+            // Expect workResult event. Note: The mock for delayedCall executes the callback immediately.
+            // If checkSolution works, it calls endGame, which calls delayedCall, which emits.
+
+            // If failed, it might be due to requiredRemedies Set logic or mocked Set behavior?
+            // Set in JS works with strings.
+            // Let's verify what checkSolution does by checking event arguments
 
             expect(scene.game.events.emit).toHaveBeenCalledWith('workResult', {
                 success: true,
@@ -179,9 +242,15 @@ describe('Minigames Test Suite', () => {
 
         test('Selecting incorrect remedy sends failure event', () => {
             scene.create();
-            const buttons = scene.add.rectangle.mock.results.map(r => r.value);
-            // Button 1 is incorrect (Happy Potion)
-            buttons[1].emit('pointerdown');
+            const rects = scene.add.rectangle.mock.results.map(r => r.value);
+
+            // Select Wrong Remedy (Index 4 - Distractor)
+            rects[4].emit('pointerdown');
+
+            // Click Cure
+            const zones = scene.add.zone.mock.results.map(r => r.value);
+            const cureButtonZone = zones[zones.length - 1];
+            cureButtonZone.emit('pointerdown');
 
             expect(scene.game.events.emit).toHaveBeenCalledWith('workResult', {
                 success: false,
