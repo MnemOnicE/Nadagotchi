@@ -371,8 +371,8 @@ export class ExpeditionScene extends Phaser.Scene {
 
         const btn = ButtonFactory.createButton(this, 400, 450, "Return Home", () => {
              this.game.events.emit(EventKeys.SCENE_COMPLETE, { type: 'EXPEDITION' });
-             this.scene.stop();
              this.scene.resume('MainScene');
+             this.scene.stop();
         }, { width: 200, height: 50, color: 0x4CAF50 });
 
         this.encounterContainer.add([bg, text, btn]);

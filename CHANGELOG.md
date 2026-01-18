@@ -18,6 +18,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Fixed an issue where `TravelingMerchant` events were text-only notifications.
+- Resolved "Deterministic Trap" regression in `Nadagotchi` tests caused by new random tie-breaker logic.
+- Fixed critical syntax error in `UIScene.js` blocking application load.
+- Fixed "Validate-First" leak in `QuestSystem` and `InventorySystem` by adding `canAddItem` checks.
+- Fixed race condition in `ExpeditionScene` ensuring `resume` is called before `stop`.
+- Added missing recipes (`Stamina-Up Tea`, `Metabolism-Slowing Tonic`) to `ItemData.js`.
+- Fixed recurring interaction logic in `RelationshipSystem.js`.
+
+### Changed
+- Refactored test suite to use a centralized `mockPhaser` helper, reducing code duplication.
+- Hardened test environment with robust mocks for Phaser Events, Zones, and Particles.
 
 ## [0.1.0] - 2024-05-20
 

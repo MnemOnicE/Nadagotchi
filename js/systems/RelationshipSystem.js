@@ -136,16 +136,49 @@ export class RelationshipSystem {
             }
 
             const relLevel = this.pet.relationships[npcName].level;
-            // Legacy quest flag check for dialogue content
-            let hasQuest = false;
+            // Check for Recurring Interaction (Completed Quest)
+            let recurringText = null;
             if (npcName === 'Master Artisan' && this.pet.quests['masterwork_crafting']) {
                  const stageDef = this.pet.questSystem.getStageDefinition('masterwork_crafting');
-                 if (stageDef && !stageDef.isComplete) hasQuest = true;
+                 if (stageDef) {
+                     if (stageDef.isComplete && stageDef.recurringInteraction) {
+                         recurringText = stageDef.recurringInteraction.journalEntry;
+                         // Apply specific recurring rewards if defined
+                         if (stageDef.recurringInteraction.rewards) {
+                             // Note: _applyRewards is in QuestSystem, maybe we should duplicate simple logic or expose it?
+                             // For now, simpler to just apply skill manually as per definition (crafting: 0.2)
+                             // Or leave standard chat skill gain?
+                             // The definition says: rewards: { skills: { crafting: 0.2 } }
+                             // Standard chat gives ARTISAN_SKILL_GAIN (0.15).
+                             // Let's add the bonus.
+                             if (stageDef.recurringInteraction.rewards.skills) {
+                                 for (const [skill, val] of Object.entries(stageDef.recurringInteraction.rewards.skills)) {
+                                     this.pet.skills[skill] += (val * moodMultiplier);
+                                 }
+                             }
+                         }
+                     } else if (!stageDef.isComplete) {
+                         // Active quest flag for NarrativeSystem
+                         // hasQuest = true; // Use variable below
+                     }
+                 }
             }
 
-            const dialogueText = NarrativeSystem.getNPCDialogue(npcName, relLevel, hasQuest);
-            this.pet.addJournalEntry(`Chatted with ${npcName}: "${dialogueText}"`);
-            resultText = dialogueText;
+            if (recurringText) {
+                this.pet.addJournalEntry(recurringText);
+                resultText = recurringText;
+            } else {
+                // Legacy/Standard Fallback
+                let hasQuest = false;
+                if (npcName === 'Master Artisan' && this.pet.quests['masterwork_crafting']) {
+                     const stageDef = this.pet.questSystem.getStageDefinition('masterwork_crafting');
+                     if (stageDef && !stageDef.isComplete) hasQuest = true;
+                }
+
+                const dialogueText = NarrativeSystem.getNPCDialogue(npcName, relLevel, hasQuest);
+                this.pet.addJournalEntry(`Chatted with ${npcName}: "${dialogueText}"`);
+                resultText = dialogueText;
+            }
         }
 
         // Default Buttons

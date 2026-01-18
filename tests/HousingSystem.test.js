@@ -1,22 +1,10 @@
 
 import { jest } from '@jest/globals';
 import { Nadagotchi } from '../js/Nadagotchi.js';
+import { setupPhaserMock, createMockAdd } from './helpers/mockPhaser';
 
-// Mock Phaser first
-global.Phaser = {
-    Scene: class {},
-    Math: { Between: jest.fn() },
-    Utils: { Array: { GetRandom: jest.fn() } },
-    GameObjects: { Sprite: class {} },
-    Display: {
-        Color: class {
-            constructor() {}
-            static Interpolate = { ColorWithColor: jest.fn().mockReturnValue({ r: 0, g: 0, b: 0 }) };
-            static ComponentToHex = jest.fn();
-            static GetColor = jest.fn();
-        }
-    }
-};
+// 1. Setup Phaser Mock
+setupPhaserMock();
 
 // Now require MainScene after global.Phaser is set
 const { MainScene } = require('../js/MainScene');
@@ -141,10 +129,23 @@ const mockAdd = {
     text: jest.fn().mockReturnValue({
         setOrigin: jest.fn().mockReturnThis(),
         setPosition: jest.fn().mockReturnThis(),
-        setText: jest.fn().mockReturnThis()
+        setText: jest.fn().mockReturnThis(),
+        setDepth: jest.fn().mockReturnThis(),
+        setVisible: jest.fn().mockReturnThis()
     }),
     image: jest.fn().mockReturnValue(mockSprite),
-    rectangle: jest.fn(),
+    rectangle: jest.fn().mockReturnValue({
+        setOrigin: jest.fn().mockReturnThis(),
+        setInteractive: jest.fn().mockReturnThis(),
+        on: jest.fn().mockReturnThis(),
+        setDepth: jest.fn().mockReturnThis(),
+        fillColor: 0x000000,
+        setPosition: jest.fn().mockReturnThis(),
+        setSize: jest.fn().mockReturnThis(),
+        setStrokeStyle: jest.fn().mockReturnThis(),
+        setVisible: jest.fn().mockReturnThis(),
+        destroy: jest.fn()
+    }),
     tileSprite: jest.fn().mockReturnValue({
         setDepth: jest.fn().mockReturnThis(),
         setTexture: jest.fn().mockReturnThis(),
@@ -156,6 +157,17 @@ const mockAdd = {
         y: 0,
         width: 100,
         height: 100
+    }),
+    group: jest.fn().mockReturnValue({ get: jest.fn(), create: jest.fn(), add: jest.fn(), clear: jest.fn() }),
+    particles: jest.fn().mockReturnValue({
+        createEmitter: jest.fn().mockReturnValue({
+            start: jest.fn(),
+            stop: jest.fn(),
+            setPosition: jest.fn(),
+            setDepth: jest.fn().mockReturnThis()
+        }),
+        setDepth: jest.fn().mockReturnThis(),
+        destroy: jest.fn()
     })
 };
 

@@ -1,64 +1,8 @@
 
-// Mock Phaser Global BEFORE imports
-global.Phaser = {
-    Scene: class {
-        constructor(config) { this.events = { emit: jest.fn(), on: jest.fn(), off: jest.fn() }; }
-    },
-    Math: { Between: () => 1 },
-    GameObjects: {
-        Sprite: class {
-            constructor() {
-                this.x = 0;
-                this.y = 0;
-                this.visible = true;
-                this.events = {};
-                this.active = true;
-            }
-            setInteractive() { return this; }
-            on(event, fn) { this.events[event] = fn; return this; }
-            emit(event, ...args) { if (this.events[event]) this.events[event](...args); }
-            destroy() { this.active = false; }
-            setVisible() { return this; }
-            setDepth() { return this; }
-            setPosition(x, y) { this.x = x; this.y = y; return this; }
-            setTint() { return this; }
-            clearTint() { return this; }
-        },
-        Graphics: class {
-            clear() {}
-            fillStyle() {}
-            fillRect() {}
-            generateTexture() {}
-            lineStyle() {}
-            strokeRect() {}
-            destroy() {}
-            setPosition() {}
-            setDepth() { return this; }
-        },
-        Text: class {
-            constructor() { this.text = ''; }
-            setOrigin() { return this; }
-            setDepth() { return this; }
-            setText(t) { this.text = t; return this; }
-            setPosition() { return this; }
-            setInteractive() { return this; }
-            destroy() {}
-        },
-        TileSprite: class {
-            setVisible() { return this; }
-            setDepth() { return this; }
-            setSize() { return this; }
-            setPosition() { return this; }
-            setTexture() { return this; }
-        },
-        Container: class {
-            destroy() {}
-        }
-    },
-    Display: {
-        Color: class { constructor(r,g,b) { this.r=r; this.g=g; this.b=b; } },
-    }
-};
+import { setupPhaserMock, createMockAdd } from './helpers/mockPhaser';
+
+// 1. Setup Phaser Mock
+setupPhaserMock();
 
 // Mock other dependencies
 jest.mock('../js/Config.js', () => ({
@@ -127,24 +71,8 @@ describe('MainScene Duplication Bug', () => {
         scene = new MainScene();
 
         // Mock Scene properties
-        scene.add = {
-            sprite: jest.fn(() => {
-                const s = new Phaser.GameObjects.Sprite();
-                s.setScale = jest.fn().mockReturnThis();
-                s.setDepth = jest.fn().mockReturnThis();
-                s.setVisible = jest.fn().mockReturnThis();
-                return s;
-            }),
-            graphics: jest.fn(() => {
-                const g = new Phaser.GameObjects.Graphics();
-                g.setDepth = jest.fn().mockReturnThis();
-                g.setVisible = jest.fn().mockReturnThis();
-                return g;
-            }),
-            text: jest.fn(() => new Phaser.GameObjects.Text()),
-            tileSprite: jest.fn(() => new Phaser.GameObjects.TileSprite()),
-            image: jest.fn(() => ({ setOrigin: () => ({ setDepth: () => {} }) }))
-        };
+        scene.add = createMockAdd();
+        // Customize text mock specific to this test if needed, or rely on helper
         scene.cameras = { main: { width: 800, height: 600, setSize: jest.fn(), setViewport: jest.fn() } };
         scene.scale = { width: 800, height: 600, on: jest.fn(), off: jest.fn() };
         scene.time = { addEvent: jest.fn(() => ({ remove: jest.fn() })), delayedCall: jest.fn() };
@@ -193,7 +121,7 @@ describe('MainScene Duplication Bug', () => {
 
         // Step 2: Click the PLACED chair to pick it up
         // This triggers the pointerdown event on the sprite
-        realSprite.events['pointerdown']({ x: 100, y: 100 });
+        realSprite.emit('pointerdown', { x: 100, y: 100 });
 
         // Correct Behavior:
         // Total Inventory: 1 (start) + 1 (picked up) = 2.

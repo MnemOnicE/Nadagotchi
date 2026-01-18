@@ -17,7 +17,8 @@ describe('QuestSystem', () => {
             inventorySystem: {
                 removeItem: jest.fn(),
                 discoverRecipe: jest.fn(),
-                addItem: jest.fn()
+                addItem: jest.fn(),
+                canAddItem: jest.fn(() => true)
             },
             skills: { crafting: 0 }
         };
@@ -90,5 +91,33 @@ describe('QuestSystem', () => {
         pet.quests['masterwork_crafting'] = { stage: 2 };
         questSystem.setQuestFlag('masterwork_crafting', 'hasCraftedChair');
         expect(pet.quests['masterwork_crafting'].hasCraftedChair).toBe(true);
+    });
+
+    test('should not advance quest if inventory cannot accept reward items (Validate-First)', () => {
+        // Setup a quest state
+        const questId = 'masterwork_crafting';
+        pet.quests[questId] = { stage: 1 };
+        pet.inventory['Sticks'] = 5; // Meets requirements
+
+        // Mock Stage Definition to have item rewards
+        const mockStageDef = {
+            requirements: { items: { 'Sticks': 5 } },
+            consumeRequirements: true,
+            rewards: { items: { 'Rare Gem': 1 } },
+            nextStage: 2
+        };
+        jest.spyOn(questSystem, 'getStageDefinition').mockReturnValue(mockStageDef);
+
+        // Mock Inventory Full
+        pet.inventorySystem.canAddItem.mockReturnValue(false);
+
+        // Attempt Advance
+        const result = questSystem.advanceQuest(questId);
+
+        // Assert Transaction Aborted
+        expect(result).toBe(false);
+        expect(pet.quests[questId].stage).toBe(1); // Did not advance
+        expect(pet.inventorySystem.removeItem).not.toHaveBeenCalled(); // Items NOT consumed
+        expect(pet.inventorySystem.addItem).not.toHaveBeenCalled(); // Reward NOT given
     });
 });

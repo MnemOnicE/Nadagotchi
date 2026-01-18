@@ -1,87 +1,9 @@
 
 // tests/MainSceneCoverage.test.js
+import { setupPhaserMock, createMockAdd, mockGameObject } from './helpers/mockPhaser';
 
-// 1. Mock Phaser Global
-const mockGameObject = () => {
-    const listeners = {};
-    const obj = {
-        on: jest.fn((event, fn) => {
-            listeners[event] = fn;
-            return obj;
-        }),
-        emit: (event, ...args) => {
-            if (listeners[event]) listeners[event](...args);
-        },
-        setInteractive: jest.fn().mockReturnThis(),
-        disableInteractive: jest.fn().mockReturnThis(),
-        setVisible: jest.fn().mockReturnThis(),
-        setOrigin: jest.fn().mockReturnThis(),
-        setBackgroundColor: jest.fn().mockReturnThis(),
-        destroy: jest.fn(),
-        setSize: jest.fn().mockReturnThis(),
-        setAlpha: jest.fn().mockReturnThis(),
-        setPosition: jest.fn().mockReturnThis(),
-        setScrollFactor: jest.fn().mockReturnThis(),
-        setDepth: jest.fn().mockReturnThis(),
-        setText: jest.fn().mockReturnThis(),
-        setStrokeStyle: jest.fn().mockReturnThis(),
-        setBlendMode: jest.fn().mockReturnThis(),
-        setScale: jest.fn().mockReturnThis(),
-        setAngle: jest.fn().mockReturnThis(),
-        setFrame: jest.fn().mockReturnThis(),
-        clear: jest.fn(),
-        fillStyle: jest.fn().mockReturnThis(),
-        fillRect: jest.fn().mockReturnThis(),
-        strokeRect: jest.fn().mockReturnThis(),
-        lineStyle: jest.fn().mockReturnThis(),
-        refresh: jest.fn().mockReturnThis(),
-        setTint: jest.fn().mockReturnThis(),
-        clearTint: jest.fn().mockReturnThis(),
-        context: {
-             createLinearGradient: jest.fn(() => ({ addColorStop: jest.fn() })),
-             createRadialGradient: jest.fn(() => ({ addColorStop: jest.fn() })),
-             fillStyle: '',
-             fillRect: jest.fn()
-        },
-        width: 800,
-        height: 600
-    };
-    return obj;
-};
-
-global.Phaser = {
-    Scene: class Scene {
-        constructor(config) {
-            this.config = config;
-            // Ensure this.events exists for all Scenes
-            this.events = {
-                on: jest.fn(),
-                off: jest.fn(),
-                emit: jest.fn()
-            };
-            this.plugins = {
-                get: jest.fn()
-            };
-        }
-    },
-    GameObjects: {
-        Sprite: class Sprite { constructor() { Object.assign(this, mockGameObject()); } },
-        Image: class Image { constructor() { Object.assign(this, mockGameObject()); } },
-        Graphics: class Graphics { constructor() { Object.assign(this, mockGameObject()); } },
-        Text: class Text { constructor() { Object.assign(this, mockGameObject()); } }
-    },
-    Math: {
-        Between: jest.fn().mockReturnValue(1)
-    },
-    Display: {
-        Color: class Color {
-            constructor(r, g, b) { this.r = r; this.g = g; this.b = b; }
-            static Interpolate = {
-                ColorWithColor: jest.fn().mockReturnValue({ r: 0, g: 0, b: 0 })
-            }
-        }
-    }
-};
+// 1. Setup Phaser Mock
+setupPhaserMock();
 
 // 2. Mock Dependencies
 jest.mock('../js/Nadagotchi');
@@ -128,12 +50,14 @@ describe('MainScene Coverage', () => {
              skills: { logic: 10, navigation: 10, research: 10, empathy: 10, crafting: 10 },
              currentCareer: 'Innovator',
              inventory: {},
+             debris: [],
              mood: 'happy',
              dominantArchetype: 'Adventurer',
              gainCareerXP: jest.fn().mockReturnValue(true),
              completeWorkShift: jest.fn().mockReturnValue({ success: true, happinessChange: 10, skillUp: 'logic', promoted: false, message: 'Work done' }),
              questSystem: {
-                 generateDailyQuest: jest.fn()
+                 generateDailyQuest: jest.fn(),
+                 hasNewQuest: jest.fn().mockReturnValue(false)
              },
              returnItemToInventory: jest.fn()
         };
@@ -171,17 +95,7 @@ describe('MainScene Coverage', () => {
             getCurrentWeather: jest.fn().mockReturnValue('Sunny')
         }));
 
-        mockAdd = {
-            sprite: jest.fn(() => new Phaser.GameObjects.Sprite()),
-            image: jest.fn(() => new Phaser.GameObjects.Image()),
-            graphics: jest.fn(() => new Phaser.GameObjects.Graphics()),
-            text: jest.fn(() => new Phaser.GameObjects.Text()),
-            tileSprite: jest.fn(() => {
-                const sprite = new Phaser.GameObjects.Sprite();
-                sprite.setTilePosition = jest.fn().mockReturnThis();
-                return sprite;
-            })
-        };
+        mockAdd = createMockAdd();
 
         mockGameEvents = {
             on: jest.fn(),
