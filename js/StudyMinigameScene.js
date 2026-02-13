@@ -178,7 +178,7 @@ export class StudyMinigameScene extends Phaser.Scene {
 
     endGame() {
         this.game.events.emit('STUDY_COMPLETE', { score: this.foundWords });
-        this.scene.stop();
         this.scene.resume('MainScene');
+        this.scene.stop();
     }
 }

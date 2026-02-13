@@ -170,8 +170,8 @@ export class HealerMinigameScene extends Phaser.Scene {
 
         this.time.delayedCall(2000, () => {
             this.game.events.emit(EventKeys.WORK_RESULT, { success: isSuccess, career: 'Healer' });
-            this.scene.stop();
             this.scene.resume('MainScene');
+            this.scene.stop();
         });
     }
 

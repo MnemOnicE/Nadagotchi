@@ -47,8 +47,8 @@ export class ArtisanMinigameScene extends Phaser.Scene {
                 result.craftedItem = "Fancy Bookshelf";
             }
             this.game.events.emit(EventKeys.WORK_RESULT, result);
-            this.scene.stop();
             this.scene.resume('MainScene');
+            this.scene.stop();
         };
 
         const checkPattern = () => {

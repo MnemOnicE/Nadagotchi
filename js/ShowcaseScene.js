@@ -132,9 +132,9 @@ export class ShowcaseScene extends Phaser.Scene {
      * Closes the scene and resumes the main game.
      */
     close() {
-        this.scene.stop();
         this.scene.resume('MainScene');
         this.scene.wake('UIScene');
+        this.scene.stop();
     }
 
     /**
