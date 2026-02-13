@@ -60,7 +60,8 @@ export const Config = {
     // Limits
     LIMITS: {
         MAX_STATS: 100,
-        MAX_STATS_BONUS: 105 // e.g., energy with homozygous metabolism
+        MAX_STATS_BONUS: 105, // e.g., energy with homozygous metabolism
+        MAX_JOURNAL_ENTRIES: 100
     },
 
     // Action Effects
