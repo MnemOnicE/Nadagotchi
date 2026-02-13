@@ -209,7 +209,8 @@ export const Config = {
     // Game Loop Constants
     GAME_LOOP: {
         TARGET_FPS: 60,
-        MS_PER_FRAME: 1000 / 60
+        MS_PER_FRAME: 1000 / 60,
+        MAX_DELTA: 1000 * 60 * 60 // Cap simulation step to 1 hour to prevent death loops
     },
 
     // Timing Constants
@@ -237,6 +238,7 @@ export const Config = {
 
     // UI Configuration
     UI: {
-        DASHBOARD_HEIGHT_RATIO: 0.35 // Increased from 0.25 to prevent button overlap on mobile
+        DASHBOARD_HEIGHT_RATIO: 0.35, // Increased from 0.25 to prevent button overlap on mobile
+        SAFE_AREA_TOP: 40 // Mobile Notch / Status Bar Offset (px)
     }
 };

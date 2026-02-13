@@ -14,6 +14,7 @@ import { SoundSynthesizer } from './utils/SoundSynthesizer.js';
 import { ItemDefinitions } from './ItemData.js';
 import { RoomDefinitions } from './RoomDefinitions.js';
 import { ButtonFactory } from './ButtonFactory.js';
+import { DebugConsole } from './DebugConsole.js';
 
 /**
  * @fileoverview The primary game scene.
@@ -222,6 +223,9 @@ export class MainScene extends Phaser.Scene {
         this.game.events.on(EventKeys.SCENE_COMPLETE, this.handleSceneCompleteBound);
         this.scale.on('resize', this.resize, this);
 
+        // --- Debug Console ---
+        this.debugConsole = new DebugConsole(this);
+
         // --- Final Setup ---
         this.resize({ width: this.scale.width, height: this.scale.height });
         this.skyManager.update(); // Initial draw
@@ -314,7 +318,11 @@ export class MainScene extends Phaser.Scene {
         this.weatherParticles.update(this.worldState.weather, this.worldState.season);
 
         // Apply game speed multiplier to delta time
-        const simDelta = delta * (this.gameSettings.gameSpeed || 1.0);
+        // FIX: Cap delta to prevent "Death Loop" on background resume
+        const maxDelta = Config.GAME_LOOP.MAX_DELTA || 3600000;
+        const cappedDelta = Math.min(delta, maxDelta);
+        const simDelta = cappedDelta * (this.gameSettings.gameSpeed || 1.0);
+
         this.nadagotchi.live(simDelta, this.worldState);
 
         // OPTIMIZATION: Throttle stats updates to ~10Hz (every 100ms)
@@ -1264,6 +1272,26 @@ export class MainScene extends Phaser.Scene {
             this.showNotification("Can't place here!", '#FF0000');
             SoundSynthesizer.instance.playFailure();
             return;
+        }
+
+        // --- COLLISION CHECK ---
+        // Assume default 64x64 item size centered
+        const newItemBounds = new Phaser.Geom.Rectangle(x - 32, y - 32, 64, 64);
+        const existing = this.placedFurniture[this.currentRoom] || [];
+
+        for (const item of existing) {
+            let bounds;
+            if (item.sprite) {
+                bounds = item.sprite.getBounds();
+            } else {
+                 bounds = new Phaser.Geom.Rectangle(item.x - 32, item.y - 32, 64, 64);
+            }
+
+            if (Phaser.Geom.Intersects.RectangleToRectangle(newItemBounds, bounds)) {
+                 this.showNotification("Overlaps existing furniture!", '#FF0000');
+                 SoundSynthesizer.instance.playFailure();
+                 return;
+            }
         }
 
         if (this.nadagotchi.placeItem(this.selectedFurniture)) {
