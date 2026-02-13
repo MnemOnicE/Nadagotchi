@@ -1,79 +1,26 @@
+import { jest } from '@jest/globals';
+import { setupPhaserMock, createMockAdd, mockGameObject } from './helpers/mockPhaser';
 
-// Mock Phaser Global BEFORE requiring the module
-const mockGameObject = () => {
-    const listeners = {};
-    const obj = {
-        on: jest.fn((event, fn) => {
-            listeners[event] = fn;
-            return obj;
-        }),
-        emit: (event, ...args) => {
-            if (listeners[event]) listeners[event](...args);
-        },
-        setInteractive: jest.fn().mockReturnThis(),
-        disableInteractive: jest.fn().mockReturnThis(),
-        setVisible: jest.fn().mockReturnThis(),
-        setOrigin: jest.fn().mockReturnThis(),
-        setBackgroundColor: jest.fn().mockReturnThis(),
-        destroy: jest.fn(),
-        setSize: jest.fn().mockReturnThis(),
-        setAlpha: jest.fn().mockReturnThis(),
-        setPosition: jest.fn().mockReturnThis(),
-        setScrollFactor: jest.fn().mockReturnThis(),
-        setDepth: jest.fn().mockReturnThis(),
-        setText: jest.fn(function(val) {
-            this.textValue = val;
-            return this;
-        }),
-        setStrokeStyle: jest.fn().mockReturnThis(),
-        add: jest.fn().mockReturnThis(),
-        addMultiple: jest.fn().mockReturnThis(),
-        setStyle: jest.fn().mockReturnThis(),
-        width: 100,
-        height: 50,
-        list: [],
-        textValue: ''
-    };
-    return obj;
-};
+// Setup global Phaser mock BEFORE imports that rely on it
+setupPhaserMock();
 
-global.Phaser = {
-    Scene: class Scene {
-        constructor(config) { this.config = config; }
-    },
-    GameObjects: {
-        Container: class Container {
-            constructor() {
-                Object.assign(this, mockGameObject());
-                this.list = [];
-                this.add = (child) => {
-                    if (Array.isArray(child)) {
-                        this.list = this.list.concat(child);
-                    } else {
-                        this.list.push(child);
-                    }
-                    return this;
-                };
-                this.addMultiple = (children) => { this.list = this.list.concat(children); return this; };
-                this.removeAll = jest.fn();
+// Enhance the Container mock for this specific test
+// The helper's Container mock is basic; UIScene tests need list management
+const originalContainer = global.Phaser.GameObjects.Container;
+global.Phaser.GameObjects.Container = class Container {
+    constructor() {
+        Object.assign(this, mockGameObject());
+        this.list = [];
+        this.add = (child) => {
+            if (Array.isArray(child)) {
+                this.list = this.list.concat(child);
+            } else {
+                this.list.push(child);
             }
-        },
-        Group: class Group {
-             constructor() {
-                 Object.assign(this, mockGameObject());
-                 this.children = [];
-                 this.addMultiple = (children) => {
-                     this.children = this.children.concat(children);
-                     return this;
-                 };
-             }
-             add(child) { this.children.push(child); return this; }
-             setVisible(v) { this.visible = v; return this; }
-        },
-        Text: class Text { constructor() { Object.assign(this, mockGameObject()); } },
-        Graphics: class Graphics { constructor() { Object.assign(this, mockGameObject()); } },
-        Sprite: class Sprite { constructor() { Object.assign(this, mockGameObject()); } },
-        Rectangle: class Rectangle { constructor() { Object.assign(this, mockGameObject()); } }
+            return this;
+        };
+        this.addMultiple = (children) => { this.list = this.list.concat(children); return this; };
+        this.removeAll = jest.fn(() => { this.list = []; });
     }
 };
 
@@ -156,13 +103,12 @@ describe('UIScene Action Buttons & Optimization', () => {
     let mockAdd;
 
     beforeEach(() => {
-        mockAdd = {
-            text: jest.fn(() => new Phaser.GameObjects.Text()),
-            rectangle: jest.fn(() => new Phaser.GameObjects.Rectangle()),
-            group: jest.fn(() => new Phaser.GameObjects.Group()),
-            container: jest.fn(() => new Phaser.GameObjects.Container()),
-            image: jest.fn(() => new Phaser.GameObjects.Sprite()), // Use Sprite mock for image
-        };
+        mockAdd = createMockAdd();
+
+        // Enhance mockAdd for specific UIScene needs if strictly necessary
+        // The helper provides basic functionality. UIScene uses 'container', 'text', 'rectangle' etc.
+        // We override 'container' to use our enhanced class
+        mockAdd.container = jest.fn(() => new Phaser.GameObjects.Container());
 
         mockGameEvents = {
             on: jest.fn(),
@@ -248,9 +194,10 @@ describe('UIScene Action Buttons & Optimization', () => {
 
         scene.updateStatsUI(dataNoCareer);
 
-        // Work button should be disabled (or filtered if conditioned out)
-        // Based on analysis, let's just check if the list of buttons is consistent
-        // with expectations.
+        const buttonsWithNoCareer = scene.actionButtons.map(b => b.textLabel);
+        // Work button should NOT be present if filtered by condition
+        // In UIScene: condition: () => hasCareer.
+        expect(buttonsWithNoCareer).not.toContain('Work');
 
         // Mock data WITH career
         const dataWithCareer = {
@@ -267,43 +214,8 @@ describe('UIScene Action Buttons & Optimization', () => {
 
         scene.updateStatsUI(dataWithCareer);
 
-        // Now signature should change because 'Work' button enabled/disabled state is not part of signature
-        // Signature is just text labels: "Explore|Study|Work|Craft"
-        // Wait, if text labels don't change, signature doesn't change!
-        // The signature is: visibleActions.map(a => a.text).join('|');
-        // 'Work' is always in visibleActions if condition isn't filtering it.
-
-        // If condition returns false, it is filtered out.
-        // { text: 'Work', condition: () => hasCareer ... }
-        // If no career, condition is false. Filtered out.
-        // Signature: Explore|Study|Craft
-        // If career:
-        // Signature: Explore|Study|Work|Craft
-
-        // So signature DOES change.
-
         const buttonsWithCareer = scene.actionButtons.map(b => b.textLabel);
         expect(buttonsWithCareer).toContain('Work');
-
-        // Reset to no career
-        scene.updateStatsUI(dataNoCareer);
-        const buttonsNoCareer = scene.actionButtons.map(b => b.textLabel);
-        // Work button should be disabled or gone.
-        // If condition fails, it's gone from visibleActions.
-
-        // Wait, looking at code:
-        // const visibleActions = allActions.filter(item => !item.condition || item.condition());
-        // Yes, it is removed from the array.
-        // BUT wait, I saw `disabledMessage` property. usually implies it should be visible but disabled.
-        // However, the condition usage in `filter` implies removal.
-
-        // Let's verify what actually happens in the test.
-        // If it was removed, it won't be in `buttonsNoCareer`.
-
-        // In `UIScene.js`:
-        // else if (tabId === 'ACTION') actions = [{ text: 'Explore', ... }, ..., { text: 'Work', ..., condition: () => this.nadagotchiData && this.nadagotchiData.currentCareer ... }];
-
-        // So yes, if no career, it is removed.
     });
 
     test('updateStatsUI call should be optimized after refactor', () => {
@@ -314,7 +226,7 @@ describe('UIScene Action Buttons & Optimization', () => {
         // Call updateStatsUI with same data/state
         const data = {
             nadagotchi: {
-                stats: { hunger: 50 },
+                stats: { hunger: 50, energy: 50, happiness: 50 },
                 skills: { logic: 1, navigation: 1, research: 1 },
                 mood: 'happy',
                 dominantArchetype: 'Adventurer',
