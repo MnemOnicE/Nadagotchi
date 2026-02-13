@@ -352,29 +352,23 @@ export class MainScene extends Phaser.Scene {
     updateQuestIndicators() {
         if (!this.nadagotchi.questSystem) return;
 
-        this._checkNPC('Grizzled Scout', 'npcScout');
-        this._checkNPC('Master Artisan', 'npcArtisan');
-        this._checkNPC('Sickly Villager', 'npcVillager');
-    }
+        const checkNPC = (npcName, indicatorKey) => {
+             const hasQuest = this.nadagotchi.questSystem.hasNewQuest(npcName);
+             const indicator = this.questIndicators[indicatorKey];
+             const npcSprite = this[indicatorKey];
 
-    /**
-     * Checks if a specific NPC has a new quest and updates their indicator.
-     * @param {string} npcName - The name of the NPC.
-     * @param {string} indicatorKey - The property key for the NPC sprite and indicator.
-     * @private
-     */
-    _checkNPC(npcName, indicatorKey) {
-        const hasQuest = this.nadagotchi.questSystem.hasNewQuest(npcName);
-        const indicator = this.questIndicators[indicatorKey];
-        const npcSprite = this[indicatorKey];
+             // Only show if NPC is visible (i.e. we are in Garden)
+             if (indicator && npcSprite && npcSprite.visible) {
+                 indicator.setVisible(hasQuest);
+                 indicator.setPosition(npcSprite.x, npcSprite.y - 60);
+             } else if (indicator) {
+                 indicator.setVisible(false);
+             }
+        };
 
-        // Only show if NPC is visible (i.e. we are in Garden)
-        if (indicator && npcSprite && npcSprite.visible) {
-            indicator.setVisible(hasQuest);
-            indicator.setPosition(npcSprite.x, npcSprite.y - 60);
-        } else if (indicator) {
-            indicator.setVisible(false);
-        }
+        checkNPC('Grizzled Scout', 'npcScout');
+        checkNPC('Master Artisan', 'npcArtisan');
+        checkNPC('Sickly Villager', 'npcVillager');
     }
 
     /**
