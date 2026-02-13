@@ -149,4 +149,18 @@ describe('LogicPuzzleScene', () => {
             career: 'Innovator'
         });
     });
+
+    test('should resume MainScene BEFORE stopping on game end', () => {
+        scene.create();
+        const buttons = scene.add.rectangle.mock.results.map(r => r.value);
+        const greenBtn = buttons[1];
+
+        // Sequence is Red. Click Green to trigger endGame(false).
+        greenBtn.emit('pointerdown');
+
+        const stopOrder = scene.scene.stop.mock.invocationCallOrder[0];
+        const resumeOrder = scene.scene.resume.mock.invocationCallOrder[0];
+
+        expect(resumeOrder).toBeLessThan(stopOrder);
+    });
 });

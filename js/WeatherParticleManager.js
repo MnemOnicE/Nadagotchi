@@ -17,7 +17,9 @@ export class WeatherParticleManager {
     createEmitters() {
         const width = this.scene.scale.width;
         // Rain
-        this.emitters.rain = this.scene.add.particles('rain_drop').createEmitter({
+        const rainManager = this.scene.add.particles('rain_drop');
+        rainManager.setDepth(50); // In front of pet
+        this.emitters.rain = rainManager.createEmitter({
             x: { min: 0, max: width },
             y: -10,
             lifespan: 1000,
@@ -25,10 +27,12 @@ export class WeatherParticleManager {
             speedX: { min: -10, max: 10 },
             quantity: 2,
             on: false
-        }).setDepth(50); // In front of pet
+        });
 
         // Snow
-        this.emitters.snow = this.scene.add.particles('snow_flake').createEmitter({
+        const snowManager = this.scene.add.particles('snow_flake');
+        snowManager.setDepth(50);
+        this.emitters.snow = snowManager.createEmitter({
             x: { min: 0, max: width },
             y: -10,
             lifespan: 3000,
@@ -37,10 +41,12 @@ export class WeatherParticleManager {
             scale: { start: 0.5, end: 1.0 },
             quantity: 1,
             on: false
-        }).setDepth(50);
+        });
 
         // Leaves (Autumn)
-        this.emitters.leaf = this.scene.add.particles('leaf').createEmitter({
+        const leafManager = this.scene.add.particles('leaf');
+        leafManager.setDepth(50);
+        this.emitters.leaf = leafManager.createEmitter({
             x: { min: 0, max: width },
             y: -10,
             lifespan: 4000,
@@ -49,7 +55,7 @@ export class WeatherParticleManager {
             rotate: { min: 0, max: 360 },
             quantity: 0, // Very sparse
             on: false
-        }).setDepth(50);
+        });
     }
 
     /**
