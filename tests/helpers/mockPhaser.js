@@ -30,6 +30,7 @@ export const mockGameObject = () => {
         setAngle: jest.fn().mockReturnThis(),
         setFrame: jest.fn().mockReturnThis(),
         clear: jest.fn(),
+        setFillStyle: jest.fn().mockReturnThis(),
         fillStyle: jest.fn().mockReturnThis(),
         fillRect: jest.fn().mockReturnThis(),
         strokeRect: jest.fn().mockReturnThis(),
