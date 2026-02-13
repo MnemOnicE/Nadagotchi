@@ -219,7 +219,9 @@ export const Config = {
 
     // Security & Hashing
     SECURITY: {
-        DNA_SALT: "NADAGOTCHI_GENETICS_V1_SALT"
+        // Loaded via environment variables in Vite (defined in vite.config.js) or process.env in Jest.
+        // Falls back to a generic salt for development.
+        DNA_SALT: (typeof process !== 'undefined' && process.env && process.env.VITE_DNA_SALT) || "DEVELOPMENT_ONLY_SALT"
     },
 
     // Debris & Environment

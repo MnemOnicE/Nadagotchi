@@ -4,3 +4,7 @@ server.log
 dist/
 android/app/build/
 android/.gradle/
+.env
+.env.*
+.env
+.env.*
