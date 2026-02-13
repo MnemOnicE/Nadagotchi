@@ -89,7 +89,7 @@ export class UIScene extends Phaser.Scene {
     createTabs() {
         const tabs = [{ label: '❤️ CARE', id: 'CARE' }, { label: '🎒 ACTION', id: 'ACTION' }, { label: '⚙️ SYSTEM', id: 'SYSTEM' }, { label: '🏺 ANCESTORS', id: 'ANCESTORS' }];
         tabs.forEach(tab => {
-            const btn = ButtonFactory.createButton(this, 0, 0, tab.label, () => { this.showTab(tab.id, true); }, { width: 100, height: 35, color: 0xD8A373, fontSize: '24px' });
+            const btn = ButtonFactory.createButton(this, 0, 0, tab.label, () => { this.showTab(tab.id, false); }, { width: 100, height: 35, color: 0xD8A373, fontSize: '24px' });
             btn.tabId = tab.id; this.tabButtons.push(btn);
         });
     }
@@ -106,6 +106,10 @@ export class UIScene extends Phaser.Scene {
         return actions;
     }
     showTab(tabId, force = false) {
+        if (!force && this.currentTab === tabId) {
+            this.updateActionButtons(false);
+            return;
+        }
         this.currentTab = tabId;
         this.tabButtons.forEach(btn => { btn.setAlpha(btn.tabId === tabId ? 1.0 : 0.7); });
         this.updateActionButtons(force);
@@ -113,7 +117,7 @@ export class UIScene extends Phaser.Scene {
     updateActionButtons(force = false) {
         const allActions = this.getTabActions(this.currentTab);
         const visibleActions = allActions.filter(item => !item.condition || item.condition());
-        const signature = visibleActions.map(a => a.text).join('|');
+        const signature = `${this.currentTab}:${visibleActions.map(a => a.text).join('|')}`;
         if (!force && signature === this.lastActionSignature) return;
         this.actionButtons.forEach(btn => btn.destroy());
         this.actionButtons = [];
