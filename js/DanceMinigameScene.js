@@ -212,8 +212,8 @@ export class DanceMinigameScene extends Phaser.Scene {
         const btn = ButtonFactory.createButton(this, w/2, h/2 + 100, "Finish", () => {
              // Return to MainScene with generic success for now (handled by Play action logic)
              // We can pass data if we want special rewards later
-             this.scene.stop();
              this.scene.resume('MainScene');
+             this.scene.stop();
 
              // Trigger standard Play effects via MainScene helper or direct Nadagotchi call?
              // MainScene usually handles UI_ACTION -> Nadagotchi.handleAction.
