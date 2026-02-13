@@ -1,89 +1,35 @@
+import { jest } from '@jest/globals';
+import { setupPhaserMock, createMockAdd, mockGameObject } from './helpers/mockPhaser';
 
-// tests/UIScene.test.js
+setupPhaserMock();
 
-// 1. Mock Phaser Global
-const mockGameObject = () => {
-    const listeners = {};
-    const obj = {
-        on: jest.fn((event, fn) => {
-            listeners[event] = fn;
-            return obj;
-        }),
-        emit: (event, ...args) => {
-            if (listeners[event]) listeners[event](...args);
-        },
-        setInteractive: jest.fn().mockReturnThis(),
-        disableInteractive: jest.fn().mockReturnThis(),
-        setVisible: jest.fn().mockReturnThis(),
-        setOrigin: jest.fn().mockReturnThis(),
-        setBackgroundColor: jest.fn().mockReturnThis(),
-        destroy: jest.fn(),
-        setSize: jest.fn().mockReturnThis(),
-        setAlpha: jest.fn().mockReturnThis(),
-        setPosition: jest.fn().mockReturnThis(),
-        setScrollFactor: jest.fn().mockReturnThis(),
-        setDepth: jest.fn().mockReturnThis(),
-        setText: jest.fn(function(val) {
-            this.textValue = val;
-            return this;
-        }),
-        setStrokeStyle: jest.fn().mockReturnThis(),
-        add: jest.fn().mockReturnThis(),
-        addMultiple: jest.fn().mockReturnThis(),
-        width: 100,
-        height: 50,
-        list: [],
-        textValue: ''
-    };
-    return obj;
-};
-
-global.Phaser = {
-    Scene: class Scene {
-        constructor(config) { this.config = config; }
-    },
-    GameObjects: {
-        Container: class Container {
-            constructor() {
-                Object.assign(this, mockGameObject());
-                this.list = [];
-                this.add = (child) => {
-                    if (Array.isArray(child)) {
-                        this.list = this.list.concat(child);
-                    } else {
-                        this.list.push(child);
-                    }
-                    return this;
-                };
-                this.addMultiple = (children) => { this.list = this.list.concat(children); return this; };
+// Enhance the Container mock for this specific test
+// The helper's Container mock is basic; UIScene tests need list management
+const originalContainer = global.Phaser.GameObjects.Container;
+global.Phaser.GameObjects.Container = class Container {
+    constructor() {
+        Object.assign(this, mockGameObject());
+        this.list = [];
+        this.add = (child) => {
+            if (Array.isArray(child)) {
+                this.list = this.list.concat(child);
+            } else {
+                this.list.push(child);
             }
-        },
-        Group: class Group {
-             constructor() {
-                 Object.assign(this, mockGameObject());
-                 this.children = [];
-                 // Override the mockGameObject's addMultiple to ensure logic runs
-                 this.addMultiple = (children) => {
-                     this.children = this.children.concat(children);
-                     return this;
-                 };
-             }
-             add(child) { this.children.push(child); return this; }
-             setVisible(v) { this.visible = v; return this; }
-        },
-        Text: class Text { constructor() { Object.assign(this, mockGameObject()); } },
-        Graphics: class Graphics { constructor() { Object.assign(this, mockGameObject()); } },
-        Sprite: class Sprite { constructor() { Object.assign(this, mockGameObject()); } },
-        Rectangle: class Rectangle { constructor() { Object.assign(this, mockGameObject()); } }
+            return this;
+        };
+        this.addMultiple = (children) => { this.list = this.list.concat(children); return this; };
     }
 };
 
-// 2. Mock Dependencies
+const { UIScene } = require('../js/UIScene');
+const { EventKeys } = require('../js/EventKeys');
+
+// Mock Dependencies
 jest.mock('../js/ButtonFactory', () => {
     return {
         ButtonFactory: {
             createButton: jest.fn((scene, x, y, text, callback, options) => {
-                // Return a simple object that mocks the Container behavior needed
                 const btn = {
                     textLabel: text,
                     setPosition: jest.fn().mockReturnThis(),
@@ -99,7 +45,8 @@ jest.mock('../js/ButtonFactory', () => {
                     }),
                     isDisabled: false,
                     x: x,
-                    y: y
+                    y: y,
+                    tabId: options ? options.tabId : undefined
                 };
 
                 btn.emit = (event) => {
@@ -134,20 +81,17 @@ jest.mock('../js/PersistenceManager', () => {
 });
 
 // Mock SoundSynthesizer
-const mockPlayFailure = jest.fn();
+const mockPlayFailureFn = jest.fn(); // Renamed to avoid confusion, though scoping is the issue
 jest.mock('../js/utils/SoundSynthesizer', () => {
     return {
         SoundSynthesizer: {
             instance: {
-                playFailure: mockPlayFailure,
+                playFailure: jest.fn(), // Use a fresh mock here
                 playChime: jest.fn()
             }
         }
     };
 });
-
-const { UIScene } = require('../js/UIScene');
-const { EventKeys } = require('../js/EventKeys');
 
 describe('UIScene', () => {
     let scene;
@@ -158,14 +102,12 @@ describe('UIScene', () => {
         mockLoadJournal.mockClear();
         mockLoadRecipes.mockClear();
         mockLoadHallOfFame.mockClear();
-        mockPlayFailure.mockClear();
+        // Access the mocked function from the module if we need to spy on it
+        // Or just trust it runs.
 
-        mockAdd = {
-            text: jest.fn(() => new Phaser.GameObjects.Text()),
-            rectangle: jest.fn(() => new Phaser.GameObjects.Rectangle()),
-            group: jest.fn(() => new Phaser.GameObjects.Group()),
-            container: jest.fn(() => new Phaser.GameObjects.Container()),
-        };
+        mockAdd = createMockAdd();
+        // Override mockAdd.container to use the enhanced container from setupPhaserMock
+        mockAdd.container = jest.fn(() => new Phaser.GameObjects.Container());
 
         mockGameEvents = {
             on: jest.fn(),
