@@ -22,19 +22,24 @@ describe('NarrativeSystem', () => {
             expect(DialogueDefinitions['Grizzled Scout'].quest_active).toContain(dialogue);
         });
 
-        test('should handle missing categories (expect fail before fix)', () => {
-            // Sickly Villager has no quest_active.
-            // Currently it falls back to default because of the check:
-            // if (hasActiveQuest && npcData['quest_active']) { category = 'quest_active'; }
+        test('should handle missing quest_active category', () => {
+            // Sickly Villager has no quest_active category.
             const dialogue = NarrativeSystem.getNPCDialogue('Sickly Villager', 0, true);
             expect(DialogueDefinitions['Sickly Villager'].default).toContain(dialogue);
         });
 
-        test('should handle missing friend category (potential crash before fix)', () => {
-            // Master Artisan has friend category, but let's assume one doesn't.
-            // For now, testing existing ones.
-            const dialogue = NarrativeSystem.getNPCDialogue('Sickly Villager', 5, false);
-            expect(DialogueDefinitions['Sickly Villager'].friend).toContain(dialogue);
+        test('should handle missing friend category by falling back to default', () => {
+            // Setup a temporary NPC without a friend category
+            DialogueDefinitions['Robustness Test NPC'] = {
+                'default': ['Fallback success']
+            };
+
+            // Should fall back to default when relationship >= 5 but friend is missing
+            const dialogue = NarrativeSystem.getNPCDialogue('Robustness Test NPC', 5, false);
+            expect(dialogue).toBe('Fallback success');
+
+            // Clean up
+            delete DialogueDefinitions['Robustness Test NPC'];
         });
     });
 
