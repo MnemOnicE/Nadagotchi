@@ -220,9 +220,46 @@ export const Config = {
 
     // Security & Hashing
     SECURITY: {
-        // Loaded via environment variables in Vite (defined in vite.config.js) or process.env in Jest.
-        // Falls back to a generic salt for development.
-        DNA_SALT: (typeof process !== 'undefined' && process.env && process.env.VITE_DNA_SALT) || "DEVELOPMENT_ONLY_SALT"
+        /**
+         * The secret salt used for DNA serialization checksums.
+         * Priority:
+         * 1. Environment Variable (VITE_DNA_SALT)
+         * 2. Persisted salt in localStorage (for unique per-installation security)
+         * 3. Randomly generated salt (if 1 and 2 are missing)
+         * 4. Insecure fallback (DEVELOPMENT_ONLY_SALT) for environments without localStorage or env vars.
+         */
+        get DNA_SALT() {
+            // 1. Check for Environment Variable (Vite/Node)
+            const envSalt = (typeof process !== 'undefined' && process.env) ? process.env.VITE_DNA_SALT : null;
+            if (envSalt && envSalt !== "DEVELOPMENT_ONLY_SALT") {
+                return envSalt;
+            }
+
+            // 2. Check for Persisted Salt in LocalStorage
+            if (typeof localStorage !== 'undefined') {
+                try {
+                    let storedSalt = localStorage.getItem('nadagotchi_dna_salt');
+                    if (!storedSalt) {
+                        // Generate a new unique salt for this installation
+                        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+                            storedSalt = crypto.randomUUID();
+                        } else {
+                            // Robust fallback for older environments
+                            storedSalt = Math.random().toString(36).substring(2, 15) +
+                                         Math.random().toString(36).substring(2, 15) +
+                                         Date.now().toString(36);
+                        }
+                        localStorage.setItem('nadagotchi_dna_salt', storedSalt);
+                    }
+                    return storedSalt;
+                } catch (e) {
+                    // Silently fail if localStorage is restricted (e.g., Private Mode)
+                }
+            }
+
+            // 3. Fallback for non-browser/non-env environments (like some test runners)
+            return "DEVELOPMENT_ONLY_SALT";
+        }
     },
 
     // Debris & Environment
