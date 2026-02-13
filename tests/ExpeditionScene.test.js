@@ -117,8 +117,7 @@ describe('ExpeditionScene', () => {
         callback();
 
         // Verify Order
-        // Current Code: stop() -> resume()
-        // Expected Fix: resume() -> stop()
+        // Fix Verified: resume() -> stop()
 
         const stopOrder = scene.scene.stop.mock.invocationCallOrder[0];
         const resumeOrder = scene.scene.resume.mock.invocationCallOrder[0];

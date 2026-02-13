@@ -135,6 +135,7 @@ export class ShowcaseScene extends Phaser.Scene {
         this.scene.resume('MainScene');
         this.scene.stop();
         this.scene.wake('UIScene');
+        this.scene.stop();
     }
 
     /**
