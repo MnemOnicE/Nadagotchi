@@ -1226,28 +1226,6 @@ export class Nadagotchi {
     }
 
     /**
-     * Adds a specified quantity of an item to the inventory.
-     * Delegates to InventorySystem.
-     * @param {string} itemName - The name of the item to add.
-     * @param {number} quantity - The number of items to add.
-     * @private
-     */
-    _addItem(itemName, quantity) {
-        this.inventorySystem.addItem(itemName, quantity);
-    }
-
-    /**
-     * Removes a specified quantity of an item from the inventory.
-     * Delegates to InventorySystem.
-     * @param {string} itemName - The name of the item to remove.
-     * @param {number} quantity - The number of items to remove.
-     * @private
-     */
-    _removeItem(itemName, quantity) {
-        this.inventorySystem.removeItem(itemName, quantity);
-    }
-
-    /**
      * Exports the pet's DNA string for sharing.
      * @returns {string} The serialized DNA.
      */
