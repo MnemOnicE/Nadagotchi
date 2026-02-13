@@ -22,8 +22,8 @@ export default defineConfig(({ mode }) => {
     },
     define: {
       // Inject the secret salt from environment variables into the client-side code.
-      // Falls back to null if not provided, allowing Config.js to handle unique salt generation.
-      'process.env.VITE_DNA_SALT': JSON.stringify(env.VITE_DNA_SALT || null)
+      // Falls back to a generic salt for development environments.
+      'process.env.VITE_DNA_SALT': JSON.stringify(env.VITE_DNA_SALT || 'DEVELOPMENT_ONLY_SALT')
     }
   };
 });
