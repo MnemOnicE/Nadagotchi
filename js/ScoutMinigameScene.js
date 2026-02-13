@@ -54,8 +54,8 @@ export class ScoutMinigameScene extends Phaser.Scene {
         const endGame = (isSuccess) => {
             if (timer) timer.destroy();
             this.game.events.emit(EventKeys.WORK_RESULT, { success: isSuccess, career: this.careerName });
-            this.scene.stop();
             this.scene.resume('MainScene');
+            this.scene.stop();
         };
 
         const updateTimer = () => {

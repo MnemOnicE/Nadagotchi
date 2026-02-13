@@ -40,8 +40,8 @@ export class LogicPuzzleScene extends Phaser.Scene {
 
         const endGame = (isSuccess) => {
             this.game.events.emit(EventKeys.WORK_RESULT, { success: isSuccess, career: 'Innovator' });
-            this.scene.stop();
             this.scene.resume('MainScene');
+            this.scene.stop();
         };
 
         const handlePlayerClick = (colorName) => {
