@@ -31,9 +31,29 @@ export class UIScene extends Phaser.Scene {
         this.dashboardBg = this.add.rectangle(0, 0, 1, 1, 0xA3B8A2).setOrigin(0);
         this.dashboardBorder = this.add.rectangle(0, 0, 1, 1, 0x4A4A4A).setOrigin(0);
 
-        this.statsText = this.add.text(10, 10, '', {
+        const safeTop = Config.UI.SAFE_AREA_TOP || 0;
+        this.statsText = this.add.text(10, 10 + safeTop, '', {
             fontFamily: 'VT323, monospace', fontSize: '24px', color: '#ffffff', stroke: '#000000', strokeThickness: 3
         });
+
+        // --- SECRET DEBUG TRIGGER ---
+        this.statsText.setInteractive({ useHandCursor: true });
+        this.statsTextClickCount = 0;
+        this.statsText.on('pointerdown', () => {
+             this.statsTextClickCount++;
+             if (this.statsTextClickCount === 1) {
+                  // Reset after 2 seconds
+                  this.time.delayedCall(2000, () => { this.statsTextClickCount = 0; });
+             }
+             if (this.statsTextClickCount >= 5) {
+                  this.statsTextClickCount = 0;
+                  const mainScene = this.scene.get('MainScene');
+                  if (mainScene && mainScene.debugConsole) {
+                       mainScene.debugConsole.toggle();
+                  }
+             }
+        });
+
         this.lastStatsText = '';
 
         this.actionButtons = [];
@@ -146,7 +166,10 @@ export class UIScene extends Phaser.Scene {
         this.tabButtons.forEach(btn => { btn.setPosition(tabX, dashboardY + 10); tabX += tabWidth + 10; });
         if (this.jobBoardButton) this.jobBoardButton.setPosition(width - 130, height - 60);
         if (this.retireButton) this.retireButton.setPosition(width - 10, 50);
-        if (this.calendarDropdown) this.calendarDropdown.setPosition(width - 160, 0);
+
+        const safeTop = Config.UI.SAFE_AREA_TOP || 0;
+        if (this.calendarDropdown) this.calendarDropdown.setPosition(width - 160, safeTop);
+
         this.updateActionButtons(true);
         this.resizeModals(width, height);
     }
