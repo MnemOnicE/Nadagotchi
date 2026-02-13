@@ -26,11 +26,11 @@ export class NarrativeSystem {
 
         if (hasActiveQuest && npcData['quest_active']) {
             category = 'quest_active';
-        } else if (relationshipLevel >= 5) {
+        } else if (relationshipLevel >= 5 && npcData['friend']) {
             category = 'friend';
         }
 
-        const lines = npcData[category];
+        const lines = npcData[category] || npcData['default'];
         return lines[Math.floor(Math.random() * lines.length)];
     }
 

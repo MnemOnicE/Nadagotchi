@@ -38,7 +38,8 @@ export class SkyManager {
         const daylightFactor = this.scene.worldClock.getDaylightFactor();
 
         // OPTIMIZATION: Skip expensive gradient and star drawing if the sky state hasn't changed.
-        if (this.lastDaylightFactor === daylightFactor) return;
+        // We use a small threshold (0.002) to avoid redrawing for imperceptible changes during transitions.
+        if (Math.abs(this.lastDaylightFactor - daylightFactor) < 0.002) return;
         this.lastDaylightFactor = daylightFactor;
 
         const nightTop = new Phaser.Display.Color(0, 0, 51);
