@@ -21,6 +21,7 @@ jest.mock('../js/Config.js', () => ({
             GENOME_STARTER_VAL: 10
         },
         LIMITS: { MAX_STATS: 100 },
+        SECURITY: { DNA_SALT: 'test_salt' },
         GAME_LOOP: { MS_PER_FRAME: 16 },
         DECAY: { HUNGER: 0.1, ENERGY: 0.1, AGE_INCREMENT: 0.001 },
         THRESHOLDS: { HUNGER_ANGRY: 20, HUNGER_SAD: 50, ENERGY_SAD: 30, HAPPY_MOOD: 80, HAPPY_MOOD_HOMOZYGOUS: 60, AGE_LEGACY: 10 },

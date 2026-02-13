@@ -2,9 +2,6 @@ import { EventKeys } from './EventKeys.js';
 import { ButtonFactory } from './ButtonFactory.js';
 import { SoundSynthesizer } from './utils/SoundSynthesizer.js';
 
-const COMMON_LETTERS = "EOTAINSHR";
-const VOWELS = "AEIOU";
-
 /**
  * @class StudyMinigameScene
  * @extends Phaser.Scene
@@ -55,11 +52,20 @@ export class StudyMinigameScene extends Phaser.Scene {
     }
 
     generateGrid() {
+        // Bias towards common letters in our dictionary
+        const common = "EOTAINSHR";
+        const rare = "QZJXKV";
+        const vowels = "AEIOU";
+
         for(let y=0; y<this.gridSize; y++) {
             const row = [];
             for(let x=0; x<this.gridSize; x++) {
-                // Bias towards common letters in our dictionary
-                const char = this._generateRandomChar(0.3);
+                let char = '';
+                const r = Math.random();
+                if(r < 0.3) char = vowels[Math.floor(Math.random() * vowels.length)];
+                else if(r < 0.8) char = common[Math.floor(Math.random() * common.length)];
+                else char = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+
                 row.push({ char, x, y, sprite: null, bg: null });
             }
             this.grid.push(row);
@@ -147,20 +153,21 @@ export class StudyMinigameScene extends Phaser.Scene {
     replaceSelected() {
         // Remove chars and drop down (simple refill for now)
         this.selectedCells.forEach(c => {
-            // Reroll char. Higher vowel chance on refill (0.4 vs 0.3)
-            c.char = this._generateRandomChar(0.4);
+            const vowels = "AEIOU";
+            const common = "EOTAINSHR";
+            // Reroll char
+            let char = '';
+            const r = Math.random();
+            if(r < 0.4) char = vowels[Math.floor(Math.random() * vowels.length)]; // Higher vowel chance on refill
+            else if(r < 0.8) char = common[Math.floor(Math.random() * common.length)];
+            else char = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+
+            c.char = char;
             // Update Text (Need ref to text obj? We didn't store it. Re-render entire grid is easiest for this prototype)
         });
 
         this.renderGrid();
         this.selectedCells = [];
-    }
-
-    _generateRandomChar(vowelChance) {
-        const r = Math.random();
-        if (r < vowelChance) return VOWELS[Math.floor(Math.random() * VOWELS.length)];
-        else if (r < 0.8) return COMMON_LETTERS[Math.floor(Math.random() * COMMON_LETTERS.length)];
-        else return String.fromCharCode(65 + Math.floor(Math.random() * 26));
     }
 
     showFeedback(msg, color) {

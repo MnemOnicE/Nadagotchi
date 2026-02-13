@@ -220,7 +220,7 @@ describe('UIScene Action Buttons & Optimization', () => {
 
     test('updateStatsUI call should be optimized after refactor', () => {
         scene.showTab('CARE');
-        scene.lastActionSignature = 'CARE:Feed|Play|Meditate';
+        scene.lastActionSignature = 'Feed|Play|Meditate';
         const initialButtons = scene.actionButtons;
 
         // Call updateStatsUI with same data/state
