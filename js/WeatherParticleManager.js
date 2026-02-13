@@ -93,7 +93,7 @@ export class WeatherParticleManager {
     }
 
     resize(width, height) {
-        // Update emitter bounds
+        // Update emitter bounds and kill zone
         Object.values(this.emitters).forEach(e => {
             e.setPosition(0, -10); // Reset origin
             // Correct way to reset width using Phaser 3 API
@@ -101,9 +101,8 @@ export class WeatherParticleManager {
                 source: new Phaser.Geom.Rectangle(0, -10, width, 1),
                 type: 'random'
             });
+            // Ensure particles die when leaving the screen
+            e.setBounds(0, 0, width, height);
         });
-
-        // Update bounds for killing particles when they leave the screen
-        if (this.emitters.rain) this.emitters.rain.setBounds(0, 0, width, height);
     }
 }

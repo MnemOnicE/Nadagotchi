@@ -48,7 +48,7 @@ describe('WeatherParticleManager', () => {
         manager = new WeatherParticleManager(scene);
     });
 
-    test('resize updates emitter zone using correct API', () => {
+    test('resize updates emitter zone and bounds using correct API', () => {
         const width = 1024;
         const height = 768;
 
@@ -60,7 +60,6 @@ describe('WeatherParticleManager', () => {
         // Verify setEmitZone is called with correct source
         // Note: The current code (pre-refactor) sets `emitZone` property directly.
         // This test expects the refactored behavior (setEmitZone call).
-        // Since I haven't refactored yet, this test should FAIL initially if I ran it now.
         expect(mockEmitter.setEmitZone).toHaveBeenCalledWith(expect.objectContaining({
             source: expect.any(global.Phaser.Geom.Rectangle)
         }));
@@ -71,5 +70,7 @@ describe('WeatherParticleManager', () => {
         expect(rect.height).toBe(1);
         expect(rect.x).toBe(0);
         expect(rect.y).toBe(-10);
+
+        expect(mockEmitter.setBounds).toHaveBeenCalledWith(0, 0, width, height);
     });
 });
