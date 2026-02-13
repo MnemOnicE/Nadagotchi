@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "A Tamagotchi-like game with a deep, emergent personality system.",
   "main": "js/game.js",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "directories": {
     "test": "tests"
   },
