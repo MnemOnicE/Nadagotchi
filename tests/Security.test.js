@@ -187,6 +187,24 @@ describe('Security Hardening', () => {
 
         // Get the raw save string
         const raw = localStorage.getItem('nadagotchi_save');
+
+        // Handle v1 Secure Format
+        if (raw && raw.startsWith('v1|')) {
+            const parts = raw.split('|');
+            // v1|salt|ciphertext|hmac
+            // Tamper with ciphertext (part 2)
+            let ciphertext = parts[2];
+            // Flip last char
+            const lastChar = ciphertext.slice(-1);
+            const newLastChar = lastChar === '0' ? '1' : '0';
+            parts[2] = ciphertext.slice(0, -1) + newLastChar;
+
+            localStorage.setItem('nadagotchi_save', parts.join('|'));
+            expect(persistence.loadPet()).toBeNull();
+            return;
+        }
+
+        // Fallback for legacy format tests (if applicable)
         const [encoded, hash] = raw.split('|');
 
         // Decode, modify hunger, re-encode
