@@ -177,6 +177,8 @@ describe('QuestSystem', () => {
         });
 
         test('successfully completes daily quest (CRAFT)', () => {
+            const initialHappiness = 50;
+            pet.stats.happiness = initialHappiness;
             pet.dailyQuest = {
                 type: 'CRAFT',
                 item: 'Chair',
@@ -192,6 +194,10 @@ describe('QuestSystem', () => {
             expect(result).toBe(true);
             expect(pet.dailyQuest.completed).toBe(true);
             expect(pet.inventorySystem.removeItem).toHaveBeenCalledWith('Chair', 1);
+            expect(pet.gainCareerXP).toHaveBeenCalledWith(20);
+            expect(pet.stats.happiness).toBe(initialHappiness + Config.ACTIONS.INTERACT_NPC.QUEST_HAPPINESS_GAIN);
+            expect(pet.relationships['Artisan'].level).toBe(6);
+            expect(pet.addJournalEntry).toHaveBeenCalledWith(expect.stringContaining('I completed a request for Artisan'));
         });
 
         test('does not update relationship if NPC not met', () => {

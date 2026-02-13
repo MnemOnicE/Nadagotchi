@@ -143,7 +143,7 @@ export class PersistenceManager {
 
         // Migration: If data is an Array (Legacy), wrap it in Entryway
         if (Array.isArray(data)) {
-            console.debug("Migrating legacy furniture data to Entryway...");
+            console.log("Migrating legacy furniture data to Entryway...");
             return { "Entryway": data };
         }
 
@@ -179,7 +179,7 @@ export class PersistenceManager {
 
         // Migration: If data has 'wallpaper' at root level (Legacy)
         if (data.wallpaper || data.flooring) {
-            console.debug("Migrating legacy home config to Entryway...");
+            console.log("Migrating legacy home config to Entryway...");
             return {
                 rooms: {
                     "Entryway": {
