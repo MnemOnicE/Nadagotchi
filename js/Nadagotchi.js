@@ -282,6 +282,9 @@ export class Nadagotchi {
         this.moodOverride = null;
         /** @type {number} Time in ms remaining for the mood override. */
         this.moodOverrideTimer = 0;
+
+        /** @type {boolean} Internal flag to batch journal saves. */
+        this._journalSavePending = false;
     }
 
     /**
@@ -991,12 +994,34 @@ export class Nadagotchi {
 
     /**
      * Adds a new entry to the journal and saves it to persistence.
+     * Caps the journal size and batches saves to optimize performance.
      * @param {string} text - The content of the journal entry.
      */
     addJournalEntry(text) {
         const newEntry = { date: new Date().toLocaleString(), text: text };
         this.journal.push(newEntry);
-        this.persistence.saveJournal(this.journal);
+
+        // Cap the journal growth
+        const limit = Config.LIMITS.MAX_JOURNAL_ENTRIES || 100;
+        if (this.journal.length > limit) {
+            this.journal = this.journal.slice(-limit);
+        }
+
+        // Batch serialization and persistence to reduce frequency
+        if (!this._journalSavePending) {
+            this._journalSavePending = true;
+            const performSave = () => {
+                this.persistence.saveJournal(this.journal);
+                this._journalSavePending = false;
+            };
+
+            // Use queueMicrotask for efficient batching, fallback to setTimeout
+            if (typeof queueMicrotask === 'function') {
+                queueMicrotask(performSave);
+            } else {
+                setTimeout(performSave, 0);
+            }
+        }
     }
 
     /**
