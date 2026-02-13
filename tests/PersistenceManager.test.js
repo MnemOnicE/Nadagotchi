@@ -85,4 +85,47 @@ describe('PersistenceManager', () => {
         const loadedRecipes = persistenceManager.loadRecipes();
         expect(loadedRecipes).toEqual([]);
     });
+
+    describe('Migration', () => {
+        beforeEach(() => {
+            jest.spyOn(console, 'debug').mockImplementation(() => {});
+        });
+
+        afterEach(() => {
+            console.debug.mockRestore();
+        });
+
+        test('should migrate legacy furniture array to Entryway object', () => {
+            const legacyData = [{ key: 'Chair', x: 10, y: 10 }];
+            // Manually save legacy data as plain JSON (PersistenceManager._load supports this)
+            global.localStorage.setItem('nadagotchi_furniture', JSON.stringify(legacyData));
+
+            const result = persistenceManager.loadFurniture();
+
+            expect(result).toHaveProperty('Entryway');
+            expect(result.Entryway).toEqual(legacyData);
+            expect(console.debug).toHaveBeenCalledWith(expect.stringContaining('Migrating legacy furniture data'));
+        });
+
+        test('should migrate legacy home config to Entryway object', () => {
+            const legacyData = { wallpaper: 'Blue', flooring: 'Wood' };
+            global.localStorage.setItem('nadagotchi_home_config', JSON.stringify(legacyData));
+
+            const result = persistenceManager.loadHomeConfig();
+
+            expect(result.rooms).toHaveProperty('Entryway');
+            expect(result.rooms.Entryway.wallpaper).toBe('Blue');
+            expect(console.debug).toHaveBeenCalledWith(expect.stringContaining('Migrating legacy home config'));
+        });
+
+        test('should not trigger migration for modern furniture data', () => {
+            const modernData = { "Entryway": [{ key: 'Table', x: 50, y: 50 }] };
+            persistenceManager.saveFurniture(modernData);
+
+            const result = persistenceManager.loadFurniture();
+
+            expect(result).toEqual(modernData);
+            expect(console.debug).not.toHaveBeenCalled();
+        });
+    });
 });
