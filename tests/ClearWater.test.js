@@ -5,6 +5,7 @@ import { ItemDefinitions } from '../js/ItemData.js';
 // Mock Config to avoid runtime errors
 jest.mock('../js/Config.js', () => ({
     Config: {
+        SECURITY: { DNA_SALT: 'test_salt' },
         ACTIONS: {
             CRAFT: { ENERGY_COST: 10, HAPPINESS_PENALTY_MISSING_MATS: 5, HAPPINESS_RESTORE: 5, SKILL_GAIN: 1 },
             FORAGE: { ENERGY_COST: 10, SKILL_GAIN: 1 }

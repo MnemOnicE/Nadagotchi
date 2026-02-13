@@ -38,6 +38,9 @@ describe('Task Verification', () => {
         // Simulate Winter by passing it to live()
         pet.live({ weather: "Sunny", time: "Day", activeEvent: null, season: "Winter" });
 
+        // Mock RNG to avoid rare artifact drop failure (needs > 0.02)
+        jest.spyOn(pet.rng, 'random').mockReturnValue(0.5);
+
         // Spy on the seeded RNG
         const choiceSpy = jest.spyOn(pet.rng, 'choice');
 

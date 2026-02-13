@@ -5,6 +5,16 @@ import { Config } from '../js/Config.js';
 
 describe('Genetics Serialization System', () => {
 
+    let originalSalt;
+
+    beforeAll(() => {
+        originalSalt = Config.SECURITY.DNA_SALT;
+    });
+
+    afterAll(() => {
+        Config.SECURITY.DNA_SALT = originalSalt;
+    });
+
     it('should correctly serialize and deserialize a genome', () => {
         const genome = new Genome();
         const serialized = GeneticsSystem.serialize(genome);
