@@ -108,7 +108,10 @@ export class UIScene extends Phaser.Scene {
     showTab(tabId, force = false) {
         this.currentTab = tabId;
         this.tabButtons.forEach(btn => { btn.setAlpha(btn.tabId === tabId ? 1.0 : 0.7); });
-        const allActions = this.getTabActions(tabId);
+        this.updateActionButtons(force);
+    }
+    updateActionButtons(force = false) {
+        const allActions = this.getTabActions(this.currentTab);
         const visibleActions = allActions.filter(item => !item.condition || item.condition());
         const signature = visibleActions.map(a => a.text).join('|');
         if (!force && signature === this.lastActionSignature) return;
@@ -144,7 +147,7 @@ export class UIScene extends Phaser.Scene {
         if (this.jobBoardButton) this.jobBoardButton.setPosition(width - 130, height - 60);
         if (this.retireButton) this.retireButton.setPosition(width - 10, 50);
         if (this.calendarDropdown) this.calendarDropdown.setPosition(width - 160, 0);
-        this.showTab(this.currentTab);
+        this.updateActionButtons(true);
         this.resizeModals(width, height);
     }
     resizeModals(width, height) {
@@ -192,7 +195,7 @@ export class UIScene extends Phaser.Scene {
         const moodEmoji = this.getMoodEmoji(mood);
         const text = `Location: ${location}\nArchetype: ${dominantArchetype}\nMood: ${mood} ${moodEmoji}\nCareer: ${currentCareer || 'None'}\nHunger: ${Math.floor(stats.hunger)}\nEnergy: ${Math.floor(stats.energy)}\nHappiness: ${Math.floor(stats.happiness)}\nLogic: ${skills.logic.toFixed(2)} | Nav: ${skills.navigation.toFixed(2)} | Research: ${skills.research.toFixed(2)}`;
         if (this.lastStatsText !== text) { this.statsText.setText(text); this.lastStatsText = text; }
-        this.showTab(this.currentTab, false);
+        this.updateActionButtons(false);
         if (currentCareer) this.jobBoardButton.setAlpha(1.0); else this.jobBoardButton.setAlpha(0.6);
         this.retireButton.setVisible(isLegacyReady);
         if (newCareerUnlocked) { this.showCareerNotification(newCareerUnlocked); this.mainScene.nadagotchi.newCareerUnlocked = null; }
