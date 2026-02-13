@@ -63,23 +63,16 @@ describe('SkyManager Performance', () => {
         const totalFrames = 420 * 60;
         const delta = 1000 / 60; // ~16.67ms
 
-        let redrawCount = 0;
-
         for (let i = 0; i < totalFrames; i++) {
             worldClock.update(delta);
             skyManager.update();
-
-            // Check if redraw happened in this frame
-            if (mockContext.createLinearGradient.mock.calls.length > redrawCount) {
-                redrawCount++;
-            }
         }
 
-        console.log(`Total Frames: ${totalFrames}`);
-        console.log(`Redraw Count: ${redrawCount}`);
+        const redrawCount = mockContext.createLinearGradient.mock.calls.length;
 
-        // Assertions to verify behavior (baseline or optimized)
-        // For now, just logging is enough to see the baseline.
-        expect(redrawCount).toBeGreaterThan(0);
+        // The optimized redraw count should be significantly lower than the baseline.
+        // Based on the PR, this should be around 838, down from ~5000.
+        // This assertion will help catch performance regressions.
+        expect(redrawCount).toBeLessThan(1000);
     });
 });
