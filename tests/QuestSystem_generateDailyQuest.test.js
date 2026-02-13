@@ -23,6 +23,7 @@ describe('QuestSystem.generateDailyQuest', () => {
     let questSystem;
 
     beforeEach(() => {
+        jest.clearAllMocks();
         pet = {
             rng: {
                 choice: jest.fn((arr) => arr[0]) // Default to returning first element
@@ -31,7 +32,6 @@ describe('QuestSystem.generateDailyQuest', () => {
             addJournalEntry: jest.fn()
         };
         questSystem = new QuestSystem(pet);
-        jest.clearAllMocks();
     });
 
     test('should correctly select a template from the specified season', () => {
