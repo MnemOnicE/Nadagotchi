@@ -181,25 +181,6 @@ export class StartScene extends Phaser.Scene {
             repeat: -1
         });
 
-        // Keyboard Logic (Defined early to be accessible by buttons)
-        const keyHandler = (event) => {
-            if (event.key.length === 1 && currentName.length < 12) {
-                // Alphanumeric check regex
-                if (/[a-zA-Z0-9 ]/.test(event.key)) {
-                    currentName += event.key;
-                }
-            } else if (event.key === 'Backspace') {
-                currentName = currentName.slice(0, -1);
-            } else if (event.key === 'Enter') {
-                 if (currentName.length > 0) {
-                    this.input.keyboard.off('keydown', keyHandler);
-                    this.startGame(archetype, currentName);
-                }
-            }
-
-            nameDisplay.setText(currentName.length > 0 ? currentName : 'Type Name...');
-        };
-
         // Instructions
         const instructions = this.add.text(width / 2, height * 0.6, '(Type using your keyboard. Max 12 chars.)', {
             fontFamily: 'VT323, monospace',
@@ -225,6 +206,25 @@ export class StartScene extends Phaser.Scene {
             this.selectionContainer.setVisible(true);
         }, { width: 100, height: 40, color: 0x888888 });
         this.nameInputContainer.add(backBtn);
+
+        // Keyboard Logic
+        const keyHandler = (event) => {
+            if (event.key.length === 1 && currentName.length < 12) {
+                // Alphanumeric check regex
+                if (/[a-zA-Z0-9 ]/.test(event.key)) {
+                    currentName += event.key;
+                }
+            } else if (event.key === 'Backspace') {
+                currentName = currentName.slice(0, -1);
+            } else if (event.key === 'Enter') {
+                 if (currentName.length > 0) {
+                    this.input.keyboard.off('keydown', keyHandler);
+                    this.startGame(archetype, currentName);
+                }
+            }
+
+            nameDisplay.setText(currentName.length > 0 ? currentName : 'Type Name...');
+        };
 
         this.input.keyboard.on('keydown', keyHandler);
     }

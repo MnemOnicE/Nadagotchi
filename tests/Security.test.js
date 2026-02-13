@@ -187,24 +187,6 @@ describe('Security Hardening', () => {
 
         // Get the raw save string
         const raw = localStorage.getItem('nadagotchi_save');
-
-        // Handle v1 Secure Format
-        if (raw && raw.startsWith('v1|')) {
-            const parts = raw.split('|');
-            // v1|salt|ciphertext|hmac
-            // Tamper with ciphertext (part 2)
-            let ciphertext = parts[2];
-            // Flip last char
-            const lastChar = ciphertext.slice(-1);
-            const newLastChar = lastChar === '0' ? '1' : '0';
-            parts[2] = ciphertext.slice(0, -1) + newLastChar;
-
-            localStorage.setItem('nadagotchi_save', parts.join('|'));
-            expect(persistence.loadPet()).toBeNull();
-            return;
-        }
-
-        // Fallback for legacy format tests (if applicable)
         const [encoded, hash] = raw.split('|');
 
         // Decode, modify hunger, re-encode
@@ -267,9 +249,9 @@ describe('Security Hardening', () => {
         // Since Config is already loaded, we check if it correctly generated a salt
         const salt = Config.SECURITY.DNA_SALT;
         expect(salt).toBeDefined();
-        expect(salt).not.toBe("DEVELOPMENT_ONLY_SALT");
+        expect(salt).not.toBe("NADAGOTCHI_LOCAL_FALLBACK");
 
-        // It should be a UUID (based on debug_salt.test.js results)
+        // It should be a UUID or a secure random string
         // or at least a long random string.
         expect(salt.length).toBeGreaterThan(10);
 

@@ -329,12 +329,18 @@ export class Nadagotchi {
 
     /**
      * Generates a random seed for the universe.
-     * Uses Math.random() as the bootstrap entropy source.
+     * Uses Crypto API if available for high-entropy bootstrapping.
      * @returns {number} A large random integer.
      * @private
      */
     _generateSeed() {
-        return Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+        if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+            const array = new Uint32Array(1);
+            crypto.getRandomValues(array);
+            return array[0];
+        }
+        // Fallback for older environments
+        return Math.floor(Math.random() * 0xFFFFFFFF);
     }
 
     /**
@@ -1311,7 +1317,14 @@ export class Nadagotchi {
             location: 'Home',
             genome: { genotype: genome.genotype, phenotype: phenotype },
             homeConfig: initialHomeConfig,
-            universeSeed: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
+            universeSeed: (function() {
+                if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+                    const array = new Uint32Array(1);
+                    crypto.getRandomValues(array);
+                    return array[0];
+                }
+                return Math.floor(Math.random() * 0xFFFFFFFF);
+            })()
         };
     }
 }
