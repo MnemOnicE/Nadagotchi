@@ -148,7 +148,7 @@ export class PersistenceManager {
 
         // Migration: If data is an Array (Legacy), wrap it in Entryway
         if (Array.isArray(data)) {
-            console.debug("Migrating legacy furniture data to Entryway...");
+            console.log("Migrating legacy furniture data to Entryway...");
             return { "Entryway": data };
         }
 
@@ -184,7 +184,7 @@ export class PersistenceManager {
 
         // Migration: If data has 'wallpaper' at root level (Legacy)
         if (data.wallpaper || data.flooring) {
-            console.debug("Migrating legacy home config to Entryway...");
+            console.log("Migrating legacy home config to Entryway...");
             return {
                 rooms: {
                     "Entryway": {
@@ -251,10 +251,10 @@ export class PersistenceManager {
             if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
                 crypto.getRandomValues(fileSaltBytes);
             } else {
-                // Fallback for environments without crypto (unlikely in modern browsers but good for tests)
-                for (let i = 0; i < 16; i++) {
-                    fileSaltBytes[i] = Math.floor(Math.random() * 256);
-                }
+                // In modern environments (Browser, Node.js > 19, JSDOM), crypto is available.
+                // We deliberately fail rather than fallback to insecure Math.random() to satisfy security audits.
+                console.error("Secure Persistence: 'crypto.getRandomValues' not available.");
+                return;
             }
             const fileSalt = Array.from(fileSaltBytes).map(b => b.toString(16).padStart(2, '0')).join('');
 
