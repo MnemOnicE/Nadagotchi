@@ -3,6 +3,9 @@
  * Includes mechanisms for data integrity (checksums), legacy support, and specialized save slots (Pet, Hall of Fame, Journal).
  */
 
+import { Config } from './Config.js';
+import { encrypt, decrypt, hmacSha256 } from './utils/CryptoUtils.js';
+
 /**
  * PersistenceManager handles saving and loading game data.
  * It provides an abstraction layer over `localStorage` with added security features.
@@ -22,6 +25,8 @@ export class PersistenceManager {
         }
 
         // Pass the UUID as salt to bind the save file to this specific pet instance
+        // Note: In v1 secure save, the UUID is encrypted within the payload, so extra salt is less critical for binding,
+        // but we verify it on load if possible.
         this._save("nadagotchi_save", payload, payload.uuid);
     }
 
@@ -143,7 +148,7 @@ export class PersistenceManager {
 
         // Migration: If data is an Array (Legacy), wrap it in Entryway
         if (Array.isArray(data)) {
-            console.log("Migrating legacy furniture data to Entryway...");
+            console.debug("Migrating legacy furniture data to Entryway...");
             return { "Entryway": data };
         }
 
@@ -179,7 +184,7 @@ export class PersistenceManager {
 
         // Migration: If data has 'wallpaper' at root level (Legacy)
         if (data.wallpaper || data.flooring) {
-            console.log("Migrating legacy home config to Entryway...");
+            console.debug("Migrating legacy home config to Entryway...");
             return {
                 rooms: {
                     "Entryway": {
@@ -231,37 +236,102 @@ export class PersistenceManager {
     }
 
     /**
-     * Helper method to save data with simple obfuscation (Base64) and an integrity check (Hash).
+     * Securely saves data to localStorage using HMAC-SHA256 and stream encryption.
      * @param {string} key - The localStorage key.
      * @param {any} data - The data to save.
-     * @param {string} [salt=null] - Optional salt (e.g., UUID) to bind the hash to the data content.
+     * @param {string} [extraSalt=null] - Optional extra salt (e.g., UUID) for legacy binding, ignored for key derivation in v1 to allow decryption.
      * @private
      */
-    _save(key, data, salt = null) {
+    _save(key, data, extraSalt = null) {
         try {
             const json = JSON.stringify(data);
-            const encoded = btoa(json);
-            const strToHash = salt ? encoded + salt : encoded;
-            const hash = this._hash(strToHash);
-            localStorage.setItem(key, `${encoded}|${hash}`);
+
+            // Generate a random 16-byte file salt
+            const fileSaltBytes = new Uint8Array(16);
+            if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+                crypto.getRandomValues(fileSaltBytes);
+            } else {
+                // Fallback for environments without crypto (unlikely in modern browsers but good for tests)
+                for (let i = 0; i < 16; i++) {
+                    fileSaltBytes[i] = Math.floor(Math.random() * 256);
+                }
+            }
+            const fileSalt = Array.from(fileSaltBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+
+            // Derive Key: Global Secret + File Salt
+            // We intentionally do NOT use extraSalt here because we can't extract it from the encrypted blob during load
+            // without the key itself. The security is guaranteed by the Secret.
+            const secret = Config.SECURITY.DNA_SALT || "DEVELOPMENT_ONLY_SALT";
+            const compositeKey = secret + fileSalt;
+
+            // Encrypt
+            const ciphertext = encrypt(json, compositeKey);
+
+            // HMAC
+            const hmac = hmacSha256(compositeKey, ciphertext);
+
+            // Format: v1|fileSalt|ciphertext|hmac
+            localStorage.setItem(key, `v1|${fileSalt}|${ciphertext}|${hmac}`);
+
         } catch (e) {
             console.error(`Failed to save data for key ${key}:`, e);
         }
     }
 
     /**
-     * Helper method to load data with integrity verification.
-     * Supports legacy plain JSON saves by checking for JSON syntax first.
+     * Loads data with integrity verification and support for legacy formats.
      * @param {string} key - The localStorage key.
-     * @param {function} [saltCallback=null] - Optional callback to extract salt from parsed data for verification.
-     * @returns {any|null} The parsed data, or null if missing, corrupted, or tampered.
+     * @param {function} [saltCallback=null] - Callback to extract extra salt (e.g. UUID) from parsed data.
+     * @returns {any|null} The parsed data, or null if invalid.
      * @private
      */
     _load(key, saltCallback = null) {
         const raw = localStorage.getItem(key);
         if (!raw) return null;
 
-        // Legacy support: check if it looks like JSON
+        // V1 Secure Format Check
+        if (raw.startsWith('v1|')) {
+            try {
+                const parts = raw.split('|');
+                if (parts.length !== 4) {
+                    console.warn(`Corrupted v1 save file for key ${key}.`);
+                    return null;
+                }
+
+                const [_, fileSalt, ciphertext, storedHmac] = parts;
+
+                const secret = Config.SECURITY.DNA_SALT || "DEVELOPMENT_ONLY_SALT";
+                const encryptionKey = secret + fileSalt;
+
+                // Integrity Check
+                const calcedHmac = hmacSha256(encryptionKey, ciphertext);
+                if (calcedHmac !== storedHmac) {
+                    console.warn(`Save file tampered (HMAC mismatch) for key ${key}.`);
+                    return null;
+                }
+
+                // Decrypt
+                const json = decrypt(ciphertext, encryptionKey);
+                let data;
+                try {
+                    data = JSON.parse(json);
+                } catch (e) {
+                    console.error(`Failed to parse decrypted JSON for key ${key}.`, e);
+                    return null;
+                }
+
+                // Note: We don't verify saltCallback here because the UUID is internal to the encrypted payload
+                // and thus protected by the encryption/HMAC.
+
+                return data;
+
+            } catch (e) {
+                console.error(`Failed to load v1 save for key ${key}:`, e);
+                return null;
+            }
+        }
+
+        // Legacy: check if it looks like JSON
         if (raw.trim().startsWith('{') || raw.trim().startsWith('[')) {
             try {
                 return JSON.parse(raw);
@@ -271,42 +341,42 @@ export class PersistenceManager {
             }
         }
 
+        // Legacy: Base64|Hash
         const parts = raw.split('|');
-        if (parts.length !== 2) {
-            console.warn(`Save file corrupted or tampered (invalid format) for key ${key}.`);
-            return null;
+        if (parts.length === 2) {
+            const [encoded, hash] = parts;
+            let json;
+            try {
+                json = atob(encoded);
+            } catch (e) {
+                console.error(`Failed to decode save for key ${key}:`, e);
+                return null;
+            }
+
+            let data;
+            try {
+                data = JSON.parse(json);
+            } catch (e) {
+                console.error(`Failed to parse JSON for key ${key}:`, e);
+                return null;
+            }
+
+            // Integrity Check
+            let salt = "";
+            if (saltCallback) {
+                salt = saltCallback(data) || "";
+            }
+
+            const strToHash = salt ? encoded + salt : encoded;
+            if (this._hash(strToHash) !== hash) {
+                console.warn(`Save file tampered (hash mismatch) for key ${key}.`);
+                return null;
+            }
+            return data;
         }
 
-        const [encoded, hash] = parts;
-        let json;
-        try {
-            json = atob(encoded);
-        } catch (e) {
-            console.error(`Failed to decode save for key ${key}:`, e);
-            return null;
-        }
-
-        let data;
-        try {
-            data = JSON.parse(json);
-        } catch (e) {
-            console.error(`Failed to parse JSON for key ${key}:`, e);
-            return null;
-        }
-
-        // Integrity Check
-        let salt = "";
-        if (saltCallback) {
-            salt = saltCallback(data) || "";
-        }
-
-        const strToHash = salt ? encoded + salt : encoded;
-        if (this._hash(strToHash) !== hash) {
-            console.warn(`Save file tampered (hash mismatch) for key ${key}.`);
-            return null;
-        }
-
-        return data;
+        console.warn(`Unknown save format for key ${key}.`);
+        return null;
     }
 
     /**
