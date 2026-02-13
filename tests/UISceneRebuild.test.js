@@ -173,7 +173,7 @@ describe('UIScene Rebuild Logic', () => {
 
         // If optimization works, firstButton should NOT be destroyed
         // If no optimization, it IS destroyed
-        // expect(firstButton.destroy).not.toHaveBeenCalled();
+        expect(firstButton.destroy).not.toHaveBeenCalled();
     });
 
     test('rebuilding: showTab(true) SHOULD destroy buttons even if signature matches', () => {
