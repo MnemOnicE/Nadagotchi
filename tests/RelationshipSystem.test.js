@@ -5,7 +5,7 @@ import { Config } from '../js/Config.js';
 // Mock Config to ensure stable values for testing
 jest.mock('../js/Config.js', () => ({
     Config: {
-        SECURITY: { DNA_SALT: 'test_salt' },
+        SECURITY: { DNA_SALT: '' },
         ACTIONS: {
             INTERACT_NPC: {
                 ENERGY_COST: 5,

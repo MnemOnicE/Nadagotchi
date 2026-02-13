@@ -11,8 +11,6 @@ class LocalStorageMock {
     removeItem(key) { delete this.store[key]; }
 }
 global.localStorage = new LocalStorageMock();
-global.btoa = (str) => Buffer.from(str, 'binary').toString('base64');
-global.atob = (str) => Buffer.from(str, 'base64').toString('binary');
 
 describe('Journal Capping and Batching', () => {
     let pet;

@@ -1015,11 +1015,11 @@ export class Nadagotchi {
                 this._journalSavePending = false;
             };
 
-            // Use queueMicrotask for efficient batching, fallback to setTimeout
+            // Use queueMicrotask or Promise for efficient batching
             if (typeof queueMicrotask === 'function') {
                 queueMicrotask(performSave);
             } else {
-                setTimeout(performSave, 0);
+                Promise.resolve().then(performSave);
             }
         }
     }

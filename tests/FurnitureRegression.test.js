@@ -22,7 +22,7 @@ jest.mock('../js/Config.js', () => ({
             INTERACT_NPC: { ENERGY_COST: 5 }
         },
         LIMITS: { MAX_STATS: 100 },
-        SECURITY: { DNA_SALT: 'test_salt' },
+        SECURITY: { DNA_SALT: '' },
         GENETICS: { HOMOZYGOUS_ENERGY_BONUS: 5, METABOLISM_NORMALIZER: 5 },
         DECAY: { AGE_INCREMENT: 0.001 },
         THRESHOLDS: { AGE_LEGACY: 50 },

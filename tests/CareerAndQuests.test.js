@@ -14,7 +14,7 @@ jest.mock('../js/Config.js', () => ({
         GENETICS: { METABOLISM_NORMALIZER: 5, HOMOZYGOUS_ENERGY_BONUS: 5 },
         LIMITS: { MAX_STATS: 100 },
         DECAY: { HUNGER: 0, ENERGY: 0, AGE_INCREMENT: 0 },
-        SECURITY: { DNA_SALT: 'test_salt' },
+        SECURITY: { DNA_SALT: '' },
         THRESHOLDS: { HUNGER_ANGRY: 20, HUNGER_SAD: 40, ENERGY_SAD: 30 },
         ACTIONS: {
             FORAGE: { ENERGY_COST: 10, SKILL_GAIN: 0.1 },
