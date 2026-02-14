@@ -62,7 +62,7 @@ describe('Nadagotchi RNG Integration', () => {
         const seed = pet1.universeSeed;
 
         // Advance RNG via methods that use it
-        // _generateUUID calls rng inside constructor
+        // generateUUID calls rng inside constructor
         // genome initialization calls rng inside constructor
 
         // Let's call forage to explicitly use RNG
