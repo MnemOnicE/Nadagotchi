@@ -3,6 +3,8 @@
  * Includes mechanisms for data integrity (checksums), legacy support, and specialized save slots (Pet, Hall of Fame, Journal).
  */
 
+import { toBase64, fromBase64 } from './utils/Encoding.js';
+
 /**
  * PersistenceManager handles saving and loading game data.
  * It provides an abstraction layer over `localStorage` with added security features.
@@ -240,7 +242,7 @@ export class PersistenceManager {
     _save(key, data, salt = null) {
         try {
             const json = JSON.stringify(data);
-            const encoded = btoa(json);
+            const encoded = toBase64(json);
             const strToHash = salt ? encoded + salt : encoded;
             const hash = this._hash(strToHash);
             localStorage.setItem(key, `${encoded}|${hash}`);
@@ -280,7 +282,7 @@ export class PersistenceManager {
         const [encoded, hash] = parts;
         let json;
         try {
-            json = atob(encoded);
+            json = fromBase64(encoded);
         } catch (e) {
             console.error(`Failed to decode save for key ${key}:`, e);
             return null;
