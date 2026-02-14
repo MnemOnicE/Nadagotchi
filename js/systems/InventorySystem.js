@@ -308,7 +308,7 @@ export class InventorySystem {
         roomConfig[assetConfigKey] = def.assetKey;
 
         // Persist immediately
-        this.pet.persistence.saveHomeConfig(this.pet.homeConfig);
+        this.pet.persistence.saveHomeConfig(this.pet.homeConfig).catch(console.error);
 
         this.pet.addJournalEntry(`I redecorated the ${RoomDefinitions[roomId].name} with ${itemName}. Looks cozy!`);
 
@@ -379,7 +379,7 @@ export class InventorySystem {
     discoverRecipe(recipeName) {
         if (!this.pet.discoveredRecipes.includes(recipeName)) {
             this.pet.discoveredRecipes.push(recipeName);
-            this.pet.persistence.saveRecipes(this.pet.discoveredRecipes);
+            this.pet.persistence.saveRecipes(this.pet.discoveredRecipes).catch(console.error);
             this.pet.addJournalEntry(`I discovered a new recipe: ${recipeName}!`);
             return true;
         }

@@ -172,18 +172,18 @@ describe('Security Hardening', () => {
         expect(result).toBe(false);
     });
 
-    test('Persistence Salt: Save includes UUID and verifies correctly', () => {
+    test('Persistence Salt: Save includes UUID and verifies correctly', async () => {
         nadagotchi.stats.hunger = 50;
-        persistence.savePet(nadagotchi);
+        await persistence.savePet(nadagotchi);
 
-        const loaded = persistence.loadPet();
+        const loaded = await persistence.loadPet();
         expect(loaded).not.toBeNull();
         expect(loaded.uuid).toBe(nadagotchi.uuid);
         expect(loaded.stats.hunger).toBe(50);
     });
 
-    test('Persistence Salt: Tampering fails verification', () => {
-        persistence.savePet(nadagotchi);
+    test('Persistence Salt: Tampering fails verification', async () => {
+        await persistence.savePet(nadagotchi);
 
         // Get the raw save string
         const raw = localStorage.getItem('nadagotchi_save');
@@ -196,15 +196,15 @@ describe('Security Hardening', () => {
 
         // Attacker tries to use the old hash (invalid because content changed)
         localStorage.setItem('nadagotchi_save', `${newEncoded}|${hash}`);
-        expect(persistence.loadPet()).toBeNull();
+        expect(await persistence.loadPet()).toBeNull();
 
         // Attacker tries to generate new hash WITHOUT salt (because they don't know uuid is part of salt logic, or assume standard hash)
         // Simulate attacker hash: hash(newEncoded)
-        const attackerHash = persistence._hash(newEncoded);
+        const attackerHash = await persistence._hash(newEncoded);
         localStorage.setItem('nadagotchi_save', `${newEncoded}|${attackerHash}`);
 
         // Should fail because _load uses hash(newEncoded + uuid)
-        expect(persistence.loadPet()).toBeNull();
+        expect(await persistence.loadPet()).toBeNull();
     });
 
     test('Minigame Privacy: State is hidden', () => {

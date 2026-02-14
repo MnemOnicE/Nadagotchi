@@ -210,15 +210,9 @@ export class Nadagotchi {
         /** @type {PersistenceManager} Manages saving and loading game data. */
         this.persistence = new PersistenceManager();
         /** @type {Array<{date: string, text: string}>} A log of significant events. */
-        this.journal = this.persistence.loadJournal();
+        this.journal = []; // Loaded in init()
         /** @type {Array<string>} A list of crafting recipes the pet has discovered. */
-        this.discoveredRecipes = this.persistence.loadRecipes();
-
-        // Ensure default recipes are discovered for new games
-        if (this.discoveredRecipes.length === 0) {
-            this.discoveredRecipes.push("Fancy Bookshelf");
-            this.persistence.saveRecipes(this.discoveredRecipes);
-        }
+        this.discoveredRecipes = []; // Loaded in init()
 
         /** @type {Object.<string, {materials: Object.<string, number>, description: string}>} */
         this.recipes = Recipes;
@@ -285,6 +279,21 @@ export class Nadagotchi {
 
         /** @type {boolean} Internal flag to batch journal saves. */
         this._journalSavePending = false;
+    }
+
+    /**
+     * Initializes asynchronous data (Journal, Recipes).
+     * Must be called after construction.
+     */
+    async init() {
+        this.journal = await this.persistence.loadJournal();
+        this.discoveredRecipes = await this.persistence.loadRecipes();
+
+        // Ensure default recipes are discovered for new games
+        if (this.discoveredRecipes.length === 0) {
+            this.discoveredRecipes.push("Fancy Bookshelf");
+            await this.persistence.saveRecipes(this.discoveredRecipes);
+        }
     }
 
     /**
@@ -1010,9 +1019,14 @@ export class Nadagotchi {
         // Batch serialization and persistence to reduce frequency
         if (!this._journalSavePending) {
             this._journalSavePending = true;
-            const performSave = () => {
-                this.persistence.saveJournal(this.journal);
-                this._journalSavePending = false;
+            const performSave = async () => {
+                try {
+                    await this.persistence.saveJournal(this.journal);
+                } catch (e) {
+                    console.error("Failed to save journal:", e);
+                } finally {
+                    this._journalSavePending = false;
+                }
             };
 
             // Use queueMicrotask or Promise for efficient batching
@@ -1076,7 +1090,7 @@ export class Nadagotchi {
 
         this.homeConfig.rooms[roomId].unlocked = true;
         this.addJournalEntry(`I unlocked the ${RoomDefinitions[roomId].name}! More space to decorate.`);
-        this.persistence.savePet(this);
+        this.persistence.savePet(this).catch(console.error);
     }
 
     /**

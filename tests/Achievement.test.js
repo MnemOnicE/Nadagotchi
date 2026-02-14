@@ -6,11 +6,11 @@ jest.mock('../js/PersistenceManager.js', () => {
     return {
         PersistenceManager: jest.fn().mockImplementation(() => {
             return {
-                loadAchievements: () => ({ unlocked: [], progress: {} }),
-                saveAchievements: jest.fn(),
-                loadJournal: () => [],
-                loadRecipes: () => [],
-                loadSettings: () => ({})
+                loadAchievements: jest.fn().mockResolvedValue({ unlocked: [], progress: {} }),
+                saveAchievements: jest.fn().mockResolvedValue(),
+                loadJournal: jest.fn().mockResolvedValue([]),
+                loadRecipes: jest.fn().mockResolvedValue([]),
+                loadSettings: jest.fn().mockResolvedValue({})
             };
         })
     };

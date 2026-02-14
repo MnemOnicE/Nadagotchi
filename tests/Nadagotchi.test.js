@@ -10,7 +10,9 @@ class LocalStorageMock {
     setItem(key, value) { this.store[key] = String(value); }
     removeItem(key) { delete this.store[key]; }
 }
-global.localStorage = new LocalStorageMock();
+const mockStorage = new LocalStorageMock();
+global.localStorage = mockStorage;
+globalThis.localStorage = mockStorage; // Ensure globalThis has it too
 
 // Mock Phaser since it's not available in the Node.js test environment
 const Phaser = {
@@ -25,8 +27,9 @@ global.Phaser = Phaser;
 describe('Nadagotchi', () => {
     let pet;
 
-    beforeEach(() => {
+    beforeEach(async () => {
         pet = new Nadagotchi('Intellectual');
+        await pet.init();
         // Force a deterministic genome to avoid random homozygous bonuses in general tests
         pet.genome.genotype = {
             Adventurer: [10, 20],

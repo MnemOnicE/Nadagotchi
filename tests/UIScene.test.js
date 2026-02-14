@@ -64,9 +64,9 @@ jest.mock('../js/ButtonFactory', () => {
     };
 });
 
-const mockLoadJournal = jest.fn().mockReturnValue([{ date: 'Day 1', text: 'Diary Entry' }]);
-const mockLoadRecipes = jest.fn().mockReturnValue(['Fancy Bookshelf']);
-const mockLoadHallOfFame = jest.fn().mockReturnValue([]);
+const mockLoadJournal = jest.fn().mockResolvedValue([{ date: 'Day 1', text: 'Diary Entry' }]);
+const mockLoadRecipes = jest.fn().mockResolvedValue(['Fancy Bookshelf']);
+const mockLoadHallOfFame = jest.fn().mockResolvedValue([]);
 
 jest.mock('../js/PersistenceManager', () => {
     return {
@@ -223,18 +223,18 @@ describe('UIScene', () => {
         expect(mockGameEvents.emit).toHaveBeenCalledWith(EventKeys.UI_ACTION, EventKeys.OPEN_JOB_BOARD);
     });
 
-    test('should open modals correctly', () => {
+    test('should open modals correctly', async () => {
         scene.create();
         scene.nadagotchiData = { inventory: {} }; // Mock data needed for some modals
 
         // Journal
-        scene.handleUIActions(EventKeys.OPEN_JOURNAL);
+        await scene.handleUIActions(EventKeys.OPEN_JOURNAL);
         expect(scene.journalModal.setVisible).toHaveBeenCalledWith(true);
         expect(scene.scene.pause).toHaveBeenCalledWith('MainScene');
         expect(mockLoadJournal).toHaveBeenCalled();
 
         // Inventory
-        scene.handleUIActions(EventKeys.OPEN_INVENTORY);
+        await scene.handleUIActions(EventKeys.OPEN_INVENTORY);
         expect(scene.inventoryModal.setVisible).toHaveBeenCalledWith(true);
     });
 

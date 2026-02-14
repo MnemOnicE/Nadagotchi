@@ -3,6 +3,8 @@
  * Includes mechanisms for data integrity (checksums), legacy support, and specialized save slots (Pet, Hall of Fame, Journal).
  */
 
+import { CryptoUtils } from './utils/CryptoUtils.js';
+
 /**
  * PersistenceManager handles saving and loading game data.
  * It provides an abstraction layer over `localStorage` with added security features.
@@ -14,7 +16,7 @@ export class PersistenceManager {
      * @param {object} nadagotchiData - The Nadagotchi object to save.
      * @param {object} [homeConfig=null] - DEPRECATED: The home configuration object. Now part of nadagotchiData.
      */
-    savePet(nadagotchiData, homeConfig = null) {
+    async savePet(nadagotchiData, homeConfig = null) {
         // Merge homeConfig into the save payload if provided as a separate argument (Legacy support)
         const payload = { ...nadagotchiData };
         if (homeConfig) {
@@ -22,34 +24,34 @@ export class PersistenceManager {
         }
 
         // Pass the UUID as salt to bind the save file to this specific pet instance
-        this._save("nadagotchi_save", payload, payload.uuid);
+        await this._save("nadagotchi_save", payload, payload.uuid);
     }
 
     /**
      * Loads the active Nadagotchi's data from localStorage.
-     * @returns {object|null} The parsed Nadagotchi data, or null if no save exists or data is corrupted.
+     * @returns {Promise<object|null>} The parsed Nadagotchi data, or null if no save exists or data is corrupted.
      */
-    loadPet() {
+    async loadPet() {
         // Provide a callback to extract the UUID from the parsed data for hash verification
-        return this._load("nadagotchi_save", (data) => data.uuid);
+        return await this._load("nadagotchi_save", (data) => data.uuid);
     }
 
     /**
      * Adds a retired Nadagotchi to the "Hall of Fame" in localStorage.
      * @param {object} nadagotchiData - The data of the pet to retire.
      */
-    saveToHallOfFame(nadagotchiData) {
-        const fameList = this.loadHallOfFame();
+    async saveToHallOfFame(nadagotchiData) {
+        const fameList = await this.loadHallOfFame();
         fameList.push(nadagotchiData);
-        this._save("hall_of_fame", fameList);
+        await this._save("hall_of_fame", fameList);
     }
 
     /**
      * Retrieves the list of all retired pets from the Hall of Fame.
-     * @returns {Array<object>} An array of retired Nadagotchi data objects.
+     * @returns {Promise<Array<object>>} An array of retired Nadagotchi data objects.
      */
-    loadHallOfFame() {
-        return this._load("hall_of_fame") || [];
+    async loadHallOfFame() {
+        return (await this._load("hall_of_fame")) || [];
     }
 
     /**
@@ -57,7 +59,7 @@ export class PersistenceManager {
      * This is typically used when a pet is retired to allow starting a new generation.
      */
     clearActivePet() {
-        localStorage.removeItem("nadagotchi_save");
+        globalThis.localStorage.removeItem("nadagotchi_save");
     }
 
     /**
@@ -73,72 +75,72 @@ export class PersistenceManager {
             "nadagotchi_furniture",
             "nadagotchi_home_config"
         ];
-        keysToClear.forEach(key => localStorage.removeItem(key));
+        keysToClear.forEach(key => globalThis.localStorage.removeItem(key));
     }
 
     /**
      * Saves the player's journal entries to localStorage.
      * @param {Array<object>} journalEntries - The array of journal entries to save.
      */
-    saveJournal(journalEntries) {
-        this._save("nadagotchi_journal", journalEntries);
+    async saveJournal(journalEntries) {
+        await this._save("nadagotchi_journal", journalEntries);
     }
 
     /**
      * Loads the player's journal entries from localStorage.
-     * @returns {Array<object>} The array of journal entries, or empty array if none found.
+     * @returns {Promise<Array<object>>} The array of journal entries, or empty array if none found.
      */
-    loadJournal() {
-        return this._load("nadagotchi_journal") || [];
+    async loadJournal() {
+        return (await this._load("nadagotchi_journal")) || [];
     }
 
     /**
      * Saves the list of discovered recipes to localStorage.
      * @param {Array<string>} recipeList - The array of discovered recipe names.
      */
-    saveRecipes(recipeList) {
-        this._save("nadagotchi_recipes", recipeList);
+    async saveRecipes(recipeList) {
+        await this._save("nadagotchi_recipes", recipeList);
     }
 
     /**
      * Loads the list of discovered recipes from localStorage.
-     * @returns {Array<string>} The array of discovered recipe names, or empty array if none found.
+     * @returns {Promise<Array<string>>} The array of discovered recipe names, or empty array if none found.
      */
-    loadRecipes() {
-        return this._load("nadagotchi_recipes") || [];
+    async loadRecipes() {
+        return (await this._load("nadagotchi_recipes")) || [];
     }
 
     /**
      * Saves the game's calendar data to localStorage.
      * @param {object} calendarData - The Calendar object to save.
      */
-    saveCalendar(calendarData) {
-        this._save("nadagotchi_calendar", calendarData);
+    async saveCalendar(calendarData) {
+        await this._save("nadagotchi_calendar", calendarData);
     }
 
     /**
      * Loads the game's calendar data from localStorage.
-     * @returns {object|null} The parsed calendar data, or null if no save exists.
+     * @returns {Promise<object|null>} The parsed calendar data, or null if no save exists.
      */
-    loadCalendar() {
-        return this._load("nadagotchi_calendar");
+    async loadCalendar() {
+        return await this._load("nadagotchi_calendar");
     }
 
     /**
      * Saves the placed furniture data to localStorage.
      * @param {object} furnitureData - The furniture object keyed by room ID.
      */
-    saveFurniture(furnitureData) {
-        this._save("nadagotchi_furniture", furnitureData);
+    async saveFurniture(furnitureData) {
+        await this._save("nadagotchi_furniture", furnitureData);
     }
 
     /**
      * Loads the placed furniture data from localStorage.
      * Supports migration from legacy array format to room-keyed object.
-     * @returns {object} The furniture object keyed by room ID (e.g., { "Entryway": [] }).
+     * @returns {Promise<object>} The furniture object keyed by room ID (e.g., { "Entryway": [] }).
      */
-    loadFurniture() {
-        const data = this._load("nadagotchi_furniture");
+    async loadFurniture() {
+        const data = await this._load("nadagotchi_furniture");
         if (!data) return { "Entryway": [] }; // Default empty state
 
         // Migration: If data is an Array (Legacy), wrap it in Entryway
@@ -155,18 +157,18 @@ export class PersistenceManager {
      * @deprecated Home Config is now stored in the pet data.
      * @param {object} config - { rooms: { "Entryway": { ... } } }
      */
-    saveHomeConfig(config) {
-        this._save("nadagotchi_home_config", config);
+    async saveHomeConfig(config) {
+        await this._save("nadagotchi_home_config", config);
     }
 
     /**
      * Loads the home configuration.
      * Supports migration from legacy flat format to room-keyed object.
      * @deprecated Home Config is now loaded via loadPet(). Use for migration only.
-     * @returns {object} { rooms: { "Entryway": { ... } } }
+     * @returns {Promise<object>} { rooms: { "Entryway": { ... } } }
      */
-    loadHomeConfig() {
-        const data = this._load("nadagotchi_home_config");
+    async loadHomeConfig() {
+        const data = await this._load("nadagotchi_home_config");
 
         // Default State
         const defaultState = {
@@ -202,32 +204,32 @@ export class PersistenceManager {
      * Saves the global game settings to localStorage.
      * @param {object} settings - The settings object to save.
      */
-    saveSettings(settings) {
-        this._save("nadagotchi_settings", settings);
+    async saveSettings(settings) {
+        await this._save("nadagotchi_settings", settings);
     }
 
     /**
      * Loads the global game settings from localStorage.
-     * @returns {object|null} The parsed settings, or null if no save exists.
+     * @returns {Promise<object|null>} The parsed settings, or null if no save exists.
      */
-    loadSettings() {
-        return this._load("nadagotchi_settings");
+    async loadSettings() {
+        return await this._load("nadagotchi_settings");
     }
 
     /**
      * Saves the achievement progress to localStorage.
      * @param {object} achievementData - The achievement data (unlocked list + progress).
      */
-    saveAchievements(achievementData) {
-        this._save("nadagotchi_achievements", achievementData);
+    async saveAchievements(achievementData) {
+        await this._save("nadagotchi_achievements", achievementData);
     }
 
     /**
      * Loads the achievement progress from localStorage.
-     * @returns {object} The parsed achievement data, or default structure.
+     * @returns {Promise<object>} The parsed achievement data, or default structure.
      */
-    loadAchievements() {
-        return this._load("nadagotchi_achievements") || { unlocked: [], progress: {} };
+    async loadAchievements() {
+        return (await this._load("nadagotchi_achievements")) || { unlocked: [], progress: {} };
     }
 
     /**
@@ -237,13 +239,13 @@ export class PersistenceManager {
      * @param {string} [salt=null] - Optional salt (e.g., UUID) to bind the hash to the data content.
      * @private
      */
-    _save(key, data, salt = null) {
+    async _save(key, data, salt = null) {
         try {
             const json = JSON.stringify(data);
             const encoded = btoa(json);
             const strToHash = salt ? encoded + salt : encoded;
-            const hash = this._hash(strToHash);
-            localStorage.setItem(key, `${encoded}|${hash}`);
+            const hash = await this._hash(strToHash);
+            globalThis.localStorage.setItem(key, `${encoded}|${hash}`);
         } catch (e) {
             console.error(`Failed to save data for key ${key}:`, e);
         }
@@ -257,8 +259,8 @@ export class PersistenceManager {
      * @returns {any|null} The parsed data, or null if missing, corrupted, or tampered.
      * @private
      */
-    _load(key, saltCallback = null) {
-        const raw = localStorage.getItem(key);
+    async _load(key, saltCallback = null) {
+        const raw = globalThis.localStorage.getItem(key);
         if (!raw) return null;
 
         // Legacy support: check if it looks like JSON
@@ -301,7 +303,9 @@ export class PersistenceManager {
         }
 
         const strToHash = salt ? encoded + salt : encoded;
-        if (this._hash(strToHash) !== hash) {
+        const calculatedHash = await this._hash(strToHash);
+
+        if (calculatedHash !== hash) {
             console.warn(`Save file tampered (hash mismatch) for key ${key}.`);
             return null;
         }
@@ -310,19 +314,12 @@ export class PersistenceManager {
     }
 
     /**
-     * Simple hash function for integrity checking (DJB2 variant).
+     * Secure hash function for integrity checking (SHA-256 via Web Crypto API).
      * @param {string} str - The string to hash.
-     * @returns {string} The hash value.
+     * @returns {Promise<string>} The hash value.
      * @private
      */
-    _hash(str) {
-        let hash = 0;
-        if (str.length === 0) return hash.toString();
-        for (let i = 0; i < str.length; i++) {
-            const char = str.charCodeAt(i);
-            hash = ((hash << 5) - hash) + char;
-            hash |= 0; // Convert to 32bit integer
-        }
-        return hash.toString();
+    async _hash(str) {
+        return await CryptoUtils.digest(str);
     }
 }

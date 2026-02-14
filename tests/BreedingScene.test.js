@@ -50,7 +50,7 @@ global.Phaser = {
 };
 
 // 2. Mock Dependencies
-const mockSaveToHallOfFame = jest.fn();
+const mockSaveToHallOfFame = jest.fn().mockResolvedValue();
 const mockClearActivePet = jest.fn();
 jest.mock('../js/PersistenceManager', () => {
     return {
@@ -196,12 +196,12 @@ describe('BreedingScene', () => {
         expect(scene.tweens.add).toHaveBeenCalled(); // For fading out
     });
 
-    test('should finalize legacy', () => {
+    test('should finalize legacy', async () => {
         scene.create();
         const newPetData = { dominantArchetype: 'Intellectual' };
 
         // Call finalizeLegacy directly
-        scene.finalizeLegacy(newPetData);
+        await scene.finalizeLegacy(newPetData);
 
         expect(mockSaveToHallOfFame).toHaveBeenCalledWith(mockParentData);
         expect(mockClearActivePet).toHaveBeenCalled();

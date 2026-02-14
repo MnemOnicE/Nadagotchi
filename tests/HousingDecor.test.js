@@ -40,14 +40,14 @@ jest.mock('../js/Config.js', () => {
 jest.mock('../js/PersistenceManager.js', () => {
     return {
         PersistenceManager: jest.fn().mockImplementation(() => ({
-            saveHomeConfig: jest.fn(),
-            loadJournal: jest.fn().mockReturnValue([]),
-            loadRecipes: jest.fn().mockReturnValue([]),
-            loadPet: jest.fn().mockReturnValue(null),
-            loadSettings: jest.fn().mockReturnValue({}),
-            saveRecipes: jest.fn(),
-            savePet: jest.fn(),
-            saveJournal: jest.fn(), // Added missing mock
+            saveHomeConfig: jest.fn().mockResolvedValue(),
+            loadJournal: jest.fn().mockResolvedValue([]),
+            loadRecipes: jest.fn().mockResolvedValue([]),
+            loadPet: jest.fn().mockResolvedValue(null),
+            loadSettings: jest.fn().mockResolvedValue({}),
+            saveRecipes: jest.fn().mockResolvedValue(),
+            savePet: jest.fn().mockResolvedValue(),
+            saveJournal: jest.fn().mockResolvedValue(), // Added missing mock
         }))
     };
 });

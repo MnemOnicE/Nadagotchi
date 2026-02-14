@@ -98,9 +98,9 @@ jest.mock('../js/ButtonFactory', () => {
     };
 });
 
-const mockLoadJournal = jest.fn().mockReturnValue([{ date: 'Day 1', text: 'Diary Entry' }]);
-const mockLoadRecipes = jest.fn().mockReturnValue(['Fancy Bookshelf']);
-const mockLoadHallOfFame = jest.fn().mockReturnValue([]);
+const mockLoadJournal = jest.fn().mockResolvedValue([{ date: 'Day 1', text: 'Diary Entry' }]);
+const mockLoadRecipes = jest.fn().mockResolvedValue(['Fancy Bookshelf']);
+const mockLoadHallOfFame = jest.fn().mockResolvedValue([]);
 
 jest.mock('../js/PersistenceManager', () => {
     return {
@@ -167,37 +167,37 @@ describe('UIScene Modal Management', () => {
         };
     });
 
-    test('opening a new modal should close existing open modals', () => {
+    test('opening a new modal should close existing open modals', async () => {
         // 1. Open Journal
-        scene.handleUIActions(EventKeys.OPEN_JOURNAL);
+        await scene.handleUIActions(EventKeys.OPEN_JOURNAL);
         expect(scene.journalModal.visible).toBe(true);
 
         // 2. Open Inventory
-        scene.handleUIActions(EventKeys.OPEN_INVENTORY);
+        await scene.handleUIActions(EventKeys.OPEN_INVENTORY);
         expect(scene.inventoryModal.visible).toBe(true);
 
         // 3. Assert Journal is CLOSED (This is the bug fix requirement)
         expect(scene.journalModal.visible).toBe(false);
     });
 
-    test('opening settings should close other modals', () => {
-        scene.handleUIActions(EventKeys.OPEN_RECIPES);
+    test('opening settings should close other modals', async () => {
+        await scene.handleUIActions(EventKeys.OPEN_RECIPES);
         expect(scene.recipeModal.visible).toBe(true);
 
-        scene.handleUIActions(EventKeys.OPEN_SETTINGS);
+        await scene.handleUIActions(EventKeys.OPEN_SETTINGS);
         expect(scene.settingsModal.visible).toBe(true);
         expect(scene.recipeModal.visible).toBe(false);
     });
 
-    test('opening passport should pause MainScene and sleep UIScene', () => {
-        scene.handleUIActions(EventKeys.OPEN_SHOWCASE);
+    test('opening passport should pause MainScene and sleep UIScene', async () => {
+        await scene.handleUIActions(EventKeys.OPEN_SHOWCASE);
         expect(scene.scene.pause).toHaveBeenCalledWith('MainScene');
         expect(scene.scene.sleep).toHaveBeenCalled();
         expect(scene.scene.launch).toHaveBeenCalledWith('ShowcaseScene', expect.anything());
     });
 
-    test('showing dialogue should close other modals', () => {
-        scene.handleUIActions(EventKeys.DECORATE);
+    test('showing dialogue should close other modals', async () => {
+        await scene.handleUIActions(EventKeys.DECORATE);
         expect(scene.decorateModal.visible).toBe(true);
 
         scene.showDialogue('NPC', 'Hello');

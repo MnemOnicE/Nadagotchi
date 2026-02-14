@@ -10,7 +10,7 @@ const mockPet = {
     discoveredRecipes: [],
     recipes: {},
     stats: { energy: 100, happiness: 100 },
-    persistence: { saveHomeConfig: jest.fn() },
+    persistence: { saveHomeConfig: jest.fn().mockResolvedValue() },
     addJournalEntry: jest.fn(),
     getMoodMultiplier: () => 1.0,
     skills: { crafting: 0 }
@@ -44,7 +44,7 @@ describe('Housing System II', () => {
             Object.defineProperty(global, 'localStorage', { value: localStorageMock, configurable: true });
         });
 
-        test('Migrates legacy furniture array to Entryway object', () => {
+        test('Migrates legacy furniture array to Entryway object', async () => {
             // Setup Legacy Data
             const legacyData = [{ key: 'Chair', x: 10, y: 10 }];
             const encoded = btoa(JSON.stringify(legacyData));
@@ -53,19 +53,19 @@ describe('Housing System II', () => {
             // Mock hash check to pass
             persistence._hash = jest.fn(() => 'FAKEHASH');
 
-            const result = persistence.loadFurniture();
+            const result = await persistence.loadFurniture();
             expect(result).toHaveProperty('Entryway');
             expect(result.Entryway).toHaveLength(1);
             expect(result.Entryway[0].key).toBe('Chair');
         });
 
-        test('Migrates legacy home config to Entryway object', () => {
+        test('Migrates legacy home config to Entryway object', async () => {
              const legacyData = { wallpaper: 'Blue', flooring: 'Wood' };
              const encoded = btoa(JSON.stringify(legacyData));
              global.localStorage.getItem.mockReturnValueOnce(`${encoded}|FAKEHASH`);
              persistence._hash = jest.fn(() => 'FAKEHASH');
 
-             const result = persistence.loadHomeConfig();
+             const result = await persistence.loadHomeConfig();
              expect(result).toHaveProperty('rooms');
              expect(result.rooms.Entryway.wallpaper).toBe('Blue');
         });

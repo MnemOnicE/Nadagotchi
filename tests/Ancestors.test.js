@@ -85,7 +85,7 @@ describe('Hall of Ancestors UI', () => {
     let uiScene;
     let gameEvents;
 
-    beforeEach(() => {
+    beforeEach(async () => {
         global.localStorage.clear();
 
         // Mock event emitter
@@ -112,10 +112,11 @@ describe('Hall of Ancestors UI', () => {
             { generation: 1, dominantArchetype: 'Adventurer', stats: { happiness: 80 }, skills: { logic: 2, empathy: 1 }, currentCareer: 'Scout' },
             { generation: 2, dominantArchetype: 'Intellectual', stats: { happiness: 90 }, skills: { logic: 10, empathy: 2 }, currentCareer: 'Innovator' }
         ];
-        new PersistenceManager().saveToHallOfFame(ancestors[0]);
-        new PersistenceManager().saveToHallOfFame(ancestors[1]);
+        await new PersistenceManager().saveToHallOfFame(ancestors[0]);
+        await new PersistenceManager().saveToHallOfFame(ancestors[1]);
 
         uiScene.create();
+        await uiScene.loadAncestors();
     });
 
     test('should have ANCESTORS tab', () => {

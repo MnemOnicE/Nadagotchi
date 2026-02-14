@@ -14,13 +14,22 @@ export class AchievementManager {
     constructor(game) {
         this.game = game;
         this.persistence = new PersistenceManager();
-        this.state = this.persistence.loadAchievements();
+        this.state = { unlocked: [], progress: {} }; // Default state until loaded
 
+        this.init();
+    }
+
+    /**
+     * Loads achievement data asynchronously.
+     */
+    async load() {
+        const loaded = await this.persistence.loadAchievements();
+        if (loaded) {
+            this.state = loaded;
+        }
         // Ensure default structure
         if (!this.state.unlocked) this.state.unlocked = [];
         if (!this.state.progress) this.state.progress = {};
-
-        this.init();
     }
 
     /**
@@ -73,7 +82,7 @@ export class AchievementManager {
 
         if (changed) {
             this.checkAchievements();
-            this.persistence.saveAchievements(this.state);
+            this.persistence.saveAchievements(this.state).catch(console.error);
         }
     }
 
@@ -86,7 +95,7 @@ export class AchievementManager {
             this._ensureCounter('craftCount');
             this.state.progress.craftCount++;
             this.checkAchievements();
-            this.persistence.saveAchievements(this.state);
+            this.persistence.saveAchievements(this.state).catch(console.error);
         }
     }
 
@@ -111,7 +120,7 @@ export class AchievementManager {
         this.state.unlocked.push(achievement.id);
         // Emit event for UI to pick up
         this.game.events.emit(EventKeys.ACHIEVEMENT_UNLOCKED, achievement);
-        this.persistence.saveAchievements(this.state);
+        this.persistence.saveAchievements(this.state).catch(console.error);
         // Console log for debug/headless verification
         console.log(`[AchievementManager] Unlocked: ${achievement.name}`);
     }

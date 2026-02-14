@@ -59,19 +59,20 @@ describe('MainScene Coverage', () => {
                  generateDailyQuest: jest.fn(),
                  hasNewQuest: jest.fn().mockReturnValue(false)
              },
-             returnItemToInventory: jest.fn()
+             returnItemToInventory: jest.fn(),
+             init: jest.fn().mockResolvedValue()
         };
         Nadagotchi.mockImplementation(() => mockNadagotchi);
 
         PersistenceManager.mockImplementation(() => ({
-            loadPet: jest.fn(),
-            savePet: jest.fn(),
-            loadCalendar: jest.fn(),
-            loadFurniture: jest.fn().mockReturnValue([]),
-            saveFurniture: jest.fn(),
-            loadSettings: jest.fn().mockReturnValue({ volume: 0.5, gameSpeed: 1.0 }),
-            saveSettings: jest.fn(),
-            loadAchievements: jest.fn().mockReturnValue({ unlocked: [], progress: {} })
+            loadPet: jest.fn().mockResolvedValue(null),
+            savePet: jest.fn().mockResolvedValue(),
+            loadCalendar: jest.fn().mockResolvedValue({}),
+            loadFurniture: jest.fn().mockResolvedValue({ "Entryway": [] }),
+            saveFurniture: jest.fn().mockResolvedValue(),
+            loadSettings: jest.fn().mockResolvedValue({ volume: 0.5, gameSpeed: 1.0 }),
+            saveSettings: jest.fn().mockResolvedValue(),
+            loadAchievements: jest.fn().mockResolvedValue({ unlocked: [], progress: {} })
         }));
 
         Calendar.mockImplementation(() => ({
@@ -160,15 +161,15 @@ describe('MainScene Coverage', () => {
         };
     });
 
-    test('create should initialize systems and objects', () => {
-        scene.create();
+    test('create should initialize systems and objects', async () => {
+        await scene.create();
         expect(scene.nadagotchi).toBeDefined();
         expect(mockAdd.sprite).toHaveBeenCalled();
         expect(scene.scene.launch).toHaveBeenCalledWith('UIScene');
     });
 
-    test('handleUIAction should route actions correctly', () => {
-         scene.create();
+    test('handleUIAction should route actions correctly', async () => {
+         await scene.create();
 
          // WORK
          scene.handleUIAction('WORK');
@@ -188,8 +189,8 @@ describe('MainScene Coverage', () => {
          expect(mockNadagotchi.handleAction).toHaveBeenCalledWith('FEED', undefined);
     });
 
-    test('handleWorkResult should call completeWorkShift on success', () => {
-        scene.create();
+    test('handleWorkResult should call completeWorkShift on success', async () => {
+        await scene.create();
 
         // Bypass security check by setting the active minigame
         scene.activeMinigameCareer = 'Innovator';
@@ -198,8 +199,8 @@ describe('MainScene Coverage', () => {
         expect(mockNadagotchi.completeWorkShift).toHaveBeenCalled();
     });
 
-    test('resize should update viewports', () => {
-        scene.create();
+    test('resize should update viewports', async () => {
+        await scene.create();
 
         scene.resize({ width: 1000, height: 800 });
 
@@ -208,8 +209,8 @@ describe('MainScene Coverage', () => {
         expect(scene.cameras.main.setSize).toHaveBeenCalledWith(1000, 520);
     });
 
-    test('update loop should update nadagotchi and stats', () => {
-        scene.create();
+    test('update loop should update nadagotchi and stats', async () => {
+        await scene.create();
 
         scene.update(1000, 16);
 
@@ -221,8 +222,8 @@ describe('MainScene Coverage', () => {
         }));
     });
 
-    test('furniture placement logic', () => {
-        scene.create();
+    test('furniture placement logic', async () => {
+        await scene.create();
 
         // Enable placement mode
         scene.handleUIAction(EventKeys.DECORATE, 'Fancy Chair');

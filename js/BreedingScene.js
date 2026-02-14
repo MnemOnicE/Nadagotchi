@@ -225,8 +225,9 @@ export class BreedingScene extends Phaser.Scene {
      * @private
      */
     finalizeLegacy(newPetData) {
-        this.persistence.saveToHallOfFame(this.parentData);
-        this.persistence.clearActivePet();
-        this.scene.start('MainScene', { newPetData: newPetData });
+        return this.persistence.saveToHallOfFame(this.parentData).then(() => {
+            this.persistence.clearActivePet();
+            this.scene.start('MainScene', { newPetData: newPetData });
+        }).catch(console.error);
     }
 }

@@ -11,7 +11,7 @@ export class StartScene extends Phaser.Scene {
         super({ key: 'StartScene' });
     }
 
-    create() {
+    async create() {
         // --- Background (Horizon) ---
         // Reuse the sky generation logic for a nice background
         this.createSkyBackground();
@@ -38,7 +38,7 @@ export class StartScene extends Phaser.Scene {
 
         // --- Persistence Check ---
         this.persistence = new PersistenceManager();
-        const existingPet = this.persistence.loadPet();
+        const existingPet = await this.persistence.loadPet();
 
         // --- Menu Buttons ---
         this.menuContainer = this.add.container(0, 0);
