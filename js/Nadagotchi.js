@@ -1246,20 +1246,20 @@ export class Nadagotchi {
 
     /**
      * Exports the pet's DNA string for sharing.
-     * @returns {string} The serialized DNA.
+     * @returns {Promise<string>} The serialized DNA.
      */
-    exportDNA() {
-        return GeneticsSystem.serialize(this.genome);
+    async exportDNA() {
+        return await GeneticsSystem.serialize(this.genome);
     }
 
     /**
      * Creates a new Nadagotchi data object from a DNA string.
      * Useful for starting a new game with an imported egg.
      * @param {string} dnaString - The imported DNA string.
-     * @returns {object} Data object suitable for the Nadagotchi constructor.
+     * @returns {Promise<object>} Data object suitable for the Nadagotchi constructor.
      */
-    static generateDataFromDNA(dnaString) {
-        const genome = GeneticsSystem.deserialize(dnaString);
+    static async generateDataFromDNA(dnaString) {
+        const genome = await GeneticsSystem.deserialize(dnaString);
 
         // Extract checksum for seeding to ensure deterministic phenotype from the same DNA
         const parts = dnaString.split('.');

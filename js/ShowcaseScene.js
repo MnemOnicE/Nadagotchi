@@ -83,21 +83,28 @@ export class ShowcaseScene extends Phaser.Scene {
             fontFamily: 'VT323, monospace', fontSize: '20px', color: '#4fc3f7'
         }).setOrigin(0.5);
 
-        // Generate the DNA string
-        const dnaString = this.petData.exportDNA();
-
-        // Display a truncated version visually
-        const displayString = dnaString.length > 32 ? dnaString.substring(0, 32) + "..." : dnaString;
-
+        // Placeholder / Loading State
         const dnaBg = this.add.rectangle(width / 2, dnaY + 40, width * 0.8, 50, 0x000000, 0.5).setStrokeStyle(1, 0x4fc3f7);
-        const dnaText = this.add.text(width / 2, dnaY + 40, displayString, {
-            fontFamily: 'Courier', fontSize: '16px', color: '#00ff00'
+        const dnaText = this.add.text(width / 2, dnaY + 40, "Generating Secure DNA...", {
+            fontFamily: 'Courier', fontSize: '16px', color: '#ffff00'
         }).setOrigin(0.5);
 
-        // "Copy" Button (Simulated)
-        ButtonFactory.createButton(this, width / 2, dnaY + 90, "COPY TO CLIPBOARD", () => {
-             this.copyToClipboard(dnaString);
-        }, { width: 200, height: 40, color: 0x00695c, fontSize: '20px' });
+        // Async DNA Generation
+        this.petData.exportDNA().then(dnaString => {
+            // Update Text
+            const displayString = dnaString.length > 32 ? dnaString.substring(0, 32) + "..." : dnaString;
+            dnaText.setText(displayString);
+            dnaText.setColor('#00ff00');
+
+            // "Copy" Button (Simulated)
+            ButtonFactory.createButton(this, width / 2, dnaY + 90, "COPY TO CLIPBOARD", () => {
+                 this.copyToClipboard(dnaString);
+            }, { width: 200, height: 40, color: 0x00695c, fontSize: '20px' });
+        }).catch(err => {
+            console.error("Failed to generate DNA:", err);
+            dnaText.setText("Error Generating DNA");
+            dnaText.setColor('#ff0000');
+        });
 
         // 6. Back Button
         ButtonFactory.createButton(this, 60, 40, "<- BACK", () => {
