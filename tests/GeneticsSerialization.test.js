@@ -3,6 +3,7 @@ import { GeneticsSystem, Genome } from '../js/GeneticsSystem.js';
 import { Nadagotchi } from '../js/Nadagotchi.js';
 import { Config } from '../js/Config.js';
 import { CryptoUtils } from '../js/utils/CryptoUtils.js';
+import { toBase64 } from '../js/utils/Encoding.js';
 
 describe('Genetics Serialization System', () => {
 
@@ -63,7 +64,7 @@ describe('Genetics Serialization System', () => {
 
         // Use the salt from Config
         const salt = Config.SECURITY.DNA_SALT;
-        const encoded = (typeof btoa === 'function' ? btoa(badJson) : Buffer.from(badJson).toString('base64'));
+        const encoded = toBase64(badJson);
 
         // Calculate valid checksum for this bad payload using CryptoUtils
         const validChecksum = await CryptoUtils.generateHash(encoded, salt);
