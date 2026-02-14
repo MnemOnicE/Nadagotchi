@@ -47,7 +47,7 @@ export class Nadagotchi {
         if (loadedData) {
             // This is a loaded pet. Populate all properties from the save file.
             /** @type {string} Unique identifier for this pet instance (Salt). */
-            this.uuid = loadedData.uuid || this._generateUUID(); // Migration for old saves
+            this.uuid = loadedData.uuid || this.generateUUID(); // Migration for old saves
 
             /** @type {string} The name of the pet. */
             this.name = loadedData.name || "Nadagotchi";
@@ -148,7 +148,7 @@ export class Nadagotchi {
 
         } else {
             // This is a brand new game. Start from defaults.
-            this.uuid = this._generateUUID();
+            this.uuid = this.generateUUID();
             this.name = "Nadagotchi"; // Default, can be overridden immediately after
             this.mood = 'neutral';
             this.dominantArchetype = initialArchetype;
@@ -343,9 +343,8 @@ export class Nadagotchi {
     /**
      * Generates a deterministic UUID for the pet using the seeded RNG.
      * @returns {string} A unique identifier.
-     * @private
      */
-    _generateUUID() {
+    generateUUID() {
         // Deterministic UUID generation using SeededRandom
         const chars = '0123456789abcdef';
         let uuid = '';
@@ -422,7 +421,7 @@ export class Nadagotchi {
         };
 
         return {
-            uuid: this._generateUUID(), // New UUID for the child
+            uuid: this.generateUUID(), // New UUID for the child
             mood: 'neutral',
             dominantArchetype: dominant,
             personalityPoints: initialPoints,
