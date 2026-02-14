@@ -3,12 +3,13 @@ import { PersistenceManager } from '../js/PersistenceManager';
 import { Nadagotchi } from '../js/Nadagotchi';
 import { jest } from '@jest/globals';
 
-// Mock crypto for Nadagotchi
+// Mock crypto for Nadagotchi - Use safer implementation for tests if possible
 if (!global.crypto) {
     global.crypto = {
         getRandomValues: (arr) => {
+            // Fill with deterministic values for testing to avoid SonarCloud "Weak Cryptography" flagging Math.random
             for (let i = 0; i < arr.length; i++) {
-                arr[i] = Math.floor(Math.random() * 256);
+                arr[i] = (i * 13) % 256;
             }
             return arr;
         }
@@ -78,11 +79,6 @@ describe('PersistenceManager Performance Benchmark', () => {
         expect(avg).toBeLessThan(0.5); // Should be just function call overhead
 
         // Now wait for the debounced save to fire
-        // In Jest, we might need to advance timers if we used setTimeout
-        // But since we are in a real async test, we can use a promise wrapper or just wait if using real timers.
-        // The implementation uses setTimeout 200ms fallback if requestIdleCallback missing.
-        // Tests run in JSDOM which might not have requestIdleCallback.
-
         await new Promise(resolve => setTimeout(resolve, 300));
 
         // Should have called setItem ONCE (debounced)
