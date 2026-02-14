@@ -131,10 +131,10 @@ export class StudyMinigameScene extends Phaser.Scene {
 
         const word = this.selectedCells.map(c => c.char).join('');
 
-        // Simple Dictionary Check + "Almost" Check
-        // Since we generated random letters, perfect words are rare without complex logic.
-        // We will accept any valid word from list OR any 4+ letter string as "Research Notes" (Fake it till you make it gameplay)
-        // Actually, let's just stick to the valid list for "Good" score, and give pittance for "Gibberish".
+        // Logic:
+        // 1. Valid Word: Full Score, Increment Found Count, Green Feedback, Success Sound.
+        // 2. Research Notes (Gibberish >= 4 chars): Small Score, No Found Count, Cyan Feedback, Chime Sound.
+        // 3. Invalid: No Score, Red Feedback, Failure Sound.
 
         if (this.validWords.has(word)) {
             this.score += word.length * 10;
@@ -142,6 +142,14 @@ export class StudyMinigameScene extends Phaser.Scene {
             this.scoreText.setText(`Words: ${this.foundWords} (Score: ${this.score})`);
             this.showFeedback("VALID!", 0x00FF00);
             SoundSynthesizer.instance.playSuccess();
+            this.replaceSelected();
+        } else if (word.length >= 4) {
+            // "Fake it till you make it" / Research Notes
+            this.score += word.length * 1; // Pittance (1 pt per letter)
+            // Do NOT increment foundWords
+            this.scoreText.setText(`Words: ${this.foundWords} (Score: ${this.score})`);
+            this.showFeedback("Research Note", 0x00FFFF);
+            SoundSynthesizer.instance.playChime();
             this.replaceSelected();
         } else {
             this.showFeedback("Unknown Word", 0xFF0000);
