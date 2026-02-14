@@ -133,7 +133,7 @@ jest.mock('../js/utils/SoundSynthesizer.js', () => ({
     }
 }));
 
-let Nadagotchi, PersistenceManager, MainScene, ArtisanMinigameScene, Config;
+let Nadagotchi, PersistenceManager, MainScene, ArtisanMinigameScene, Config, Encoding;
 
 beforeAll(async () => {
     Nadagotchi = (await import('../js/Nadagotchi.js')).Nadagotchi;
@@ -141,6 +141,7 @@ beforeAll(async () => {
     MainScene = (await import('../js/MainScene.js')).MainScene;
     ArtisanMinigameScene = (await import('../js/ArtisanMinigameScene.js')).ArtisanMinigameScene;
     Config = (await import('../js/Config.js')).Config;
+    Encoding = await import('../js/utils/Encoding.js');
 });
 
 describe('Security Hardening', () => {
@@ -194,9 +195,9 @@ describe('Security Hardening', () => {
         const [encoded, hash] = raw.split('|');
 
         // Decode, modify hunger, re-encode
-        const data = JSON.parse(atob(encoded));
+        const data = JSON.parse(Encoding.fromBase64(encoded));
         data.stats.hunger = 99; // Cheat
-        const newEncoded = btoa(JSON.stringify(data));
+        const newEncoded = Encoding.toBase64(JSON.stringify(data));
 
         // Attacker tries to use the old hash (invalid because content changed)
         localStorage.setItem('nadagotchi_save', `${newEncoded}|${hash}`);
