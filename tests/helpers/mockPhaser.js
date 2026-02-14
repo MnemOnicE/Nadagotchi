@@ -24,6 +24,7 @@ export const mockGameObject = () => {
         setScrollFactor: jest.fn().mockReturnThis(),
         setDepth: jest.fn().mockReturnThis(),
         setText: jest.fn().mockReturnThis(),
+        setFillStyle: jest.fn().mockReturnThis(),
         setStrokeStyle: jest.fn().mockReturnThis(),
         setBlendMode: jest.fn().mockReturnThis(),
         setScale: jest.fn().mockReturnThis(),
@@ -58,13 +59,39 @@ export const setupPhaserMock = () => {
         Scene: class Scene {
             constructor(config) {
                 this.config = config;
-                this.events = {
+                this.cameras = { main: { width: 800, height: 600, setBackgroundColor: jest.fn(), setSize: jest.fn(), setViewport: jest.fn() } };
+                this.add = createMockAdd();
+                this.time = {
+                    delayedCall: jest.fn((delay, callback) => { callback(); return { destroy: jest.fn() }; }),
+                    addEvent: jest.fn(() => ({ destroy: jest.fn(), remove: jest.fn() })),
+                    now: 0
+                };
+                this.tweens = {
+                    add: jest.fn((config) => {
+                        if (config.onComplete) config.onComplete();
+                        return { stop: jest.fn() };
+                    }),
+                    killTweensOf: jest.fn()
+                };
+                this.sys = { events: { once: jest.fn(), on: jest.fn(), off: jest.fn() } };
+                this.scene = { stop: jest.fn(), resume: jest.fn(), get: jest.fn(), launch: jest.fn(), start: jest.fn() };
+                this.game = { events: { emit: jest.fn(), on: jest.fn(), off: jest.fn() } };
+                this.events = { on: jest.fn(), off: jest.fn(), emit: jest.fn() };
+                this.input = {
+                    keyboard: { on: jest.fn(), off: jest.fn() },
                     on: jest.fn(),
                     off: jest.fn(),
-                    emit: jest.fn()
+                    setDefaultCursor: jest.fn(),
+                    setDraggable: jest.fn()
                 };
                 this.plugins = {
                     get: jest.fn()
+                };
+                this.scale = {
+                    width: 800,
+                    height: 600,
+                    on: jest.fn(),
+                    off: jest.fn()
                 };
             }
         },
