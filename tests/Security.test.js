@@ -173,9 +173,11 @@ describe('Security Hardening', () => {
         expect(result).toBe(false);
     });
 
-    test('Persistence Salt: Save includes UUID and verifies correctly', () => {
+    test('Persistence Salt: Save includes UUID and verifies correctly', async () => {
         nadagotchi.stats.hunger = 50;
         persistence.savePet(nadagotchi);
+
+        await new Promise(r => setTimeout(r, 300));
 
         const loaded = persistence.loadPet();
         expect(loaded).not.toBeNull();
@@ -183,8 +185,10 @@ describe('Security Hardening', () => {
         expect(loaded.stats.hunger).toBe(50);
     });
 
-    test('Persistence Salt: Tampering fails verification', () => {
+    test('Persistence Salt: Tampering fails verification', async () => {
         persistence.savePet(nadagotchi);
+
+        await new Promise(r => setTimeout(r, 300));
 
         // Get the raw save string
         const raw = localStorage.getItem('nadagotchi_save');

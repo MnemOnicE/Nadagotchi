@@ -41,7 +41,7 @@ export class DebrisSystem {
         const y = this.pet.rng.range(60, 90) / 100;
 
         const debris = {
-            id: this.pet._generateUUID(),
+            id: this.pet.generateUUID(),
             type: type,
             x: x,
             y: y,
@@ -64,7 +64,7 @@ export class DebrisSystem {
         const y = this.pet.rng.range(60, 90) / 100;
 
         const debris = {
-            id: this.pet._generateUUID(),
+            id: this.pet.generateUUID(),
             type: 'poop',
             x: x,
             y: y,

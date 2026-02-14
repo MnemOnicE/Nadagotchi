@@ -121,6 +121,29 @@ export class Genome {
  */
 export class GeneticsSystem {
     /**
+     * Map of item IDs to Gene targets and values.
+     */
+    static ENV_MAP = {
+        'Ancient Tome': { gene: 'Intellectual', value: 70 },
+        'Heart Amulet': { gene: 'Nurturer', value: 70 },
+        'Muse Flower': { gene: 'Mischievous', value: 70 },
+        'Nutrient Bar': { gene: 'metabolism', value: 8 },
+        'Espresso': { gene: 'metabolism', value: 9 },
+        'Chamomile': { gene: 'metabolism', value: 2 },
+        'Metabolism-Slowing Tonic': { gene: 'metabolism', value: 2 },
+        'book': { gene: 'Intellectual', value: 80 },          // Generic Book (for tests/flexibility)
+
+        // Expanded Environment Influence (Crafted Items & Resources)
+        'Fancy Bookshelf': { gene: 'Intellectual', value: 75 },
+        'Masterwork Chair': { gene: 'Recluse', value: 75 },
+        'Logic-Boosting Snack': { gene: 'Intellectual', value: 60 },
+        'Stamina-Up Tea': { gene: 'Adventurer', value: 65 },
+        'Shiny Stone': { gene: 'Mischievous', value: 60 },
+        'Frostbloom': { gene: 'Recluse', value: 70 },
+        'Berries': { gene: 'Nurturer', value: 50 }
+    };
+
+    /**
      * Generates a new Genome based on a parent Genome and environmental items.
      * The environment acts as a "second parent" for allele contribution.
      * @param {Genome} parentGenome - The genome of the parent.
@@ -136,27 +159,15 @@ export class GeneticsSystem {
         const newGenotype = {};
         const parentGenotype = parentGenome.genotype;
 
-        // Environment Mapping
-        // Maps item IDs (from BreedingScene) to Gene targets and values.
-        const envMap = {
-            'Ancient Tome': { gene: 'Intellectual', value: 70 },
-            'Heart Amulet': { gene: 'Nurturer', value: 70 },
-            'Muse Flower': { gene: 'Mischievous', value: 70 },
-            'Nutrient Bar': { gene: 'metabolism', value: 8 },
-            'Espresso': { gene: 'metabolism', value: 9 },
-            'Chamomile': { gene: 'metabolism', value: 2 },
-            'Metabolism-Slowing Tonic': { gene: 'metabolism', value: 2 },
-            'book': { gene: 'Intellectual', value: 80 },          // Generic Book (for tests/flexibility)
-
-            // Expanded Environment Influence (Crafted Items & Resources)
-            'Fancy Bookshelf': { gene: 'Intellectual', value: 75 },
-            'Masterwork Chair': { gene: 'Recluse', value: 75 },
-            'Logic-Boosting Snack': { gene: 'Intellectual', value: 60 },
-            'Stamina-Up Tea': { gene: 'Adventurer', value: 65 },
-            'Shiny Stone': { gene: 'Mischievous', value: 60 },
-            'Frostbloom': { gene: 'Recluse', value: 70 },
-            'Berries': { gene: 'Nurturer', value: 50 }
-        };
+        // Pre-process environmental items to map genes to values
+        // Strategy: First valid item for a gene wins (preserves original priority)
+        const geneTargetMap = {};
+        for (const item of environmentalItems) {
+            const mapping = GeneticsSystem.ENV_MAP[item];
+            if (mapping && geneTargetMap[mapping.gene] === undefined) {
+                geneTargetMap[mapping.gene] = mapping.value;
+            }
+        }
 
         for (const geneKey in parentGenotype) {
             // --- Step 1: Meiosis (Parental Contribution) ---
@@ -165,17 +176,8 @@ export class GeneticsSystem {
             let parentAllele = choice(parentAlleles);
 
             // --- Step 2: Environmental Contribution (The "Second Parent") ---
-            let envAllele = null;
-
-            // Check if any environmental item targets this gene
-            for (const item of environmentalItems) {
-                const mapping = envMap[item];
-                // Check if the item maps to the current gene
-                if (mapping && mapping.gene === geneKey) {
-                    envAllele = mapping.value;
-                    break; // Use the first matching item found
-                }
-            }
+            // Direct lookup instead of iteration
+            let envAllele = geneTargetMap[geneKey] ?? null;
 
             // If no item targets this gene, provide a random "Wild" allele
             if (envAllele === null) {
