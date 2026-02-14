@@ -5,6 +5,7 @@
 
 import { SeededRandom } from './utils/SeededRandom.js';
 import { Config } from './Config.js';
+import { CryptoUtils } from './utils/CryptoUtils.js';
 
 // Base64 Helpers for Environment Compatibility (Browser/Node)
 const toBase64 = (str) => (typeof btoa === 'function') ? btoa(str) : Buffer.from(str).toString('base64');
@@ -245,9 +246,9 @@ export class GeneticsSystem {
      * Serializes a Genome into a secure, shareable string.
      * Format: [Base64(JSON(Genotype))].[Checksum]
      * @param {Genome} genome - The genome to export.
-     * @returns {string} The encoded DNA string.
+     * @returns {Promise<string>} The encoded DNA string.
      */
-    static serialize(genome) {
+    static async serialize(genome) {
         if (!genome || !genome.genotype) throw new Error("Invalid Genome for Serialization");
 
         // 1. Serialize Genotype (Only DNA, no state)
@@ -257,7 +258,7 @@ export class GeneticsSystem {
         const encoded = toBase64(jsonStr);
 
         // 3. Generate Checksum
-        const checksum = GeneticsSystem._generateChecksum(encoded + Config.SECURITY.DNA_SALT);
+        const checksum = await GeneticsSystem._generateChecksum(encoded);
 
         // 4. Combine
         return `${encoded}.${checksum}`;
@@ -266,16 +267,16 @@ export class GeneticsSystem {
     /**
      * Deserializes a DNA string into a Genome object.
      * @param {string} dnaString - The encoded DNA string.
-     * @returns {Genome} A new Genome instance.
+     * @returns {Promise<Genome>} A new Genome instance.
      * @throws {Error} If integrity check fails or format is invalid.
      */
-    static deserialize(dnaString) {
+    static async deserialize(dnaString) {
         const parts = dnaString.split('.');
         if (parts.length !== 2) throw new Error("Invalid DNA Format");
         const [encoded, checksum] = parts;
 
         // 1. Verify Checksum
-        const expectedChecksum = GeneticsSystem._generateChecksum(encoded + Config.SECURITY.DNA_SALT);
+        const expectedChecksum = await GeneticsSystem._generateChecksum(encoded);
         if (checksum !== expectedChecksum) throw new Error("DNA Integrity Check Failed");
 
         // 2. Decode
@@ -308,17 +309,13 @@ export class GeneticsSystem {
     }
 
     /**
-     * Generates a simple DJB2 checksum for a string.
+     * Generates a secure SHA-256 checksum for a string.
      * @param {string} str - The input string.
-     * @returns {string} The checksum as a hex string.
+     * @returns {Promise<string>} The checksum as a hex string.
      * @private
      */
-    static _generateChecksum(str) {
-        let hash = 5381;
-        for (let i = 0; i < str.length; i++) {
-            hash = ((hash << 5) + hash) + str.charCodeAt(i); /* hash * 33 + c */
-        }
-        // Convert to unsigned 32-bit integer then hex
-        return (hash >>> 0).toString(16);
+    static async _generateChecksum(str) {
+        // Use the salt from Config to prevent tampering
+        return await CryptoUtils.generateHash(str, Config.SECURITY.DNA_SALT);
     }
 }
