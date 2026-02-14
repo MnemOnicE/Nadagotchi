@@ -2,6 +2,7 @@
 import { GeneticsSystem, Genome } from '../js/GeneticsSystem.js';
 import { Nadagotchi } from '../js/Nadagotchi.js';
 import { Config } from '../js/Config.js';
+import { toBase64 } from '../js/utils/Encoding.js';
 
 describe('Genetics Serialization System', () => {
 
@@ -65,7 +66,7 @@ describe('Genetics Serialization System', () => {
 
         // But the salt is in Config. We can read it.
         const salt = Config.SECURITY.DNA_SALT;
-        const encoded = (typeof btoa === 'function' ? btoa(badJson) : Buffer.from(badJson).toString('base64'));
+        const encoded = toBase64(badJson);
 
         // Calculate valid checksum for this bad payload
         // We need to replicate the checksum logic or expose it.
