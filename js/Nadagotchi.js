@@ -1086,84 +1086,79 @@ export class Nadagotchi {
      */
     updateDominantArchetype() {
         let maxPoints = -1;
-        let potentialDominantArchetypes = [];
+        let candidates = [];
 
-        // First, find the maximum number of points.
+        // Single pass to find candidates with maximum points
         for (const archetype in this.personalityPoints) {
-            if (this.personalityPoints[archetype] > maxPoints) {
-                maxPoints = this.personalityPoints[archetype];
+            const points = this.personalityPoints[archetype];
+            if (points > maxPoints) {
+                maxPoints = points;
+                candidates = [archetype];
+            } else if (points === maxPoints) {
+                candidates.push(archetype);
             }
         }
 
-        // Next, gather all archetypes that have that maximum score.
-        for (const archetype in this.personalityPoints) {
-            if (this.personalityPoints[archetype] === maxPoints) {
-                potentialDominantArchetypes.push(archetype);
+        if (candidates.length === 0) return;
+
+        // Optimization: If only one candidate, update and return immediately
+        if (candidates.length === 1) {
+            this.dominantArchetype = candidates[0];
+            return;
+        }
+
+        // Handle ties based on skills
+        // If tied on points, the one with the highest relevant skill score wins.
+        // If tied on skill score, pick randomly (unless incumbent is one of them).
+
+        let maxSkillScore = -1;
+        let skillWinners = [];
+        let incumbentInCandidates = false;
+
+        for (const archetype of candidates) {
+            if (archetype === this.dominantArchetype) {
+                incumbentInCandidates = true;
+            }
+
+            let score = 0;
+            switch (archetype) {
+                case 'Adventurer':
+                    score = this.skills.navigation;
+                    break;
+                case 'Nurturer':
+                    score = this.skills.empathy;
+                    break;
+                case 'Intellectual':
+                    score = this.skills.logic + this.skills.research;
+                    break;
+                case 'Recluse':
+                    score = this.skills.focus + this.skills.crafting;
+                    break;
+                case 'Mischievous':
+                    score = this.skills.communication;
+                    break;
+            }
+
+            if (score > maxSkillScore) {
+                maxSkillScore = score;
+                skillWinners = [archetype];
+            } else if (score === maxSkillScore) {
+                skillWinners.push(archetype);
             }
         }
 
-        // If the current dominant archetype is one of the tied contenders, it remains dominant unless another contender has higher skills.
-        // Otherwise, we break ties based on relevant skills.
-        if (potentialDominantArchetypes.length > 0) {
-            // Shuffle potentialDominantArchetypes to break ties randomly and avoid index bias
-            for (let i = potentialDominantArchetypes.length - 1; i > 0; i--) {
-                const j = this.rng.range(0, i + 1);
-                [potentialDominantArchetypes[i], potentialDominantArchetypes[j]] = [potentialDominantArchetypes[j], potentialDominantArchetypes[i]];
-            }
+        // Apply Incumbent Rule:
+        // If incumbent is a candidate (tied for points) AND has the highest skill score (tied or unique), it wins.
+        // Note: If incumbent is tied for max skill score, it wins tie-break against challengers.
+        if (incumbentInCandidates && skillWinners.includes(this.dominantArchetype)) {
+            return; // Keep current
+        }
 
-            // We need to compare against the current archetype as well if it's in the running.
-            // If the current archetype is NOT in the top list, we just pick the best from the list.
-            // If it IS in the list, we only switch if another candidate is strictly better (higher skills).
-
-            let bestCandidate = null;
-            let highestSkillScore = -1;
-            let currentArchetypeScore = 0; // Fix: Initialize to 0 instead of -1 to avoid brittle logic
-
-            potentialDominantArchetypes.forEach(archetype => {
-                let score = 0;
-                switch (archetype) {
-                    case 'Adventurer':
-                        score = this.skills.navigation;
-                        break;
-                    case 'Nurturer':
-                        score = this.skills.empathy;
-                        break;
-                    case 'Intellectual':
-                        score = this.skills.logic + this.skills.research;
-                        break;
-                    case 'Recluse':
-                        score = this.skills.focus + this.skills.crafting;
-                        break;
-                    case 'Mischievous':
-                        score = this.skills.communication;
-                        break;
-                }
-
-                if (archetype === this.dominantArchetype) {
-                    currentArchetypeScore = score;
-                }
-
-                if (score > highestSkillScore) {
-                    highestSkillScore = score;
-                    bestCandidate = archetype;
-                }
-            });
-
-            // If we found a candidate (list not empty)
-            if (bestCandidate) {
-                // If the current archetype is in the list, we prioritize it unless bestCandidate has a higher score.
-                if (potentialDominantArchetypes.includes(this.dominantArchetype)) {
-                    if (highestSkillScore > currentArchetypeScore) {
-                         this.dominantArchetype = bestCandidate;
-                    }
-                    // Else: keep current (tie goes to incumbent)
-                } else {
-                     this.dominantArchetype = bestCandidate;
-                }
-            } else {
-                 // Fallback if no candidate found (should be impossible given length > 0 check)
-                 this.dominantArchetype = potentialDominantArchetypes[0];
-            }
+        // Otherwise, pick a winner from the skill winners.
+        // If there's a tie in skill scores, pick randomly.
+        if (skillWinners.length > 0) {
+            // Use RNG for deterministic tie-breaking
+            this.dominantArchetype = this.rng.choice(skillWinners);
         }
     }
 
