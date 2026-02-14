@@ -48,6 +48,41 @@ describe('SeededRandom', () => {
         const rng2 = new SeededRandom("cosmos");
         expect(rng1.random()).toBe(rng2.random());
     });
+
+    describe('chance', () => {
+        it('should return true if random() is less than probability', () => {
+            const rng = new SeededRandom(123);
+            rng.random = jest.fn().mockReturnValue(0.4);
+
+            expect(rng.chance(0.5)).toBe(true);
+            expect(rng.chance(0.3)).toBe(false);
+        });
+
+        it('should handle edge cases correctly', () => {
+            const rng = new SeededRandom(123);
+            rng.random = jest.fn().mockReturnValue(0.0);
+
+            expect(rng.chance(0)).toBe(false);
+            expect(rng.chance(Number.EPSILON)).toBe(true);
+
+            rng.random = jest.fn().mockReturnValue(0.999999);
+            expect(rng.chance(1)).toBe(true);
+        });
+
+        it('should behave deterministically with seeded values', () => {
+            // Get the first random value for seed 123 to use as a baseline
+            const setupRng = new SeededRandom(123);
+            const firstRandomValue = setupRng.random();
+
+            // Test chance with probability slightly higher than the known value
+            const rngTrue = new SeededRandom(123);
+            expect(rngTrue.chance(firstRandomValue + 0.00001)).toBe(true);
+
+            // Test chance with probability slightly lower than the known value
+            const rngFalse = new SeededRandom(123);
+            expect(rngFalse.chance(firstRandomValue - 0.00001)).toBe(false);
+        });
+    });
 });
 
 describe('Nadagotchi RNG Integration', () => {
@@ -62,7 +97,7 @@ describe('Nadagotchi RNG Integration', () => {
         const seed = pet1.universeSeed;
 
         // Advance RNG via methods that use it
-        // _generateUUID calls rng inside constructor
+        // generateUUID calls rng inside constructor
         // genome initialization calls rng inside constructor
 
         // Let's call forage to explicitly use RNG
