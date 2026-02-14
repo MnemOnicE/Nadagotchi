@@ -18,7 +18,7 @@ class MockPet {
             addItem: jest.fn()
         };
         this.addJournalEntry = jest.fn();
-        this._generateUUID = () => 'test-id';
+        this.generateUUID = () => 'test-id';
     }
 }
 
