@@ -58,42 +58,82 @@ describe('DebrisSystem', () => {
         expect(pet.debris.length).toBe(Config.DEBRIS.MAX_COUNT); // Should not increase
     });
 
-    test('clean removes item and applies rewards (Weed)', () => {
-        pet.debris.push({ id: 'test-weed', type: 'weed' });
+    describe('Seasonal Spawning', () => {
+        test.each([
+            ['Spring', 'Berries'],
+            ['Autumn', 'Sticks']
+        ])('spawnDaily adds %s in %s', (season, expectedItem) => {
+            // 1st random: 0.1 (<= 0.8) -> Continue
+            // 2nd random: 0.2 (< 0.3) -> Add seasonal item
+            pet.rng.random.mockReturnValueOnce(0.1).mockReturnValueOnce(0.2);
 
-        const result = system.clean('test-weed');
+            // Mock choice to return the last element (which should be the seasonal item)
+            pet.rng.choice.mockImplementation(arr => arr[arr.length - 1]);
 
-        expect(result.success).toBe(true);
-        expect(pet.debris.length).toBe(0);
-        expect(pet.stats.energy).toBe(100 - Config.DEBRIS.CLEAN_ENERGY_COST);
-        expect(pet.skills.resilience).toBe(Config.DEBRIS.CLEAN_SKILL_GAIN);
+            system.spawnDaily(season, 'Sunny');
+
+            expect(pet.debris.length).toBe(1);
+            expect(pet.debris[0].type).toBe(expectedItem);
+            expect(pet.rng.choice).toHaveBeenCalledWith(expect.arrayContaining([expectedItem]));
+        });
+
+        test.each([
+            ['Spring', 'Berries'],
+            ['Autumn', 'Sticks']
+        ])('spawnDaily does not add %s in %s if random check fails', (season, item) => {
+            // 1st random: 0.1 (<= 0.8) -> Continue
+            // 2nd random: 0.4 (>= 0.3) -> Do NOT add seasonal item
+            pet.rng.random.mockReturnValueOnce(0.1).mockReturnValueOnce(0.4);
+            pet.rng.choice.mockImplementation(arr => arr[0]);
+
+            system.spawnDaily(season, 'Sunny');
+
+            expect(pet.rng.choice).toHaveBeenCalledWith(['weed', 'rock_small']);
+        });
     });
 
-    test('clean fails if not enough energy', () => {
-        pet.debris.push({ id: 'test-weed', type: 'weed' });
-        pet.stats.energy = 0;
+    describe('Cleaning', () => {
+        test('clean removes item and applies rewards (Weed)', () => {
+            pet.debris.push({ id: 'test-weed', type: 'weed' });
 
-        const result = system.clean('test-weed');
-        expect(result.success).toBe(false);
-        expect(pet.debris.length).toBe(1);
-    });
+            const result = system.clean('test-weed');
 
-    test('clean (Poop) increases happiness', () => {
-        pet.debris.push({ id: 'test-poop', type: 'poop' });
-        pet.stats.happiness = 50;
+            expect(result.success).toBe(true);
+            expect(pet.debris.length).toBe(0);
+            expect(pet.stats.energy).toBe(100 - Config.DEBRIS.CLEAN_ENERGY_COST);
+            expect(pet.skills.resilience).toBe(Config.DEBRIS.CLEAN_SKILL_GAIN);
+        });
 
-        system.clean('test-poop');
+        test('clean fails if not enough energy', () => {
+            pet.debris.push({ id: 'test-weed', type: 'weed' });
+            pet.stats.energy = 0;
 
-        expect(pet.stats.happiness).toBe(55);
-        expect(pet.skills.resilience).toBeGreaterThan(Config.DEBRIS.CLEAN_SKILL_GAIN);
-    });
+            const result = system.clean('test-weed');
+            expect(result.success).toBe(false);
+            expect(pet.debris.length).toBe(1);
+        });
 
-    test('clean (Resource) adds to inventory', () => {
-        pet.debris.push({ id: 'test-rock', type: 'rock_small' });
+        test('clean (Poop) increases happiness', () => {
+            pet.debris.push({ id: 'test-poop', type: 'poop' });
+            pet.stats.happiness = 50;
 
-        system.clean('test-rock');
+            system.clean('test-poop');
 
-        expect(pet.inventorySystem.addItem).toHaveBeenCalledWith('Shiny Stone', 1);
+            expect(pet.stats.happiness).toBe(55);
+            expect(pet.skills.resilience).toBeGreaterThan(Config.DEBRIS.CLEAN_SKILL_GAIN);
+        });
+
+        test.each([
+            ['rock_small', 'Shiny Stone'],
+            ['Berries', 'Berries'],
+            ['Sticks', 'Sticks']
+        ])('clean (%s) adds %s to inventory', (type, expectedInventoryItem) => {
+            pet.debris.push({ id: 'test-item', type: type });
+
+            system.clean('test-item');
+
+            expect(pet.inventorySystem.addItem).toHaveBeenCalledWith(expectedInventoryItem, 1);
+        });
     });
 
     describe('spawnPoop', () => {
