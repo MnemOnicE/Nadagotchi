@@ -3,26 +3,14 @@
  * Includes mechanisms for data integrity (checksums), legacy support, and specialized save slots (Pet, Hall of Fame, Journal).
  */
 
-import { toBase64, fromBase64 } from './utils/Encoding.js';
-
 /**
  * PersistenceManager handles saving and loading game data.
  * It provides an abstraction layer over `localStorage` with added security features.
  * @class PersistenceManager
  */
 export class PersistenceManager {
-    constructor() {
-        /** @type {Object.<string, string>} Cache of the last saved JSON strings to prevent redundant writes. */
-        this.lastSavedJson = {};
-        /** @type {?number} ID of the pending save timer/callback. */
-        this._saveTimer = null;
-        /** @type {boolean} Whether the pending timer is an idle callback. */
-        this._isIdleCallback = false;
-    }
-
     /**
      * Saves the active Nadagotchi's data to localStorage.
-     * Uses a non-blocking scheduling mechanism to avoid frame drops.
      * @param {object} nadagotchiData - The Nadagotchi object to save.
      * @param {object} [homeConfig=null] - DEPRECATED: The home configuration object. Now part of nadagotchiData.
      */
@@ -34,40 +22,7 @@ export class PersistenceManager {
         }
 
         // Pass the UUID as salt to bind the save file to this specific pet instance
-        this._scheduleSave("nadagotchi_save", payload, payload.uuid);
-    }
-
-    /**
-     * Schedules a save operation to run during idle time or after a short delay.
-     * This debounces rapid calls and moves execution off the critical path.
-     * @param {string} key - Storage key.
-     * @param {object} data - Data to save.
-     * @param {string} salt - Salt for hashing.
-     * @private
-     */
-    _scheduleSave(key, data, salt) {
-        if (this._saveTimer) {
-            if (this._isIdleCallback && typeof cancelIdleCallback !== 'undefined') {
-                cancelIdleCallback(this._saveTimer);
-            } else {
-                clearTimeout(this._saveTimer);
-            }
-        }
-
-        const task = () => {
-            this._saveTimer = null;
-            this._save(key, data, salt);
-        };
-
-        if (typeof requestIdleCallback !== 'undefined') {
-            this._isIdleCallback = true;
-            // Schedule with a timeout fallback to ensure it eventually runs
-            this._saveTimer = requestIdleCallback(task, { timeout: 2000 });
-        } else {
-            this._isIdleCallback = false;
-            // Fallback for environments without requestIdleCallback (e.g. Node/Jest without polyfill)
-            this._saveTimer = setTimeout(task, 200);
-        }
+        this._save("nadagotchi_save", payload, payload.uuid);
     }
 
     /**
@@ -102,17 +57,7 @@ export class PersistenceManager {
      * This is typically used when a pet is retired to allow starting a new generation.
      */
     clearActivePet() {
-        // Cancel any pending save to prevent resurrection
-        if (this._saveTimer) {
-             if (this._isIdleCallback && typeof cancelIdleCallback !== 'undefined') {
-                  cancelIdleCallback(this._saveTimer);
-             } else {
-                  clearTimeout(this._saveTimer);
-             }
-             this._saveTimer = null;
-        }
         localStorage.removeItem("nadagotchi_save");
-        delete this.lastSavedJson["nadagotchi_save"];
     }
 
     /**
@@ -120,16 +65,6 @@ export class PersistenceManager {
      * Used for starting a completely new game.
      */
     clearAllData() {
-        // Cancel any pending save
-        if (this._saveTimer) {
-             if (this._isIdleCallback && typeof cancelIdleCallback !== 'undefined') {
-                  cancelIdleCallback(this._saveTimer);
-             } else {
-                  clearTimeout(this._saveTimer);
-             }
-             this._saveTimer = null;
-        }
-
         const keysToClear = [
             "nadagotchi_save",
             "nadagotchi_journal",
@@ -305,20 +240,10 @@ export class PersistenceManager {
     _save(key, data, salt = null) {
         try {
             const json = JSON.stringify(data);
-            const encoded = toBase64(json);
-
-            // OPTIMIZATION: Skip save if data hasn't changed
-            if (this.lastSavedJson[key] === json) {
-                return;
-            }
-
             const encoded = btoa(json);
             const strToHash = salt ? encoded + salt : encoded;
             const hash = this._hash(strToHash);
             localStorage.setItem(key, `${encoded}|${hash}`);
-
-            // Update cache
-            this.lastSavedJson[key] = json;
         } catch (e) {
             console.error(`Failed to save data for key ${key}:`, e);
         }
@@ -355,7 +280,7 @@ export class PersistenceManager {
         const [encoded, hash] = parts;
         let json;
         try {
-            json = fromBase64(encoded);
+            json = atob(encoded);
         } catch (e) {
             console.error(`Failed to decode save for key ${key}:`, e);
             return null;

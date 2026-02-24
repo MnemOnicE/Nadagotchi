@@ -187,7 +187,19 @@ export class InventorySystem {
                 // Check for generic item types (DEED)
                 const def = ItemDefinitions[itemName];
                 if (def && def.type === 'DEED') {
-                    return this._processDeed(itemName, def);
+                    // Deed Logic
+                    const targetRoom = def.targetRoom;
+                    if (targetRoom && RoomDefinitions[targetRoom]) {
+                        // Check Linear Progression: Ensure at least one connected room is unlocked.
+                        const canUnlock = RoomDefinitions[targetRoom].connections.some(connId => this.pet.isRoomUnlocked(connId));
+
+                        if (!canUnlock) {
+                            return { success: false, message: "You must unlock a connecting room first!" };
+                        }
+
+                        this.pet.unlockRoom(targetRoom);
+                        consumed = true;
+                    }
                 }
                 break;
         }
@@ -198,31 +210,6 @@ export class InventorySystem {
         }
 
         return { success: false, message: "Item cannot be consumed." };
-    }
-
-    /**
-     * Processes a DEED item consumption logic.
-     * @param {string} itemName - The name of the deed item.
-     * @param {object} def - The item definition.
-     * @returns {object} Result object { success: boolean, message?: string }.
-     * @private
-     */
-    _processDeed(itemName, def) {
-        const targetRoom = def.targetRoom;
-        if (!targetRoom || !RoomDefinitions[targetRoom]) {
-            return { success: false, message: "Invalid Deed: Room does not exist." };
-        }
-
-        // Check Linear Progression: Ensure at least one connected room is unlocked.
-        const canUnlock = RoomDefinitions[targetRoom].connections.some(connId => this.pet.isRoomUnlocked(connId));
-
-        if (!canUnlock) {
-            return { success: false, message: "You must unlock a connecting room first!" };
-        }
-
-        this.pet.unlockRoom(targetRoom);
-        this.removeItem(itemName, 1);
-        return { success: true };
     }
 
     /**

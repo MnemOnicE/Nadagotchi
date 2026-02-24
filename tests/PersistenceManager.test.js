@@ -19,13 +19,9 @@ describe('PersistenceManager', () => {
         global.localStorage.clear();
     });
 
-    test('should save and load pet data', async () => {
+    test('should save and load pet data', () => {
         const petData = { name: 'Testy', mood: 'happy' };
         persistenceManager.savePet(petData);
-
-        // Wait for async save (debounced/scheduled)
-        await new Promise(resolve => setTimeout(resolve, 300));
-
         const loadedPet = persistenceManager.loadPet();
         expect(loadedPet).toEqual(petData);
     });

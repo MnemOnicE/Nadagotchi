@@ -41,7 +41,7 @@ export class DebrisSystem {
         const y = this.pet.rng.range(60, 90) / 100;
 
         const debris = {
-            id: this.pet.generateUUID(),
+            id: this.pet._generateUUID(),
             type: type,
             x: x,
             y: y,
@@ -60,45 +60,19 @@ export class DebrisSystem {
         // Limit
         if (this.pet.debris.length >= Config.DEBRIS.MAX_COUNT) return;
 
-        let x, y;
-        let valid = false;
-        let attempts = 0;
-        const maxAttempts = 10;
-        const overlapThreshold = 0.05;
-
-        // Try to find a spot that doesn't overlap existing debris
-        while (!valid && attempts < maxAttempts) {
-            attempts++;
-            x = this.pet.rng.range(10, 90) / 100;
-            y = this.pet.rng.range(60, 90) / 100;
-
-            // Check overlap with existing debris
-            valid = !this.pet.debris.some(d => {
-                const dist = Math.hypot(d.x - x, d.y - y);
-                return dist < overlapThreshold;
-            });
-        }
-
-        if (!valid) {
-             // Failed to find spot, skip spawn to avoid clutter
-             return;
-        }
+        const x = this.pet.rng.range(10, 90) / 100;
+        const y = this.pet.rng.range(60, 90) / 100;
 
         const debris = {
-            id: this.pet.generateUUID(),
+            id: this.pet._generateUUID(),
             type: 'poop',
             x: x,
             y: y,
             created: Date.now()
         };
         this.pet.debris.push(debris);
-
-        // Chance for a funny journal entry (10%)
-        if (this.pet.rng.random() < 0.1) {
-             this.pet.addJournalEntry("The garden has received a... natural gift.");
-        } else {
-             this.pet.addJournalEntry("Something smells funny in the garden.");
-        }
+        // Ensure mood impact immediately?
+        // No, handled by live()
     }
 
     /**

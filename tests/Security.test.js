@@ -133,7 +133,7 @@ jest.mock('../js/utils/SoundSynthesizer.js', () => ({
     }
 }));
 
-let Nadagotchi, PersistenceManager, MainScene, ArtisanMinigameScene, Config, Encoding;
+let Nadagotchi, PersistenceManager, MainScene, ArtisanMinigameScene, Config;
 
 beforeAll(async () => {
     Nadagotchi = (await import('../js/Nadagotchi.js')).Nadagotchi;
@@ -141,7 +141,6 @@ beforeAll(async () => {
     MainScene = (await import('../js/MainScene.js')).MainScene;
     ArtisanMinigameScene = (await import('../js/ArtisanMinigameScene.js')).ArtisanMinigameScene;
     Config = (await import('../js/Config.js')).Config;
-    Encoding = await import('../js/utils/Encoding.js');
 });
 
 describe('Security Hardening', () => {
@@ -173,11 +172,9 @@ describe('Security Hardening', () => {
         expect(result).toBe(false);
     });
 
-    test('Persistence Salt: Save includes UUID and verifies correctly', async () => {
+    test('Persistence Salt: Save includes UUID and verifies correctly', () => {
         nadagotchi.stats.hunger = 50;
         persistence.savePet(nadagotchi);
-
-        await new Promise(r => setTimeout(r, 300));
 
         const loaded = persistence.loadPet();
         expect(loaded).not.toBeNull();
@@ -185,19 +182,17 @@ describe('Security Hardening', () => {
         expect(loaded.stats.hunger).toBe(50);
     });
 
-    test('Persistence Salt: Tampering fails verification', async () => {
+    test('Persistence Salt: Tampering fails verification', () => {
         persistence.savePet(nadagotchi);
-
-        await new Promise(r => setTimeout(r, 300));
 
         // Get the raw save string
         const raw = localStorage.getItem('nadagotchi_save');
         const [encoded, hash] = raw.split('|');
 
         // Decode, modify hunger, re-encode
-        const data = JSON.parse(Encoding.fromBase64(encoded));
+        const data = JSON.parse(atob(encoded));
         data.stats.hunger = 99; // Cheat
-        const newEncoded = Encoding.toBase64(JSON.stringify(data));
+        const newEncoded = btoa(JSON.stringify(data));
 
         // Attacker tries to use the old hash (invalid because content changed)
         localStorage.setItem('nadagotchi_save', `${newEncoded}|${hash}`);

@@ -47,7 +47,7 @@ export class Nadagotchi {
         if (loadedData) {
             // This is a loaded pet. Populate all properties from the save file.
             /** @type {string} Unique identifier for this pet instance (Salt). */
-            this.uuid = loadedData.uuid || this.generateUUID(); // Migration for old saves
+            this.uuid = loadedData.uuid || this._generateUUID(); // Migration for old saves
 
             /** @type {string} The name of the pet. */
             this.name = loadedData.name || "Nadagotchi";
@@ -148,7 +148,7 @@ export class Nadagotchi {
 
         } else {
             // This is a brand new game. Start from defaults.
-            this.uuid = this.generateUUID();
+            this.uuid = this._generateUUID();
             this.name = "Nadagotchi"; // Default, can be overridden immediately after
             this.mood = 'neutral';
             this.dominantArchetype = initialArchetype;
@@ -343,8 +343,9 @@ export class Nadagotchi {
     /**
      * Generates a deterministic UUID for the pet using the seeded RNG.
      * @returns {string} A unique identifier.
+     * @private
      */
-    generateUUID() {
+    _generateUUID() {
         // Deterministic UUID generation using SeededRandom
         const chars = '0123456789abcdef';
         let uuid = '';
@@ -421,7 +422,7 @@ export class Nadagotchi {
         };
 
         return {
-            uuid: this.generateUUID(), // New UUID for the child
+            uuid: this._generateUUID(), // New UUID for the child
             mood: 'neutral',
             dominantArchetype: dominant,
             personalityPoints: initialPoints,
@@ -1086,79 +1087,84 @@ export class Nadagotchi {
      */
     updateDominantArchetype() {
         let maxPoints = -1;
-        let candidates = [];
+        let potentialDominantArchetypes = [];
 
-        // Single pass to find candidates with maximum points
+        // First, find the maximum number of points.
         for (const archetype in this.personalityPoints) {
-            const points = this.personalityPoints[archetype];
-            if (points > maxPoints) {
-                maxPoints = points;
-                candidates = [archetype];
-            } else if (points === maxPoints) {
-                candidates.push(archetype);
+            if (this.personalityPoints[archetype] > maxPoints) {
+                maxPoints = this.personalityPoints[archetype];
             }
         }
 
-        if (candidates.length === 0) return;
-
-        // Optimization: If only one candidate, update and return immediately
-        if (candidates.length === 1) {
-            this.dominantArchetype = candidates[0];
-            return;
-        }
-
-        // Handle ties based on skills
-        // If tied on points, the one with the highest relevant skill score wins.
-        // If tied on skill score, pick randomly (unless incumbent is one of them).
-
-        let maxSkillScore = -1;
-        let skillWinners = [];
-        let incumbentInCandidates = false;
-
-        for (const archetype of candidates) {
-            if (archetype === this.dominantArchetype) {
-                incumbentInCandidates = true;
-            }
-
-            let score = 0;
-            switch (archetype) {
-                case 'Adventurer':
-                    score = this.skills.navigation;
-                    break;
-                case 'Nurturer':
-                    score = this.skills.empathy;
-                    break;
-                case 'Intellectual':
-                    score = this.skills.logic + this.skills.research;
-                    break;
-                case 'Recluse':
-                    score = this.skills.focus + this.skills.crafting;
-                    break;
-                case 'Mischievous':
-                    score = this.skills.communication;
-                    break;
-            }
-
-            if (score > maxSkillScore) {
-                maxSkillScore = score;
-                skillWinners = [archetype];
-            } else if (score === maxSkillScore) {
-                skillWinners.push(archetype);
+        // Next, gather all archetypes that have that maximum score.
+        for (const archetype in this.personalityPoints) {
+            if (this.personalityPoints[archetype] === maxPoints) {
+                potentialDominantArchetypes.push(archetype);
             }
         }
 
-        // Apply Incumbent Rule:
-        // If incumbent is a candidate (tied for points) AND has the highest skill score (tied or unique), it wins.
-        // Note: If incumbent is tied for max skill score, it wins tie-break against challengers.
-        if (incumbentInCandidates && skillWinners.includes(this.dominantArchetype)) {
-            return; // Keep current
-        }
+        // If the current dominant archetype is one of the tied contenders, it remains dominant unless another contender has higher skills.
+        // Otherwise, we break ties based on relevant skills.
+        if (potentialDominantArchetypes.length > 0) {
+            // Shuffle potentialDominantArchetypes to break ties randomly and avoid index bias
+            for (let i = potentialDominantArchetypes.length - 1; i > 0; i--) {
+                const j = this.rng.range(0, i + 1);
+                [potentialDominantArchetypes[i], potentialDominantArchetypes[j]] = [potentialDominantArchetypes[j], potentialDominantArchetypes[i]];
+            }
 
-        // Otherwise, pick a winner from the skill winners.
-        // If there's a tie in skill scores, pick randomly.
-        if (skillWinners.length > 0) {
-            // Use RNG for deterministic tie-breaking
-            this.dominantArchetype = this.rng.choice(skillWinners);
+            // We need to compare against the current archetype as well if it's in the running.
+            // If the current archetype is NOT in the top list, we just pick the best from the list.
+            // If it IS in the list, we only switch if another candidate is strictly better (higher skills).
+
+            let bestCandidate = null;
+            let highestSkillScore = -1;
+            let currentArchetypeScore = 0; // Fix: Initialize to 0 instead of -1 to avoid brittle logic
+
+            potentialDominantArchetypes.forEach(archetype => {
+                let score = 0;
+                switch (archetype) {
+                    case 'Adventurer':
+                        score = this.skills.navigation;
+                        break;
+                    case 'Nurturer':
+                        score = this.skills.empathy;
+                        break;
+                    case 'Intellectual':
+                        score = this.skills.logic + this.skills.research;
+                        break;
+                    case 'Recluse':
+                        score = this.skills.focus + this.skills.crafting;
+                        break;
+                    case 'Mischievous':
+                        score = this.skills.communication;
+                        break;
+                }
+
+                if (archetype === this.dominantArchetype) {
+                    currentArchetypeScore = score;
+                }
+
+                if (score > highestSkillScore) {
+                    highestSkillScore = score;
+                    bestCandidate = archetype;
+                }
+            });
+
+            // If we found a candidate (list not empty)
+            if (bestCandidate) {
+                // If the current archetype is in the list, we prioritize it unless bestCandidate has a higher score.
+                if (potentialDominantArchetypes.includes(this.dominantArchetype)) {
+                    if (highestSkillScore > currentArchetypeScore) {
+                         this.dominantArchetype = bestCandidate;
+                    }
+                    // Else: keep current (tie goes to incumbent)
+                } else {
+                     this.dominantArchetype = bestCandidate;
+                }
+            } else {
+                 // Fallback if no candidate found (should be impossible given length > 0 check)
+                 this.dominantArchetype = potentialDominantArchetypes[0];
+            }
         }
     }
 
