@@ -133,7 +133,7 @@ export class UIScene extends Phaser.Scene {
     updateActionButtons(force = false) {
         const allActions = this.getTabActions(this.currentTab);
         const visibleActions = allActions.filter(item => !item.condition || item.condition());
-        const signature = visibleActions.map(a => a.text).join('|');
+        const signature = `${this.currentTab}:${visibleActions.map(a => a.text).join('|')}`;
         if (!force && signature === this.lastActionSignature) return;
         this.actionButtons.forEach(btn => btn.destroy());
         this.actionButtons = [];
