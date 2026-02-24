@@ -121,3 +121,10 @@ The player was getting stuck in the Expedition mini-game after completing the 3 
 Duplicate text "EXPEDITION COMPLETE" was also being added to the display list in an irregular way (`addToDisplayList`), causing visual clutter or potential errors.
 **Fix:**
 Swapped the order of operations in the "Return Home" button callback to ensure `this.scene.resume('MainScene')` is called *before* `this.scene.stop()`. Also removed the duplicate text generation code.
+
+---
+
+**File:** `js/GeneticsSystem.js`, `js/PersistenceManager.js`
+**Line:** 13 (GeneticsSystem), 315 (PersistenceManager)
+**Description:** Syntax errors caused by duplicate variable declarations (`toBase64`, `fromBase64`, `encoded`) using `const`. This prevented the files from being parsed and blocked the entire test suite from running.
+**Fix:** Removed the redundant local declarations and standardized on the imported utility functions from `js/utils/Encoding.js`.

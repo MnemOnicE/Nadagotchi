@@ -311,8 +311,6 @@ export class PersistenceManager {
             if (this.lastSavedJson[key] === json) {
                 return;
             }
-
-            const encoded = btoa(json);
             const strToHash = salt ? encoded + salt : encoded;
             const hash = this._hash(strToHash);
             localStorage.setItem(key, `${encoded}|${hash}`);
