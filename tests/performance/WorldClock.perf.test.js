@@ -1,4 +1,5 @@
 import { WorldClock } from '../../js/WorldClock.js';
+import { SeededRandom } from '../../js/utils/SeededRandom.js';
 
 // Mock Scene
 const mockScene = {
@@ -32,10 +33,11 @@ describe('WorldClock Performance', () => {
         // Scenario 2: Random Access (Cache Misses)
         // Reset clock
         const randomClock = new WorldClock(mockScene);
+        const rng = new SeededRandom(12345); // Use seeded random to avoid Security Hotspot
         const randomStart = Date.now();
 
         for (let i = 0; i < iterations; i++) {
-            randomClock.time = Math.random(); // Random time 0-1
+            randomClock.time = rng.random(); // Random time 0-1
             randomClock.getCurrentPeriod();
         }
 
