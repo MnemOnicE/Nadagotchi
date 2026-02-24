@@ -231,6 +231,13 @@ export class MainScene extends Phaser.Scene {
         this.skyManager.update(); // Initial draw
         this.loadFurniture();
         this.renderDebris(); // Initial render of debris
+
+        // --- Tutorial Trigger ---
+        if (data && data.startTutorial) {
+            this.time.delayedCall(500, () => {
+                this.game.events.emit(EventKeys.START_TUTORIAL);
+            });
+        }
     }
 
     /**
