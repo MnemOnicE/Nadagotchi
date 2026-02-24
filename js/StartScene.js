@@ -20,7 +20,14 @@ export class StartScene extends Phaser.Scene {
         const width = this.cameras.main.width;
         const height = this.cameras.main.height;
 
-        this.add.text(width / 2, height * 0.2, 'NADAGOTCHI', {
+        // --- Persistence Check ---
+        this.persistence = new PersistenceManager();
+        const existingPet = this.persistence.loadPet();
+
+        // --- Menu Buttons ---
+        this.menuContainer = this.add.container(0, 0);
+
+        const titleText = this.add.text(width / 2, height * 0.2, 'NADAGOTCHI', {
             fontFamily: 'VT323, monospace',
             fontSize: '80px',
             color: '#ffffff',
@@ -28,7 +35,7 @@ export class StartScene extends Phaser.Scene {
             strokeThickness: 6
         }).setOrigin(0.5);
 
-        this.add.text(width / 2, height * 0.2 + 60, 'The Digital Life Sim', {
+        const subtitleText = this.add.text(width / 2, height * 0.2 + 60, 'The Digital Life Sim', {
             fontFamily: 'VT323, monospace',
             fontSize: '32px',
             color: '#eeeeee',
@@ -36,12 +43,7 @@ export class StartScene extends Phaser.Scene {
             strokeThickness: 3
         }).setOrigin(0.5);
 
-        // --- Persistence Check ---
-        this.persistence = new PersistenceManager();
-        const existingPet = this.persistence.loadPet();
-
-        // --- Menu Buttons ---
-        this.menuContainer = this.add.container(0, 0);
+        this.menuContainer.add([titleText, subtitleText]);
 
         let buttonY = height * 0.5;
 
@@ -139,7 +141,7 @@ export class StartScene extends Phaser.Scene {
     }
 
     /**
-     * Shows the pet naming screen.
+     * Shows the pet naming screen using an HTML input for mobile compatibility.
      * @param {string} archetype
      */
     showNameInput(archetype) {
@@ -159,74 +161,66 @@ export class StartScene extends Phaser.Scene {
         }).setOrigin(0.5);
         this.nameInputContainer.add(title);
 
-        // Name Display
-        let currentName = '';
-        const nameDisplay = this.add.text(width / 2, height * 0.5, 'Type Name...', {
-            fontFamily: 'VT323, monospace',
-            fontSize: '48px',
-            color: '#FFD700',
-            backgroundColor: '#000000',
-            padding: { x: 20, y: 10 },
-            stroke: '#FFFFFF',
-            strokeThickness: 2
-        }).setOrigin(0.5);
-        this.nameInputContainer.add(nameDisplay);
+        // HTML Input Element
+        const inputElement = document.createElement('input');
+        inputElement.type = 'text';
+        inputElement.placeholder = 'Type Name...';
+        inputElement.maxLength = 12;
+        inputElement.style.fontFamily = "'VT323', monospace";
+        inputElement.style.fontSize = '32px';
+        inputElement.style.width = '300px';
+        inputElement.style.textAlign = 'center';
+        inputElement.style.color = '#FFD700';
+        inputElement.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+        inputElement.style.border = '2px solid #FFFFFF';
+        inputElement.style.padding = '10px';
+        inputElement.style.outline = 'none';
 
-        // Blinking cursor effect
-        this.tweens.add({
-            targets: nameDisplay,
-            alpha: { from: 1, to: 0.7 },
-            duration: 800,
-            yoyo: true,
-            repeat: -1
-        });
+        // Add to DOM via Phaser
+        const domElement = this.add.dom(width / 2, height * 0.5, inputElement);
+        this.nameInputContainer.add(domElement);
 
         // Instructions
-        const instructions = this.add.text(width / 2, height * 0.6, '(Type using your keyboard. Max 12 chars.)', {
+        const instructions = this.add.text(width / 2, height * 0.6, '(Tap box to type. Max 12 chars.)', {
             fontFamily: 'VT323, monospace',
             fontSize: '20px',
             color: '#cccccc'
         }).setOrigin(0.5);
         this.nameInputContainer.add(instructions);
 
+        // Helper to get name and start
+        const tryStartGame = () => {
+            const name = inputElement.value.trim();
+            if (name.length > 0) {
+                // Cleanup DOM
+                domElement.destroy();
+                this.startGame(archetype, name);
+            }
+        };
+
         // Confirm Button
         const confirmBtn = ButtonFactory.createButton(this, (width / 2) - 100, height * 0.75, 'Begin Journey', () => {
-            if (currentName.length > 0) {
-                // Cleanup listener before starting
-                this.input.keyboard.off('keydown', keyHandler);
-                this.startGame(archetype, currentName);
-            }
+            tryStartGame();
         }, { width: 200, height: 50, color: 0x4CAF50, fontSize: '28px' });
         this.nameInputContainer.add(confirmBtn);
 
         // Back Button
         const backBtn = ButtonFactory.createButton(this, (width / 2) - 50, height - 80, 'Back', () => {
-            this.input.keyboard.off('keydown', keyHandler);
+            domElement.destroy(); // Cleanup DOM
             this.nameInputContainer.setVisible(false);
             this.selectionContainer.setVisible(true);
         }, { width: 100, height: 40, color: 0x888888 });
         this.nameInputContainer.add(backBtn);
 
-        // Keyboard Logic
-        const keyHandler = (event) => {
-            if (event.key.length === 1 && currentName.length < 12) {
-                // Alphanumeric check regex
-                if (/[a-zA-Z0-9 ]/.test(event.key)) {
-                    currentName += event.key;
-                }
-            } else if (event.key === 'Backspace') {
-                currentName = currentName.slice(0, -1);
-            } else if (event.key === 'Enter') {
-                 if (currentName.length > 0) {
-                    this.input.keyboard.off('keydown', keyHandler);
-                    this.startGame(archetype, currentName);
-                }
+        // Handle Enter Key on Input
+        inputElement.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                tryStartGame();
             }
+        });
 
-            nameDisplay.setText(currentName.length > 0 ? currentName : 'Type Name...');
-        };
-
-        this.input.keyboard.on('keydown', keyHandler);
+        // Focus the input automatically (works on desktop, might require tap on mobile)
+        setTimeout(() => inputElement.focus(), 100);
     }
 
     /**
