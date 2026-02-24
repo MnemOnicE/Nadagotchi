@@ -305,14 +305,13 @@ export class PersistenceManager {
     _save(key, data, salt = null) {
         try {
             const json = JSON.stringify(data);
-            const encoded = toBase64(json);
 
             // OPTIMIZATION: Skip save if data hasn't changed
             if (this.lastSavedJson[key] === json) {
                 return;
             }
 
-            const encoded = btoa(json);
+            const encoded = toBase64(json);
             const strToHash = salt ? encoded + salt : encoded;
             const hash = this._hash(strToHash);
             localStorage.setItem(key, `${encoded}|${hash}`);
