@@ -58,6 +58,58 @@ describe('DebrisSystem', () => {
         expect(pet.debris.length).toBe(Config.DEBRIS.MAX_COUNT); // Should not increase
     });
 
+    test('spawnDaily adds Berries in Spring', () => {
+        // 1st random: 0.1 (<= 0.8) -> Continue
+        // 2nd random: 0.2 (< 0.3) -> Add Berries
+        pet.rng.random.mockReturnValueOnce(0.1).mockReturnValueOnce(0.2);
+
+        // Mock choice to return the last element (which should be Berries)
+        pet.rng.choice.mockImplementation(arr => arr[arr.length - 1]);
+
+        system.spawnDaily('Spring', 'Sunny');
+
+        expect(pet.debris.length).toBe(1);
+        expect(pet.debris[0].type).toBe('Berries');
+        expect(pet.rng.choice).toHaveBeenCalledWith(expect.arrayContaining(['Berries']));
+    });
+
+    test('spawnDaily adds Sticks in Autumn', () => {
+        // 1st random: 0.1 (<= 0.8) -> Continue
+        // 2nd random: 0.2 (< 0.3) -> Add Sticks
+        pet.rng.random.mockReturnValueOnce(0.1).mockReturnValueOnce(0.2);
+
+        // Mock choice to return the last element (which should be Sticks)
+        pet.rng.choice.mockImplementation(arr => arr[arr.length - 1]);
+
+        system.spawnDaily('Autumn', 'Sunny');
+
+        expect(pet.debris.length).toBe(1);
+        expect(pet.debris[0].type).toBe('Sticks');
+        expect(pet.rng.choice).toHaveBeenCalledWith(expect.arrayContaining(['Sticks']));
+    });
+
+    test('spawnDaily does not add Berries in Spring if random check fails', () => {
+        // 1st random: 0.1 (<= 0.8) -> Continue
+        // 2nd random: 0.4 (>= 0.3) -> Do NOT add Berries
+        pet.rng.random.mockReturnValueOnce(0.1).mockReturnValueOnce(0.4);
+        pet.rng.choice.mockImplementation(arr => arr[0]);
+
+        system.spawnDaily('Spring', 'Sunny');
+
+        expect(pet.rng.choice).toHaveBeenCalledWith(['weed', 'rock_small']);
+    });
+
+    test('spawnDaily does not add Sticks in Autumn if random check fails', () => {
+        // 1st random: 0.1 (<= 0.8) -> Continue
+        // 2nd random: 0.4 (>= 0.3) -> Do NOT add Sticks
+        pet.rng.random.mockReturnValueOnce(0.1).mockReturnValueOnce(0.4);
+        pet.rng.choice.mockImplementation(arr => arr[0]);
+
+        system.spawnDaily('Autumn', 'Sunny');
+
+        expect(pet.rng.choice).toHaveBeenCalledWith(['weed', 'rock_small']);
+    });
+
     test('clean removes item and applies rewards (Weed)', () => {
         pet.debris.push({ id: 'test-weed', type: 'weed' });
 
@@ -94,6 +146,22 @@ describe('DebrisSystem', () => {
         system.clean('test-rock');
 
         expect(pet.inventorySystem.addItem).toHaveBeenCalledWith('Shiny Stone', 1);
+    });
+
+    test('clean (Berries) adds to inventory', () => {
+        pet.debris.push({ id: 'test-berries', type: 'Berries' });
+
+        system.clean('test-berries');
+
+        expect(pet.inventorySystem.addItem).toHaveBeenCalledWith('Berries', 1);
+    });
+
+    test('clean (Sticks) adds to inventory', () => {
+        pet.debris.push({ id: 'test-sticks', type: 'Sticks' });
+
+        system.clean('test-sticks');
+
+        expect(pet.inventorySystem.addItem).toHaveBeenCalledWith('Sticks', 1);
     });
 
     describe('spawnPoop', () => {
