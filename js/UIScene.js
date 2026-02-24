@@ -133,7 +133,7 @@ export class UIScene extends Phaser.Scene {
     updateActionButtons(force = false) {
         const allActions = this.getTabActions(this.currentTab);
         const visibleActions = allActions.filter(item => !item.condition || item.condition());
-        const signature = visibleActions.map(a => a.text).join('|');
+        const signature = `${this.currentTab}:${visibleActions.map(a => a.text).join('|')}`;
         if (!force && signature === this.lastActionSignature) return;
         this.actionButtons.forEach(btn => btn.destroy());
         this.actionButtons = [];
@@ -368,7 +368,95 @@ export class UIScene extends Phaser.Scene {
     openInventoryMenu() { this.closeAllModals(); if (!this.nadagotchiData) return; if (this.inventoryButtons) this.inventoryButtons.forEach(btn => btn.destroy()); this.inventoryButtons = []; if (this.inventoryTexts) this.inventoryTexts.forEach(t => t.destroy()); this.inventoryTexts = []; const items = Object.entries(this.nadagotchiData.inventory || {}); this.inventoryModal.content.setText(items.length === 0 ? "Empty." : ""); const mw = this.getModalWidth(); let currentY = -this.getModalHeight() / 2 + 60; const startX = -mw / 2 + 20; items.forEach(([itemName, count]) => { const def = ItemDefinitions[itemName] || { description: "Unknown", emoji: "❓", type: "Misc" }; const itemStr = `${def.emoji} ${itemName} (x${count})`; const itemText = this.add.text(startX, currentY, itemStr, { font: '20px monospace', color: '#ffffff' }); const descText = this.add.text(startX + 20, currentY + 25, def.description, { font: '16px monospace', color: '#aaaaaa', wordWrap: { width: mw - 150 } }); this.inventoryModal.add([itemText, descText]); this.inventoryTexts.push(itemText, descText); if (def.type === 'Consumable' && count > 0) { const useButton = ButtonFactory.createButton(this, mw/2 - 60, currentY + 10, 'Use', () => { this.game.events.emit(EventKeys.UI_ACTION, EventKeys.CONSUME_ITEM, itemName); this.inventoryModal.setVisible(false); this.scene.resume('MainScene'); }, { width: 60, height: 30, color: 0x228B22 }); this.inventoryModal.add(useButton); this.inventoryButtons.push(useButton); } currentY += 60; }); this.inventoryModal.setVisible(true); this.scene.pause('MainScene'); }
     openAncestorModal(ancestorData) { this.closeAllModals(); if (!ancestorData) return; const advice = NarrativeSystem.getAdvice(ancestorData.dominantArchetype); const text = `Name: Generation ${ancestorData.generation}\nArchetype: ${ancestorData.dominantArchetype}\nCareer: ${ancestorData.currentCareer || 'None'}\n\nStats:\nHappiness: ${Math.floor(ancestorData.stats.happiness)}\nLogic: ${ancestorData.skills.logic.toFixed(1)}\nEmpathy: ${ancestorData.skills.empathy.toFixed(1)}\n\nAdvice:\n"${advice}"`; this.ancestorModal.content.setText(text); this.ancestorModal.setVisible(true); this.scene.pause('MainScene'); }
     openAchievementsModal() { this.closeAllModals(); const unlockedIds = new PersistenceManager().loadAchievements().unlocked || []; const text = Achievements.map(ach => unlockedIds.includes(ach.id) ? `${ach.icon} ${ach.name}\n${ach.description}` : `🔒 ${ach.name}\n(Locked)`).join('\n\n'); this.achievementsModal.content.setText(text); this.achievementsModal.setVisible(true); this.scene.pause('MainScene'); }
-    startTutorial() { console.log("Tutorial started (stub)"); }
+    startTutorial() {
+        this.closeAllModals();
+        this.scene.pause('MainScene');
+
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
+
+        const container = this.add.container(width / 2, height / 2).setDepth(1000);
+        const bg = this.add.rectangle(0, 0, 400, 250, 0x000000, 0.9).setStrokeStyle(2, 0xffffff).setInteractive();
+        const title = this.add.text(0, -80, "Welcome to Nadagotchi!", { fontFamily: 'VT323', fontSize: '32px', color: '#fff' }).setOrigin(0.5);
+        const content = this.add.text(0, -20, "Would you like a quick tour\nof the interface?", { fontFamily: 'VT323', fontSize: '24px', color: '#fff', align: 'center' }).setOrigin(0.5);
+
+        const yesBtn = ButtonFactory.createButton(this, -60, 80, "Yes", () => {
+            container.destroy();
+            this.runTutorialSequence();
+        }, { width: 100, height: 40, color: 0x4CAF50 });
+
+        const noBtn = ButtonFactory.createButton(this, 60, 80, "No", () => {
+            container.destroy();
+            this.scene.resume('MainScene');
+        }, { width: 100, height: 40, color: 0x808080 });
+
+        container.add([bg, title, content, yesBtn, noBtn]);
+    }
+
+    runTutorialSequence() {
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
+        const dashboardHeight = Math.floor(height * Config.UI.DASHBOARD_HEIGHT_RATIO);
+        const dashboardY = height - dashboardHeight;
+
+        const overlay = this.add.container(0, 0).setDepth(2000);
+        const dim = this.add.rectangle(0, 0, width, height, 0x000000, 0.7).setOrigin(0).setInteractive();
+        overlay.add(dim);
+
+        const steps = [
+            {
+                text: "These are your pet's STATS.\nKeep an eye on Hunger and Energy!",
+                highlight: { x: 5, y: 5, w: 320, h: 220 }
+            },
+            {
+                text: "These TABS let you switch between\nCare, Actions, and Systems.",
+                highlight: { x: 5, y: dashboardY + 5, w: width - 10, h: 45 }
+            },
+            {
+                text: "Finally, these are ACTION buttons.\nThis is how you interact with the world!",
+                highlight: { x: 5, y: dashboardY + 50, w: width - 10, h: dashboardHeight - 55 }
+            }
+        ];
+
+        let currentStep = 0;
+
+        const msgBox = this.add.container(width / 2, height / 2);
+        const msgBg = this.add.rectangle(0, 0, 500, 120, 0x333333, 0.9).setStrokeStyle(2, 0xffffff);
+        const msgText = this.add.text(0, -10, "", { fontFamily: 'VT323', fontSize: '24px', color: '#fff', align: 'center', wordWrap: { width: 450 } }).setOrigin(0.5);
+        const hintText = this.add.text(0, 40, "(Click anywhere to continue)", { fontFamily: 'VT323', fontSize: '18px', color: '#aaa' }).setOrigin(0.5);
+        msgBox.add([msgBg, msgText, hintText]);
+        overlay.add(msgBox);
+
+        const highlightGraphic = this.add.graphics();
+        overlay.add(highlightGraphic);
+
+        const showStep = (idx) => {
+            if (idx >= steps.length) {
+                overlay.destroy();
+                this.scene.resume('MainScene');
+                return;
+            }
+
+            const step = steps[idx];
+            msgText.setText(step.text);
+
+            highlightGraphic.clear();
+            highlightGraphic.lineStyle(4, 0xffff00, 1);
+            highlightGraphic.strokeRect(step.highlight.x, step.highlight.y, step.highlight.w, step.highlight.h);
+
+            // Move message box if it overlaps with highlight
+            if (idx === 0) msgBox.setPosition(width / 2, height * 0.7);
+            else msgBox.setPosition(width / 2, height * 0.3);
+        };
+
+        dim.on('pointerdown', () => {
+            currentStep++;
+            showStep(currentStep);
+        });
+
+        showStep(currentStep);
+    }
+
     handleAchievementUnlocked(achievement) { SoundSynthesizer.instance.playChime(); this.showToast("Achievement Unlocked!", achievement.name, achievement.icon); }
     showToast(title, message, icon = '') { const width = this.cameras.main.width; const toastWidth = 300, toastHeight = 80; const container = this.add.container(width / 2 - toastWidth / 2, -toastHeight - 20); const bg = this.add.rectangle(0, 0, toastWidth, toastHeight, 0xFFD700).setOrigin(0).setStrokeStyle(2, 0xFFFFFF); const iconText = this.add.text(10, 15, icon, { fontSize: '40px' }); const titleText = this.add.text(70, 10, title, { fontSize: '16px', color: '#000', fontStyle: 'bold', fontFamily: 'VT323' }); const msgText = this.add.text(70, 35, message, { fontSize: '24px', color: '#000', fontFamily: 'VT323' }); container.add([bg, iconText, titleText, msgText]); this.tweens.add({ targets: container, y: 20, duration: 500, ease: 'Back.out', hold: 3000, yoyo: true, onComplete: () => container.destroy() }); }
     createSettingsModal() { const modal = this.createModal("Settings"); const h = 400; const volLabel = this.add.text(0, -80, "Volume", { fontSize: '24px', fontFamily: 'VT323', monospace: true }).setOrigin(0.5); const volDown = ButtonFactory.createButton(this, -80, -40, "-", () => { const newVol = Math.max(0, (this.settingsData?.volume ?? 0.5) - 0.1); this.game.events.emit(EventKeys.UPDATE_SETTINGS, { volume: newVol }); this.settingsModal.volDisplay.setText(`${Math.round(newVol * 100)}%`); if (!this.settingsData) this.settingsData = {}; this.settingsData.volume = newVol; }, { width: 40, height: 40, color: 0x808080 }); const volUp = ButtonFactory.createButton(this, 80, -40, "+", () => { const newVol = Math.min(1, (this.settingsData?.volume ?? 0.5) + 0.1); this.game.events.emit(EventKeys.UPDATE_SETTINGS, { volume: newVol }); this.settingsModal.volDisplay.setText(`${Math.round(newVol * 100)}%`); if (!this.settingsData) this.settingsData = {}; this.settingsData.volume = newVol; }, { width: 40, height: 40, color: 0x808080 }); const volDisplay = this.add.text(0, -40, "50%", { fontSize: '24px', fontFamily: 'VT323' }).setOrigin(0.5); const speedLabel = this.add.text(0, 20, "Game Speed", { fontSize: '24px', fontFamily: 'VT323' }).setOrigin(0.5); const speedButtons = []; const speeds = [{ l: "1x", v: Config.SETTINGS.SPEED_MULTIPLIERS.NORMAL }, { l: "2x", v: Config.SETTINGS.SPEED_MULTIPLIERS.FAST }, { l: "5x", v: Config.SETTINGS.SPEED_MULTIPLIERS.HYPER }]; let startX = -80; speeds.forEach(s => { const btn = ButtonFactory.createButton(this, startX, 60, s.l, () => { this.game.events.emit(EventKeys.UPDATE_SETTINGS, { gameSpeed: s.v }); this.updateSpeedButtons(s.v); if (!this.settingsData) this.settingsData = {}; this.settingsData.gameSpeed = s.v; }, { width: 60, height: 40, fontSize: '20px', color: 0x008080 }); btn.speedVal = s.v; speedButtons.push(btn); startX += 80; }); modal.add([volLabel, volDown, volUp, volDisplay, speedLabel, ...speedButtons]); modal.volDisplay = volDisplay; modal.speedButtons = speedButtons; return modal; }

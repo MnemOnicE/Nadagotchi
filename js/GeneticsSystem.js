@@ -7,9 +7,6 @@ import { SeededRandom } from './utils/SeededRandom.js';
 import { Config } from './Config.js';
 import { CryptoUtils } from './utils/CryptoUtils.js';
 
-// Base64 Helpers for Environment Compatibility (Browser/Node)
-const toBase64 = (str) => (typeof btoa === 'function') ? btoa(str) : Buffer.from(str).toString('base64');
-const fromBase64 = (str) => (typeof atob === 'function') ? atob(str) : Buffer.from(str, 'base64').toString('utf-8');
 import { toBase64, fromBase64 } from './utils/Encoding.js';
 
 /**
