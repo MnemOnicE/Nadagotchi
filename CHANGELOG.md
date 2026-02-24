@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **New Assets:** Procedurally generated textures for Weeds, Rocks, Poop, Merchant, and Weather Particles.
 
 ### Fixed
+- Fixed critical syntax errors in `GeneticsSystem.js` and `PersistenceManager.js` caused by duplicate variable declarations, which were blocking the test suite.
 - Fixed an issue where `TravelingMerchant` events were text-only notifications.
 - Resolved "Deterministic Trap" regression in `Nadagotchi` tests caused by new random tie-breaker logic.
 - Fixed critical syntax error in `UIScene.js` blocking application load.
@@ -26,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed recurring interaction logic in `RelationshipSystem.js`.
 
 ### Changed
+- **Performance Optimization:** Optimized `SkyManager` update loop by throttling expensive canvas repaints. Redraws now only occur when the `daylightFactor` changes by more than 0.01 or at least 3 seconds have passed.
 - Refactored test suite to use a centralized `mockPhaser` helper, reducing code duplication.
 - Hardened test environment with robust mocks for Phaser Events, Zones, and Particles.
 
