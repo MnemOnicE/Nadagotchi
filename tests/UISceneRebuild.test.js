@@ -1,4 +1,3 @@
-
 // tests/UISceneRebuild.test.js
 
 // 1. Mock Phaser Global
@@ -164,16 +163,10 @@ describe('UIScene Rebuild Logic', () => {
         const firstButton = scene.actionButtons[0];
 
         // 2. Second Build (Background Update)
-        // Currently (before fix), this MIGHT destroy buttons if updateStatsUI calls it (though updateStatsUI has its own check)
-        // But we want showTab ITSELF to handle this.
-        // Calling showTab directly without force should optimize.
-
-        // NOTE: In current implementation, showTab ALWAYS destroys. So this expectation will fail until fixed.
         scene.showTab('CARE', false);
 
         // If optimization works, firstButton should NOT be destroyed
-        // If no optimization, it IS destroyed
-        // expect(firstButton.destroy).not.toHaveBeenCalled();
+        expect(firstButton.destroy).not.toHaveBeenCalled();
     });
 
     test('rebuilding: showTab(true) SHOULD destroy buttons even if signature matches', () => {
