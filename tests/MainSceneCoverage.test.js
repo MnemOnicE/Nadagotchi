@@ -134,7 +134,7 @@ describe('MainScene Coverage', () => {
                 getFrameNames: jest.fn().mockReturnValue([]),
                 add: jest.fn()
             }),
-            createCanvas: jest.fn(() => mockGameObject())
+            createCanvas: jest.fn(() => mockGameObject()), exists: jest.fn().mockReturnValue(false)
         };
         scene.scene = {
             launch: jest.fn(),

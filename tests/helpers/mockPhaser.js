@@ -1,4 +1,3 @@
-
 import { jest } from '@jest/globals';
 
 export const mockGameObject = () => {
@@ -61,6 +60,11 @@ export const setupPhaserMock = () => {
                 this.config = config;
                 this.cameras = { main: { width: 800, height: 600, setBackgroundColor: jest.fn(), setSize: jest.fn(), setViewport: jest.fn() } };
                 this.add = createMockAdd();
+                this.make = {
+                    image: jest.fn(() => new Phaser.GameObjects.Image()),
+                    graphics: jest.fn(() => new Phaser.GameObjects.Graphics()),
+                    text: jest.fn(() => new Phaser.GameObjects.Text())
+                };
                 this.time = {
                     delayedCall: jest.fn((delay, callback) => { callback(); return { destroy: jest.fn() }; }),
                     addEvent: jest.fn(() => ({ destroy: jest.fn(), remove: jest.fn() })),
@@ -106,7 +110,15 @@ export const setupPhaserMock = () => {
             Graphics: class Graphics { constructor() { Object.assign(this, mockGameObject()); } },
             Text: class Text { constructor() { Object.assign(this, mockGameObject()); } },
             TileSprite: class TileSprite { constructor() { Object.assign(this, mockGameObject()); } },
-            Container: class Container { constructor() { Object.assign(this, mockGameObject()); } }
+            Container: class Container { constructor() { Object.assign(this, mockGameObject()); } },
+            RenderTexture: class RenderTexture {
+                constructor() {
+                    Object.assign(this, mockGameObject());
+                    this.fill = jest.fn();
+                    this.draw = jest.fn();
+                    this.resize = jest.fn();
+                }
+            }
         },
         Math: {
             Between: jest.fn().mockReturnValue(1),
@@ -149,6 +161,7 @@ export const createMockAdd = () => ({
     tileSprite: jest.fn(() => new Phaser.GameObjects.TileSprite()),
     rectangle: jest.fn(() => mockGameObject()),
     zone: jest.fn(() => mockGameObject()),
+    renderTexture: jest.fn(() => new Phaser.GameObjects.RenderTexture()),
     container: jest.fn(() => ({ ...mockGameObject(), add: jest.fn(), removeAll: jest.fn() })),
     group: jest.fn().mockReturnValue({ get: jest.fn(), create: jest.fn(), add: jest.fn(), clear: jest.fn() }),
     particles: jest.fn().mockReturnValue({
