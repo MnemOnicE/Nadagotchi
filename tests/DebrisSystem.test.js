@@ -18,6 +18,7 @@ class MockPet {
             addItem: jest.fn()
         };
         this.addJournalEntry = jest.fn();
+        this.recalculateCleanlinessPenalty = jest.fn();
         this.generateUUID = () => 'test-id';
     }
 }
