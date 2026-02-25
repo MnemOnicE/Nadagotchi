@@ -29,6 +29,9 @@ export class Nadagotchi {
      * @param {object} [loadedData=null] - Optional saved data to load from. If provided, overrides defaults.
      */
     constructor(initialArchetype, loadedData = null) {
+        /** @type {boolean} Indicates if the asynchronous initialization is complete. */
+        this.isInitialized = false;
+
         // --- RNG Initialization ---
         if (loadedData) {
              // Load the universe seed (The "Big Bang")
@@ -209,16 +212,12 @@ export class Nadagotchi {
 
         /** @type {PersistenceManager} Manages saving and loading game data. */
         this.persistence = new PersistenceManager();
-        /** @type {Array<{date: string, text: string}>} A log of significant events. */
-        this.journal = this.persistence.loadJournal();
-        /** @type {Array<string>} A list of crafting recipes the pet has discovered. */
-        this.discoveredRecipes = this.persistence.loadRecipes();
 
-        // Ensure default recipes are discovered for new games
-        if (this.discoveredRecipes.length === 0) {
-            this.discoveredRecipes.push("Fancy Bookshelf");
-            this.persistence.saveRecipes(this.discoveredRecipes);
-        }
+        // --- Async Data Holders (Initialized in init()) ---
+        /** @type {Array<{date: string, text: string}>} A log of significant events. */
+        this.journal = [];
+        /** @type {Array<string>} A list of crafting recipes the pet has discovered. */
+        this.discoveredRecipes = [];
 
         /** @type {Object.<string, {materials: Object.<string, number>, description: string}>} */
         this.recipes = Recipes;
@@ -291,6 +290,24 @@ export class Nadagotchi {
 
         /** @type {boolean} Internal flag to batch journal saves. */
         this._journalSavePending = false;
+    }
+
+    /**
+     * Asynchronously initializes heavy/external data (Journal, Recipes).
+     * MUST be called after constructor.
+     * @returns {Promise<void>}
+     */
+    async init() {
+        this.journal = await this.persistence.loadJournal();
+        this.discoveredRecipes = await this.persistence.loadRecipes();
+
+        // Ensure default recipes are discovered for new games
+        if (this.discoveredRecipes.length === 0) {
+            this.discoveredRecipes.push("Fancy Bookshelf");
+            await this.persistence.saveRecipes(this.discoveredRecipes);
+        }
+
+        this.isInitialized = true;
     }
 
     /**
@@ -1013,8 +1030,8 @@ export class Nadagotchi {
         // Batch serialization and persistence to reduce frequency
         if (!this._journalSavePending) {
             this._journalSavePending = true;
-            const performSave = () => {
-                this.persistence.saveJournal(this.journal);
+            const performSave = async () => {
+                await this.persistence.saveJournal(this.journal);
                 this._journalSavePending = false;
             };
 
@@ -1083,7 +1100,7 @@ export class Nadagotchi {
      * Unlocks a room permanently.
      * @param {string} roomId
      */
-    unlockRoom(roomId) {
+    async unlockRoom(roomId) {
         if (!RoomDefinitions[roomId]) return;
 
         // Ensure room object exists in config
@@ -1099,7 +1116,7 @@ export class Nadagotchi {
 
         this.homeConfig.rooms[roomId].unlocked = true;
         this.addJournalEntry(`I unlocked the ${RoomDefinitions[roomId].name}! More space to decorate.`);
-        this.persistence.savePet(this);
+        await this.persistence.savePet(this);
     }
 
     /**

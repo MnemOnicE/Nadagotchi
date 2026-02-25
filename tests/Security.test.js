@@ -1,4 +1,3 @@
-
 import { jest } from '@jest/globals';
 
 // Mock localStorage
@@ -175,18 +174,18 @@ describe('Security Hardening', () => {
 
     test('Persistence Salt: Save includes UUID and verifies correctly', async () => {
         nadagotchi.stats.hunger = 50;
-        persistence.savePet(nadagotchi);
+        await persistence.savePet(nadagotchi);
 
         await new Promise(r => setTimeout(r, 300));
 
-        const loaded = persistence.loadPet();
+        const loaded = await persistence.loadPet();
         expect(loaded).not.toBeNull();
         expect(loaded.uuid).toBe(nadagotchi.uuid);
         expect(loaded.stats.hunger).toBe(50);
     });
 
     test('Persistence Salt: Tampering fails verification', async () => {
-        persistence.savePet(nadagotchi);
+        await persistence.savePet(nadagotchi);
 
         await new Promise(r => setTimeout(r, 300));
 
@@ -201,15 +200,17 @@ describe('Security Hardening', () => {
 
         // Attacker tries to use the old hash (invalid because content changed)
         localStorage.setItem('nadagotchi_save', `${newEncoded}|${hash}`);
-        expect(persistence.loadPet()).toBeNull();
+        expect(await persistence.loadPet()).toBeNull();
 
         // Attacker tries to generate new hash WITHOUT salt (because they don't know uuid is part of salt logic, or assume standard hash)
-        // Simulate attacker hash: hash(newEncoded)
-        const attackerHash = persistence._hash(newEncoded);
+        // Simulate attacker hash using legacy: hash(newEncoded)
+        // Note: New system uses SHA-256 by default, so legacy hash will fail length check first (if we check length),
+        // or fail value check if we fallback to legacy check.
+        const attackerHash = persistence._hashLegacy(newEncoded);
         localStorage.setItem('nadagotchi_save', `${newEncoded}|${attackerHash}`);
 
         // Should fail because _load uses hash(newEncoded + uuid)
-        expect(persistence.loadPet()).toBeNull();
+        expect(await persistence.loadPet()).toBeNull();
     });
 
     test('Minigame Privacy: State is hidden', () => {

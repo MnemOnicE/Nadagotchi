@@ -8,7 +8,7 @@ setupPhaserMock();
 // Mock PersistenceManager
 jest.mock('../js/PersistenceManager.js', () => ({
     PersistenceManager: jest.fn().mockImplementation(() => ({
-        loadPet: jest.fn(),
+        loadPet: jest.fn().mockResolvedValue(null),
         clearAllData: jest.fn(),
         savePet: jest.fn(),
         loadHallOfFame: jest.fn().mockReturnValue([]),
@@ -40,7 +40,7 @@ describe('StartScene', () => {
     let mockPersistence;
     let createElementSpy;
 
-    beforeEach(() => {
+    beforeEach(async () => {
         // Clear all mocks
         jest.clearAllMocks();
 
@@ -60,7 +60,8 @@ describe('StartScene', () => {
         // Setup scene properties
         scene.sys = {
             settings: { data: {} },
-            game: { config: {} }
+            game: { config: {} },
+            isActive: jest.fn().mockReturnValue(true)
         };
 
         // Mock add.dom which is specific to this scene
@@ -86,7 +87,8 @@ describe('StartScene', () => {
             })),
             text: jest.fn(() => ({
                 ...mockGameObject(),
-                setOrigin: jest.fn().mockReturnThis()
+                setOrigin: jest.fn().mockReturnThis(),
+                destroy: jest.fn()
             })),
             image: jest.fn(() => ({
                 ...mockGameObject(),
@@ -128,8 +130,16 @@ describe('StartScene', () => {
             }
         };
 
+        // Mock scene manager
+        scene.scene = {
+            start: jest.fn()
+        };
+
         // Initialize scene
         scene.create();
+
+        // Wait for async loadPet promise to resolve
+        await Promise.resolve();
 
         // Capture the persistence instance created in create()
         mockPersistence = scene.persistence;
@@ -142,6 +152,8 @@ describe('StartScene', () => {
     test('create() should initialize persistence and UI containers', () => {
         expect(PersistenceManager).toHaveBeenCalled();
         expect(scene.menuContainer).toBeDefined();
+        // Since loadPet is resolved with null in beforeEach (default), New Game should be shown
+        // Containers are created
         expect(scene.selectionContainer).toBeDefined();
         expect(scene.nameInputContainer).toBeDefined();
 
@@ -150,14 +162,20 @@ describe('StartScene', () => {
         expect(scene.nameInputContainer.setVisible).toHaveBeenCalledWith(false);
     });
 
-    test('create() should show Resume button if pet exists and handle click', () => {
+    test('create() should show Resume button if pet exists and handle click', async () => {
         jest.clearAllMocks(); // Clear calls from beforeEach
 
         // Setup mock return value for the NEXT instance
         PersistenceManager.mockImplementationOnce(() => ({
-            loadPet: jest.fn().mockReturnValue({ name: 'Fido' }),
+            loadPet: jest.fn().mockResolvedValue({ name: 'Fido' }),
             clearAllData: jest.fn(),
-            savePet: jest.fn()
+            savePet: jest.fn(),
+            loadHallOfFame: jest.fn().mockReturnValue([]),
+            saveToHallOfFame: jest.fn(),
+            loadJournal: jest.fn().mockReturnValue([]),
+            saveJournal: jest.fn(),
+            loadRecipes: jest.fn().mockReturnValue([]),
+            saveRecipes: jest.fn()
         }));
 
         const newScene = new StartScene();
@@ -171,11 +189,15 @@ describe('StartScene', () => {
 
         newScene.create();
 
-        expect(ButtonFactory.createButton).toHaveBeenCalledTimes(2);
+        // Wait for promise
+        await Promise.resolve();
+
+        expect(ButtonFactory.createButton).toHaveBeenCalledTimes(2); // Resume + New Game
 
         // Find Resume button callback
         const calls = ButtonFactory.createButton.mock.calls;
         const resumeCall = calls.find(call => call[3] === 'ENTER WORLD');
+        expect(resumeCall).toBeDefined();
         const resumeCallback = resumeCall[4];
 
         // Trigger callback
@@ -184,8 +206,8 @@ describe('StartScene', () => {
         expect(newScene.scene.start).toHaveBeenCalledWith('MainScene');
     });
 
-    test('create() should show only New Game button and handle click', () => {
-        // From beforeEach execution
+    test('create() should show only New Game button if no pet and handle click', async () => {
+        // From beforeEach execution (loadPet returns null)
         expect(ButtonFactory.createButton).toHaveBeenCalledTimes(1);
 
         const calls = ButtonFactory.createButton.mock.calls;

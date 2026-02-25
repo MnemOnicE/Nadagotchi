@@ -1,4 +1,3 @@
-
 // tests/MainSceneCoverage.test.js
 import { setupPhaserMock, createMockAdd, mockGameObject } from './helpers/mockPhaser';
 
@@ -43,6 +42,7 @@ describe('MainScene Coverage', () => {
 
     beforeEach(() => {
         mockNadagotchi = {
+             init: jest.fn().mockResolvedValue(),
              handleAction: jest.fn(),
              interact: jest.fn().mockReturnValue("Hello!"),
              placeItem: jest.fn().mockReturnValue(true),
@@ -62,19 +62,22 @@ describe('MainScene Coverage', () => {
                  generateDailyQuest: jest.fn(),
                  hasNewQuest: jest.fn().mockReturnValue(false)
              },
-             returnItemToInventory: jest.fn()
+             returnItemToInventory: jest.fn(),
+             homeConfig: { rooms: { "Entryway": { wallpaper: 'w', flooring: 'f' } } },
+             isRoomUnlocked: jest.fn().mockReturnValue(true),
+             cleanDebris: jest.fn().mockReturnValue({ success: true, message: 'Cleaned' })
         };
         Nadagotchi.mockImplementation(() => mockNadagotchi);
 
         PersistenceManager.mockImplementation(() => ({
-            loadPet: jest.fn(),
-            savePet: jest.fn(),
-            loadCalendar: jest.fn(),
-            loadFurniture: jest.fn().mockReturnValue([]),
-            saveFurniture: jest.fn(),
-            loadSettings: jest.fn().mockReturnValue({ volume: 0.5, gameSpeed: 1.0 }),
-            saveSettings: jest.fn(),
-            loadAchievements: jest.fn().mockReturnValue({ unlocked: [], progress: {} })
+            loadPet: jest.fn().mockResolvedValue(null),
+            savePet: jest.fn().mockResolvedValue(),
+            loadCalendar: jest.fn().mockResolvedValue({}),
+            loadFurniture: jest.fn().mockResolvedValue({}),
+            saveFurniture: jest.fn().mockResolvedValue(),
+            loadSettings: jest.fn().mockResolvedValue({ volume: 0.5, gameSpeed: 1.0 }),
+            saveSettings: jest.fn().mockResolvedValue(),
+            loadAchievements: jest.fn().mockResolvedValue({ unlocked: [], progress: {} })
         }));
 
         Calendar.mockImplementation(() => ({
@@ -169,15 +172,19 @@ describe('MainScene Coverage', () => {
         };
     });
 
-    test('create should initialize systems and objects', () => {
+    test('create should initialize systems and objects', async () => {
         scene.create();
+        await scene._initPromise; // Wait for async init
+
         expect(scene.nadagotchi).toBeDefined();
         expect(mockAdd.sprite).toHaveBeenCalled();
         expect(scene.scene.launch).toHaveBeenCalledWith('UIScene');
+        expect(scene.isReady).toBe(true);
     });
 
-    test('handleUIAction should route actions correctly', () => {
+    test('handleUIAction should route actions correctly', async () => {
          scene.create();
+         await scene._initPromise;
 
          // WORK
          scene.handleUIAction('WORK');
@@ -197,8 +204,9 @@ describe('MainScene Coverage', () => {
          expect(mockNadagotchi.handleAction).toHaveBeenCalledWith('FEED', undefined);
     });
 
-    test('handleWorkResult should call completeWorkShift on success', () => {
+    test('handleWorkResult should call completeWorkShift on success', async () => {
         scene.create();
+        await scene._initPromise;
 
         // Bypass security check by setting the active minigame
         scene.activeMinigameCareer = 'Innovator';
@@ -207,8 +215,9 @@ describe('MainScene Coverage', () => {
         expect(mockNadagotchi.completeWorkShift).toHaveBeenCalled();
     });
 
-    test('resize should update viewports', () => {
+    test('resize should update viewports', async () => {
         scene.create();
+        await scene._initPromise;
 
         scene.resize({ width: 1000, height: 800 });
 
@@ -219,8 +228,9 @@ describe('MainScene Coverage', () => {
         expect(mockWeatherParticles.resize).toHaveBeenCalledWith(1000, 520);
     });
 
-    test('update loop should update nadagotchi and stats', () => {
+    test('update loop should update nadagotchi and stats', async () => {
         scene.create();
+        await scene._initPromise;
 
         scene.update(1000, 16);
 
@@ -232,8 +242,9 @@ describe('MainScene Coverage', () => {
         }));
     });
 
-    test('furniture placement logic', () => {
+    test('furniture placement logic', async () => {
         scene.create();
+        await scene._initPromise;
 
         // Enable placement mode
         scene.handleUIAction(EventKeys.DECORATE, 'Fancy Chair');

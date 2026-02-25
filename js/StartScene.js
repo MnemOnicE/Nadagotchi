@@ -22,7 +22,6 @@ export class StartScene extends Phaser.Scene {
 
         // --- Persistence Check ---
         this.persistence = new PersistenceManager();
-        const existingPet = this.persistence.loadPet();
 
         // --- Menu Buttons ---
         this.menuContainer = this.add.container(0, 0);
@@ -45,21 +44,36 @@ export class StartScene extends Phaser.Scene {
 
         this.menuContainer.add([titleText, subtitleText]);
 
-        let buttonY = height * 0.5;
+        // Loading Indicator
+        const loadingText = this.add.text(width / 2, height * 0.5, 'Checking Save Data...', {
+            fontFamily: 'VT323, monospace',
+            fontSize: '24px',
+            color: '#ffffff'
+        }).setOrigin(0.5);
+        this.menuContainer.add(loadingText);
 
-        if (existingPet) {
-            // Fix: ButtonFactory creates container at x. To center button of width 250, we need x = width/2 - 125.
-            const resumeBtn = ButtonFactory.createButton(this, (width / 2) - 125, buttonY, 'ENTER WORLD', () => {
-                this.scene.start('MainScene');
-            }, { width: 250, height: 60, fontSize: '32px', color: 0x4CAF50 });
-            this.menuContainer.add(resumeBtn);
-            buttonY += 80;
-        }
+        // Async Load
+        this.persistence.loadPet().then(existingPet => {
+            // Handle if scene was destroyed while loading
+            if (!this.sys || !this.sys.isActive()) return;
 
-        const newGameBtn = ButtonFactory.createButton(this, (width / 2) - 125, buttonY, 'ARRIVE (New Game)', () => {
-            this.showArchetypeSelection();
-        }, { width: 250, height: 60, fontSize: '32px', color: 0x2196F3 });
-        this.menuContainer.add(newGameBtn);
+            loadingText.destroy();
+            let buttonY = height * 0.5;
+
+            if (existingPet) {
+                // Fix: ButtonFactory creates container at x. To center button of width 250, we need x = width/2 - 125.
+                const resumeBtn = ButtonFactory.createButton(this, (width / 2) - 125, buttonY, 'ENTER WORLD', () => {
+                    this.scene.start('MainScene');
+                }, { width: 250, height: 60, fontSize: '32px', color: 0x4CAF50 });
+                this.menuContainer.add(resumeBtn);
+                buttonY += 80;
+            }
+
+            const newGameBtn = ButtonFactory.createButton(this, (width / 2) - 125, buttonY, 'ARRIVE (New Game)', () => {
+                this.showArchetypeSelection();
+            }, { width: 250, height: 60, fontSize: '32px', color: 0x2196F3 });
+            this.menuContainer.add(newGameBtn);
+        });
 
         // --- Archetype Selection Container (Hidden initially) ---
         this.selectionContainer = this.add.container(0, 0);
