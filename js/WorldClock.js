@@ -35,7 +35,6 @@ export class WorldClock {
         };
 
         /** @type {?{start: number, end: number, name: string}} Cached reference to the current period object. */
-        /** @type {?{start: number, end: number, name: string}} Cache for the current period to avoid redundant lookups. */
         this._cachedPeriod = null;
     }
 
@@ -62,7 +61,6 @@ export class WorldClock {
      * @returns {string} The name of the current period.
      */
     getCurrentPeriod() {
-        // Optimization: Check if the time is still within the cached period
         if (this._cachedPeriod && this.time >= this._cachedPeriod.start && this.time < this._cachedPeriod.end) {
             return this._cachedPeriod.name;
         }
