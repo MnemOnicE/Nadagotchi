@@ -66,8 +66,7 @@ export class WorldClock {
             return this._cachedPeriod.name;
         }
 
-        for (const key in this.periods) {
-            const period = this.periods[key];
+        for (const period of Object.values(this.periods)) {
             if (this.time >= period.start && this.time < period.end) {
                 this._cachedPeriod = period;
                 return period.name;
