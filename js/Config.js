@@ -223,7 +223,7 @@ export const Config = {
     SECURITY: {
         // Loaded via environment variables in Vite (defined in vite.config.js) or process.env in Jest.
         // Salt must be injected by the build system or test runner.
-        DNA_SALT: (typeof process !== 'undefined' && process.env && process.env.VITE_DNA_SALT)
+        DNA_SALT: process.env.VITE_DNA_SALT
     },
 
     // Debris & Environment
