@@ -195,6 +195,24 @@ export const Config = {
         NEUTRAL: 1.0
     },
 
+    // Mood Visuals (Centralized)
+    MOOD_VISUALS: {
+        DEFAULT_FRAME: 1,
+        DEFAULT_EMOJI: '❓',
+        FRAMES: {
+            'happy': 0,
+            'neutral': 1,
+            'sad': 2,
+            'angry': 3
+        },
+        EMOJIS: {
+            'happy': '😊',
+            'sad': '😢',
+            'angry': '😠',
+            'neutral': '😐'
+        }
+    },
+
     // Global Settings Defaults
     SETTINGS: {
         DEFAULT_VOLUME: 0.5,
