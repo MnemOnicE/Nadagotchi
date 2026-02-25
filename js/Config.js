@@ -40,6 +40,13 @@ export const Config = {
         }
     },
 
+    // Minigame Settings
+    MINIGAMES: {
+        LOGIC_PUZZLE: {
+            LEVEL_CAP: 5
+        }
+    },
+
     // Stat Decay Rates
     DECAY: {
         HUNGER: 0.05,
@@ -195,13 +202,6 @@ export const Config = {
         NEUTRAL: 1.0
     },
 
-    // Visual Settings
-    VISUALS: {
-        MOOD_FRAMES: {
-            'happy': 0,
-            'angry': 1,
-            'sad': 2,
-            'neutral': 3
     // Mood Visuals (Centralized)
     MOOD_VISUALS: {
         DEFAULT_FRAME: 1,
@@ -247,8 +247,8 @@ export const Config = {
     // Security & Hashing
     SECURITY: {
         // Loaded via environment variables in Vite (defined in vite.config.js) or process.env in Jest.
-        // Salt must be injected by the build system or test runner.
-        DNA_SALT: process.env.VITE_DNA_SALT
+        // Falls back to a generic salt for development.
+        DNA_SALT: (typeof process !== 'undefined' && process.env && process.env.VITE_DNA_SALT) || "DEVELOPMENT_ONLY_SALT"
     },
 
     // Debris & Environment
