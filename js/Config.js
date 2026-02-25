@@ -197,6 +197,8 @@ export const Config = {
 
     // Mood Visuals (Centralized)
     MOOD_VISUALS: {
+        DEFAULT_FRAME: 1,
+        DEFAULT_EMOJI: '❓',
         FRAMES: {
             'happy': 0,
             'neutral': 1,
