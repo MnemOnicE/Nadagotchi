@@ -1043,6 +1043,13 @@ export class Nadagotchi {
      * @param {string} roomId
      * @returns {boolean}
      */
+    isRoomUnlocked(roomId) {
+        if (this.homeConfig.rooms[roomId] && this.homeConfig.rooms[roomId].unlocked !== undefined) {
+            return this.homeConfig.rooms[roomId].unlocked;
+        }
+        return RoomDefinitions[roomId] ? RoomDefinitions[roomId].unlocked : false;
+    }
+
     /**
      * Recalculates the cached cleanliness penalty values.
      * Optimization to avoid iterating debris every frame.
@@ -1063,13 +1070,6 @@ export class Nadagotchi {
             }
         }
     }
-    isRoomUnlocked(roomId) {
-        if (this.homeConfig.rooms[roomId] && this.homeConfig.rooms[roomId].unlocked !== undefined) {
-            return this.homeConfig.rooms[roomId].unlocked;
-        }
-        return RoomDefinitions[roomId] ? RoomDefinitions[roomId].unlocked : false;
-    }
-
     /**
      * Cleans up a specific debris item.
      * @param {string} id
