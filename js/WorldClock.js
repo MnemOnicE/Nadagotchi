@@ -34,6 +34,7 @@ export class WorldClock {
             NIGHT_CONT: { start: 0.9, end: 1, name: "Night" } // 21:36 - 24:00
         };
 
+        /** @type {?{start: number, end: number, name: string}} Cached reference to the current period object. */
         /** @type {?{start: number, end: number, name: string}} Cache for the current period to avoid redundant lookups. */
         this._cachedPeriod = null;
     }
