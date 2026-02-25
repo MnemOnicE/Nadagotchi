@@ -1,3 +1,4 @@
+import { Config } from './Config.js';
 import { ButtonFactory } from './ButtonFactory.js';
 import { EventKeys } from './EventKeys.js';
 import { Config } from './Config.js';
@@ -44,6 +45,8 @@ export class ShowcaseScene extends Phaser.Scene {
 
         // Pet Sprite (Scaled up)
         // We reuse the 'pet' texture but maybe use a specific frame based on mood
+
+        const frame = Config.VISUALS.MOOD_FRAMES[this.petData.mood] ?? Config.VISUALS.MOOD_FRAMES.neutral;
         const frame = Config.MOOD_VISUALS.FRAMES[this.petData.mood] ?? Config.MOOD_VISUALS.DEFAULT_FRAME;
         const sprite = this.add.sprite(0, 0, 'pet', frame).setScale(8);
 
