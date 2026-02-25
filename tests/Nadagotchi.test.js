@@ -42,6 +42,10 @@ describe('Nadagotchi', () => {
 
         // Async Init
         await pet.init();
+
+        // Manually ensure recipes are loaded for tests that need them,
+        // as the mock persistence might return empty arrays by default
+        pet.discoveredRecipes = ['Fancy Bookshelf'];
     });
 
     describe('constructor', () => {
@@ -357,7 +361,7 @@ describe('Nadagotchi', () => {
 
         test('craftItem should consume materials and add the new item to inventory', () => {
             pet.inventory = { 'Sticks': 10, 'Shiny Stone': 2 };
-            // Ensure recipe is discovered (added by init())
+            // Ensure recipe is discovered (added manually in beforeEach)
             pet.craftItem('Fancy Bookshelf');
             expect(pet.inventory['Sticks']).toBe(5);
             expect(pet.inventory['Shiny Stone']).toBe(1);
