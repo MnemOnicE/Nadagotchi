@@ -1,0 +1,638 @@
+
+> app@1.0.0 test
+> jest
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+PASS tests/PetMovement.test.js
+PASS tests/UISceneActionButtons.test.js
+PASS tests/UISceneRebuild.test.js
+PASS tests/performance/GeneticsSystem.perf.test.js
+  ● Console
+
+    console.log
+      [Benchmark] GeneticsSystem.breed x 50000 with 200 items: 1210ms
+
+      at Object.log (tests/performance/GeneticsSystem.perf.test.js:36:17)
+
+PASS tests/Security.test.js
+  ● Console
+
+    console.warn
+      Save file tampered (hash mismatch) for key nadagotchi_save.
+
+      377 |         const strToHash = salt ? encoded + salt : encoded;
+      378 |         if (this._hash(strToHash) !== hash) {
+    > 379 |             console.warn(`Save file tampered (hash mismatch) for key ${key}.`);
+          |                     ^
+      380 |             return null;
+      381 |         }
+      382 |
+
+      at PersistenceManager.warn [as _load] (js/PersistenceManager.js:379:21)
+      at PersistenceManager._load [as loadPet] (js/PersistenceManager.js:79:21)
+      at Object.loadPet (tests/Security.test.js:204:28)
+
+    console.warn
+      Save file tampered (hash mismatch) for key nadagotchi_save.
+
+      377 |         const strToHash = salt ? encoded + salt : encoded;
+      378 |         if (this._hash(strToHash) !== hash) {
+    > 379 |             console.warn(`Save file tampered (hash mismatch) for key ${key}.`);
+          |                     ^
+      380 |             return null;
+      381 |         }
+      382 |
+
+      at PersistenceManager.warn [as _load] (js/PersistenceManager.js:379:21)
+      at PersistenceManager._load [as loadPet] (js/PersistenceManager.js:79:21)
+      at Object.loadPet (tests/Security.test.js:212:28)
+
+    console.warn
+      Security Alert: Received WORK_RESULT for 'Innovator' but expected 'null'. Event ignored.
+
+      548 |         // Security Check: Ensure the result comes from a valid, active minigame session.
+      549 |         if (this.activeMinigameCareer !== data.career) {
+    > 550 |             console.warn(`Security Alert: Received WORK_RESULT for '${data.career}' but expected '${this.activeMinigameCareer}'. Event ignored.`);
+          |                     ^
+      551 |             return;
+      552 |         }
+      553 |         this.activeMinigameCareer = null; // Reset flag
+
+      at MainScene.warn [as handleWorkResult] (js/MainScene.js:550:21)
+      at Object.handleWorkResult (tests/Security.test.js:233:19)
+
+PASS tests/benchmark_save.test.js
+  ● Console
+
+    console.log
+      [Benchmark] savePet (Async) average scheduling time: 0.0195ms over 50 iterations.
+
+      at Object.log (tests/benchmark_save.test.js:75:17)
+
+    console.log
+      [Benchmark] Total scheduling time: 0.9743ms
+
+      at Object.log (tests/benchmark_save.test.js:76:17)
+
+PASS tests/FurnitureRegression.test.js
+  ● Console
+
+    console.log
+      Inventory after fix verification: { Chair: 2 }
+
+      at Object.log (tests/FurnitureRegression.test.js:130:17)
+
+PASS tests/Ancestors.test.js
+PASS tests/MainSceneCoverage.test.js
+PASS tests/ExploitSaveScumming.test.js
+  ● Console
+
+    console.warn
+      Save file tampered (hash mismatch) for key nadagotchi_save.
+
+      377 |         const strToHash = salt ? encoded + salt : encoded;
+      378 |         if (this._hash(strToHash) !== hash) {
+    > 379 |             console.warn(`Save file tampered (hash mismatch) for key ${key}.`);
+          |                     ^
+      380 |             return null;
+      381 |         }
+      382 |
+
+      at PersistenceManager.warn [as _load] (js/PersistenceManager.js:379:21)
+      at PersistenceManager._load [as loadPet] (js/PersistenceManager.js:79:21)
+      at Object.loadPet (tests/ExploitSaveScumming.test.js:63:40)
+
+PASS tests/StudyMinigameScene.test.js
+PASS tests/PersistenceManager.test.js
+PASS tests/UIScene.test.js
+PASS tests/legacy.test.js
+PASS tests/BreedingScene.test.js
+PASS tests/performance/updateDominantArchetype.perf.test.js
+  ● Console
+
+    console.log
+      Benchmark Results:
+
+      at Object.log (tests/performance/updateDominantArchetype.perf.test.js:59:17)
+
+    console.log
+      Iterations: 100000
+
+      at Object.log (tests/performance/updateDominantArchetype.perf.test.js:60:17)
+
+    console.log
+      Total Time: 102.77 ms
+
+      at Object.log (tests/performance/updateDominantArchetype.perf.test.js:61:17)
+
+    console.log
+      Average Time per Call: 0.0010 ms
+
+      at Object.log (tests/performance/updateDominantArchetype.perf.test.js:62:17)
+
+PASS tests/DebugConsole.test.js
+  ● Console
+
+    console.log
+      Currency system pending implementation.
+
+      at Object.log [as action] (js/DebugConsole.js:85:143)
+
+    console.log
+      [DEBUG] Executed: +1000 Coins (Placeholder)
+
+      at HTMLButtonElement.log (js/DebugConsole.js:121:29)
+
+    console.log
+      [DEBUG] Executed: +10 All Items
+
+      at HTMLButtonElement.log (js/DebugConsole.js:121:29)
+
+    console.log
+      [DEBUG] Executed: Toggle Hitbox Bounds
+
+      at HTMLButtonElement.log (js/DebugConsole.js:121:29)
+
+PASS tests/HousingSystem.test.js
+PASS tests/UISceneModalManagement.test.js
+PASS tests/Minigames.test.js
+PASS tests/PreloaderScene.test.js
+  ● Console
+
+    console.warn
+      Web Audio API not supported or blocked. TypeError: AudioContext is not a constructor
+          at new SoundSynthesizer (/app/js/utils/SoundSynthesizer.js:22:24)
+          at PreloaderScene.create (/app/js/PreloaderScene.js:431:9)
+          at Object.create (/app/tests/PreloaderScene.test.js:98:15)
+          at Promise.finally.completed (/app/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/app/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+          at _callCircusTest (/app/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+          at processTicksAndRejections (node:internal/process/task_queues:105:5)
+          at _runTest (/app/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+          at /app/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+          at _runTestsForDescribeBlock (/app/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+          at _runTestsForDescribeBlock (/app/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+          at run (/app/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+          at runAndTransformResultsToJestFormat (/app/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+          at jestAdapter (/app/node_modules/jest-circus/build/runner.js:101:19)
+          at runTestInternal (/app/node_modules/jest-runner/build/testWorker.js:275:16)
+          at runTest (/app/node_modules/jest-runner/build/testWorker.js:343:7)
+          at Object.worker (/app/node_modules/jest-runner/build/testWorker.js:497:12)
+
+      27 |             this.setVolume(Config.SETTINGS.DEFAULT_VOLUME);
+      28 |         } catch (e) {
+    > 29 |             console.warn('Web Audio API not supported or blocked.', e);
+         |                     ^
+      30 |             this.ctx = null;
+      31 |         }
+      32 |
+
+      at new warn (js/utils/SoundSynthesizer.js:29:21)
+      at PreloaderScene.create (js/PreloaderScene.js:431:9)
+      at Object.create (tests/PreloaderScene.test.js:98:15)
+
+PASS tests/HousingDecor.test.js
+PASS tests/Performance_UpdateStats.test.js
+  ● Console
+
+    console.log
+      UPDATE_STATS emitted 9 times in 60 frames (~1 sec).
+
+      at Object.log (tests/Performance_UpdateStats.test.js:155:17)
+
+PASS tests/FurniturePlacement.test.js
+PASS tests/Nadagotchi.test.js
+PASS tests/RelationshipSystem.test.js
+PASS tests/Performance_UIScene_Render.test.js
+PASS tests/ExpeditionScene.test.js
+PASS tests/DayCycle.test.js
+PASS tests/Genetics.test.js
+PASS tests/FeatureEnhancements.test.js
+PASS tests/GhostScene.test.js
+PASS tests/WorldClock.test.js
+PASS tests/Performance.test.js
+PASS tests/GeneticsSerialization.test.js
+PASS tests/HybridCareer.test.js
+PASS tests/HomozygousBonuses.test.js
+PASS tests/Career.test.js
+PASS tests/RecipeDefinitions.test.js
+PASS tests/repro_crafting_bug.test.js
+PASS tests/LiveLoopIntegration.test.js
+PASS tests/ExploitScaling.test.js
+PASS tests/Achievement.test.js
+  ● Console
+
+    console.log
+      [AchievementManager] Unlocked: First Craft
+
+      at AchievementManager.log [as unlock] (js/AchievementManager.js:116:17)
+          at Array.forEach (<anonymous>)
+
+    console.log
+      [AchievementManager] Unlocked: First Craft
+
+      at AchievementManager.log [as unlock] (js/AchievementManager.js:116:17)
+          at Array.forEach (<anonymous>)
+
+PASS tests/InventorySystem_placeItem.test.js
+PASS tests/DebrisSystem.test.js
+PASS tests/DailyQuest.test.js
+PASS tests/WeatherSystem.test.js
+PASS tests/InventoryCheck.test.js
+PASS tests/ClearWater.test.js
+PASS tests/ExploitQuestBypass.test.js
+PASS tests/SeededRNG.test.js
+PASS tests/Encoding.test.js
+PASS tests/SeasonalCrafting.test.js
+PASS tests/Expedition.test.js
+PASS tests/Journal.test.js
+PASS tests/GhostSystem.test.js
+PASS tests/Inventory.test.js
+PASS tests/MetaGame.test.js
+PASS tests/QuestSystem.test.js
+  ● Console
+
+    console.error
+      Quest Transaction Aborted: Cannot add item 'Rare Gem' in quest 'masterwork_crafting' (Inventory Full/Limit)
+
+      139 |                 for (const [item, qty] of Object.entries(stageDef.rewards.items)) {
+      140 |                     if (!this.pet.inventorySystem.canAddItem(item, qty)) {
+    > 141 |                         console.error(`Quest Transaction Aborted: Cannot add item '${item}' in quest '${questId}' (Inventory Full/Limit)`);
+          |                                 ^
+      142 |                         return false;
+      143 |                     }
+      144 |                 }
+
+      at QuestSystem.error [as advanceQuest] (js/systems/QuestSystem.js:141:33)
+      at Object.advanceQuest (tests/QuestSystem.test.js:115:36)
+
+PASS tests/Calendar.test.js
+PASS tests/CareerAndQuests.test.js
+PASS tests/DeterministicImport.test.js
+PASS tests/EventManager.test.js
+PASS tests/WeatherParticleManager.test.js
+PASS tests/QuestSystem_generateDailyQuest.test.js
+PASS tests/LightingManager.test.js
+PASS tests/performance/SkyManager.perf.test.js
+  ● Console
+
+    console.log
+      [OPTIMIZED] Total canvas operations for 1000 transitions: 5296
+
+      at Object.log (tests/performance/SkyManager.perf.test.js:78:17)
+
+PASS tests/InteractExploit.test.js
+PASS tests/CryptoUtils.test.js
+PASS tests/HousingExpansion.test.js
+PASS tests/LogicPuzzleScene.test.js
+PASS tests/QuestIntegration.test.js
+PASS tests/ExploitArtisanQuest.test.js
+PASS tests/HousingSystemII.test.js
+  ● Console
+
+    console.log
+      Migrating legacy furniture data to Entryway...
+
+      at PersistenceManager.log [as loadFurniture] (js/PersistenceManager.js:211:21)
+
+    console.log
+      Migrating legacy home config to Entryway...
+
+      at PersistenceManager.log [as loadHomeConfig] (js/PersistenceManager.js:247:21)
+
+FAIL tests/performance/WorldClock.perf.test.js
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation, specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    SyntaxError: /app/tests/performance/WorldClock.perf.test.js: 'import' and 'export' may only appear at the top level. (45:0)
+
+      43 |
+      44 |         console.log(`[Benchmark] WorldClock.getCurrentPeriod (Dynamic Time) x ${iterations}: ${durationDynamic.toFixed(4)}ms`);
+    > 45 | import { WorldClock } from '../../js/WorldClock.js';
+         | ^
+      46 | import { SeededRandom } from '../../js/utils/SeededRandom.js';
+      47 |
+      48 | // Mock Scene
+
+      at constructor (node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at Parser.toParseError [as raise] (node_modules/@babel/parser/src/tokenizer/index.ts:1507:19)
+      at Parser.raise [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:640:16)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseStatementListItem] (node_modules/@babel/parser/src/parser/statement.ts:431:17)
+      at Parser.parseStatementListItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1444:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseBlock] (node_modules/@babel/parser/src/parser/statement.ts:1385:10)
+      at Parser.parseBlock [as parseFunctionBody] (node_modules/@babel/parser/src/parser/expression.ts:2626:24)
+      at Parser.parseFunctionBody [as parseArrowExpression] (node_modules/@babel/parser/src/parser/expression.ts:2563:10)
+      at Parser.parseArrowExpression [as parseParenAndDistinguishExpression] (node_modules/@babel/parser/src/parser/expression.ts:1847:12)
+      at Parser.parseParenAndDistinguishExpression [as parseExprAtom] (node_modules/@babel/parser/src/parser/expression.ts:1170:21)
+      at Parser.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:742:23)
+      at Parser.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at Parser.parseUpdate [as parseMaybeUnary] (node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at Parser.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at Parser.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at Parser.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at Parser.parseMaybeConditional [as parseMaybeAssign] (node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at parseMaybeAssign (node_modules/@babel/parser/src/parser/expression.ts:257:12)
+      at Parser.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3202:12)
+      at Parser.allowInAnd [as parseMaybeAssignAllowIn] (node_modules/@babel/parser/src/parser/expression.ts:256:17)
+      at Parser.parseMaybeAssignAllowIn [as parseMaybeAssignAllowInOrVoidPattern] (node_modules/@babel/parser/src/parser/expression.ts:3316:17)
+      at Parser.parseMaybeAssignAllowInOrVoidPattern [as parseExprListItem] (node_modules/@babel/parser/src/parser/expression.ts:2798:18)
+      at Parser.parseExprListItem [as parseCallExpressionArguments] (node_modules/@babel/parser/src/parser/expression.ts:1042:14)
+      at Parser.parseCallExpressionArguments [as parseCoverCallAndAsyncArrowHead] (node_modules/@babel/parser/src/parser/expression.ts:922:29)
+      at Parser.parseCoverCallAndAsyncArrowHead [as parseSubscript] (node_modules/@babel/parser/src/parser/expression.ts:804:19)
+      at Parser.parseSubscript [as parseSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:763:19)
+      at Parser.parseSubscripts [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:748:17)
+      at Parser.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at Parser.parseUpdate [as parseMaybeUnary] (node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at Parser.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at Parser.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at Parser.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at Parser.parseMaybeConditional [as parseMaybeAssign] (node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at Parser.parseMaybeAssign [as parseExpressionBase] (node_modules/@babel/parser/src/parser/expression.ts:226:23)
+      at parseExpressionBase (node_modules/@babel/parser/src/parser/expression.ts:217:39)
+      at Parser.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3197:16)
+      at Parser.allowInAnd [as parseExpression] (node_modules/@babel/parser/src/parser/expression.ts:217:17)
+      at Parser.parseExpression [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:688:23)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseStatementListItem] (node_modules/@babel/parser/src/parser/statement.ts:431:17)
+      at Parser.parseStatementListItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1444:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseBlock] (node_modules/@babel/parser/src/parser/statement.ts:1385:10)
+      at Parser.parseBlock [as parseFunctionBody] (node_modules/@babel/parser/src/parser/expression.ts:2626:24)
+      at Parser.parseFunctionBody [as parseArrowExpression] (node_modules/@babel/parser/src/parser/expression.ts:2563:10)
+      at Parser.parseArrowExpression [as parseParenAndDistinguishExpression] (node_modules/@babel/parser/src/parser/expression.ts:1847:12)
+      at Parser.parseParenAndDistinguishExpression [as parseExprAtom] (node_modules/@babel/parser/src/parser/expression.ts:1170:21)
+      at Parser.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:742:23)
+      at Parser.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at Parser.parseUpdate [as parseMaybeUnary] (node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at Parser.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at Parser.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at Parser.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at Parser.parseMaybeConditional [as parseMaybeAssign] (node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at parseMaybeAssign (node_modules/@babel/parser/src/parser/expression.ts:257:12)
+      at Parser.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3202:12)
+      at Parser.allowInAnd [as parseMaybeAssignAllowIn] (node_modules/@babel/parser/src/parser/expression.ts:256:17)
+      at Parser.parseMaybeAssignAllowIn [as parseMaybeAssignAllowInOrVoidPattern] (node_modules/@babel/parser/src/parser/expression.ts:3316:17)
+      at Parser.parseMaybeAssignAllowInOrVoidPattern [as parseExprListItem] (node_modules/@babel/parser/src/parser/expression.ts:2798:18)
+      at Parser.parseExprListItem [as parseCallExpressionArguments] (node_modules/@babel/parser/src/parser/expression.ts:1042:14)
+      at Parser.parseCallExpressionArguments [as parseCoverCallAndAsyncArrowHead] (node_modules/@babel/parser/src/parser/expression.ts:922:29)
+      at Parser.parseCoverCallAndAsyncArrowHead [as parseSubscript] (node_modules/@babel/parser/src/parser/expression.ts:804:19)
+      at Parser.parseSubscript [as parseSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:763:19)
+      at Parser.parseSubscripts [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:748:17)
+      at Parser.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at Parser.parseUpdate [as parseMaybeUnary] (node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at Parser.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at Parser.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at Parser.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at Parser.parseMaybeConditional [as parseMaybeAssign] (node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at Parser.parseMaybeAssign [as parseExpressionBase] (node_modules/@babel/parser/src/parser/expression.ts:226:23)
+      at parseExpressionBase (node_modules/@babel/parser/src/parser/expression.ts:217:39)
+      at Parser.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3197:16)
+      at Parser.allowInAnd [as parseExpression] (node_modules/@babel/parser/src/parser/expression.ts:217:17)
+      at Parser.parseExpression [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:688:23)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseModuleItem] (node_modules/@babel/parser/src/parser/statement.ts:419:17)
+      at Parser.parseModuleItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1443:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseProgram] (node_modules/@babel/parser/src/parser/statement.ts:229:10)
+      at Parser.parseProgram [as parseTopLevel] (node_modules/@babel/parser/src/parser/statement.ts:203:25)
+      at Parser.parseTopLevel [as parse] (node_modules/@babel/parser/src/parser/index.ts:88:25)
+      at parse (node_modules/@babel/parser/src/index.ts:86:38)
+      at parser (node_modules/@babel/core/src/parser/index.ts:29:19)
+          at parser.next (<anonymous>)
+      at normalizeFile (node_modules/@babel/core/src/transformation/normalize-file.ts:50:24)
+          at normalizeFile.next (<anonymous>)
+      at run (node_modules/@babel/core/src/transformation/index.ts:41:36)
+          at run.next (<anonymous>)
+      at transform (node_modules/@babel/core/src/transform.ts:29:20)
+          at transform.next (<anonymous>)
+      at evaluateSync (node_modules/gensync/index.js:251:28)
+      at sync (node_modules/gensync/index.js:89:14)
+      at fn (node_modules/@babel/core/src/errors/rewrite-stack-trace.ts:99:14)
+      at transformSync (node_modules/@babel/core/src/transform.ts:66:52)
+      at ScriptTransformer.transformSource (node_modules/@jest/transform/build/index.js:422:31)
+      at ScriptTransformer._transformAndBuildScript (node_modules/@jest/transform/build/index.js:519:40)
+
+----------------------------|---------|----------|---------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+File                        | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+----------------------------|---------|----------|---------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+All files                   |   66.53 |    60.59 |   58.85 |   70.14 |
+ js                         |   65.32 |    57.98 |   57.39 |   68.85 |
+  AchievementData.js        |     100 |      100 |     100 |     100 |
+  AchievementManager.js     |   63.82 |       40 |    87.5 |   66.66 | 57-71,85-89
+  ArtisanMinigameScene.js   |   98.59 |    83.33 |     100 |     100 | 61-65
+  BreedingScene.js          |   89.58 |       80 |   77.27 |   93.18 | 108-110,162-164
+  ButtonFactory.js          |   70.21 |    39.13 |      40 |   71.11 | 77-82,97-98,106-112,131-132
+  Calendar.js               |     100 |      100 |     100 |     100 |
+  CareerDefinitions.js      |     100 |      100 |     100 |     100 |
+  Config.js                 |     100 |      100 |     100 |     100 |
+  DanceMinigameScene.js     |       0 |        0 |       0 |       0 | 14-222
+  DebugConsole.js           |   46.87 |       10 |   28.26 |   50.68 | 60-63,67-71,75-78,83-84,90-92,126-131,140-148,160-172,183-186,193-224,246-277,286
+  DialogueDefinitions.js    |     100 |      100 |     100 |     100 |
+  EventKeys.js              |     100 |      100 |     100 |     100 |
+  EventManager.js           |     100 |    78.57 |     100 |     100 | 36-46
+  ExpeditionDefinitions.js  |     100 |      100 |     100 |     100 |
+  ExpeditionScene.js        |   18.68 |     6.15 |   18.51 |    19.2 | 39-51,87-347,362-363
+  GeneticsSystem.js         |   93.22 |     95.5 |   82.14 |   97.87 | 287,295
+  GhostScene.js             |     100 |      100 |     100 |     100 |
+  HealerMinigameScene.js    |   81.81 |    54.16 |   84.61 |   84.41 | 108-109,124-137,179
+  ItemData.js               |     100 |      100 |     100 |     100 |
+  LightingManager.js        |   91.48 |       80 |     100 |     100 | 54-65,112
+  LogicPuzzleScene.js       |   98.24 |     87.5 |     100 |     100 | 49
+  MainScene.js              |   62.19 |    50.31 |   46.57 |   63.06 | 117-120,148,151,165,167,171,179,183,187,191,237-279,302,308-310,377-378,396,404-412,421-422,429-442,450-510,522-536,562-565,609,675-694,705-792,804-841,866,871-873,897,912-914,980-1025,1038-1051,1062,1176-1182,1207-1208,1213-1218,1292-1301,1319,1345-1353,1382,1414-1418
+  Nadagotchi.js             |      84 |    74.82 |   89.18 |   87.09 | 110-128,140,314,330,406,501,507,521-522,537-538,548-549,563-566,686,690,722,775-776,799-801,808-810,869-887,899-904,942,988-989,1021,1055,1185,1187,1189
+  NarrativeSystem.js        |   90.32 |       75 |     100 |   96.42 | 28
+  PersistenceManager.js     |   70.08 |       68 |      75 |   71.55 | 33,51,63-65,108,124-141,181,197,215-224,261-271,287,322,340-344,350-351,359-360,367-368
+  PreloaderScene.js         |   97.42 |       70 |   81.81 |   97.51 | 413-415,419-421
+  QuestDefinitions.js       |     100 |      100 |     100 |     100 |
+  RoomDefinitions.js        |     100 |      100 |     100 |     100 |
+  ScoutMinigameScene.js     |   93.05 |    66.66 |    92.3 |   93.93 | 62-65
+  ShowcaseScene.js          |       0 |        0 |       0 |       0 | 13-172
+  SkyManager.js             |   94.11 |       80 |     100 |   95.83 | 71-72
+  StartScene.js             |       0 |        0 |       0 |       0 | 11-266
+  StudyMinigameScene.js     |   88.49 |    82.14 |   72.22 |    92.7 | 101-103,171,188-190
+  UIScene.js                |   49.51 |    35.71 |   46.49 |   55.59 | 43-52,62,69,181-185,193-194,196,199,201-210,227,259-332,348-351,362,365-366,370-461,466-468
+  WeatherParticleManager.js |   78.94 |       60 |     100 |   77.14 | 77-78,80-82,85,90-91
+  WeatherSystem.js          |     100 |      100 |     100 |     100 |
+  WorldClock.js             |   96.15 |      100 |     100 |   96.15 | 77
+  game.js                   |       0 |      100 |     100 |       0 | 23-55
+ js/systems                 |   84.08 |    75.21 |   89.36 |   86.84 |
+  DebrisSystem.js           |   96.82 |    91.17 |     100 |     100 | 25,111,140
+  ExpeditionSystem.js       |   90.47 |    82.35 |     100 |   94.73 | 65,97
+  GhostSystem.js            |     100 |      100 |     100 |     100 |
+  InventorySystem.js        |   68.88 |    67.27 |   73.33 |   71.34 | 31-32,73-130,164-167,192,200,213,248-255,263,289,358
+  QuestSystem.js            |   88.67 |    72.44 |     100 |   93.54 | 72,81,133-134,195-196
+  RelationshipSystem.js     |   95.65 |       80 |   85.71 |    96.7 | 160,174-175
+ js/utils                   |   35.71 |    47.05 |   37.03 |   39.28 |
+  CryptoUtils.js            |   33.33 |    63.63 |      25 |    37.5 | 19-28,40-45
+  Encoding.js               |     100 |      100 |     100 |     100 |
+  SeededRandom.js           |      95 |    83.33 |     100 |     100 | 66
+  SoundSynthesizer.js       |   10.52 |    15.38 |    6.66 |   12.12 | 23-27,41-176
+----------------------------|---------|----------|---------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Summary of all failing tests
+FAIL tests/performance/WorldClock.perf.test.js
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation, specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    SyntaxError: /app/tests/performance/WorldClock.perf.test.js: 'import' and 'export' may only appear at the top level. (45:0)
+
+      43 |
+      44 |         console.log(`[Benchmark] WorldClock.getCurrentPeriod (Dynamic Time) x ${iterations}: ${durationDynamic.toFixed(4)}ms`);
+    > 45 | import { WorldClock } from '../../js/WorldClock.js';
+         | ^
+      46 | import { SeededRandom } from '../../js/utils/SeededRandom.js';
+      47 |
+      48 | // Mock Scene
+
+      at constructor (node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at Parser.toParseError [as raise] (node_modules/@babel/parser/src/tokenizer/index.ts:1507:19)
+      at Parser.raise [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:640:16)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseStatementListItem] (node_modules/@babel/parser/src/parser/statement.ts:431:17)
+      at Parser.parseStatementListItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1444:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseBlock] (node_modules/@babel/parser/src/parser/statement.ts:1385:10)
+      at Parser.parseBlock [as parseFunctionBody] (node_modules/@babel/parser/src/parser/expression.ts:2626:24)
+      at Parser.parseFunctionBody [as parseArrowExpression] (node_modules/@babel/parser/src/parser/expression.ts:2563:10)
+      at Parser.parseArrowExpression [as parseParenAndDistinguishExpression] (node_modules/@babel/parser/src/parser/expression.ts:1847:12)
+      at Parser.parseParenAndDistinguishExpression [as parseExprAtom] (node_modules/@babel/parser/src/parser/expression.ts:1170:21)
+      at Parser.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:742:23)
+      at Parser.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at Parser.parseUpdate [as parseMaybeUnary] (node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at Parser.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at Parser.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at Parser.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at Parser.parseMaybeConditional [as parseMaybeAssign] (node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at parseMaybeAssign (node_modules/@babel/parser/src/parser/expression.ts:257:12)
+      at Parser.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3202:12)
+      at Parser.allowInAnd [as parseMaybeAssignAllowIn] (node_modules/@babel/parser/src/parser/expression.ts:256:17)
+      at Parser.parseMaybeAssignAllowIn [as parseMaybeAssignAllowInOrVoidPattern] (node_modules/@babel/parser/src/parser/expression.ts:3316:17)
+      at Parser.parseMaybeAssignAllowInOrVoidPattern [as parseExprListItem] (node_modules/@babel/parser/src/parser/expression.ts:2798:18)
+      at Parser.parseExprListItem [as parseCallExpressionArguments] (node_modules/@babel/parser/src/parser/expression.ts:1042:14)
+      at Parser.parseCallExpressionArguments [as parseCoverCallAndAsyncArrowHead] (node_modules/@babel/parser/src/parser/expression.ts:922:29)
+      at Parser.parseCoverCallAndAsyncArrowHead [as parseSubscript] (node_modules/@babel/parser/src/parser/expression.ts:804:19)
+      at Parser.parseSubscript [as parseSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:763:19)
+      at Parser.parseSubscripts [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:748:17)
+      at Parser.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at Parser.parseUpdate [as parseMaybeUnary] (node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at Parser.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at Parser.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at Parser.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at Parser.parseMaybeConditional [as parseMaybeAssign] (node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at Parser.parseMaybeAssign [as parseExpressionBase] (node_modules/@babel/parser/src/parser/expression.ts:226:23)
+      at parseExpressionBase (node_modules/@babel/parser/src/parser/expression.ts:217:39)
+      at Parser.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3197:16)
+      at Parser.allowInAnd [as parseExpression] (node_modules/@babel/parser/src/parser/expression.ts:217:17)
+      at Parser.parseExpression [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:688:23)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseStatementListItem] (node_modules/@babel/parser/src/parser/statement.ts:431:17)
+      at Parser.parseStatementListItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1444:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseBlock] (node_modules/@babel/parser/src/parser/statement.ts:1385:10)
+      at Parser.parseBlock [as parseFunctionBody] (node_modules/@babel/parser/src/parser/expression.ts:2626:24)
+      at Parser.parseFunctionBody [as parseArrowExpression] (node_modules/@babel/parser/src/parser/expression.ts:2563:10)
+      at Parser.parseArrowExpression [as parseParenAndDistinguishExpression] (node_modules/@babel/parser/src/parser/expression.ts:1847:12)
+      at Parser.parseParenAndDistinguishExpression [as parseExprAtom] (node_modules/@babel/parser/src/parser/expression.ts:1170:21)
+      at Parser.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:742:23)
+      at Parser.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at Parser.parseUpdate [as parseMaybeUnary] (node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at Parser.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at Parser.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at Parser.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at Parser.parseMaybeConditional [as parseMaybeAssign] (node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at parseMaybeAssign (node_modules/@babel/parser/src/parser/expression.ts:257:12)
+      at Parser.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3202:12)
+      at Parser.allowInAnd [as parseMaybeAssignAllowIn] (node_modules/@babel/parser/src/parser/expression.ts:256:17)
+      at Parser.parseMaybeAssignAllowIn [as parseMaybeAssignAllowInOrVoidPattern] (node_modules/@babel/parser/src/parser/expression.ts:3316:17)
+      at Parser.parseMaybeAssignAllowInOrVoidPattern [as parseExprListItem] (node_modules/@babel/parser/src/parser/expression.ts:2798:18)
+      at Parser.parseExprListItem [as parseCallExpressionArguments] (node_modules/@babel/parser/src/parser/expression.ts:1042:14)
+      at Parser.parseCallExpressionArguments [as parseCoverCallAndAsyncArrowHead] (node_modules/@babel/parser/src/parser/expression.ts:922:29)
+      at Parser.parseCoverCallAndAsyncArrowHead [as parseSubscript] (node_modules/@babel/parser/src/parser/expression.ts:804:19)
+      at Parser.parseSubscript [as parseSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:763:19)
+      at Parser.parseSubscripts [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:748:17)
+      at Parser.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at Parser.parseUpdate [as parseMaybeUnary] (node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at Parser.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at Parser.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at Parser.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at Parser.parseMaybeConditional [as parseMaybeAssign] (node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at Parser.parseMaybeAssign [as parseExpressionBase] (node_modules/@babel/parser/src/parser/expression.ts:226:23)
+      at parseExpressionBase (node_modules/@babel/parser/src/parser/expression.ts:217:39)
+      at Parser.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3197:16)
+      at Parser.allowInAnd [as parseExpression] (node_modules/@babel/parser/src/parser/expression.ts:217:17)
+      at Parser.parseExpression [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:688:23)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseModuleItem] (node_modules/@babel/parser/src/parser/statement.ts:419:17)
+      at Parser.parseModuleItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1443:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseProgram] (node_modules/@babel/parser/src/parser/statement.ts:229:10)
+      at Parser.parseProgram [as parseTopLevel] (node_modules/@babel/parser/src/parser/statement.ts:203:25)
+      at Parser.parseTopLevel [as parse] (node_modules/@babel/parser/src/parser/index.ts:88:25)
+      at parse (node_modules/@babel/parser/src/index.ts:86:38)
+      at parser (node_modules/@babel/core/src/parser/index.ts:29:19)
+          at parser.next (<anonymous>)
+      at normalizeFile (node_modules/@babel/core/src/transformation/normalize-file.ts:50:24)
+          at normalizeFile.next (<anonymous>)
+      at run (node_modules/@babel/core/src/transformation/index.ts:41:36)
+          at run.next (<anonymous>)
+      at transform (node_modules/@babel/core/src/transform.ts:29:20)
+          at transform.next (<anonymous>)
+      at evaluateSync (node_modules/gensync/index.js:251:28)
+      at sync (node_modules/gensync/index.js:89:14)
+      at fn (node_modules/@babel/core/src/errors/rewrite-stack-trace.ts:99:14)
+      at transformSync (node_modules/@babel/core/src/transform.ts:66:52)
+      at ScriptTransformer.transformSource (node_modules/@jest/transform/build/index.js:422:31)
+      at ScriptTransformer._transformAndBuildScript (node_modules/@jest/transform/build/index.js:519:40)
+
+
+Test Suites: 1 failed, 74 passed, 75 total
+Tests:       376 passed, 376 total
+Snapshots:   0 total
+Time:        7.439 s
+Ran all test suites.
