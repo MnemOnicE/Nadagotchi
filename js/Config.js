@@ -40,13 +40,6 @@ export const Config = {
         }
     },
 
-    // Minigame Settings
-    MINIGAMES: {
-        LOGIC_PUZZLE: {
-            LEVEL_CAP: 5
-        }
-    },
-
     // Stat Decay Rates
     DECAY: {
         HUNGER: 0.05,
