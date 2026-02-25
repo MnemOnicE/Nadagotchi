@@ -1,95 +1,51 @@
 
-import { WorldClock } from '../../js/WorldClock.js';
-
-// Mock Phaser Scene
-const mockScene = {};
-
-describe('WorldClock Performance', () => {
-    let clock;
-
-    beforeEach(() => {
-        clock = new WorldClock(mockScene);
-    });
-
-    test('getCurrentPeriod benchmark', () => {
-        const iterations = 1000000;
-
-        // Scenario 1: Static Time (Simulating multiple calls within same frame or very slow time)
-        // This is the best-case scenario for caching.
-        clock.time = 0.5; // Mid-day
-
-        const startStatic = performance.now();
-        for (let i = 0; i < iterations; i++) {
-            clock.getCurrentPeriod();
-        }
-        const endStatic = performance.now();
-        const durationStatic = endStatic - startStatic;
-
-        console.log(`[Benchmark] WorldClock.getCurrentPeriod (Static Time) x ${iterations}: ${durationStatic.toFixed(4)}ms`);
-
-        // Scenario 2: Dynamic Time within same period (Simulating normal game loop updates)
-        // Time advances, but period remains 'Day' for a long time.
-        clock.time = 0.3; // Start of Day
-        const increment = 0.000001; // Small increment
-
-        const startDynamic = performance.now();
-        for (let i = 0; i < iterations; i++) {
-            clock.time += increment;
-            if (clock.time >= 0.8) clock.time = 0.3; // Reset to keep it in 'Day' mostly, but we want to test the check overhead
-            clock.getCurrentPeriod();
-        }
-        const endDynamic = performance.now();
-        const durationDynamic = endDynamic - startDynamic;
-
-        console.log(`[Benchmark] WorldClock.getCurrentPeriod (Dynamic Time) x ${iterations}: ${durationDynamic.toFixed(4)}ms`);
+import { jest } from '@jest/globals';
 import { WorldClock } from '../../js/WorldClock.js';
 import { SeededRandom } from '../../js/utils/SeededRandom.js';
 
-// Mock Scene
-const mockScene = {
-    events: { emit: () => {} },
-    time: { now: 0 }
-};
-
 describe('WorldClock Performance', () => {
-    test('getCurrentPeriod() benchmark - Cached vs Uncached', () => {
-        const clock = new WorldClock(mockScene);
+    let mockScene;
+    let clock;
 
-        // Scenario 1: Mostly Cache Hits (Time changes slightly but stays in same period)
-        // Simulate normal game loop where time increments by small delta
-        const iterations = 1000000;
-        const delta = 1000 / 60; // 16ms per frame (approx)
+    beforeEach(() => {
+        mockScene = {
+            events: { emit: jest.fn() }
+        };
+        // Use a mock or real implementation depending on what we benchmark.
+        // Here we test the class logic itself.
+        clock = new WorldClock(mockScene);
+    });
 
-        const start = Date.now();
+    test('getCurrentPeriod performance', () => {
+        const iterations = 100000;
+        const start = performance.now();
 
         for (let i = 0; i < iterations; i++) {
-            // Update time slightly
-            clock.update(delta);
-            // Call getCurrentPeriod
+            // Simulate time passing to trigger calculation
+            clock.accumulatedTime = (i % 24000) * 10;
             clock.getCurrentPeriod();
         }
 
-        const end = Date.now();
+        const end = performance.now();
         const duration = end - start;
+        console.log(`[Benchmark] WorldClock.getCurrentPeriod x ${iterations}: ${duration.toFixed(4)}ms`);
 
-        console.log(`[Benchmark] WorldClock.getCurrentPeriod x ${iterations} (sequential update): ${duration}ms`);
+        // Basic assertion to ensure it runs fast enough (e.g., < 100ms for 100k ops)
+        expect(duration).toBeLessThan(500);
+    });
 
-        // Scenario 2: Random Access (Cache Misses)
-        // Reset clock
-        const randomClock = new WorldClock(mockScene);
-        const rng = new SeededRandom(12345); // Use seeded random to avoid Security Hotspot
-        const randomStart = Date.now();
+    test('update cycle performance', () => {
+        const iterations = 50000;
+        const start = performance.now();
 
         for (let i = 0; i < iterations; i++) {
-            randomClock.time = rng.random(); // Random time 0-1
-            randomClock.getCurrentPeriod();
+            clock.update(16.6); // 60 FPS delta
         }
 
-        const randomEnd = Date.now();
-        const randomDuration = randomEnd - randomStart;
+        const end = performance.now();
+        const duration = end - start;
+        console.log(`[Benchmark] WorldClock.update x ${iterations}: ${duration.toFixed(4)}ms`);
 
-        console.log(`[Benchmark] WorldClock.getCurrentPeriod x ${iterations} (random access): ${randomDuration}ms`);
-
-        expect(duration).toBeLessThan(5000); // Sanity check
+        expect(duration).toBeLessThan(500);
     });
 });

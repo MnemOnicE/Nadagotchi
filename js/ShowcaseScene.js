@@ -44,7 +44,7 @@ export class ShowcaseScene extends Phaser.Scene {
 
         // Pet Sprite (Scaled up)
         // We reuse the 'pet' texture but maybe use a specific frame based on mood
-        const frame = Config.MOOD_VISUALS.FRAMES[this.petData.mood] ?? Config.MOOD_VISUALS.DEFAULT_FRAME;
+        const frame = Config.MOOD_VISUALS.FRAMES[this.petData.mood] ?? 1;
         const sprite = this.add.sprite(0, 0, 'pet', frame).setScale(8);
 
         // Add a simple idle tween
