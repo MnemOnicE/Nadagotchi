@@ -195,6 +195,16 @@ export const Config = {
         NEUTRAL: 1.0
     },
 
+    // Visual Settings
+    VISUALS: {
+        MOOD_FRAMES: {
+            'happy': 0,
+            'angry': 1,
+            'sad': 2,
+            'neutral': 3
+        }
+    },
+
     // Global Settings Defaults
     SETTINGS: {
         DEFAULT_VOLUME: 0.5,
