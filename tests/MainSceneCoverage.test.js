@@ -12,6 +12,7 @@ jest.mock('../js/Calendar');
 jest.mock('../js/EventManager');
 jest.mock('../js/WorldClock');
 jest.mock('../js/WeatherSystem');
+jest.mock('../js/WeatherParticleManager');
 jest.mock('../js/utils/SoundSynthesizer', () => ({
     SoundSynthesizer: {
         instance: {
@@ -30,11 +31,13 @@ const { Calendar } = require('../js/Calendar');
 const { EventManager } = require('../js/EventManager');
 const { WorldClock } = require('../js/WorldClock');
 const { WeatherSystem } = require('../js/WeatherSystem');
+const { WeatherParticleManager } = require('../js/WeatherParticleManager');
 const { EventKeys } = require('../js/EventKeys');
 
 describe('MainScene Coverage', () => {
     let scene;
     let mockNadagotchi;
+    let mockWeatherParticles;
     let mockAdd;
     let mockGameEvents;
 
@@ -94,6 +97,12 @@ describe('MainScene Coverage', () => {
         WeatherSystem.mockImplementation(() => ({
             getCurrentWeather: jest.fn().mockReturnValue('Sunny')
         }));
+
+        mockWeatherParticles = {
+            resize: jest.fn(),
+            update: jest.fn()
+        };
+        WeatherParticleManager.mockImplementation(() => mockWeatherParticles);
 
         mockAdd = createMockAdd();
 
@@ -206,6 +215,8 @@ describe('MainScene Coverage', () => {
         // Dashboard is 35% of 800 = 280. Game height = 520.
         expect(scene.cameras.main.setViewport).toHaveBeenCalledWith(0, 0, 1000, 520);
         expect(scene.cameras.main.setSize).toHaveBeenCalledWith(1000, 520);
+
+        expect(mockWeatherParticles.resize).toHaveBeenCalledWith(1000, 520);
     });
 
     test('update loop should update nadagotchi and stats', () => {
