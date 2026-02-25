@@ -1,51 +1,54 @@
-// tests/PersistenceManager.test.js
-import { PersistenceManager } from '../js/PersistenceManager';
-
-// Mock localStorage
-class LocalStorageMock {
-    constructor() { this.store = {}; }
-    clear() { this.store = {}; }
-    getItem(key) { return this.store[key] || null; }
-    setItem(key, value) { this.store[key] = String(value); }
-    removeItem(key) { delete this.store[key]; }
-}
-global.localStorage = new LocalStorageMock();
+import { PersistenceManager } from '../js/PersistenceManager.js';
+import { setupLocalStorageMock } from './helpers/mockLocalStorage.js';
 
 describe('PersistenceManager', () => {
     let persistenceManager;
 
     beforeEach(() => {
+        setupLocalStorageMock();
         persistenceManager = new PersistenceManager();
-        global.localStorage.clear();
+        localStorage.clear();
+        jest.restoreAllMocks();
+
+        // Mock requestIdleCallback to execute quickly
+        global.requestIdleCallback = (cb) => {
+             return setTimeout(() => {
+                 cb({ didTimeout: false, timeRemaining: () => 10 });
+             }, 5);
+        };
+        global.cancelIdleCallback = (id) => clearTimeout(id);
     });
 
     test('should save and load pet data', async () => {
-        const petData = { name: 'Testy', mood: 'happy' };
+        const petData = { name: 'Blobby', type: 'Slime', uuid: '123' };
         persistenceManager.savePet(petData);
 
-        // Wait for async save (debounced/scheduled)
-        await new Promise(resolve => setTimeout(resolve, 300));
+        // Wait enough for the async save to complete
+        await new Promise(r => setTimeout(r, 100));
 
-        const loadedPet = persistenceManager.loadPet();
-        expect(loadedPet).toEqual(petData);
+        const loadedData = persistenceManager.loadPet();
+        expect(loadedData).toEqual(petData);
     });
 
     test('should return null when no pet data is saved', () => {
-        const loadedPet = persistenceManager.loadPet();
-        expect(loadedPet).toBeNull();
+        const loadedData = persistenceManager.loadPet();
+        expect(loadedData).toBeNull();
     });
 
-    test('should clear active pet data', () => {
-        const petData = { name: 'Testy', mood: 'happy' };
+    test('should clear active pet data', async () => {
+        const petData = { name: 'Blobby', type: 'Slime', uuid: '123' };
         persistenceManager.savePet(petData);
+        await new Promise(r => setTimeout(r, 100));
+
         persistenceManager.clearActivePet();
-        const loadedPet = persistenceManager.loadPet();
-        expect(loadedPet).toBeNull();
+        const loadedData = persistenceManager.loadPet();
+        expect(loadedData).toBeNull();
     });
 
-    test('should save to and load from hall of fame', () => {
+    test('should save to and load from hall of fame', async () => {
         const retiredPet = { name: 'Old Timer', archetype: 'Recluse' };
-        persistenceManager.saveToHallOfFame(retiredPet);
+        await persistenceManager.saveToHallOfFame(retiredPet);
+
         const hallOfFame = persistenceManager.loadHallOfFame();
         expect(hallOfFame).toHaveLength(1);
         expect(hallOfFame[0]).toEqual(retiredPet);
@@ -56,19 +59,22 @@ describe('PersistenceManager', () => {
         expect(hallOfFame).toEqual([]);
     });
 
-    test('should append to hall of fame', () => {
+    test('should append to hall of fame', async () => {
         const retiredPet1 = { name: 'Old Timer', archetype: 'Recluse' };
         const retiredPet2 = { name: 'Ancient One', archetype: 'Intellectual' };
-        persistenceManager.saveToHallOfFame(retiredPet1);
-        persistenceManager.saveToHallOfFame(retiredPet2);
+
+        await persistenceManager.saveToHallOfFame(retiredPet1);
+        await persistenceManager.saveToHallOfFame(retiredPet2);
+
         const hallOfFame = persistenceManager.loadHallOfFame();
         expect(hallOfFame).toHaveLength(2);
+        expect(hallOfFame[0]).toEqual(retiredPet1);
         expect(hallOfFame[1]).toEqual(retiredPet2);
     });
 
-    test('should save and load journal entries', () => {
+    test('should save and load journal entries', async () => {
         const entries = [{ id: 1, text: 'Day 1' }];
-        persistenceManager.saveJournal(entries);
+        await persistenceManager.saveJournal(entries);
         const loadedEntries = persistenceManager.loadJournal();
         expect(loadedEntries).toEqual(entries);
     });
@@ -78,9 +84,9 @@ describe('PersistenceManager', () => {
         expect(loadedEntries).toEqual([]);
     });
 
-    test('should save and load recipes', () => {
+    test('should save and load recipes', async () => {
         const recipes = ['Recipe A', 'Recipe B'];
-        persistenceManager.saveRecipes(recipes);
+        await persistenceManager.saveRecipes(recipes);
         const loadedRecipes = persistenceManager.loadRecipes();
         expect(loadedRecipes).toEqual(recipes);
     });
