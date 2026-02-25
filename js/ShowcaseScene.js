@@ -1,6 +1,7 @@
 import { ButtonFactory } from './ButtonFactory.js';
 import { EventKeys } from './EventKeys.js';
 import { Config } from './Config.js';
+import { ToastManager } from './systems/ToastManager.js';
 
 /**
  * @fileoverview A dedicated scene for the "Pet Passport" / Showcase system.
@@ -24,6 +25,7 @@ export class ShowcaseScene extends Phaser.Scene {
 
     create() {
         const width = this.cameras.main.width;
+        this.toastManager = new ToastManager(this);
         const height = this.cameras.main.height;
 
         // 1. Background (Solid color with slight transparency to hint at pause state, or full solid)
@@ -150,26 +152,6 @@ export class ShowcaseScene extends Phaser.Scene {
      * Duplicated from UIScene (should potentially be a utility, but keeping isolated for now).
      */
     showToast(title, message) {
-        const width = this.cameras.main.width;
-        const toastWidth = 300;
-        const toastHeight = 60;
-        const x = width / 2 - toastWidth / 2;
-        const y = this.cameras.main.height - 100;
-
-        const container = this.add.container(x, y);
-        const bg = this.add.rectangle(0, 0, toastWidth, toastHeight, 0x333333).setOrigin(0).setStrokeStyle(2, 0xffffff);
-        const text = this.add.text(toastWidth/2, toastHeight/2, `${title}: ${message}`, {
-            fontFamily: 'VT323', fontSize: '20px', color: '#fff'
-        }).setOrigin(0.5);
-
-        container.add([bg, text]);
-
-        this.tweens.add({
-            targets: container,
-            alpha: 0,
-            duration: 500,
-            delay: 2000,
-            onComplete: () => container.destroy()
-        });
+        this.toastManager.show({ title, message, style: 'DARK' });
     }
 }
