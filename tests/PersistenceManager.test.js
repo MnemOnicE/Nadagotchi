@@ -21,27 +21,27 @@ describe('PersistenceManager', () => {
 
     test('should save and load pet data', async () => {
         const petData = { name: 'Blobby', type: 'Slime', uuid: '123' };
-        persistenceManager.savePet(petData);
+        await persistenceManager.savePet(petData);
 
-        // Wait enough for the async save to complete
+        // Wait enough for the async save to complete (timer based)
         await new Promise(r => setTimeout(r, 100));
 
-        const loadedData = persistenceManager.loadPet();
+        const loadedData = await persistenceManager.loadPet();
         expect(loadedData).toEqual(petData);
     });
 
-    test('should return null when no pet data is saved', () => {
-        const loadedData = persistenceManager.loadPet();
+    test('should return null when no pet data is saved', async () => {
+        const loadedData = await persistenceManager.loadPet();
         expect(loadedData).toBeNull();
     });
 
     test('should clear active pet data', async () => {
         const petData = { name: 'Blobby', type: 'Slime', uuid: '123' };
-        persistenceManager.savePet(petData);
+        await persistenceManager.savePet(petData);
         await new Promise(r => setTimeout(r, 100));
 
         persistenceManager.clearActivePet();
-        const loadedData = persistenceManager.loadPet();
+        const loadedData = await persistenceManager.loadPet();
         expect(loadedData).toBeNull();
     });
 
@@ -49,13 +49,13 @@ describe('PersistenceManager', () => {
         const retiredPet = { name: 'Old Timer', archetype: 'Recluse' };
         await persistenceManager.saveToHallOfFame(retiredPet);
 
-        const hallOfFame = persistenceManager.loadHallOfFame();
+        const hallOfFame = await persistenceManager.loadHallOfFame();
         expect(hallOfFame).toHaveLength(1);
         expect(hallOfFame[0]).toEqual(retiredPet);
     });
 
-    test('should return empty array when no hall of fame data is saved', () => {
-        const hallOfFame = persistenceManager.loadHallOfFame();
+    test('should return empty array when no hall of fame data is saved', async () => {
+        const hallOfFame = await persistenceManager.loadHallOfFame();
         expect(hallOfFame).toEqual([]);
     });
 
@@ -66,7 +66,7 @@ describe('PersistenceManager', () => {
         await persistenceManager.saveToHallOfFame(retiredPet1);
         await persistenceManager.saveToHallOfFame(retiredPet2);
 
-        const hallOfFame = persistenceManager.loadHallOfFame();
+        const hallOfFame = await persistenceManager.loadHallOfFame();
         expect(hallOfFame).toHaveLength(2);
         expect(hallOfFame[0]).toEqual(retiredPet1);
         expect(hallOfFame[1]).toEqual(retiredPet2);
@@ -75,24 +75,24 @@ describe('PersistenceManager', () => {
     test('should save and load journal entries', async () => {
         const entries = [{ id: 1, text: 'Day 1' }];
         await persistenceManager.saveJournal(entries);
-        const loadedEntries = persistenceManager.loadJournal();
+        const loadedEntries = await persistenceManager.loadJournal();
         expect(loadedEntries).toEqual(entries);
     });
 
-    test('should return empty array when no journal entries are saved', () => {
-        const loadedEntries = persistenceManager.loadJournal();
+    test('should return empty array when no journal entries are saved', async () => {
+        const loadedEntries = await persistenceManager.loadJournal();
         expect(loadedEntries).toEqual([]);
     });
 
     test('should save and load recipes', async () => {
         const recipes = ['Recipe A', 'Recipe B'];
         await persistenceManager.saveRecipes(recipes);
-        const loadedRecipes = persistenceManager.loadRecipes();
+        const loadedRecipes = await persistenceManager.loadRecipes();
         expect(loadedRecipes).toEqual(recipes);
     });
 
-    test('should return empty array when no recipes are saved', () => {
-        const loadedRecipes = persistenceManager.loadRecipes();
+    test('should return empty array when no recipes are saved', async () => {
+        const loadedRecipes = await persistenceManager.loadRecipes();
         expect(loadedRecipes).toEqual([]);
     });
 });

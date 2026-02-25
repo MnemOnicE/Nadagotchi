@@ -63,6 +63,9 @@ export class MainScene extends Phaser.Scene {
         this.isMoving = false;
         /** @type {number} Timestamp for the next autonomous move. */
         this.nextMoveTime = 0;
+
+        /** @type {boolean} Flag indicating if async initialization is complete. */
+        this.isReady = false;
     }
 
     /**
@@ -80,9 +83,18 @@ export class MainScene extends Phaser.Scene {
      * @param {object} [data.newPetData] - Data for creating a new pet, typically from the BreedingScene.
      */
     create(data) {
+        // Start async initialization
+        this._initPromise = this.initializeGame(data);
+    }
+
+    /**
+     * Async initialization wrapper for handling Promise-based persistence and setup.
+     * @param {object} data - Data passed from previous scene.
+     */
+    async initializeGame(data) {
         // --- World Systems Initialization (Pre-Visuals) ---
         this.persistence = new PersistenceManager();
-        const loadedCalendar = this.persistence.loadCalendar();
+        const loadedCalendar = await this.persistence.loadCalendar();
         this.calendar = new Calendar(loadedCalendar);
         this.eventManager = new EventManager(this.calendar);
         this.worldClock = new WorldClock(this);
@@ -110,7 +122,7 @@ export class MainScene extends Phaser.Scene {
         // Drawing handled in resize
 
         // --- Pet Initialization ---
-        const loadedPet = this.persistence.loadPet();
+        const loadedPet = await this.persistence.loadPet();
 
         if (data && data.newPetData) {
             // New Game: Pass null for loadedData to ensure defaults are used
@@ -124,15 +136,18 @@ export class MainScene extends Phaser.Scene {
             this.nadagotchi = new Nadagotchi('Adventurer', loadedPet);
         }
 
+        // Initialize heavy async data (Journal, Recipes)
+        await this.nadagotchi.init();
+
         if (!loadedPet && !(data && data.newPetData)) {
-             this.persistence.savePet(this.nadagotchi);
+             await this.persistence.savePet(this.nadagotchi);
         }
 
         // Expose for verification/testing
         window.mainScene = this;
 
         // --- Settings Initialization ---
-        const savedSettings = this.persistence.loadSettings();
+        const savedSettings = await this.persistence.loadSettings();
         this.gameSettings = {
             volume: Config.SETTINGS.DEFAULT_VOLUME,
             gameSpeed: Config.SETTINGS.DEFAULT_SPEED,
@@ -229,7 +244,7 @@ export class MainScene extends Phaser.Scene {
         // --- Final Setup ---
         this.resize({ width: this.scale.width, height: this.scale.height });
         this.skyManager.update(); // Initial draw
-        this.loadFurniture();
+        await this.loadFurniture();
         this.renderDebris(); // Initial render of debris
 
         // --- Tutorial Trigger ---
@@ -238,6 +253,9 @@ export class MainScene extends Phaser.Scene {
                 this.game.events.emit(EventKeys.START_TUTORIAL);
             });
         }
+
+        // MARK AS READY
+        this.isReady = true;
     }
 
     /**
@@ -287,6 +305,8 @@ export class MainScene extends Phaser.Scene {
      * @param {number} delta - The time in milliseconds since the last frame.
      */
     update(time, delta) {
+        if (!this.isReady) return;
+
         const dayPassed = this.worldClock.update(delta);
         if (dayPassed) {
             this.calendar.advanceDay();
@@ -1060,7 +1080,7 @@ export class MainScene extends Phaser.Scene {
                     yoyo: true,
                     repeat: -1,
                     ease: 'Sine.easeInOut'
-                });
+                 });
              }
         } else if (mood === 'angry') {
              // Angry Shake
@@ -1396,20 +1416,20 @@ export class MainScene extends Phaser.Scene {
      * Persists the placed furniture data.
      * Serializes only the necessary data (key, x, y), stripping sprite references.
      */
-    saveFurniture() {
+    async saveFurniture() {
         const serializable = {};
         for (const [roomId, items] of Object.entries(this.placedFurniture)) {
             serializable[roomId] = items.map(f => ({ key: f.key, x: f.x, y: f.y }));
         }
-        this.persistence.saveFurniture(serializable);
+        await this.persistence.saveFurniture(serializable);
     }
 
     /**
      * Loads and renders previously placed furniture.
      */
-    loadFurniture() {
+    async loadFurniture() {
         // loadFurniture returns { RoomID: [...] } now (via PersistenceManager migration)
-        const loadedData = this.persistence.loadFurniture() || { "Entryway": [] };
+        const loadedData = await this.persistence.loadFurniture() || { "Entryway": [] };
 
         // Clear object but keep reference
         this.placedFurniture = {};
