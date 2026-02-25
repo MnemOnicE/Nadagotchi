@@ -390,7 +390,7 @@ export class PersistenceManager {
         const strToHash = salt ? encoded + salt : encoded;
 
         // Check 1: Secure SHA-256 (64 hex characters)
-        if (hash.length === 64) {
+        if (/^[0-9a-f]{64}$/i.test(hash)) {
              const expectedHash = await CryptoUtils.generateHash(strToHash, "");
              if (expectedHash !== hash) {
                  console.warn(`Save file tampered (SHA-256 hash mismatch) for key ${key}.`);
