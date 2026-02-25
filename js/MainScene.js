@@ -614,7 +614,6 @@ export class MainScene extends Phaser.Scene {
         // Resize dynamic textures via managers
         if (this.skyManager) this.skyManager.resize(width, gameHeight);
         if (this.lightingManager) this.lightingManager.resize(width, gameHeight);
-        if (this.weatherParticles) this.weatherParticles.resize(width, gameHeight);
 
         // Resize Wallpaper/Flooring
         if (this.wallpaperLayer) {

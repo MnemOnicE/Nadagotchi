@@ -37,8 +37,7 @@ describe('InventorySystem.placeItem', () => {
 
     beforeEach(() => {
         pet = new Nadagotchi('Adventurer');
-        // Ensure clean state
-        pet.inventory = {};
+        // Inventory is initialized to {} by default in constructor
     });
 
     test('should return true and decrement count when item exists and count > 0', () => {
