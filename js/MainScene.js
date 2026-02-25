@@ -614,6 +614,7 @@ export class MainScene extends Phaser.Scene {
         // Resize dynamic textures via managers
         if (this.skyManager) this.skyManager.resize(width, gameHeight);
         if (this.lightingManager) this.lightingManager.resize(width, gameHeight);
+        if (this.weatherParticles) this.weatherParticles.resize(width, gameHeight);
 
         // Resize Wallpaper/Flooring
         if (this.wallpaperLayer) {
@@ -935,10 +936,7 @@ export class MainScene extends Phaser.Scene {
     updateSpriteMood() {
         if (this.currentMood !== this.nadagotchi.mood) {
             this.currentMood = this.nadagotchi.mood;
-            // Map game moods to sprite frames:
-            // Happy (0), Angry (1), Tired/Sad (2), Content/Neutral (3)
-            const moodMap = { 'happy': 0, 'angry': 1, 'sad': 2, 'neutral': 3 };
-            this.sprite.setFrame(moodMap[this.currentMood] ?? 3);
+            this.sprite.setFrame(Config.VISUALS.MOOD_FRAMES[this.currentMood] ?? Config.VISUALS.MOOD_FRAMES.neutral);
             this.startIdleAnimation(this.currentMood);
         }
     }

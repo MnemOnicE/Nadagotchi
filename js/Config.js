@@ -195,6 +195,31 @@ export const Config = {
         NEUTRAL: 1.0
     },
 
+    // Visual Settings
+    VISUALS: {
+        MOOD_FRAMES: {
+            'happy': 0,
+            'angry': 1,
+            'sad': 2,
+            'neutral': 3
+    // Mood Visuals (Centralized)
+    MOOD_VISUALS: {
+        DEFAULT_FRAME: 1,
+        DEFAULT_EMOJI: '❓',
+        FRAMES: {
+            'happy': 0,
+            'neutral': 1,
+            'sad': 2,
+            'angry': 3
+        },
+        EMOJIS: {
+            'happy': '😊',
+            'sad': '😢',
+            'angry': '😠',
+            'neutral': '😐'
+        }
+    },
+
     // Global Settings Defaults
     SETTINGS: {
         DEFAULT_VOLUME: 0.5,
@@ -222,8 +247,8 @@ export const Config = {
     // Security & Hashing
     SECURITY: {
         // Loaded via environment variables in Vite (defined in vite.config.js) or process.env in Jest.
-        // Falls back to a generic salt for development.
-        DNA_SALT: (typeof process !== 'undefined' && process.env && process.env.VITE_DNA_SALT) || "DEVELOPMENT_ONLY_SALT"
+        // Salt must be injected by the build system or test runner.
+        DNA_SALT: process.env.VITE_DNA_SALT
     },
 
     // Debris & Environment
