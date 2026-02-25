@@ -78,18 +78,16 @@ describe('AchievementManager', () => {
 
         it('should NOT increment chat count for excluded interactions', () => {
             const handler = manager.handleUIAction.bind(manager);
+            const excludedEvents = [
+                EventKeys.INTERACT_BOOKSHELF,
+                EventKeys.INTERACT_PLANT,
+                EventKeys.INTERACT_FANCY_BOOKSHELF,
+            ];
 
-            // Test bookshelf interaction
-            handler(EventKeys.INTERACT_BOOKSHELF, {});
-            expect(manager.state.progress.chatCount).toBe(0);
-
-            // Test plant interaction
-            handler(EventKeys.INTERACT_PLANT, {});
-            expect(manager.state.progress.chatCount).toBe(0);
-
-            // Test fancy bookshelf
-            handler(EventKeys.INTERACT_FANCY_BOOKSHELF, {});
-            expect(manager.state.progress.chatCount).toBe(0);
+            excludedEvents.forEach((eventKey) => {
+                handler(eventKey, {});
+                expect(manager.state.progress.chatCount).toBe(0);
+            });
         });
 
         it('should unlock Socialite achievement after 10 chats', () => {
