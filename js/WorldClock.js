@@ -34,8 +34,6 @@ export class WorldClock {
             NIGHT_CONT: { start: 0.9, end: 1, name: "Night" } // 21:36 - 24:00
         };
 
-        /** @type {?{start: number, end: number, name: string}} Cached reference to the current period object. */
-        this._cachedPeriod = null;
     }
 
     /**
@@ -61,14 +59,9 @@ export class WorldClock {
      * @returns {string} The name of the current period.
      */
     getCurrentPeriod() {
-        if (this._cachedPeriod && this.time >= this._cachedPeriod.start && this.time < this._cachedPeriod.end) {
-            return this._cachedPeriod.name;
-        }
-
         for (const key in this.periods) {
             const period = this.periods[key];
             if (this.time >= period.start && this.time < period.end) {
-                this._cachedPeriod = period;
                 return period.name;
             }
         }

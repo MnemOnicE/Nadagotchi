@@ -156,11 +156,7 @@ export const createMockAdd = () => ({
             start: jest.fn(),
             stop: jest.fn(),
             setPosition: jest.fn(),
-            setDepth: jest.fn().mockReturnThis(),
-            setEmitZone: jest.fn().mockReturnThis(),
-            setBounds: jest.fn().mockReturnThis(),
-            setQuantity: jest.fn().mockReturnThis(),
-            setFrequency: jest.fn().mockReturnThis()
+            setDepth: jest.fn().mockReturnThis()
         }),
         setDepth: jest.fn().mockReturnThis(),
         destroy: jest.fn()

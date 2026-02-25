@@ -5,20 +5,6 @@ export default defineConfig(({ mode }) => {
   // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
   const env = loadEnv(mode, process.cwd(), '');
 
-  let salt = env.VITE_DNA_SALT;
-
-  if (mode === 'production') {
-    if (!salt) {
-      throw new Error("SECURITY ERROR: VITE_DNA_SALT is required for production builds. Please set this environment variable.");
-    }
-  } else {
-    // Development fallback
-    if (!salt) {
-      console.warn("SECURITY WARNING: VITE_DNA_SALT not set. Using insecure default for development.");
-      salt = 'DEVELOPMENT_ONLY_SALT';
-    }
-  }
-
   return {
     // Base public path when served in production (e.g. for GitHub Pages)
     base: './',
@@ -37,7 +23,7 @@ export default defineConfig(({ mode }) => {
     define: {
       // Inject the secret salt from environment variables into the client-side code.
       // Falls back to a generic salt for development environments.
-      'process.env.VITE_DNA_SALT': JSON.stringify(salt)
+      'process.env.VITE_DNA_SALT': JSON.stringify(env.VITE_DNA_SALT || 'DEVELOPMENT_ONLY_SALT')
     }
   };
 });

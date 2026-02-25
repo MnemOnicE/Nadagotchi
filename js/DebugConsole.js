@@ -82,7 +82,7 @@ export class DebugConsole {
             { label: "+10 All Items", action: () => this.addAllItems() },
             { label: "Clear Inventory", action: () => this.clearInventory() },
             { label: "Unlock All Careers", action: () => { this.scene.nadagotchi.unlockAllCareers(); this.refreshGame(); } },
-            { label: "+1000 Coins (Placeholder)", action: () => { this.showToast("Not Implemented", "No currency system yet!", "💰"); console.log("Currency system pending implementation."); } }
+            { label: "+1000 Coins (Placeholder)", action: () => { alert("No currency system yet!"); } }
         ]);
 
         this.addSection("Debug Tools", [
@@ -153,7 +153,7 @@ export class DebugConsole {
             this.scene.nadagotchi.inventorySystem.addItem(key, 10);
         });
         this.refreshGame();
-        this.showToast("Added Items", "Added 10 of every item.", "🎒");
+        alert("Added 10 of every item.");
     }
 
     clearInventory() {
@@ -186,13 +186,13 @@ export class DebugConsole {
                  this.debugGraphics = null;
              }
         }
-        this.showToast("Bounds Toggled", "Move furniture to see updates.", "🟦");
+        alert("Bounds Toggled (Move furniture to see updates if static)");
     }
 
     simulateBackgroundResume() {
         const hours = 8;
         const ms = hours * 60 * 60 * 1000;
-        this.showToast("Time Warp", `Simulating ${hours} hours...`, "⏳");
+        alert(`Simulating ${hours} hours passing instantly...`);
         // We bypass the cap in MainScene update by calling live directly here?
         // No, we want to test if the cap works OR if the logic handles large deltas.
         // Actually, the user asked to simulate it "to see if your pet survives".
@@ -218,10 +218,10 @@ export class DebugConsole {
         }, null, 2);
 
         navigator.clipboard.writeText(dump).then(() => {
-            this.showToast("Exported", "Save data copied to clipboard!", "📋");
+            alert("Save data copied to clipboard!");
         }).catch(err => {
             console.error(err);
-            this.showToast("Error", "Clipboard write failed.", "❌");
+            alert("Clipboard write failed. See console.");
         });
     }
 
@@ -275,15 +275,6 @@ export class DebugConsole {
         this.container.style.display = this.visible ? 'block' : 'none';
         if (this.visible) {
              this.refreshGame();
-        }
-    }
-
-    showToast(title, message, icon) {
-        const uiScene = this.scene.scene.get('UIScene');
-        if (uiScene && uiScene.showToast) {
-            uiScene.showToast(title, message, icon);
-        } else {
-            console.log(`[TOAST] ${icon} ${title}: ${message}`);
         }
     }
 }
