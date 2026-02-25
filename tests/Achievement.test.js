@@ -62,4 +62,54 @@ describe('AchievementManager', () => {
         // Should not emit unlock again
         expect(gameMock.events.emit).toHaveBeenCalledTimes(1);
     });
+
+    describe('NPC Interactions', () => {
+        it('should increment chat count for generic NPC interactions', () => {
+            const handler = manager.handleUIAction.bind(manager);
+
+            // Test with a generic interaction string
+            handler(EventKeys.INTERACT_NPC, {});
+            expect(manager.state.progress.chatCount).toBe(1);
+
+            // Test with another valid interaction
+            handler(EventKeys.INTERACT_VILLAGER, {});
+            expect(manager.state.progress.chatCount).toBe(2);
+        });
+
+        it('should NOT increment chat count for excluded interactions', () => {
+            const handler = manager.handleUIAction.bind(manager);
+            const excludedEvents = [
+                EventKeys.INTERACT_BOOKSHELF,
+                EventKeys.INTERACT_PLANT,
+                EventKeys.INTERACT_FANCY_BOOKSHELF,
+            ];
+
+            excludedEvents.forEach((eventKey) => {
+                handler(eventKey, {});
+                expect(manager.state.progress.chatCount).toBe(0);
+            });
+        });
+
+        it('should unlock Socialite achievement after 10 chats', () => {
+            const handler = manager.handleUIAction.bind(manager);
+
+            // Simulate 9 chats
+            for (let i = 0; i < 9; i++) {
+                handler(EventKeys.INTERACT_NPC, {});
+            }
+            expect(manager.state.progress.chatCount).toBe(9);
+            expect(manager.state.unlocked).not.toContain('socialite');
+
+            // 10th chat
+            handler(EventKeys.INTERACT_NPC, {});
+            expect(manager.state.progress.chatCount).toBe(10);
+
+            // Verify unlock
+            expect(manager.state.unlocked).toContain('socialite');
+            expect(gameMock.events.emit).toHaveBeenCalledWith(
+                EventKeys.ACHIEVEMENT_UNLOCKED,
+                expect.objectContaining({ id: 'socialite' })
+            );
+        });
+    });
 });

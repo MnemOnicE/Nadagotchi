@@ -1,46 +1,51 @@
-
 import { WorldClock } from '../../js/WorldClock.js';
+import { SeededRandom } from '../../js/utils/SeededRandom.js';
 
-// Mock Phaser Scene
-const mockScene = {};
+// Mock Scene
+const mockScene = {
+    events: { emit: () => {} },
+    time: { now: 0 }
+};
 
 describe('WorldClock Performance', () => {
-    let clock;
+    test('getCurrentPeriod() benchmark - Cached vs Uncached', () => {
+        const clock = new WorldClock(mockScene);
 
-    beforeEach(() => {
-        clock = new WorldClock(mockScene);
-    });
-
-    test('getCurrentPeriod benchmark', () => {
+        // Scenario 1: Mostly Cache Hits (Time changes slightly but stays in same period)
+        // Simulate normal game loop where time increments by small delta
         const iterations = 1000000;
+        const delta = 1000 / 60; // 16ms per frame (approx)
 
-        // Scenario 1: Static Time (Simulating multiple calls within same frame or very slow time)
-        // This is the best-case scenario for caching.
-        clock.time = 0.5; // Mid-day
+        const start = Date.now();
 
-        const startStatic = performance.now();
         for (let i = 0; i < iterations; i++) {
+            // Update time slightly
+            clock.update(delta);
+            // Call getCurrentPeriod
             clock.getCurrentPeriod();
         }
-        const endStatic = performance.now();
-        const durationStatic = endStatic - startStatic;
 
-        console.log(`[Benchmark] WorldClock.getCurrentPeriod (Static Time) x ${iterations}: ${durationStatic.toFixed(4)}ms`);
+        const end = Date.now();
+        const duration = end - start;
 
-        // Scenario 2: Dynamic Time within same period (Simulating normal game loop updates)
-        // Time advances, but period remains 'Day' for a long time.
-        clock.time = 0.3; // Start of Day
-        const increment = 0.000001; // Small increment
+        console.log(`[Benchmark] WorldClock.getCurrentPeriod x ${iterations} (sequential update): ${duration}ms`);
 
-        const startDynamic = performance.now();
+        // Scenario 2: Random Access (Cache Misses)
+        // Reset clock
+        const randomClock = new WorldClock(mockScene);
+        const rng = new SeededRandom(12345); // Use seeded random to avoid Security Hotspot
+        const randomStart = Date.now();
+
         for (let i = 0; i < iterations; i++) {
-            clock.time += increment;
-            if (clock.time >= 0.8) clock.time = 0.3; // Reset to keep it in 'Day' mostly, but we want to test the check overhead
-            clock.getCurrentPeriod();
+            randomClock.time = rng.random(); // Random time 0-1
+            randomClock.getCurrentPeriod();
         }
-        const endDynamic = performance.now();
-        const durationDynamic = endDynamic - startDynamic;
 
-        console.log(`[Benchmark] WorldClock.getCurrentPeriod (Dynamic Time) x ${iterations}: ${durationDynamic.toFixed(4)}ms`);
+        const randomEnd = Date.now();
+        const randomDuration = randomEnd - randomStart;
+
+        console.log(`[Benchmark] WorldClock.getCurrentPeriod x ${iterations} (random access): ${randomDuration}ms`);
+
+        expect(duration).toBeLessThan(5000); // Sanity check
     });
 });
