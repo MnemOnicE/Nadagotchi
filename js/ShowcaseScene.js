@@ -1,5 +1,6 @@
 import { ButtonFactory } from './ButtonFactory.js';
 import { EventKeys } from './EventKeys.js';
+import { Config } from './Config.js';
 
 /**
  * @fileoverview A dedicated scene for the "Pet Passport" / Showcase system.
@@ -43,8 +44,7 @@ export class ShowcaseScene extends Phaser.Scene {
 
         // Pet Sprite (Scaled up)
         // We reuse the 'pet' texture but maybe use a specific frame based on mood
-        const moodMap = { 'happy': 0, 'neutral': 1, 'sad': 2, 'angry': 3 };
-        const frame = moodMap[this.petData.mood] ?? 1;
+        const frame = Config.MOOD_VISUALS.FRAMES[this.petData.mood] ?? 1;
         const sprite = this.add.sprite(0, 0, 'pet', frame).setScale(8);
 
         // Add a simple idle tween
