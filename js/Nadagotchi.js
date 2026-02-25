@@ -268,8 +268,6 @@ export class Nadagotchi {
         });
 
         // Optimization: Cleanliness Penalty Caching
-        this._cachedGlobalPenalty = 0;
-        this._cachedLocalPenalties = {};
         this.recalculateCleanlinessPenalty();
 
 
@@ -1065,28 +1063,6 @@ export class Nadagotchi {
             }
         }
     }
-
-    /**
-     * Recalculates the cached cleanliness penalty values.
-     * Optimization to avoid iterating debris every frame.
-     */
-    recalculateCleanlinessPenalty() {
-        this._cachedGlobalPenalty = 0;
-        this._cachedLocalPenalties = {};
-
-        for (const d of this.debris) {
-            let penalty = 0;
-            if (d.type === 'weed') penalty = Config.DEBRIS.HAPPINESS_PENALTY_PER_WEED;
-            else if (d.type === 'poop') penalty = Config.DEBRIS.HAPPINESS_PENALTY_PER_POOP;
-
-            if (penalty > 0) {
-                this._cachedGlobalPenalty += penalty;
-                const loc = d.location || 'GARDEN';
-                this._cachedLocalPenalties[loc] = (this._cachedLocalPenalties[loc] || 0) + penalty;
-            }
-        }
-    }
-
     isRoomUnlocked(roomId) {
         if (this.homeConfig.rooms[roomId] && this.homeConfig.rooms[roomId].unlocked !== undefined) {
             return this.homeConfig.rooms[roomId].unlocked;

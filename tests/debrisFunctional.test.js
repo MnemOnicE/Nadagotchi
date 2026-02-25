@@ -17,16 +17,11 @@ describe('Debris System Functional Tests', () => {
     });
 
     test('Spawn Daily Debris puts items in GARDEN', () => {
-        pet.debrisSystem.spawnDaily('Spring', 'Sunny');
-        // Force spawn if RNG fails (mock RNG or just retry/check)
-        // Since we didn't mock RNG fully, let's just inspect what spawnDaily does or assume RNG works enough times or mock it.
-        // Actually, Nadagotchi uses SeededRandom.
-
-        // Let's manually push debris to test logic if spawn is probabilistic
-        // or just rely on the code review. But let's try to mock RNG to force spawn.
-        jest.spyOn(pet.rng, 'random').mockReturnValue(0.0); // Always spawn
+        // Use spy to control random chance for spawn logic
+        jest.spyOn(pet.rng, 'random').mockReturnValue(0.0); // Ensures spawn condition pass
 
         pet.debrisSystem.spawnDaily('Spring', 'Sunny');
+
         expect(pet.debris.length).toBeGreaterThan(0);
         expect(pet.debris[0].location).toBe('GARDEN');
     });
@@ -34,8 +29,9 @@ describe('Debris System Functional Tests', () => {
     test('Spawn Poop puts items in current location', () => {
         pet.location = 'Kitchen';
 
-        // Find a valid spot (mock rng)
+        // Use spy to ensure valid placement search succeeds
         jest.spyOn(pet.rng, 'random').mockReturnValue(0.1);
+        jest.spyOn(pet.rng, 'range').mockReturnValue(50); // Mock range for coords if needed
 
         pet.debrisSystem.spawnPoop();
         expect(pet.debris.length).toBeGreaterThan(0);
@@ -44,7 +40,7 @@ describe('Debris System Functional Tests', () => {
     });
 
     test('Penalty calculation includes Global + Local', () => {
-        // 1. Add debris in Garden
+        // 1. Add debris manually with location
         pet.debris.push({ type: 'weed', location: 'GARDEN' });
         pet.debris.push({ type: 'poop', location: 'Kitchen' });
         pet.recalculateCleanlinessPenalty();
@@ -55,12 +51,5 @@ describe('Debris System Functional Tests', () => {
         expect(pet._cachedGlobalPenalty).toBeCloseTo(weedPenalty + poopPenalty);
         expect(pet._cachedLocalPenalties['GARDEN']).toBeCloseTo(weedPenalty);
         expect(pet._cachedLocalPenalties['Kitchen']).toBeCloseTo(poopPenalty);
-
-        // 2. Pet in Garden (Should feel Global + Garden)
-        pet.location = 'GARDEN';
-        // Mock live to inspect cleanlinessPenalty variable?
-        // Can't easily inspect local var.
-        // But we can check stats decay.
-        // Let's trust the unit test of _cached values and the code review of live().
     });
 });

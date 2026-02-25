@@ -1,5 +1,0 @@
-Benchmark Results (Debris Penalty):
-Debris Count: 100
-Iterations: 50000
-Total Time: 156.48 ms
-Average Time per Call: 0.0031 ms

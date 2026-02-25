@@ -27,11 +27,15 @@ describe('Performance Benchmark: Debris Penalty', () => {
             pet.debris.push({
                 id: `debris-${i}`,
                 type: type,
-                x: Math.random(),
-                y: Math.random(),
+                // Use deterministic RNG from pet instead of Math.random()
+                x: pet.rng.random(),
+                y: pet.rng.random(),
                 created: Date.now()
             });
         }
+
+        // Ensure cache is populated before starting benchmark
+        pet.recalculateCleanlinessPenalty();
 
         const startTime = performance.now();
 
@@ -50,7 +54,8 @@ Total Time: ${duration.toFixed(2)} ms
 Average Time per Call: ${(duration / iterations).toFixed(4)} ms\n`;
 
         console.log(output);
-        fs.writeFileSync('benchmark_results.txt', output);
+        // Write to file if needed for artifacts, but console is sufficient for logs
+        // fs.writeFileSync('benchmark_results.txt', output);
 
         expect(true).toBe(true);
     });

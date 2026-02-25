@@ -50,7 +50,7 @@ export class DebrisSystem {
         };
 
         this.pet.debris.push(debris);
-        if (this.pet.recalculateCleanlinessPenalty) this.pet.recalculateCleanlinessPenalty();
+        this.pet.recalculateCleanlinessPenalty();
         this.pet.addJournalEntry(`Something appeared in the garden: ${type}`);
     }
 
@@ -100,7 +100,7 @@ export class DebrisSystem {
             created: Date.now()
         };
         this.pet.debris.push(debris);
-        if (this.pet.recalculateCleanlinessPenalty) this.pet.recalculateCleanlinessPenalty();
+        this.pet.recalculateCleanlinessPenalty();
 
         // Chance for a funny journal entry (10%)
         if (this.pet.rng.random() < 0.1) {
@@ -129,7 +129,7 @@ export class DebrisSystem {
 
         // Remove
         this.pet.debris.splice(index, 1);
-        if (this.pet.recalculateCleanlinessPenalty) this.pet.recalculateCleanlinessPenalty();
+        this.pet.recalculateCleanlinessPenalty();
 
         let message = "";
 
