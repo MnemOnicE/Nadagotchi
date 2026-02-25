@@ -70,17 +70,7 @@ describe('Encoding Utils', () => {
             delete global.atob;
 
             // Make Buffer undefined
-            // Note: In strict mode, deleting a non-configurable property might fail,
-            // but global.Buffer is usually configurable in Jest environment.
-            // If delete fails, we can try setting it to undefined.
-            try {
-                delete global.Buffer;
-            } catch (e) {
-                global.Buffer = undefined;
-            }
-            if (typeof global.Buffer !== 'undefined') {
-                 global.Buffer = undefined;
-            }
+            global.Buffer = undefined;
         });
 
         test('toBase64 should throw error', () => {
