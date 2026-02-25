@@ -223,7 +223,7 @@ export class UIScene extends Phaser.Scene {
         this.retireButton.setVisible(isLegacyReady);
         if (newCareerUnlocked) { this.showCareerNotification(newCareerUnlocked); this.mainScene.nadagotchi.newCareerUnlocked = null; }
     }
-    getMoodEmoji(mood) { return Config.MOOD_VISUALS.EMOJIS[mood] || '❓'; }
+    getMoodEmoji(mood) { return Config.MOOD_VISUALS.EMOJIS[mood] || Config.MOOD_VISUALS.DEFAULT_EMOJI; }
     showCareerNotification(message) { const txt = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2 - 30, `Career Unlocked: ${message}!`, { fontFamily: 'VT323, Arial', fontSize: '32px', color: '#000', backgroundColor: '#fff', padding: { x: 10, y: 5 }, align: 'center' }).setOrigin(0.5); this.time.delayedCall(3000, () => txt.destroy()); }
     createCalendarDropdown() {
         const width = 150, collapsedHeight = 30, expandedHeight = 120;
