@@ -5,12 +5,13 @@ describe('PersistenceManager', () => {
     let persistenceManager;
 
     beforeEach(() => {
+        jest.useFakeTimers();
         setupLocalStorageMock();
         persistenceManager = new PersistenceManager();
         localStorage.clear();
         jest.restoreAllMocks();
 
-        // Mock requestIdleCallback to execute quickly
+        // Mock requestIdleCallback to execute via setTimeout (controlled by Jest)
         global.requestIdleCallback = (cb) => {
              return setTimeout(() => {
                  cb({ didTimeout: false, timeRemaining: () => 10 });
@@ -19,12 +20,16 @@ describe('PersistenceManager', () => {
         global.cancelIdleCallback = (id) => clearTimeout(id);
     });
 
+    afterEach(() => {
+        jest.useRealTimers();
+    });
+
     test('should save and load pet data', async () => {
         const petData = { name: 'Blobby', type: 'Slime', uuid: '123' };
         persistenceManager.savePet(petData);
 
-        // Wait enough for the async save to complete
-        await new Promise(r => setTimeout(r, 100));
+        // Fast-forward timers to trigger the async save
+        jest.runAllTimers();
 
         const loadedData = persistenceManager.loadPet();
         expect(loadedData).toEqual(petData);
@@ -38,7 +43,7 @@ describe('PersistenceManager', () => {
     test('should clear active pet data', async () => {
         const petData = { name: 'Blobby', type: 'Slime', uuid: '123' };
         persistenceManager.savePet(petData);
-        await new Promise(r => setTimeout(r, 100));
+        jest.runAllTimers();
 
         persistenceManager.clearActivePet();
         const loadedData = persistenceManager.loadPet();
@@ -47,7 +52,15 @@ describe('PersistenceManager', () => {
 
     test('should save to and load from hall of fame', async () => {
         const retiredPet = { name: 'Old Timer', archetype: 'Recluse' };
-        await persistenceManager.saveToHallOfFame(retiredPet);
+
+        // Start save (returns Promise)
+        const savePromise = persistenceManager.saveToHallOfFame(retiredPet);
+
+        // Advance timers to process the internal requestIdleCallback/setTimeout
+        jest.runAllTimers();
+
+        // Wait for promise resolution
+        await savePromise;
 
         const hallOfFame = persistenceManager.loadHallOfFame();
         expect(hallOfFame).toHaveLength(1);
@@ -63,8 +76,13 @@ describe('PersistenceManager', () => {
         const retiredPet1 = { name: 'Old Timer', archetype: 'Recluse' };
         const retiredPet2 = { name: 'Ancient One', archetype: 'Intellectual' };
 
-        await persistenceManager.saveToHallOfFame(retiredPet1);
-        await persistenceManager.saveToHallOfFame(retiredPet2);
+        const p1 = persistenceManager.saveToHallOfFame(retiredPet1);
+        jest.runAllTimers();
+        await p1;
+
+        const p2 = persistenceManager.saveToHallOfFame(retiredPet2);
+        jest.runAllTimers();
+        await p2;
 
         const hallOfFame = persistenceManager.loadHallOfFame();
         expect(hallOfFame).toHaveLength(2);
@@ -74,7 +92,10 @@ describe('PersistenceManager', () => {
 
     test('should save and load journal entries', async () => {
         const entries = [{ id: 1, text: 'Day 1' }];
-        await persistenceManager.saveJournal(entries);
+        const p = persistenceManager.saveJournal(entries);
+        jest.runAllTimers();
+        await p;
+
         const loadedEntries = persistenceManager.loadJournal();
         expect(loadedEntries).toEqual(entries);
     });
@@ -86,7 +107,10 @@ describe('PersistenceManager', () => {
 
     test('should save and load recipes', async () => {
         const recipes = ['Recipe A', 'Recipe B'];
-        await persistenceManager.saveRecipes(recipes);
+        const p = persistenceManager.saveRecipes(recipes);
+        jest.runAllTimers();
+        await p;
+
         const loadedRecipes = persistenceManager.loadRecipes();
         expect(loadedRecipes).toEqual(recipes);
     });

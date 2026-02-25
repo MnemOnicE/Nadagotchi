@@ -1,3 +1,0 @@
-- Tested cross-environment utilities (Browser/Node) by mocking globals (window.btoa, global.Buffer).
-- Used Jest's describe blocks with beforeEach/afterEach to isolate environment mocks.
-- Ensured 100% coverage for Encoding.js.
