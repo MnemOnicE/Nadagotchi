@@ -267,8 +267,14 @@ export class Nadagotchi {
             writable: true
         });
 
+        // Optimization: Cleanliness Penalty Caching
+        this.recalculateCleanlinessPenalty();
+
+
         /** @type {string} The pet's current location. */
-        this.location = loadedData ? loadedData.location : 'Home';
+        this.location = loadedData ? loadedData.location : 'GARDEN';
+        // Migration: Treat 'Home' as 'GARDEN'
+        if (this.location === 'Home') this.location = 'GARDEN';
 
         // --- Runtime State Tracking (Not persisted) ---
         /** @type {?string} Tracks the last known weather to detect changes. */
@@ -543,11 +549,9 @@ export class Nadagotchi {
 
         // 4. Apply Final Decays
         // Debris Penalties
-        let cleanlinessPenalty = 0;
-        this.debris.forEach(d => {
-            if (d.type === 'weed') cleanlinessPenalty += Config.DEBRIS.HAPPINESS_PENALTY_PER_WEED;
-            if (d.type === 'poop') cleanlinessPenalty += Config.DEBRIS.HAPPINESS_PENALTY_PER_POOP;
-        });
+        // Debris Penalties
+        // Optimization: Use cached values. Local debris hurts twice as much (Global + Local).
+        let cleanlinessPenalty = this._cachedGlobalPenalty + (this._cachedLocalPenalties[this.location] || 0);
 
         this.stats.hunger -= (hungerDecay * metabolismMult);
         this.stats.energy -= (energyDecay * metabolismMult * traitModifier);
@@ -1039,6 +1043,26 @@ export class Nadagotchi {
      * @param {string} roomId
      * @returns {boolean}
      */
+    /**
+     * Recalculates the cached cleanliness penalty values.
+     * Optimization to avoid iterating debris every frame.
+     */
+    recalculateCleanlinessPenalty() {
+        this._cachedGlobalPenalty = 0;
+        this._cachedLocalPenalties = {};
+
+        for (const d of this.debris) {
+            let penalty = 0;
+            if (d.type === 'weed') penalty = Config.DEBRIS.HAPPINESS_PENALTY_PER_WEED;
+            else if (d.type === 'poop') penalty = Config.DEBRIS.HAPPINESS_PENALTY_PER_POOP;
+
+            if (penalty > 0) {
+                this._cachedGlobalPenalty += penalty;
+                const loc = d.location || 'GARDEN';
+                this._cachedLocalPenalties[loc] = (this._cachedLocalPenalties[loc] || 0) + penalty;
+            }
+        }
+    }
     isRoomUnlocked(roomId) {
         if (this.homeConfig.rooms[roomId] && this.homeConfig.rooms[roomId].unlocked !== undefined) {
             return this.homeConfig.rooms[roomId].unlocked;

@@ -666,12 +666,14 @@ export class MainScene extends Phaser.Scene {
     renderDebris() {
         this.debrisGroup.clear(true, true); // Clear old sprites
 
-        if (this.location === 'INDOOR') return; // Don't render if indoors
-
         const width = this.cameras.main.width;
         const height = this.cameras.main.height;
+        const currentLocation = (this.location === 'INDOOR') ? this.currentRoom : 'GARDEN';
 
         this.nadagotchi.debris.forEach(d => {
+            const dLocation = d.location || 'GARDEN';
+            if (dLocation !== currentLocation) return;
+
             const x = d.x * width;
             const y = d.y * height;
 
@@ -740,6 +742,7 @@ export class MainScene extends Phaser.Scene {
     enterHouse() {
         this.location = 'INDOOR';
         this.currentRoom = 'Entryway';
+        this.nadagotchi.location = 'Entryway'; // Sync location
         this.changeRoom('Entryway');
         SoundSynthesizer.instance.playChime();
         this.showNotification("Welcome Home!", '#FFFFFF');
@@ -750,6 +753,7 @@ export class MainScene extends Phaser.Scene {
      */
     exitHouse() {
         this.location = 'GARDEN';
+        this.nadagotchi.location = 'GARDEN'; // Sync location
         this.renderLocation();
         SoundSynthesizer.instance.playChime();
         this.showNotification("To the Garden!", '#FFFFFF');
@@ -766,6 +770,7 @@ export class MainScene extends Phaser.Scene {
         // No explicit save needed here, PersistenceManager handles full object.
 
         this.currentRoom = roomId;
+        this.nadagotchi.location = roomId; // Sync location
         const def = RoomDefinitions[roomId];
 
         // 1. Update Backgrounds
@@ -1080,6 +1085,7 @@ export class MainScene extends Phaser.Scene {
             });
         }
     }
+
 
     /**
      * Checks for and triggers spontaneous, "proactive" behaviors based on the pet's state.

@@ -43,12 +43,14 @@ export class DebrisSystem {
         const debris = {
             id: this.pet.generateUUID(),
             type: type,
+            location: 'GARDEN',
             x: x,
             y: y,
             created: Date.now()
         };
 
         this.pet.debris.push(debris);
+        this.pet.recalculateCleanlinessPenalty();
         this.pet.addJournalEntry(`Something appeared in the garden: ${type}`);
     }
 
@@ -72,8 +74,13 @@ export class DebrisSystem {
             x = this.pet.rng.range(10, 90) / 100;
             y = this.pet.rng.range(60, 90) / 100;
 
-            // Check overlap with existing debris
+            // Check overlap with existing debris in same location
+            const location = this.pet.location || 'GARDEN';
             valid = !this.pet.debris.some(d => {
+                // Ignore debris in other locations
+                const dLoc = d.location || 'GARDEN';
+                if (dLoc !== location) return false;
+
                 const dist = Math.hypot(d.x - x, d.y - y);
                 return dist < overlapThreshold;
             });
@@ -87,11 +94,13 @@ export class DebrisSystem {
         const debris = {
             id: this.pet.generateUUID(),
             type: 'poop',
+            location: this.pet.location || 'GARDEN',
             x: x,
             y: y,
             created: Date.now()
         };
         this.pet.debris.push(debris);
+        this.pet.recalculateCleanlinessPenalty();
 
         // Chance for a funny journal entry (10%)
         if (this.pet.rng.random() < 0.1) {
@@ -120,6 +129,7 @@ export class DebrisSystem {
 
         // Remove
         this.pet.debris.splice(index, 1);
+        this.pet.recalculateCleanlinessPenalty();
 
         let message = "";
 
