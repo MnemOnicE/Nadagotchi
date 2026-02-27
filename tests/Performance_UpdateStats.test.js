@@ -1,4 +1,3 @@
-
 // tests/Performance_UpdateStats.test.js
 import { setupPhaserMock, createMockAdd, mockGameObject } from './helpers/mockPhaser';
 
@@ -90,6 +89,11 @@ describe('Performance: Update Stats Throttling', () => {
 
         scene = new MainScene();
         scene.add = createMockAdd();
+        scene.make = {
+            image: jest.fn().mockReturnValue(mockGameObject()),
+            graphics: jest.fn().mockReturnValue(mockGameObject()),
+            text: jest.fn()
+        };
         scene.cameras = {
             main: {
                 width: 800,
@@ -106,6 +110,7 @@ describe('Performance: Update Stats Throttling', () => {
             off: jest.fn()
         };
         scene.textures = {
+            exists: jest.fn().mockReturnValue(false),
             get: jest.fn().mockReturnValue({
                 getFrameNames: jest.fn().mockReturnValue([]),
                 add: jest.fn()

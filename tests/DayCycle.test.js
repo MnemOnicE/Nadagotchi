@@ -1,4 +1,3 @@
-
 import { jest } from '@jest/globals';
 import { Nadagotchi } from '../js/Nadagotchi';
 import { Calendar } from '../js/Calendar';
@@ -100,6 +99,11 @@ describe('Day Cycle Integration', () => {
 
         scene = new MainScene();
         scene.add = createMockAdd();
+        scene.make = {
+            image: jest.fn().mockReturnValue(mockGameObject()),
+            graphics: jest.fn().mockReturnValue(mockGameObject()),
+            text: jest.fn()
+        };
         scene.cameras = {
             main: {
                 width: 800,
@@ -116,6 +120,7 @@ describe('Day Cycle Integration', () => {
             off: jest.fn()
         };
         scene.textures = {
+            exists: jest.fn().mockReturnValue(false),
             get: jest.fn().mockReturnValue({
                 getFrameNames: jest.fn().mockReturnValue([]),
                 add: jest.fn()

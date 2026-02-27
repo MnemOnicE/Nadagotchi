@@ -1,24 +1,34 @@
-
 import { jest } from '@jest/globals';
-import { Nadagotchi } from '../js/Nadagotchi.js';
-import { setupPhaserMock, createMockAdd } from './helpers/mockPhaser';
+import { setupPhaserMock, createMockAdd, mockGameObject } from './helpers/mockPhaser';
 
 // 1. Setup Phaser Mock
 setupPhaserMock();
 
-// Now require MainScene after global.Phaser is set
+// Required AFTER global.Phaser is set
 const { MainScene } = require('../js/MainScene');
-const { EventKeys } = require('../js/EventKeys');
+const { Nadagotchi } = require('../js/Nadagotchi');
 
 // Mock Config
-jest.mock('../js/Config.js', () => ({
+jest.mock('../js/Config', () => ({
     Config: {
-        INITIAL_STATE: {
-            PERSONALITY_POINTS_STARTER: 10,
-            STATS: { hunger: 100, energy: 100, happiness: 100 },
+        ITEMS: {
+            FURNITURE: {
+                'Fancy Bookshelf': { type: 'FURNITURE', category: 'DECOR', energy: 10, happiness: 10, price: 100 },
+                'Plant': { type: 'FURNITURE', category: 'DECOR', energy: 5, happiness: 5, price: 50 },
+                'Rug': { type: 'FURNITURE', category: 'DECOR', energy: 2, happiness: 2, price: 20 }
+            }
+        },
+        STATS: {
+            ENERGY_MAX: 100,
+            HAPPINESS_MAX: 100,
+            HUNGER_MAX: 100,
             SKILLS: { logic: 0, research: 0, empathy: 0, navigation: 0, crafting: 0, focus: 0, communication: 0 },
             MOOD_SENSITIVITY_DEFAULT: 5,
             GENOME_STARTER_VAL: 10
+        },
+        INITIAL_STATE: {
+             PERSONALITY_POINTS_STARTER: { Intellectual: 0, Recluse: 0 },
+             STATS: { energy: 100, happiness: 100, hunger: 100 }
         },
         LIMITS: { MAX_STATS: 100 },
         SECURITY: { DNA_SALT: '' },
@@ -73,6 +83,7 @@ jest.mock('../js/utils/SoundSynthesizer', () => ({
 
 // Mock Phaser objects
 const mockSprite = {
+    ...mockGameObject(),
     setInteractive: jest.fn().mockReturnThis(),
     on: jest.fn().mockReturnThis(),
     setTint: jest.fn(),
@@ -90,13 +101,26 @@ const mockSprite = {
 };
 
 const mockGraphics = {
+    ...mockGameObject(),
     lineStyle: jest.fn().mockReturnThis(),
     strokeRect: jest.fn().mockReturnThis(),
     destroy: jest.fn(),
     setPosition: jest.fn(),
     clear: jest.fn(),
     fillStyle: jest.fn().mockReturnThis(),
-    fillRect: jest.fn(),
+    fillRect: jest.fn()
+};
+
+const mockRenderTexture = {
+    ...mockGameObject(),
+    fill: jest.fn(),
+    draw: jest.fn(),
+    resize: jest.fn(),
+    setOrigin: jest.fn().mockReturnThis(),
+    setScrollFactor: jest.fn().mockReturnThis(),
+    setScale: jest.fn().mockReturnThis(),
+    setBlendMode: jest.fn().mockReturnThis(),
+    setDepth: jest.fn().mockReturnThis(),
     setVisible: jest.fn().mockReturnThis()
 };
 
@@ -125,9 +149,11 @@ const mockAdd = {
     sprite: jest.fn().mockReturnValue(mockSprite),
     graphics: jest.fn().mockReturnValue({
         ...mockGraphics,
-        setDepth: jest.fn().mockReturnThis()
+        setDepth: jest.fn().mockReturnThis(),
+        setVisible: jest.fn().mockReturnThis()
     }),
     text: jest.fn().mockReturnValue({
+        ...mockGameObject(),
         setOrigin: jest.fn().mockReturnThis(),
         setPosition: jest.fn().mockReturnThis(),
         setText: jest.fn().mockReturnThis(),
@@ -135,7 +161,9 @@ const mockAdd = {
         setVisible: jest.fn().mockReturnThis()
     }),
     image: jest.fn().mockReturnValue(mockSprite),
+    renderTexture: jest.fn().mockReturnValue(mockRenderTexture),
     rectangle: jest.fn().mockReturnValue({
+        ...mockGameObject(),
         setOrigin: jest.fn().mockReturnThis(),
         setInteractive: jest.fn().mockReturnThis(),
         on: jest.fn().mockReturnThis(),
@@ -148,6 +176,7 @@ const mockAdd = {
         destroy: jest.fn()
     }),
     tileSprite: jest.fn().mockReturnValue({
+        ...mockGameObject(),
         setDepth: jest.fn().mockReturnThis(),
         setTexture: jest.fn().mockReturnThis(),
         setSize: jest.fn().mockReturnThis(),
@@ -186,6 +215,7 @@ const mockCameras = {
 };
 
 const mockTextures = {
+    exists: jest.fn().mockReturnValue(false),
     createCanvas: jest.fn().mockReturnValue({
         getContext: jest.fn().mockReturnValue({
             createLinearGradient: jest.fn().mockReturnValue({ addColorStop: jest.fn() }),
@@ -208,6 +238,17 @@ const mockTextures = {
     })
 };
 
+const mockMake = {
+    image: jest.fn().mockReturnValue({
+        ...mockGameObject(),
+        setOrigin: jest.fn().mockReturnThis(),
+        setScale: jest.fn().mockReturnThis(),
+        setPosition: jest.fn().mockReturnThis()
+    }),
+    graphics: jest.fn().mockReturnValue(mockGraphics),
+    text: jest.fn()
+};
+
 describe('Housing System (MainScene)', () => {
     let scene;
 
@@ -216,6 +257,7 @@ describe('Housing System (MainScene)', () => {
 
         scene = new MainScene();
         scene.add = mockAdd;
+        scene.make = mockMake;
         scene.cameras = mockCameras;
         scene.input = mockInput;
         scene.textures = mockTextures;
