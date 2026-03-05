@@ -1391,8 +1391,7 @@ export class MainScene extends Phaser.Scene {
                 sprite.destroy();
 
                 const roomList = this.placedFurniture[this.currentRoom] || [];
-                const index = roomList.findIndex(f => f.key === itemName && f.x === x && f.y === y); // Match original props? No, sprites can move.
-                // Better to match by sprite instance
+                // Optimized: Match by sprite instance to avoid redundant property checks
                 const liveIndex = roomList.findIndex(f => f.sprite === sprite);
 
                 if (liveIndex > -1) roomList.splice(liveIndex, 1);
