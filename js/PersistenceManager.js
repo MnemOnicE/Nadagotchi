@@ -215,7 +215,6 @@ export class PersistenceManager {
 
         // Migration: If data is an Array (Legacy), wrap it in Entryway
         if (Array.isArray(data)) {
-            console.log("Migrating legacy furniture data to Entryway...");
             return { "Entryway": data };
         }
 
@@ -252,7 +251,6 @@ export class PersistenceManager {
 
         // Migration: If data has 'wallpaper' at root level (Legacy)
         if (data.wallpaper || data.flooring) {
-            console.log("Migrating legacy home config to Entryway...");
             return {
                 rooms: {
                     "Entryway": {
@@ -405,7 +403,6 @@ export class PersistenceManager {
                  return null;
              }
              // Valid legacy save: We should upgrade it on next save (automatic via _save)
-             console.log(`Legacy save detected for ${key}. Will upgrade to SHA-256 on next save.`);
         }
 
         return data;
