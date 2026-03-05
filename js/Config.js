@@ -40,6 +40,7 @@ export const Config = {
         }
     },
 
+<<<<<<< HEAD
     // Minigame Settings
     MINIGAMES: {
         LOGIC_PUZZLE: {
@@ -47,6 +48,8 @@ export const Config = {
         }
     },
 
+=======
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
     // Stat Decay Rates
     DECAY: {
         HUNGER: 0.05,
@@ -202,6 +205,7 @@ export const Config = {
         NEUTRAL: 1.0
     },
 
+<<<<<<< HEAD
     // Mood Visuals (Centralized)
     MOOD_VISUALS: {
         DEFAULT_FRAME: 1,
@@ -220,6 +224,8 @@ export const Config = {
         }
     },
 
+=======
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
     // Global Settings Defaults
     SETTINGS: {
         DEFAULT_VOLUME: 0.5,

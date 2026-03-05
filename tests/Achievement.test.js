@@ -62,6 +62,7 @@ describe('AchievementManager', () => {
         // Should not emit unlock again
         expect(gameMock.events.emit).toHaveBeenCalledTimes(1);
     });
+<<<<<<< HEAD
 
     describe('NPC Interactions', () => {
         it('should increment chat count for generic NPC interactions', () => {
@@ -112,4 +113,6 @@ describe('AchievementManager', () => {
             );
         });
     });
+=======
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
 });

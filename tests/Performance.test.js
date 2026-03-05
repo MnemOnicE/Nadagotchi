@@ -117,7 +117,11 @@ describe('Performance Repro: Event Emission', () => {
                 getFrameNames: jest.fn().mockReturnValue([]),
                 add: jest.fn()
             }),
+<<<<<<< HEAD
             createCanvas: jest.fn(() => mockGameObject()), exists: jest.fn().mockReturnValue(false)
+=======
+            createCanvas: jest.fn(() => mockGameObject())
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
         };
         scene.scene = {
             launch: jest.fn(),
