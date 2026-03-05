@@ -22,6 +22,10 @@ export class StartScene extends Phaser.Scene {
 
         // --- Persistence Check ---
         this.persistence = new PersistenceManager();
+<<<<<<< HEAD
+=======
+        const existingPet = this.persistence.loadPet();
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
 
         // --- Menu Buttons ---
         this.menuContainer = this.add.container(0, 0);
@@ -44,6 +48,7 @@ export class StartScene extends Phaser.Scene {
 
         this.menuContainer.add([titleText, subtitleText]);
 
+<<<<<<< HEAD
         // Loading Indicator
         const loadingText = this.add.text(width / 2, height * 0.5, 'Checking Save Data...', {
             fontFamily: 'VT323, monospace',
@@ -74,6 +79,23 @@ export class StartScene extends Phaser.Scene {
             }, { width: 250, height: 60, fontSize: '32px', color: 0x2196F3 });
             this.menuContainer.add(newGameBtn);
         });
+=======
+        let buttonY = height * 0.5;
+
+        if (existingPet) {
+            // Fix: ButtonFactory creates container at x. To center button of width 250, we need x = width/2 - 125.
+            const resumeBtn = ButtonFactory.createButton(this, (width / 2) - 125, buttonY, 'ENTER WORLD', () => {
+                this.scene.start('MainScene');
+            }, { width: 250, height: 60, fontSize: '32px', color: 0x4CAF50 });
+            this.menuContainer.add(resumeBtn);
+            buttonY += 80;
+        }
+
+        const newGameBtn = ButtonFactory.createButton(this, (width / 2) - 125, buttonY, 'ARRIVE (New Game)', () => {
+            this.showArchetypeSelection();
+        }, { width: 250, height: 60, fontSize: '32px', color: 0x2196F3 });
+        this.menuContainer.add(newGameBtn);
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
 
         // --- Archetype Selection Container (Hidden initially) ---
         this.selectionContainer = this.add.container(0, 0);

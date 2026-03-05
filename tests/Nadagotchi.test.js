@@ -25,7 +25,11 @@ global.Phaser = Phaser;
 describe('Nadagotchi', () => {
     let pet;
 
+<<<<<<< HEAD
     beforeEach(async () => {
+=======
+    beforeEach(() => {
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
         pet = new Nadagotchi('Intellectual');
         // Force a deterministic genome to avoid random homozygous bonuses in general tests
         pet.genome.genotype = {
@@ -39,6 +43,7 @@ describe('Nadagotchi', () => {
             specialAbility: [null, null]
         };
         pet.genome.phenotype = pet.genome.calculatePhenotype();
+<<<<<<< HEAD
 
         // Async Init
         await pet.init();
@@ -50,6 +55,12 @@ describe('Nadagotchi', () => {
 
     describe('constructor', () => {
         test('should initialize from loadedData', async () => {
+=======
+    });
+
+    describe('constructor', () => {
+        test('should initialize from loadedData', () => {
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
             const loadedData = {
                 mood: 'happy',
                 dominantArchetype: 'Nurturer',
@@ -68,7 +79,10 @@ describe('Nadagotchi', () => {
                 location: 'Home'
             };
             const loadedPet = new Nadagotchi('Adventurer', loadedData);
+<<<<<<< HEAD
             await loadedPet.init();
+=======
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
 
             expect(loadedPet.mood).toBe('happy');
             expect(loadedPet.dominantArchetype).toBe('Nurturer');
@@ -361,7 +375,10 @@ describe('Nadagotchi', () => {
 
         test('craftItem should consume materials and add the new item to inventory', () => {
             pet.inventory = { 'Sticks': 10, 'Shiny Stone': 2 };
+<<<<<<< HEAD
             // Ensure recipe is discovered (added manually in beforeEach)
+=======
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
             pet.craftItem('Fancy Bookshelf');
             expect(pet.inventory['Sticks']).toBe(5);
             expect(pet.inventory['Shiny Stone']).toBe(1);

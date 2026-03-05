@@ -43,14 +43,20 @@ export class DebrisSystem {
         const debris = {
             id: this.pet.generateUUID(),
             type: type,
+<<<<<<< HEAD
             location: 'GARDEN',
+=======
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
             x: x,
             y: y,
             created: Date.now()
         };
 
         this.pet.debris.push(debris);
+<<<<<<< HEAD
         this.pet.recalculateCleanlinessPenalty();
+=======
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
         this.pet.addJournalEntry(`Something appeared in the garden: ${type}`);
     }
 
@@ -74,6 +80,7 @@ export class DebrisSystem {
             x = this.pet.rng.range(10, 90) / 100;
             y = this.pet.rng.range(60, 90) / 100;
 
+<<<<<<< HEAD
             // Check overlap with existing debris in same location
             const location = this.pet.location || 'GARDEN';
             valid = !this.pet.debris.some(d => {
@@ -81,6 +88,10 @@ export class DebrisSystem {
                 const dLoc = d.location || 'GARDEN';
                 if (dLoc !== location) return false;
 
+=======
+            // Check overlap with existing debris
+            valid = !this.pet.debris.some(d => {
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
                 const dist = Math.hypot(d.x - x, d.y - y);
                 return dist < overlapThreshold;
             });
@@ -94,13 +105,19 @@ export class DebrisSystem {
         const debris = {
             id: this.pet.generateUUID(),
             type: 'poop',
+<<<<<<< HEAD
             location: this.pet.location || 'GARDEN',
+=======
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
             x: x,
             y: y,
             created: Date.now()
         };
         this.pet.debris.push(debris);
+<<<<<<< HEAD
         this.pet.recalculateCleanlinessPenalty();
+=======
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
 
         // Chance for a funny journal entry (10%)
         if (this.pet.rng.random() < 0.1) {
@@ -129,7 +146,10 @@ export class DebrisSystem {
 
         // Remove
         this.pet.debris.splice(index, 1);
+<<<<<<< HEAD
         this.pet.recalculateCleanlinessPenalty();
+=======
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
 
         let message = "";
 

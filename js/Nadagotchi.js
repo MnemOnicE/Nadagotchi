@@ -29,9 +29,12 @@ export class Nadagotchi {
      * @param {object} [loadedData=null] - Optional saved data to load from. If provided, overrides defaults.
      */
     constructor(initialArchetype, loadedData = null) {
+<<<<<<< HEAD
         /** @type {boolean} Indicates if the asynchronous initialization is complete. */
         this.isInitialized = false;
 
+=======
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
         // --- RNG Initialization ---
         if (loadedData) {
              // Load the universe seed (The "Big Bang")
@@ -212,12 +215,25 @@ export class Nadagotchi {
 
         /** @type {PersistenceManager} Manages saving and loading game data. */
         this.persistence = new PersistenceManager();
+<<<<<<< HEAD
 
         // --- Async Data Holders (Initialized in init()) ---
         /** @type {Array<{date: string, text: string}>} A log of significant events. */
         this.journal = [];
         /** @type {Array<string>} A list of crafting recipes the pet has discovered. */
         this.discoveredRecipes = [];
+=======
+        /** @type {Array<{date: string, text: string}>} A log of significant events. */
+        this.journal = this.persistence.loadJournal();
+        /** @type {Array<string>} A list of crafting recipes the pet has discovered. */
+        this.discoveredRecipes = this.persistence.loadRecipes();
+
+        // Ensure default recipes are discovered for new games
+        if (this.discoveredRecipes.length === 0) {
+            this.discoveredRecipes.push("Fancy Bookshelf");
+            this.persistence.saveRecipes(this.discoveredRecipes);
+        }
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
 
         /** @type {Object.<string, {materials: Object.<string, number>, description: string}>} */
         this.recipes = Recipes;
@@ -266,6 +282,7 @@ export class Nadagotchi {
             writable: true
         });
 
+<<<<<<< HEAD
         // Optimization: Cleanliness Penalty Caching
         this.recalculateCleanlinessPenalty();
 
@@ -274,6 +291,10 @@ export class Nadagotchi {
         this.location = loadedData ? loadedData.location : 'GARDEN';
         // Migration: Treat 'Home' as 'GARDEN'
         if (this.location === 'Home') this.location = 'GARDEN';
+=======
+        /** @type {string} The pet's current location. */
+        this.location = loadedData ? loadedData.location : 'Home';
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
 
         // --- Runtime State Tracking (Not persisted) ---
         /** @type {?string} Tracks the last known weather to detect changes. */
@@ -293,6 +314,7 @@ export class Nadagotchi {
     }
 
     /**
+<<<<<<< HEAD
      * Asynchronously initializes heavy/external data (Journal, Recipes).
      * MUST be called after constructor.
      * @returns {Promise<void>}
@@ -311,6 +333,8 @@ export class Nadagotchi {
     }
 
     /**
+=======
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
      * Helper to migrate legacy home config data to the new room-based structure.
      * @param {object} data
      * @returns {object}
@@ -566,9 +590,17 @@ export class Nadagotchi {
 
         // 4. Apply Final Decays
         // Debris Penalties
+<<<<<<< HEAD
         // Debris Penalties
         // Optimization: Use cached values. Local debris hurts twice as much (Global + Local).
         let cleanlinessPenalty = this._cachedGlobalPenalty + (this._cachedLocalPenalties[this.location] || 0);
+=======
+        let cleanlinessPenalty = 0;
+        this.debris.forEach(d => {
+            if (d.type === 'weed') cleanlinessPenalty += Config.DEBRIS.HAPPINESS_PENALTY_PER_WEED;
+            if (d.type === 'poop') cleanlinessPenalty += Config.DEBRIS.HAPPINESS_PENALTY_PER_POOP;
+        });
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
 
         this.stats.hunger -= (hungerDecay * metabolismMult);
         this.stats.energy -= (energyDecay * metabolismMult * traitModifier);
@@ -1030,8 +1062,13 @@ export class Nadagotchi {
         // Batch serialization and persistence to reduce frequency
         if (!this._journalSavePending) {
             this._journalSavePending = true;
+<<<<<<< HEAD
             const performSave = async () => {
                 await this.persistence.saveJournal(this.journal);
+=======
+            const performSave = () => {
+                this.persistence.saveJournal(this.journal);
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
                 this._journalSavePending = false;
             };
 
@@ -1060,6 +1097,7 @@ export class Nadagotchi {
      * @param {string} roomId
      * @returns {boolean}
      */
+<<<<<<< HEAD
     /**
      * Recalculates the cached cleanliness penalty values.
      * Optimization to avoid iterating debris every frame.
@@ -1080,6 +1118,8 @@ export class Nadagotchi {
             }
         }
     }
+=======
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
     isRoomUnlocked(roomId) {
         if (this.homeConfig.rooms[roomId] && this.homeConfig.rooms[roomId].unlocked !== undefined) {
             return this.homeConfig.rooms[roomId].unlocked;
@@ -1100,7 +1140,11 @@ export class Nadagotchi {
      * Unlocks a room permanently.
      * @param {string} roomId
      */
+<<<<<<< HEAD
     async unlockRoom(roomId) {
+=======
+    unlockRoom(roomId) {
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
         if (!RoomDefinitions[roomId]) return;
 
         // Ensure room object exists in config
@@ -1116,7 +1160,11 @@ export class Nadagotchi {
 
         this.homeConfig.rooms[roomId].unlocked = true;
         this.addJournalEntry(`I unlocked the ${RoomDefinitions[roomId].name}! More space to decorate.`);
+<<<<<<< HEAD
         await this.persistence.savePet(this);
+=======
+        this.persistence.savePet(this);
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
     }
 
     /**

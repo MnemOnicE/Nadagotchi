@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
 // tests/MainSceneCoverage.test.js
 import { setupPhaserMock, createMockAdd, mockGameObject } from './helpers/mockPhaser';
 
@@ -11,7 +15,10 @@ jest.mock('../js/Calendar');
 jest.mock('../js/EventManager');
 jest.mock('../js/WorldClock');
 jest.mock('../js/WeatherSystem');
+<<<<<<< HEAD
 jest.mock('../js/WeatherParticleManager');
+=======
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
 jest.mock('../js/utils/SoundSynthesizer', () => ({
     SoundSynthesizer: {
         instance: {
@@ -30,19 +37,28 @@ const { Calendar } = require('../js/Calendar');
 const { EventManager } = require('../js/EventManager');
 const { WorldClock } = require('../js/WorldClock');
 const { WeatherSystem } = require('../js/WeatherSystem');
+<<<<<<< HEAD
 const { WeatherParticleManager } = require('../js/WeatherParticleManager');
+=======
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
 const { EventKeys } = require('../js/EventKeys');
 
 describe('MainScene Coverage', () => {
     let scene;
     let mockNadagotchi;
+<<<<<<< HEAD
     let mockWeatherParticles;
+=======
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
     let mockAdd;
     let mockGameEvents;
 
     beforeEach(() => {
         mockNadagotchi = {
+<<<<<<< HEAD
              init: jest.fn().mockResolvedValue(),
+=======
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
              handleAction: jest.fn(),
              interact: jest.fn().mockReturnValue("Hello!"),
              placeItem: jest.fn().mockReturnValue(true),
@@ -62,14 +78,19 @@ describe('MainScene Coverage', () => {
                  generateDailyQuest: jest.fn(),
                  hasNewQuest: jest.fn().mockReturnValue(false)
              },
+<<<<<<< HEAD
              returnItemToInventory: jest.fn(),
              homeConfig: { rooms: { "Entryway": { wallpaper: 'w', flooring: 'f' } } },
              isRoomUnlocked: jest.fn().mockReturnValue(true),
              cleanDebris: jest.fn().mockReturnValue({ success: true, message: 'Cleaned' })
+=======
+             returnItemToInventory: jest.fn()
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
         };
         Nadagotchi.mockImplementation(() => mockNadagotchi);
 
         PersistenceManager.mockImplementation(() => ({
+<<<<<<< HEAD
             loadPet: jest.fn().mockResolvedValue(null),
             savePet: jest.fn().mockResolvedValue(),
             loadCalendar: jest.fn().mockResolvedValue({}),
@@ -78,6 +99,16 @@ describe('MainScene Coverage', () => {
             loadSettings: jest.fn().mockResolvedValue({ volume: 0.5, gameSpeed: 1.0 }),
             saveSettings: jest.fn().mockResolvedValue(),
             loadAchievements: jest.fn().mockResolvedValue({ unlocked: [], progress: {} })
+=======
+            loadPet: jest.fn(),
+            savePet: jest.fn(),
+            loadCalendar: jest.fn(),
+            loadFurniture: jest.fn().mockReturnValue([]),
+            saveFurniture: jest.fn(),
+            loadSettings: jest.fn().mockReturnValue({ volume: 0.5, gameSpeed: 1.0 }),
+            saveSettings: jest.fn(),
+            loadAchievements: jest.fn().mockReturnValue({ unlocked: [], progress: {} })
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
         }));
 
         Calendar.mockImplementation(() => ({
@@ -101,12 +132,15 @@ describe('MainScene Coverage', () => {
             getCurrentWeather: jest.fn().mockReturnValue('Sunny')
         }));
 
+<<<<<<< HEAD
         mockWeatherParticles = {
             resize: jest.fn(),
             update: jest.fn()
         };
         WeatherParticleManager.mockImplementation(() => mockWeatherParticles);
 
+=======
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
         mockAdd = createMockAdd();
 
         mockGameEvents = {
@@ -137,7 +171,11 @@ describe('MainScene Coverage', () => {
                 getFrameNames: jest.fn().mockReturnValue([]),
                 add: jest.fn()
             }),
+<<<<<<< HEAD
             createCanvas: jest.fn(() => mockGameObject()), exists: jest.fn().mockReturnValue(false)
+=======
+            createCanvas: jest.fn(() => mockGameObject())
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
         };
         scene.scene = {
             launch: jest.fn(),
@@ -172,6 +210,7 @@ describe('MainScene Coverage', () => {
         };
     });
 
+<<<<<<< HEAD
     test('create should initialize systems and objects', async () => {
         scene.create();
         await scene._initPromise; // Wait for async init
@@ -185,6 +224,17 @@ describe('MainScene Coverage', () => {
     test('handleUIAction should route actions correctly', async () => {
          scene.create();
          await scene._initPromise;
+=======
+    test('create should initialize systems and objects', () => {
+        scene.create();
+        expect(scene.nadagotchi).toBeDefined();
+        expect(mockAdd.sprite).toHaveBeenCalled();
+        expect(scene.scene.launch).toHaveBeenCalledWith('UIScene');
+    });
+
+    test('handleUIAction should route actions correctly', () => {
+         scene.create();
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
 
          // WORK
          scene.handleUIAction('WORK');
@@ -204,9 +254,14 @@ describe('MainScene Coverage', () => {
          expect(mockNadagotchi.handleAction).toHaveBeenCalledWith('FEED', undefined);
     });
 
+<<<<<<< HEAD
     test('handleWorkResult should call completeWorkShift on success', async () => {
         scene.create();
         await scene._initPromise;
+=======
+    test('handleWorkResult should call completeWorkShift on success', () => {
+        scene.create();
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
 
         // Bypass security check by setting the active minigame
         scene.activeMinigameCareer = 'Innovator';
@@ -215,15 +270,21 @@ describe('MainScene Coverage', () => {
         expect(mockNadagotchi.completeWorkShift).toHaveBeenCalled();
     });
 
+<<<<<<< HEAD
     test('resize should update viewports', async () => {
         scene.create();
         await scene._initPromise;
+=======
+    test('resize should update viewports', () => {
+        scene.create();
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
 
         scene.resize({ width: 1000, height: 800 });
 
         // Dashboard is 35% of 800 = 280. Game height = 520.
         expect(scene.cameras.main.setViewport).toHaveBeenCalledWith(0, 0, 1000, 520);
         expect(scene.cameras.main.setSize).toHaveBeenCalledWith(1000, 520);
+<<<<<<< HEAD
 
         expect(mockWeatherParticles.resize).toHaveBeenCalledWith(1000, 520);
     });
@@ -231,6 +292,12 @@ describe('MainScene Coverage', () => {
     test('update loop should update nadagotchi and stats', async () => {
         scene.create();
         await scene._initPromise;
+=======
+    });
+
+    test('update loop should update nadagotchi and stats', () => {
+        scene.create();
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
 
         scene.update(1000, 16);
 
@@ -242,9 +309,14 @@ describe('MainScene Coverage', () => {
         }));
     });
 
+<<<<<<< HEAD
     test('furniture placement logic', async () => {
         scene.create();
         await scene._initPromise;
+=======
+    test('furniture placement logic', () => {
+        scene.create();
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
 
         // Enable placement mode
         scene.handleUIAction(EventKeys.DECORATE, 'Fancy Chair');

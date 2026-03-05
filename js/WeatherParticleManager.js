@@ -96,6 +96,7 @@ export class WeatherParticleManager {
         // Update emitter bounds
         Object.values(this.emitters).forEach(e => {
             e.setPosition(0, -10); // Reset origin
+<<<<<<< HEAD
             e.setEmitZone({
                 source: new Phaser.Geom.Rectangle(0, -10, width, 1),
                 type: 'random',
@@ -103,6 +104,15 @@ export class WeatherParticleManager {
             });
         });
 
+=======
+            e.emitZone = { source: new Phaser.Geom.Rectangle(0, -10, width, 1) }; // Hacky way to reset width?
+            // Phaser 3.55 Emitter setPosition moves the emitter origin.
+            // To change the emission area, we often need to recreate or update the emitZone.
+            // Simplified: Just update x coords range if using object syntax in create.
+            // But properties are not always dynamic post-creation.
+            // For simple top-down rain, we can just move the emitter manager container or rely on sufficient width.
+        });
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
         // Correct approach for Phaser 3:
         if (this.emitters.rain) this.emitters.rain.setBounds(0, 0, width, height);
     }
