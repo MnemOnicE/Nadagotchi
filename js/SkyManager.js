@@ -101,7 +101,7 @@ export class SkyManager {
      */
     resize(width, height) {
         if (this.skyTexture) {
-            this.skyTexture.setSize(width, height);
+            if (this.skyTexture && this.skyTexture.setSize) this.skyTexture.setSize(width, height);
             // Force redraw
             this.lastDaylightFactor = -1;
             this.update();

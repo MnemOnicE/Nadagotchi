@@ -6,12 +6,31 @@ import { setupPhaserMock, createMockAdd, mockGameObject } from './helpers/mockPh
 setupPhaserMock();
 
 // 2. Mock Dependencies
-jest.mock('../js/Nadagotchi');
-jest.mock('../js/PersistenceManager');
-jest.mock('../js/Calendar');
-jest.mock('../js/EventManager');
-jest.mock('../js/WorldClock');
-jest.mock('../js/WeatherSystem');
+jest.mock('../js/Nadagotchi.js', () => {
+    return {
+        Nadagotchi: jest.fn().mockImplementation(() => {
+            return {
+                init: jest.fn().mockResolvedValue(),
+                update: jest.fn(),
+                hasNewQuest: false,
+                level: 1,
+                stats: { hunger: 100, energy: 100, happiness: 100 },
+                skills: { logic: 1, navigation: 1, research: 1 },
+                mood: 'happy',
+                dominantArchetype: 'Adventurer',
+                inventory: {},
+                getEquippedCosmetics: jest.fn().mockReturnValue([]),
+                placeItem: jest.fn(),
+                pickupItem: jest.fn()
+            };
+        })
+    };
+});
+jest.mock('../js/PersistenceManager.js');
+jest.mock('../js/Calendar.js');
+jest.mock('../js/EventManager.js');
+jest.mock('../js/WorldClock.js');
+jest.mock('../js/WeatherSystem.js');
 jest.mock('../js/utils/SoundSynthesizer', () => ({
     SoundSynthesizer: {
         instance: {
@@ -105,12 +124,20 @@ describe('Performance: Update Stats Throttling', () => {
             on: jest.fn(),
             off: jest.fn()
         };
-        scene.textures = {
+        scene.textures = { exists: jest.fn().mockReturnValue(true),
             get: jest.fn().mockReturnValue({
                 getFrameNames: jest.fn().mockReturnValue([]),
                 add: jest.fn()
             }),
-            createCanvas: jest.fn(() => mockGameObject())
+            createCanvas: jest.fn(() => ({
+                getContext: jest.fn(() => ({
+                    createRadialGradient: jest.fn(() => ({ addColorStop: jest.fn() })),
+                    fillRect: jest.fn(),
+                    fillStyle: '#000000',
+                    globalCompositeOperation: ''
+                })),
+                refresh: jest.fn()
+            }))
         };
         scene.scene = {
             launch: jest.fn(),
@@ -137,8 +164,10 @@ describe('Performance: Update Stats Throttling', () => {
         };
     });
 
-    test('should throttle UPDATE_STATS events', () => {
+    test('should throttle UPDATE_STATS events', async () => {
         scene.create();
+        await scene._initPromise;
+        scene.isReady = true;
 
         // Simulating 60 frames at 16ms delta
         // Total time: ~1000ms

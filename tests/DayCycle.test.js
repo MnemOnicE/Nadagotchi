@@ -47,6 +47,7 @@ describe('Day Cycle Integration', () => {
         jest.clearAllMocks();
 
         mockNadagotchi = {
+            init: jest.fn().mockResolvedValue(),
              handleAction: jest.fn(),
              interact: jest.fn(),
              live: jest.fn(),
@@ -115,12 +116,20 @@ describe('Day Cycle Integration', () => {
             on: jest.fn(),
             off: jest.fn()
         };
-        scene.textures = {
+        scene.textures = { exists: jest.fn().mockReturnValue(true),
             get: jest.fn().mockReturnValue({
                 getFrameNames: jest.fn().mockReturnValue([]),
                 add: jest.fn()
             }),
-            createCanvas: jest.fn(() => mockGameObject())
+            createCanvas: jest.fn(() => ({
+                getContext: jest.fn(() => ({
+                    createRadialGradient: jest.fn(() => ({ addColorStop: jest.fn() })),
+                    fillRect: jest.fn(),
+                    fillStyle: '#000000',
+                    globalCompositeOperation: ''
+                })),
+                refresh: jest.fn()
+            }))
         };
         scene.scene = {
             launch: jest.fn(),
@@ -148,12 +157,14 @@ describe('Day Cycle Integration', () => {
         };
     });
 
-    test('should advance calendar day when full day passes', () => {
+    test('should advance calendar day when full day passes', async () => {
         scene.create();
 
         // 1. Simulate Day Pass
         mockWorldClock.update.mockReturnValue(true); // Day passed
 
+        scene.create();
+        await scene._initPromise;
         scene.update(1000, 16);
 
         expect(mockCalendar.advanceDay).toHaveBeenCalled();
@@ -162,12 +173,14 @@ describe('Day Cycle Integration', () => {
         expect(mockEventManager.update).toHaveBeenCalled();
     });
 
-    test('should NOT advance calendar if day has not passed', () => {
+    test('should NOT advance calendar if day has not passed', async () => {
         scene.create();
 
         // 1. Simulate Tick
         mockWorldClock.update.mockReturnValue(false); // Day NOT passed
 
+        scene.create();
+        await scene._initPromise;
         scene.update(1000, 16);
 
         expect(mockCalendar.advanceDay).not.toHaveBeenCalled();

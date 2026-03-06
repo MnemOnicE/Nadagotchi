@@ -1,61 +1,80 @@
-import { jest } from '@jest/globals';
 
 export const mockGameObject = () => {
     const listeners = {};
     const obj = {
-        listeners, // Expose listeners for direct access in tests if needed
-        on: jest.fn((event, fn) => {
-            listeners[event] = fn;
-            return obj;
-        }),
-        emit: (event, ...args) => {
-            if (listeners[event]) listeners[event](...args);
-        },
+        scene: { scene: { get: jest.fn() }, time: { delayedCall: jest.fn((delay, cb, args) => { if(args) cb(...args); else cb(); }) } },
+        on: (event, callback) => { listeners[event] = callback; return obj; },
+        off: (event) => { delete listeners[event]; return obj; },
+        emit: (event, ...args) => { if (listeners[event]) listeners[event](...args); },
         setInteractive: jest.fn().mockReturnThis(),
-        setVisible: jest.fn().mockReturnThis(),
         disableInteractive: jest.fn().mockReturnThis(),
-        setVisible: jest.fn().mockReturnThis(),
-        setOrigin: jest.fn().mockReturnThis(),
-        disableInteractive: jest.fn().mockReturnThis(),
-        setVisible: jest.fn().mockReturnThis(),
+        setVisible: jest.fn(function(v) { this.visible = v; return this; }),
         setOrigin: jest.fn().mockReturnThis(),
         setBackgroundColor: jest.fn().mockReturnThis(),
         destroy: jest.fn(),
         setSize: jest.fn().mockReturnThis(),
-        setAlpha: jest.fn().mockReturnThis(),
-        setPosition: jest.fn().mockReturnThis(),
-        setScrollFactor: jest.fn().mockReturnThis(),
-        setDepth: jest.fn().mockReturnThis(),
-        setText: jest.fn().mockReturnThis(),
-        setFillStyle: jest.fn().mockReturnThis(),
-        setStrokeStyle: jest.fn().mockReturnThis(),
-        setBlendMode: jest.fn().mockReturnThis(),
+        setViewport: jest.fn().mockReturnThis(),
         setScale: jest.fn().mockReturnThis(),
-        setAngle: jest.fn().mockReturnThis(),
-        setFrame: jest.fn().mockReturnThis(),
-        clear: jest.fn(),
-        fillStyle: jest.fn().mockReturnThis(),
-        fillRect: jest.fn().mockReturnThis(),
-        strokeRect: jest.fn().mockReturnThis(),
-        lineStyle: jest.fn().mockReturnThis(),
-        refresh: jest.fn().mockReturnThis(),
+        setPosition: jest.fn().mockReturnThis(),
+        setDepth: jest.fn().mockReturnThis(),
+        setAlpha: jest.fn().mockReturnThis(),
         setTint: jest.fn().mockReturnThis(),
         clearTint: jest.fn().mockReturnThis(),
+        setFrame: jest.fn().mockReturnThis(),
+        setText: jest.fn().mockReturnThis(),
+        setFillStyle: jest.fn().mockReturnThis(),
+        setAngle: jest.fn().mockReturnThis(),
         setTexture: jest.fn().mockReturnThis(),
+        setFlipX: jest.fn().mockReturnThis(),
         setTilePosition: jest.fn().mockReturnThis(),
-        context: {
-             createLinearGradient: jest.fn(() => ({ addColorStop: jest.fn() })),
-             createRadialGradient: jest.fn(() => ({ addColorStop: jest.fn() })),
-             fillStyle: '',
-             fillRect: jest.fn()
-        },
-        width: 800,
-        height: 600,
+        play: jest.fn().mockReturnThis(),
+        clear: jest.fn().mockReturnThis(),
+        fillStyle: jest.fn().mockReturnThis(),
+        fillRect: jest.fn().mockReturnThis(),
+        lineStyle: jest.fn().mockReturnThis(),
+        strokeRect: jest.fn().mockReturnThis(),
+        setStrokeStyle: jest.fn().mockReturnThis(),
+        resize: jest.fn().mockReturnThis(),
+        setScrollFactor: jest.fn().mockReturnThis(),
+        setBlendMode: jest.fn().mockReturnThis(),
+        fill: jest.fn().mockReturnThis(),
+        draw: jest.fn().mockReturnThis(),
         x: 0,
-        y: 0
+        y: 0,
+        width: 100,
+        height: 100,
+        displayHeight: 100,
+        visible: false
     };
     return obj;
 };
+
+export const createMockAdd = () => ({
+    sprite: jest.fn(() => mockGameObject()),
+    image: jest.fn(() => mockGameObject()),
+    graphics: jest.fn(() => mockGameObject()),
+    text: jest.fn(() => mockGameObject()),
+    tileSprite: jest.fn(() => mockGameObject()),
+    rectangle: jest.fn(() => mockGameObject()),
+    zone: jest.fn(() => mockGameObject()),
+    renderTexture: jest.fn(() => mockGameObject()),
+    container: jest.fn(() => ({ ...mockGameObject(), add: jest.fn(), removeAll: jest.fn() })),
+    group: jest.fn().mockReturnValue({ get: jest.fn(), create: jest.fn(), add: jest.fn(), clear: jest.fn() }),
+    particles: jest.fn().mockReturnValue({
+        createEmitter: jest.fn().mockReturnValue({
+            start: jest.fn(),
+            stop: jest.fn(),
+            setPosition: jest.fn(),
+            setDepth: jest.fn().mockReturnThis(),
+            setEmitZone: jest.fn().mockReturnThis(),
+            setBounds: jest.fn().mockReturnThis(),
+            setQuantity: jest.fn().mockReturnThis(),
+            setFrequency: jest.fn().mockReturnThis()
+        }),
+        setDepth: jest.fn().mockReturnThis(),
+        destroy: jest.fn()
+    })
+});
 
 export const setupPhaserMock = () => {
     global.Phaser = {
@@ -64,17 +83,12 @@ export const setupPhaserMock = () => {
                 this.config = config;
                 this.events = { on: jest.fn(), off: jest.fn(), emit: jest.fn() };
                 this.scale = { on: jest.fn(), off: jest.fn(), width: 800, height: 600 };
-                 main: { width: 800, height: 600, setBackgroundColor: jest.fn(), setSize: jest.fn(), setViewport: jest.fn() } };
+                this.cameras = { main: { width: 800, height: 600, setBackgroundColor: jest.fn(), setSize: jest.fn(), setViewport: jest.fn() } };
                 this.add = createMockAdd();
                 this.make = {
-                    image: jest.fn(() => new Phaser.GameObjects.Image()),
-                    graphics: jest.fn(() => ({
-                        setDepth: jest.fn().mockReturnThis(),
-                        clear: jest.fn().mockReturnThis(),
-                        fillStyle: jest.fn().mockReturnThis(),
-                        fillRect: jest.fn().mockReturnThis()
-                    })),
-                    text: jest.fn(() => new Phaser.GameObjects.Text())
+                    image: jest.fn(() => mockGameObject()),
+                    graphics: jest.fn(() => mockGameObject()),
+                    renderTexture: jest.fn(() => mockGameObject())
                 };
                 this.time = {
                     delayedCall: jest.fn((delay, callback) => { callback(); return { destroy: jest.fn() }; }),
@@ -88,10 +102,20 @@ export const setupPhaserMock = () => {
                     }),
                     killTweensOf: jest.fn()
                 };
+                this.textures = {
+                    exists: jest.fn().mockReturnValue(true),
+                    createCanvas: jest.fn(() => ({
+                        getContext: jest.fn(() => ({
+                            createRadialGradient: jest.fn(() => ({ addColorStop: jest.fn() })),
+                            fillRect: jest.fn(),
+                            globalCompositeOperation: ''
+                        })),
+                        refresh: jest.fn()
+                    }))
+                };
                 this.sys = { events: { once: jest.fn(), on: jest.fn(), off: jest.fn() } };
                 this.scene = { stop: jest.fn(), resume: jest.fn(), get: jest.fn(), launch: jest.fn(), start: jest.fn() };
-                this.game = { registry: { set: jest.fn(), get: jest.fn() }, events: { emit: jest.fn(), on: jest.fn(), off: jest.fn() } };
-                this.events = { on: jest.fn(), off: jest.fn(), emit: jest.fn() };
+                this.game = { events: { emit: jest.fn(), on: jest.fn(), off: jest.fn() } };
                 this.input = {
                     keyboard: { on: jest.fn(), off: jest.fn() },
                     on: jest.fn(),
@@ -101,12 +125,6 @@ export const setupPhaserMock = () => {
                 };
                 this.plugins = {
                     get: jest.fn()
-                };
-                this.scale = {
-                    width: 800,
-                    height: 600,
-                    on: jest.fn(),
-                    off: jest.fn()
                 };
             }
         },
@@ -125,9 +143,6 @@ export const setupPhaserMock = () => {
             RenderTexture: class RenderTexture {
                 constructor() {
                     Object.assign(this, mockGameObject());
-                    this.fill = jest.fn();
-                    this.draw = jest.fn();
-                    this.resize = jest.fn();
                 }
             }
         },
@@ -163,35 +178,3 @@ export const setupPhaserMock = () => {
         }
     };
 };
-
-export const createMockAdd = () => ({
-    sprite: jest.fn(() => new Phaser.GameObjects.Sprite()),
-    image: jest.fn(() => new Phaser.GameObjects.Image()),
-    graphics: jest.fn(() => ({
-                        setDepth: jest.fn().mockReturnThis(),
-                        clear: jest.fn().mockReturnThis(),
-                        fillStyle: jest.fn().mockReturnThis(),
-                        fillRect: jest.fn().mockReturnThis()
-                    })),
-    text: jest.fn(() => new Phaser.GameObjects.Text()),
-    tileSprite: jest.fn(() => new Phaser.GameObjects.TileSprite()),
-    rectangle: jest.fn(() => mockGameObject()),
-    zone: jest.fn(() => mockGameObject()),
-    renderTexture: jest.fn(() => new Phaser.GameObjects.RenderTexture()),
-    container: jest.fn(() => ({ ...mockGameObject(), add: jest.fn(), removeAll: jest.fn() })),
-    group: jest.fn().mockReturnValue({ get: jest.fn(), create: jest.fn(), add: jest.fn(), clear: jest.fn() }),
-    particles: jest.fn().mockReturnValue({
-        createEmitter: jest.fn().mockReturnValue({
-            start: jest.fn(),
-            stop: jest.fn(),
-            setPosition: jest.fn(),
-            setDepth: jest.fn().mockReturnThis(),
-            setEmitZone: jest.fn().mockReturnThis(),
-            setBounds: jest.fn().mockReturnThis(),
-            setQuantity: jest.fn().mockReturnThis(),
-            setFrequency: jest.fn().mockReturnThis()
-        }),
-        setDepth: jest.fn().mockReturnThis(),
-        destroy: jest.fn()
-    })
-});

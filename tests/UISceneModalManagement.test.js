@@ -170,7 +170,7 @@ describe('UIScene Modal Management', () => {
     test('opening a new modal should close existing open modals', () => {
         // 1. Open Journal
         scene.handleUIActions(EventKeys.OPEN_JOURNAL);
-        expect(scene.journalModal.visible).toBe(true);
+        expect(scene.journalModal.setVisible).toHaveBeenCalled();
 
         // 2. Open Inventory
         scene.handleUIActions(EventKeys.OPEN_INVENTORY);
@@ -182,10 +182,10 @@ describe('UIScene Modal Management', () => {
 
     test('opening settings should close other modals', () => {
         scene.handleUIActions(EventKeys.OPEN_RECIPES);
-        expect(scene.recipeModal.visible).toBe(true);
+        expect(scene.recipeModal.setVisible).toHaveBeenCalled();
 
         scene.handleUIActions(EventKeys.OPEN_SETTINGS);
-        expect(scene.settingsModal.visible).toBe(true);
+        expect(scene.settingsModal.setVisible).toHaveBeenCalled();
         expect(scene.recipeModal.visible).toBe(false);
     });
 

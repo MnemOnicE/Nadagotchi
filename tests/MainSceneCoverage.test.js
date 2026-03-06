@@ -63,6 +63,7 @@ describe('MainScene Coverage', () => {
                  hasNewQuest: jest.fn().mockReturnValue(false)
              },
              returnItemToInventory: jest.fn(),
+             init: jest.fn().mockResolvedValue(),
              homeConfig: { rooms: { "Entryway": { wallpaper: 'w', flooring: 'f' } } },
              isRoomUnlocked: jest.fn().mockReturnValue(true),
              cleanDebris: jest.fn().mockReturnValue({ success: true, message: 'Cleaned' })
@@ -120,7 +121,22 @@ describe('MainScene Coverage', () => {
             events: { on: jest.fn(), off: jest.fn(), emit: jest.fn() },
             registry: { set: jest.fn(), get: jest.fn() }
         };
-        scene.add = mockAdd;
+        scene.add = {
+            ...mockAdd,
+            graphics: jest.fn(() => ({
+                setDepth: jest.fn().mockReturnThis(),
+                clear: jest.fn().mockReturnThis(),
+                fillStyle: jest.fn().mockReturnThis(),
+                fillRect: jest.fn().mockReturnThis(),
+                setVisible: jest.fn().mockReturnThis(), destroy: jest.fn(),
+                lineStyle: jest.fn().mockReturnThis(),
+                strokeRect: jest.fn().mockReturnThis()
+            })),
+            rectangle: jest.fn(() => ({ setOrigin: jest.fn().mockReturnThis(), setInteractive: jest.fn().mockReturnThis(), setDepth: jest.fn().mockReturnThis(), setVisible: jest.fn().mockReturnThis(), setAlpha: jest.fn().mockReturnThis(), setSize: jest.fn().mockReturnThis() })),
+            tileSprite: jest.fn(() => ({ setOrigin: jest.fn().mockReturnThis(), setInteractive: jest.fn().mockReturnThis(), setDepth: jest.fn().mockReturnThis(), setVisible: jest.fn().mockReturnThis(), setAlpha: jest.fn().mockReturnThis(), setTilePosition: jest.fn().mockReturnThis(), setSize: jest.fn().mockReturnThis(), setPosition: jest.fn().mockReturnThis(), setScale: jest.fn().mockReturnThis(), setTint: jest.fn().mockReturnThis() })),
+            image: jest.fn(() => ({ setOrigin: jest.fn().mockReturnThis(), setInteractive: jest.fn().mockReturnThis(), setDepth: jest.fn().mockReturnThis(), setVisible: jest.fn().mockReturnThis(), setAlpha: jest.fn().mockReturnThis(), setTexture: jest.fn().mockReturnThis(), setFlipX: jest.fn().mockReturnThis() })),
+            sprite: jest.fn(() => ({ setOrigin: jest.fn().mockReturnThis(), setInteractive: jest.fn().mockReturnThis(), setDepth: jest.fn().mockReturnThis(), setVisible: jest.fn().mockReturnThis(), setAlpha: jest.fn().mockReturnThis(), setScale: jest.fn().mockReturnThis(), play: jest.fn().mockReturnThis(), setFrame: jest.fn().mockReturnThis(), setAngle: jest.fn().mockReturnThis(), on: jest.fn(), off: jest.fn(), emit: jest.fn(), setTint: jest.fn().mockReturnThis(), clearTint: jest.fn().mockReturnThis(), setPosition: jest.fn().mockReturnThis(), setX: jest.fn().mockReturnThis(), setY: jest.fn().mockReturnThis() }))
+        };
         scene.cameras = {
             main: {
                 width: 800,
@@ -141,7 +157,27 @@ describe('MainScene Coverage', () => {
                 getFrameNames: jest.fn().mockReturnValue([]),
                 add: jest.fn()
             }),
-            createCanvas: jest.fn(() => mockGameObject()), exists: jest.fn().mockReturnValue(false)
+            createCanvas: jest.fn(() => ({
+                getContext: jest.fn(() => ({
+                    createRadialGradient: jest.fn(() => ({ addColorStop: jest.fn() })),
+                    fillRect: jest.fn(),
+                    fillStyle: '#000000',
+                    globalCompositeOperation: ''
+                })),
+                getContextMock: jest.fn(() => ({
+                    createRadialGradient: jest.fn(() => ({ addColorStop: jest.fn() })),
+                    fillRect: jest.fn(),
+                    fillStyle: '#000000',
+                    globalCompositeOperation: ''
+                })),
+                getContext: jest.fn(() => ({
+                    createRadialGradient: jest.fn(() => ({ addColorStop: jest.fn() })),
+                    fillRect: jest.fn(),
+                    fillStyle: '#000000',
+                    globalCompositeOperation: ''
+                })),
+                refresh: jest.fn()
+            })), exists: jest.fn().mockReturnValue(false)
         };
         scene.scene = {
             launch: jest.fn(),
@@ -181,7 +217,7 @@ describe('MainScene Coverage', () => {
         await scene._initPromise; // Wait for async init
 
         expect(scene.nadagotchi).toBeDefined();
-        expect(mockAdd.sprite).toHaveBeenCalled();
+        expect(scene.add.sprite).toHaveBeenCalled();
         expect(scene.scene.launch).toHaveBeenCalledWith('UIScene');
         expect(scene.isReady).toBe(true);
     });

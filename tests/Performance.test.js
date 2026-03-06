@@ -7,12 +7,31 @@ import { setupPhaserMock, createMockAdd, mockGameObject } from './helpers/mockPh
 setupPhaserMock();
 
 // 2. Mock Dependencies
-jest.mock('../js/Nadagotchi');
-jest.mock('../js/PersistenceManager');
-jest.mock('../js/Calendar');
-jest.mock('../js/EventManager');
-jest.mock('../js/WorldClock');
-jest.mock('../js/WeatherSystem');
+jest.mock('../js/Nadagotchi.js', () => {
+    return {
+        Nadagotchi: jest.fn().mockImplementation(() => {
+            return {
+                init: jest.fn().mockResolvedValue(),
+                update: jest.fn(),
+                hasNewQuest: false,
+                level: 1,
+                stats: { hunger: 100, energy: 100, happiness: 100 },
+                skills: { logic: 1, navigation: 1, research: 1 },
+                mood: 'happy',
+                dominantArchetype: 'Adventurer',
+                inventory: {},
+                getEquippedCosmetics: jest.fn().mockReturnValue([]),
+                placeItem: jest.fn(),
+                pickupItem: jest.fn()
+            };
+        })
+    };
+});
+jest.mock('../js/PersistenceManager.js');
+jest.mock('../js/Calendar.js');
+jest.mock('../js/EventManager.js');
+jest.mock('../js/WorldClock.js');
+jest.mock('../js/WeatherSystem.js');
 jest.mock('../js/utils/SoundSynthesizer', () => ({
     SoundSynthesizer: {
         instance: {
@@ -117,7 +136,15 @@ describe('Performance Repro: Event Emission', () => {
                 getFrameNames: jest.fn().mockReturnValue([]),
                 add: jest.fn()
             }),
-            createCanvas: jest.fn(() => mockGameObject()), exists: jest.fn().mockReturnValue(false)
+            createCanvas: jest.fn(() => ({
+                getContext: jest.fn(() => ({
+                    createRadialGradient: jest.fn(() => ({ addColorStop: jest.fn() })),
+                    fillRect: jest.fn(),
+                    fillStyle: '#000000',
+                    globalCompositeOperation: ''
+                })),
+                refresh: jest.fn()
+            })), exists: jest.fn().mockReturnValue(false)
         };
         scene.scene = {
             launch: jest.fn(),
@@ -149,8 +176,10 @@ describe('Performance Repro: Event Emission', () => {
         };
     });
 
-    test('should throttle UPDATE_STATS emissions (Optimized)', () => {
+    test('should throttle UPDATE_STATS emissions (Optimized)', async () => {
         scene.create();
+        await scene._initPromise;
+        scene.isReady = true;
 
         // 1. Initial Update (Time: 0) -> Should Emit
         scene.update(0, 16);

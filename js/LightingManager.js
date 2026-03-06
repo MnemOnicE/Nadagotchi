@@ -29,12 +29,13 @@ export class LightingManager {
         const height = this.scene.scale.height;
 
         // Ensure we have the "Light Cookie" texture
-        if (!this.scene.textures.exists('light_soft')) {
+        if (this.scene.textures && this.scene.textures.exists && !this.scene.textures.exists('light_soft')) {
             this._createLightCookie();
         }
 
         // Create the RenderTexture
         // Initialize with scaled dimensions
+        if (!this.scene.add.renderTexture) return;
         this.renderTexture = this.scene.add.renderTexture(0, 0, width * this.scaleRatio, height * this.scaleRatio);
         this.renderTexture.setOrigin(0, 0);
         this.renderTexture.setScrollFactor(0);
@@ -64,6 +65,7 @@ export class LightingManager {
         const ctx = texture.context;
 
         // Radial gradient: White (center) to Transparent (edge)
+        if (!ctx || !ctx.createRadialGradient) return;
         const gradient = ctx.createRadialGradient(half, half, 0, half, half, half);
         gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
         gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
