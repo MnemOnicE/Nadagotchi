@@ -1,32 +1,7 @@
 import { ButtonFactory } from './ButtonFactory.js';
 import { EventKeys } from './EventKeys.js';
 import { Config } from './Config.js';
-import { ToastManager } from './systems/ToastManager.js';
-
-/**
- * @fileoverview A dedicated scene for the "Pet Passport" / Showcase system.
- * Displays detailed pet statistics, visualizes the pet, and allows DNA export/import.
- * Designed to be a "Pause" screen that overlays or replaces the main game view temporarily.
- */
-
-export class ShowcaseScene extends Phaser.Scene {
-    constructor() {
-        super({ key: 'ShowcaseScene' });
-    }
-
-    /**
-     * Initializes the scene with data passed from the calling scene.
-     * @param {object} data - The payload containing the pet data.
-     * @param {import('./Nadagotchi.js').Nadagotchi} data.nadagotchi - The current pet instance.
-     */
-    init(data) {
-        this.petData = data.nadagotchi;
-    }
-
-    create() {
-        const width = this.cameras.main.width;
-        this.toastManager = new ToastManager(this);
-        const height = this.cameras.main.height;
+import { ToastManager } from './systems/ToastManager.js';        const height = this.cameras.main.height;
 
         // 1. Background (Solid color with slight transparency to hint at pause state, or full solid)
         // Using a "Passport" dark blue theme
@@ -46,8 +21,7 @@ export class ShowcaseScene extends Phaser.Scene {
 
         // Pet Sprite (Scaled up)
         // We reuse the 'pet' texture but maybe use a specific frame based on mood
-        const frame = Config.MOOD_VISUALS.FRAMES[this.petData.mood] ?? Config.MOOD_VISUALS.DEFAULT_FRAME;
-        const sprite = this.add.sprite(0, 0, 'pet', frame).setScale(8);
+        const frame = Config.MOOD_VISUALS.FRAMES[this.petData.mood] ?? Config.MOOD_VISUALS.DEFAULT_FRAME;        const sprite = this.add.sprite(0, 0, 'pet', frame).setScale(8);
 
         // Add a simple idle tween
         this.tweens.add({
@@ -152,6 +126,5 @@ export class ShowcaseScene extends Phaser.Scene {
      * Duplicated from UIScene (should potentially be a utility, but keeping isolated for now).
      */
     showToast(title, message) {
-        this.toastManager.show({ title, message, style: 'DARK' });
-    }
+        this.toastManager.show({ title, message, style: 'DARK' });    }
 }

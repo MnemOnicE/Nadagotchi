@@ -1,5 +1,4 @@
-import { jest } from '@jest/globals';
-import { LightingManager } from '../js/LightingManager';
+import { jest } from '@jest/globals';import { LightingManager } from '../js/LightingManager';
 
 describe('LightingManager', () => {
     let lightingManager;
@@ -53,8 +52,7 @@ describe('LightingManager', () => {
                 renderTexture: jest.fn().mockReturnValue(mockRenderTexture)
             },
             make: {
-                image: jest.fn().mockReturnValue(mockDummyLight)
-            },
+                image: jest.fn().mockReturnValue(mockDummyLight)            },
             worldState: {
                 time: 'Day'
             },
@@ -63,8 +61,7 @@ describe('LightingManager', () => {
             // NPCs
             npcScout: { x: 200, y: 200, visible: true },
             npcArtisan: { x: 300, y: 300, visible: true },
-            npcVillager: { x: 400, y: 400, visible: true }
-        };
+            npcVillager: { x: 400, y: 400, visible: true }        };
 
         lightingManager = new LightingManager(mockScene);
     });
@@ -80,8 +77,7 @@ describe('LightingManager', () => {
     test('should be invisible during Day', () => {
         mockScene.worldState.time = 'Day';
         lightingManager.update();
-        expect(mockRenderTexture.setVisible).toHaveBeenCalledWith(false);
-    });
+        expect(mockRenderTexture.setVisible).toHaveBeenCalledWith(false);    });
 
     test('should be visible and draw during Night', () => {
         mockScene.worldState.time = 'Night';
@@ -95,8 +91,7 @@ describe('LightingManager', () => {
     test('should be visible during Dusk', () => {
         mockScene.worldState.time = 'Dusk';
         lightingManager.update();
-        expect(mockRenderTexture.setVisible).toHaveBeenCalledWith(true);
-    });
+        expect(mockRenderTexture.setVisible).toHaveBeenCalledWith(true);    });
 
     test('should be invisible when INDOOR even if Night', () => {
         mockScene.worldState.time = 'Night';
@@ -144,6 +139,5 @@ describe('LightingManager', () => {
         lightingManager.resize(1000, 800);
         // Expect scaled resize
         expect(mockRenderTexture.resize).toHaveBeenCalledWith(500, 400); // 1000*0.5, 800*0.5
-        expect(mockRenderTexture.setScale).toHaveBeenCalledWith(2);
-    });
+        expect(mockRenderTexture.setScale).toHaveBeenCalledWith(2);    });
 });

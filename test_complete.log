@@ -1,0 +1,2957 @@
+
+> app@1.0.0 test
+> jest
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+FAIL tests/Security.test.js
+  ● Security Hardening › Zombie Pet: Action blocked if insufficient energy
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation, specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    SyntaxError: /workspaces/Nadagotchi/js/MainScene.js: Unexpected reserved word 'await'. (95:26)
+
+      93 |
+      94 |         // --- Pet Initialization ---
+    > 95 |         const loadedPet = await this.persistence.loadPet();
+         |                           ^
+      96 |         if (data && data.newPetData) {
+      97 |             // New Game: Pass null for loadedData to ensure defaults are used
+      98 |             this.nadagotchi = new Nadagotchi(data.newPetData.dominantArchetype, null);
+
+      138 |     Nadagotchi = (await import('../js/Nadagotchi.js')).Nadagotchi;
+      139 |     PersistenceManager = (await import('../js/PersistenceManager.js')).PersistenceManager;
+    > 140 |     MainScene = (await import('../js/MainScene.js')).MainScene;
+          |                  ^
+      141 |     ArtisanMinigameScene = (await import('../js/ArtisanMinigameScene.js')).ArtisanMinigameScene;
+      142 |     Config = (await import('../js/Config.js')).Config;
+      143 |     Encoding = await import('../js/utils/Encoding.js');
+
+      at constructor (node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at Parser.toParseError [as raise] (node_modules/@babel/parser/src/tokenizer/index.ts:1507:19)
+      at Parser.raise [as checkReservedWord] (node_modules/@babel/parser/src/parser/expression.ts:2896:12)
+      at Parser.checkReservedWord [as parseIdentifierName] (node_modules/@babel/parser/src/parser/expression.ts:2858:12)
+      at Parser.parseIdentifierName [as parseIdentifier] (node_modules/@babel/parser/src/parser/expression.ts:2815:23)
+      at Parser.parseIdentifier [as parseExprAtom] (node_modules/@babel/parser/src/parser/expression.ts:1304:27)
+      at Parser.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:742:23)
+      at Parser.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at Parser.parseUpdate [as parseMaybeUnary] (node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at Parser.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at Parser.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at Parser.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at Parser.parseMaybeConditional [as parseMaybeAssign] (node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at parseMaybeAssign (node_modules/@babel/parser/src/parser/expression.ts:257:12)
+      at Parser.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3197:16)
+      at Parser.allowInAnd [as parseMaybeAssignAllowIn] (node_modules/@babel/parser/src/parser/expression.ts:256:17)
+      at Parser.parseMaybeAssignAllowIn [as parseVar] (node_modules/@babel/parser/src/parser/statement.ts:1587:18)
+      at Parser.parseVar [as parseVarStatement] (node_modules/@babel/parser/src/parser/statement.ts:1251:10)
+      at Parser.parseVarStatement [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:612:21)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseStatementListItem] (node_modules/@babel/parser/src/parser/statement.ts:431:17)
+      at Parser.parseStatementListItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1444:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseBlock] (node_modules/@babel/parser/src/parser/statement.ts:1385:10)
+      at Parser.parseBlock [as parseFunctionBody] (node_modules/@babel/parser/src/parser/expression.ts:2626:24)
+      at Parser.parseFunctionBody [as parseFunctionBodyAndFinish] (node_modules/@babel/parser/src/parser/expression.ts:2595:10)
+      at Parser.parseFunctionBodyAndFinish [as parseMethod] (node_modules/@babel/parser/src/parser/expression.ts:2492:31)
+      at Parser.parseMethod [as pushClassMethod] (node_modules/@babel/parser/src/parser/statement.ts:2244:12)
+      at Parser.pushClassMethod [as parseClassMemberWithIsStatic] (node_modules/@babel/parser/src/parser/statement.ts:2023:12)
+      at Parser.parseClassMemberWithIsStatic [as parseClassMember] (node_modules/@babel/parser/src/parser/statement.ts:1938:10)
+      at parseClassMember (node_modules/@babel/parser/src/parser/statement.ts:1851:14)
+      at Parser.callback [as withSmartMixTopicForbiddingContext] (node_modules/@babel/parser/src/parser/expression.ts:3176:14)
+      at Parser.withSmartMixTopicForbiddingContext [as parseClassBody] (node_modules/@babel/parser/src/parser/statement.ts:1823:10)
+      at Parser.parseClassBody [as parseClass] (node_modules/@babel/parser/src/parser/statement.ts:1774:22)
+      at Parser.parseClass [as parseExportDeclaration] (node_modules/@babel/parser/src/parser/statement.ts:2628:25)
+      at Parser.parseExportDeclaration [as maybeParseExportDeclaration] (node_modules/@babel/parser/src/parser/statement.ts:2551:31)
+      at Parser.maybeParseExportDeclaration [as parseExport] (node_modules/@babel/parser/src/parser/statement.ts:2432:29)
+      at Parser.parseExport [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:649:25)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseModuleItem] (node_modules/@babel/parser/src/parser/statement.ts:419:17)
+      at Parser.parseModuleItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1443:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseProgram] (node_modules/@babel/parser/src/parser/statement.ts:229:10)
+      at Parser.parseProgram [as parseTopLevel] (node_modules/@babel/parser/src/parser/statement.ts:203:25)
+      at Parser.parseTopLevel [as parse] (node_modules/@babel/parser/src/parser/index.ts:88:25)
+      at parse (node_modules/@babel/parser/src/index.ts:86:38)
+      at parser (node_modules/@babel/core/src/parser/index.ts:29:19)
+          at parser.next (<anonymous>)
+      at normalizeFile (node_modules/@babel/core/src/transformation/normalize-file.ts:50:24)
+          at normalizeFile.next (<anonymous>)
+      at run (node_modules/@babel/core/src/transformation/index.ts:41:36)
+          at run.next (<anonymous>)
+      at transform (node_modules/@babel/core/src/transform.ts:29:20)
+          at transform.next (<anonymous>)
+      at evaluateSync (node_modules/gensync/index.js:251:28)
+      at sync (node_modules/gensync/index.js:89:14)
+      at fn (node_modules/@babel/core/src/errors/rewrite-stack-trace.ts:99:14)
+      at transformSync (node_modules/@babel/core/src/transform.ts:66:52)
+      at ScriptTransformer.transformSource (node_modules/@jest/transform/build/index.js:422:31)
+      at ScriptTransformer._transformAndBuildScript (node_modules/@jest/transform/build/index.js:519:40)
+      at ScriptTransformer.transform (node_modules/@jest/transform/build/index.js:558:19)
+      at require (tests/Security.test.js:140:18)
+      at Object.<anonymous> (tests/Security.test.js:140:18)
+
+  ● Security Hardening › Recipe Duplication: Discovering known recipe returns false
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation, specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    SyntaxError: /workspaces/Nadagotchi/js/MainScene.js: Unexpected reserved word 'await'. (95:26)
+
+      93 |
+      94 |         // --- Pet Initialization ---
+    > 95 |         const loadedPet = await this.persistence.loadPet();
+         |                           ^
+      96 |         if (data && data.newPetData) {
+      97 |             // New Game: Pass null for loadedData to ensure defaults are used
+      98 |             this.nadagotchi = new Nadagotchi(data.newPetData.dominantArchetype, null);
+
+      138 |     Nadagotchi = (await import('../js/Nadagotchi.js')).Nadagotchi;
+      139 |     PersistenceManager = (await import('../js/PersistenceManager.js')).PersistenceManager;
+    > 140 |     MainScene = (await import('../js/MainScene.js')).MainScene;
+          |                  ^
+      141 |     ArtisanMinigameScene = (await import('../js/ArtisanMinigameScene.js')).ArtisanMinigameScene;
+      142 |     Config = (await import('../js/Config.js')).Config;
+      143 |     Encoding = await import('../js/utils/Encoding.js');
+
+      at constructor (node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at Parser.toParseError [as raise] (node_modules/@babel/parser/src/tokenizer/index.ts:1507:19)
+      at Parser.raise [as checkReservedWord] (node_modules/@babel/parser/src/parser/expression.ts:2896:12)
+      at Parser.checkReservedWord [as parseIdentifierName] (node_modules/@babel/parser/src/parser/expression.ts:2858:12)
+      at Parser.parseIdentifierName [as parseIdentifier] (node_modules/@babel/parser/src/parser/expression.ts:2815:23)
+      at Parser.parseIdentifier [as parseExprAtom] (node_modules/@babel/parser/src/parser/expression.ts:1304:27)
+      at Parser.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:742:23)
+      at Parser.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at Parser.parseUpdate [as parseMaybeUnary] (node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at Parser.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at Parser.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at Parser.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at Parser.parseMaybeConditional [as parseMaybeAssign] (node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at parseMaybeAssign (node_modules/@babel/parser/src/parser/expression.ts:257:12)
+      at Parser.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3197:16)
+      at Parser.allowInAnd [as parseMaybeAssignAllowIn] (node_modules/@babel/parser/src/parser/expression.ts:256:17)
+      at Parser.parseMaybeAssignAllowIn [as parseVar] (node_modules/@babel/parser/src/parser/statement.ts:1587:18)
+      at Parser.parseVar [as parseVarStatement] (node_modules/@babel/parser/src/parser/statement.ts:1251:10)
+      at Parser.parseVarStatement [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:612:21)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseStatementListItem] (node_modules/@babel/parser/src/parser/statement.ts:431:17)
+      at Parser.parseStatementListItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1444:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseBlock] (node_modules/@babel/parser/src/parser/statement.ts:1385:10)
+      at Parser.parseBlock [as parseFunctionBody] (node_modules/@babel/parser/src/parser/expression.ts:2626:24)
+      at Parser.parseFunctionBody [as parseFunctionBodyAndFinish] (node_modules/@babel/parser/src/parser/expression.ts:2595:10)
+      at Parser.parseFunctionBodyAndFinish [as parseMethod] (node_modules/@babel/parser/src/parser/expression.ts:2492:31)
+      at Parser.parseMethod [as pushClassMethod] (node_modules/@babel/parser/src/parser/statement.ts:2244:12)
+      at Parser.pushClassMethod [as parseClassMemberWithIsStatic] (node_modules/@babel/parser/src/parser/statement.ts:2023:12)
+      at Parser.parseClassMemberWithIsStatic [as parseClassMember] (node_modules/@babel/parser/src/parser/statement.ts:1938:10)
+      at parseClassMember (node_modules/@babel/parser/src/parser/statement.ts:1851:14)
+      at Parser.callback [as withSmartMixTopicForbiddingContext] (node_modules/@babel/parser/src/parser/expression.ts:3176:14)
+      at Parser.withSmartMixTopicForbiddingContext [as parseClassBody] (node_modules/@babel/parser/src/parser/statement.ts:1823:10)
+      at Parser.parseClassBody [as parseClass] (node_modules/@babel/parser/src/parser/statement.ts:1774:22)
+      at Parser.parseClass [as parseExportDeclaration] (node_modules/@babel/parser/src/parser/statement.ts:2628:25)
+      at Parser.parseExportDeclaration [as maybeParseExportDeclaration] (node_modules/@babel/parser/src/parser/statement.ts:2551:31)
+      at Parser.maybeParseExportDeclaration [as parseExport] (node_modules/@babel/parser/src/parser/statement.ts:2432:29)
+      at Parser.parseExport [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:649:25)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseModuleItem] (node_modules/@babel/parser/src/parser/statement.ts:419:17)
+      at Parser.parseModuleItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1443:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseProgram] (node_modules/@babel/parser/src/parser/statement.ts:229:10)
+      at Parser.parseProgram [as parseTopLevel] (node_modules/@babel/parser/src/parser/statement.ts:203:25)
+      at Parser.parseTopLevel [as parse] (node_modules/@babel/parser/src/parser/index.ts:88:25)
+      at parse (node_modules/@babel/parser/src/index.ts:86:38)
+      at parser (node_modules/@babel/core/src/parser/index.ts:29:19)
+          at parser.next (<anonymous>)
+      at normalizeFile (node_modules/@babel/core/src/transformation/normalize-file.ts:50:24)
+          at normalizeFile.next (<anonymous>)
+      at run (node_modules/@babel/core/src/transformation/index.ts:41:36)
+          at run.next (<anonymous>)
+      at transform (node_modules/@babel/core/src/transform.ts:29:20)
+          at transform.next (<anonymous>)
+      at evaluateSync (node_modules/gensync/index.js:251:28)
+      at sync (node_modules/gensync/index.js:89:14)
+      at fn (node_modules/@babel/core/src/errors/rewrite-stack-trace.ts:99:14)
+      at transformSync (node_modules/@babel/core/src/transform.ts:66:52)
+      at ScriptTransformer.transformSource (node_modules/@jest/transform/build/index.js:422:31)
+      at ScriptTransformer._transformAndBuildScript (node_modules/@jest/transform/build/index.js:519:40)
+      at ScriptTransformer.transform (node_modules/@jest/transform/build/index.js:558:19)
+      at require (tests/Security.test.js:140:18)
+      at Object.<anonymous> (tests/Security.test.js:140:18)
+
+  ● Security Hardening › Persistence Salt: Save includes UUID and verifies correctly
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation, specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    SyntaxError: /workspaces/Nadagotchi/js/MainScene.js: Unexpected reserved word 'await'. (95:26)
+
+      93 |
+      94 |         // --- Pet Initialization ---
+    > 95 |         const loadedPet = await this.persistence.loadPet();
+         |                           ^
+      96 |         if (data && data.newPetData) {
+      97 |             // New Game: Pass null for loadedData to ensure defaults are used
+      98 |             this.nadagotchi = new Nadagotchi(data.newPetData.dominantArchetype, null);
+
+      138 |     Nadagotchi = (await import('../js/Nadagotchi.js')).Nadagotchi;
+      139 |     PersistenceManager = (await import('../js/PersistenceManager.js')).PersistenceManager;
+    > 140 |     MainScene = (await import('../js/MainScene.js')).MainScene;
+          |                  ^
+      141 |     ArtisanMinigameScene = (await import('../js/ArtisanMinigameScene.js')).ArtisanMinigameScene;
+      142 |     Config = (await import('../js/Config.js')).Config;
+      143 |     Encoding = await import('../js/utils/Encoding.js');
+
+      at constructor (node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at Parser.toParseError [as raise] (node_modules/@babel/parser/src/tokenizer/index.ts:1507:19)
+      at Parser.raise [as checkReservedWord] (node_modules/@babel/parser/src/parser/expression.ts:2896:12)
+      at Parser.checkReservedWord [as parseIdentifierName] (node_modules/@babel/parser/src/parser/expression.ts:2858:12)
+      at Parser.parseIdentifierName [as parseIdentifier] (node_modules/@babel/parser/src/parser/expression.ts:2815:23)
+      at Parser.parseIdentifier [as parseExprAtom] (node_modules/@babel/parser/src/parser/expression.ts:1304:27)
+      at Parser.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:742:23)
+      at Parser.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at Parser.parseUpdate [as parseMaybeUnary] (node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at Parser.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at Parser.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at Parser.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at Parser.parseMaybeConditional [as parseMaybeAssign] (node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at parseMaybeAssign (node_modules/@babel/parser/src/parser/expression.ts:257:12)
+      at Parser.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3197:16)
+      at Parser.allowInAnd [as parseMaybeAssignAllowIn] (node_modules/@babel/parser/src/parser/expression.ts:256:17)
+      at Parser.parseMaybeAssignAllowIn [as parseVar] (node_modules/@babel/parser/src/parser/statement.ts:1587:18)
+      at Parser.parseVar [as parseVarStatement] (node_modules/@babel/parser/src/parser/statement.ts:1251:10)
+      at Parser.parseVarStatement [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:612:21)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseStatementListItem] (node_modules/@babel/parser/src/parser/statement.ts:431:17)
+      at Parser.parseStatementListItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1444:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseBlock] (node_modules/@babel/parser/src/parser/statement.ts:1385:10)
+      at Parser.parseBlock [as parseFunctionBody] (node_modules/@babel/parser/src/parser/expression.ts:2626:24)
+      at Parser.parseFunctionBody [as parseFunctionBodyAndFinish] (node_modules/@babel/parser/src/parser/expression.ts:2595:10)
+      at Parser.parseFunctionBodyAndFinish [as parseMethod] (node_modules/@babel/parser/src/parser/expression.ts:2492:31)
+      at Parser.parseMethod [as pushClassMethod] (node_modules/@babel/parser/src/parser/statement.ts:2244:12)
+      at Parser.pushClassMethod [as parseClassMemberWithIsStatic] (node_modules/@babel/parser/src/parser/statement.ts:2023:12)
+      at Parser.parseClassMemberWithIsStatic [as parseClassMember] (node_modules/@babel/parser/src/parser/statement.ts:1938:10)
+      at parseClassMember (node_modules/@babel/parser/src/parser/statement.ts:1851:14)
+      at Parser.callback [as withSmartMixTopicForbiddingContext] (node_modules/@babel/parser/src/parser/expression.ts:3176:14)
+      at Parser.withSmartMixTopicForbiddingContext [as parseClassBody] (node_modules/@babel/parser/src/parser/statement.ts:1823:10)
+      at Parser.parseClassBody [as parseClass] (node_modules/@babel/parser/src/parser/statement.ts:1774:22)
+      at Parser.parseClass [as parseExportDeclaration] (node_modules/@babel/parser/src/parser/statement.ts:2628:25)
+      at Parser.parseExportDeclaration [as maybeParseExportDeclaration] (node_modules/@babel/parser/src/parser/statement.ts:2551:31)
+      at Parser.maybeParseExportDeclaration [as parseExport] (node_modules/@babel/parser/src/parser/statement.ts:2432:29)
+      at Parser.parseExport [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:649:25)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseModuleItem] (node_modules/@babel/parser/src/parser/statement.ts:419:17)
+      at Parser.parseModuleItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1443:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseProgram] (node_modules/@babel/parser/src/parser/statement.ts:229:10)
+      at Parser.parseProgram [as parseTopLevel] (node_modules/@babel/parser/src/parser/statement.ts:203:25)
+      at Parser.parseTopLevel [as parse] (node_modules/@babel/parser/src/parser/index.ts:88:25)
+      at parse (node_modules/@babel/parser/src/index.ts:86:38)
+      at parser (node_modules/@babel/core/src/parser/index.ts:29:19)
+          at parser.next (<anonymous>)
+      at normalizeFile (node_modules/@babel/core/src/transformation/normalize-file.ts:50:24)
+          at normalizeFile.next (<anonymous>)
+      at run (node_modules/@babel/core/src/transformation/index.ts:41:36)
+          at run.next (<anonymous>)
+      at transform (node_modules/@babel/core/src/transform.ts:29:20)
+          at transform.next (<anonymous>)
+      at evaluateSync (node_modules/gensync/index.js:251:28)
+      at sync (node_modules/gensync/index.js:89:14)
+      at fn (node_modules/@babel/core/src/errors/rewrite-stack-trace.ts:99:14)
+      at transformSync (node_modules/@babel/core/src/transform.ts:66:52)
+      at ScriptTransformer.transformSource (node_modules/@jest/transform/build/index.js:422:31)
+      at ScriptTransformer._transformAndBuildScript (node_modules/@jest/transform/build/index.js:519:40)
+      at ScriptTransformer.transform (node_modules/@jest/transform/build/index.js:558:19)
+      at require (tests/Security.test.js:140:18)
+      at Object.<anonymous> (tests/Security.test.js:140:18)
+
+  ● Security Hardening › Persistence Salt: Tampering fails verification
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation, specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    SyntaxError: /workspaces/Nadagotchi/js/MainScene.js: Unexpected reserved word 'await'. (95:26)
+
+      93 |
+      94 |         // --- Pet Initialization ---
+    > 95 |         const loadedPet = await this.persistence.loadPet();
+         |                           ^
+      96 |         if (data && data.newPetData) {
+      97 |             // New Game: Pass null for loadedData to ensure defaults are used
+      98 |             this.nadagotchi = new Nadagotchi(data.newPetData.dominantArchetype, null);
+
+      138 |     Nadagotchi = (await import('../js/Nadagotchi.js')).Nadagotchi;
+      139 |     PersistenceManager = (await import('../js/PersistenceManager.js')).PersistenceManager;
+    > 140 |     MainScene = (await import('../js/MainScene.js')).MainScene;
+          |                  ^
+      141 |     ArtisanMinigameScene = (await import('../js/ArtisanMinigameScene.js')).ArtisanMinigameScene;
+      142 |     Config = (await import('../js/Config.js')).Config;
+      143 |     Encoding = await import('../js/utils/Encoding.js');
+
+      at constructor (node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at Parser.toParseError [as raise] (node_modules/@babel/parser/src/tokenizer/index.ts:1507:19)
+      at Parser.raise [as checkReservedWord] (node_modules/@babel/parser/src/parser/expression.ts:2896:12)
+      at Parser.checkReservedWord [as parseIdentifierName] (node_modules/@babel/parser/src/parser/expression.ts:2858:12)
+      at Parser.parseIdentifierName [as parseIdentifier] (node_modules/@babel/parser/src/parser/expression.ts:2815:23)
+      at Parser.parseIdentifier [as parseExprAtom] (node_modules/@babel/parser/src/parser/expression.ts:1304:27)
+      at Parser.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:742:23)
+      at Parser.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at Parser.parseUpdate [as parseMaybeUnary] (node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at Parser.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at Parser.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at Parser.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at Parser.parseMaybeConditional [as parseMaybeAssign] (node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at parseMaybeAssign (node_modules/@babel/parser/src/parser/expression.ts:257:12)
+      at Parser.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3197:16)
+      at Parser.allowInAnd [as parseMaybeAssignAllowIn] (node_modules/@babel/parser/src/parser/expression.ts:256:17)
+      at Parser.parseMaybeAssignAllowIn [as parseVar] (node_modules/@babel/parser/src/parser/statement.ts:1587:18)
+      at Parser.parseVar [as parseVarStatement] (node_modules/@babel/parser/src/parser/statement.ts:1251:10)
+      at Parser.parseVarStatement [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:612:21)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseStatementListItem] (node_modules/@babel/parser/src/parser/statement.ts:431:17)
+      at Parser.parseStatementListItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1444:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseBlock] (node_modules/@babel/parser/src/parser/statement.ts:1385:10)
+      at Parser.parseBlock [as parseFunctionBody] (node_modules/@babel/parser/src/parser/expression.ts:2626:24)
+      at Parser.parseFunctionBody [as parseFunctionBodyAndFinish] (node_modules/@babel/parser/src/parser/expression.ts:2595:10)
+      at Parser.parseFunctionBodyAndFinish [as parseMethod] (node_modules/@babel/parser/src/parser/expression.ts:2492:31)
+      at Parser.parseMethod [as pushClassMethod] (node_modules/@babel/parser/src/parser/statement.ts:2244:12)
+      at Parser.pushClassMethod [as parseClassMemberWithIsStatic] (node_modules/@babel/parser/src/parser/statement.ts:2023:12)
+      at Parser.parseClassMemberWithIsStatic [as parseClassMember] (node_modules/@babel/parser/src/parser/statement.ts:1938:10)
+      at parseClassMember (node_modules/@babel/parser/src/parser/statement.ts:1851:14)
+      at Parser.callback [as withSmartMixTopicForbiddingContext] (node_modules/@babel/parser/src/parser/expression.ts:3176:14)
+      at Parser.withSmartMixTopicForbiddingContext [as parseClassBody] (node_modules/@babel/parser/src/parser/statement.ts:1823:10)
+      at Parser.parseClassBody [as parseClass] (node_modules/@babel/parser/src/parser/statement.ts:1774:22)
+      at Parser.parseClass [as parseExportDeclaration] (node_modules/@babel/parser/src/parser/statement.ts:2628:25)
+      at Parser.parseExportDeclaration [as maybeParseExportDeclaration] (node_modules/@babel/parser/src/parser/statement.ts:2551:31)
+      at Parser.maybeParseExportDeclaration [as parseExport] (node_modules/@babel/parser/src/parser/statement.ts:2432:29)
+      at Parser.parseExport [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:649:25)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseModuleItem] (node_modules/@babel/parser/src/parser/statement.ts:419:17)
+      at Parser.parseModuleItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1443:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseProgram] (node_modules/@babel/parser/src/parser/statement.ts:229:10)
+      at Parser.parseProgram [as parseTopLevel] (node_modules/@babel/parser/src/parser/statement.ts:203:25)
+      at Parser.parseTopLevel [as parse] (node_modules/@babel/parser/src/parser/index.ts:88:25)
+      at parse (node_modules/@babel/parser/src/index.ts:86:38)
+      at parser (node_modules/@babel/core/src/parser/index.ts:29:19)
+          at parser.next (<anonymous>)
+      at normalizeFile (node_modules/@babel/core/src/transformation/normalize-file.ts:50:24)
+          at normalizeFile.next (<anonymous>)
+      at run (node_modules/@babel/core/src/transformation/index.ts:41:36)
+          at run.next (<anonymous>)
+      at transform (node_modules/@babel/core/src/transform.ts:29:20)
+          at transform.next (<anonymous>)
+      at evaluateSync (node_modules/gensync/index.js:251:28)
+      at sync (node_modules/gensync/index.js:89:14)
+      at fn (node_modules/@babel/core/src/errors/rewrite-stack-trace.ts:99:14)
+      at transformSync (node_modules/@babel/core/src/transform.ts:66:52)
+      at ScriptTransformer.transformSource (node_modules/@jest/transform/build/index.js:422:31)
+      at ScriptTransformer._transformAndBuildScript (node_modules/@jest/transform/build/index.js:519:40)
+      at ScriptTransformer.transform (node_modules/@jest/transform/build/index.js:558:19)
+      at require (tests/Security.test.js:140:18)
+      at Object.<anonymous> (tests/Security.test.js:140:18)
+
+  ● Security Hardening › Minigame Privacy: State is hidden
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation, specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    SyntaxError: /workspaces/Nadagotchi/js/MainScene.js: Unexpected reserved word 'await'. (95:26)
+
+      93 |
+      94 |         // --- Pet Initialization ---
+    > 95 |         const loadedPet = await this.persistence.loadPet();
+         |                           ^
+      96 |         if (data && data.newPetData) {
+      97 |             // New Game: Pass null for loadedData to ensure defaults are used
+      98 |             this.nadagotchi = new Nadagotchi(data.newPetData.dominantArchetype, null);
+
+      138 |     Nadagotchi = (await import('../js/Nadagotchi.js')).Nadagotchi;
+      139 |     PersistenceManager = (await import('../js/PersistenceManager.js')).PersistenceManager;
+    > 140 |     MainScene = (await import('../js/MainScene.js')).MainScene;
+          |                  ^
+      141 |     ArtisanMinigameScene = (await import('../js/ArtisanMinigameScene.js')).ArtisanMinigameScene;
+      142 |     Config = (await import('../js/Config.js')).Config;
+      143 |     Encoding = await import('../js/utils/Encoding.js');
+
+      at constructor (node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at Parser.toParseError [as raise] (node_modules/@babel/parser/src/tokenizer/index.ts:1507:19)
+      at Parser.raise [as checkReservedWord] (node_modules/@babel/parser/src/parser/expression.ts:2896:12)
+      at Parser.checkReservedWord [as parseIdentifierName] (node_modules/@babel/parser/src/parser/expression.ts:2858:12)
+      at Parser.parseIdentifierName [as parseIdentifier] (node_modules/@babel/parser/src/parser/expression.ts:2815:23)
+      at Parser.parseIdentifier [as parseExprAtom] (node_modules/@babel/parser/src/parser/expression.ts:1304:27)
+      at Parser.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:742:23)
+      at Parser.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at Parser.parseUpdate [as parseMaybeUnary] (node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at Parser.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at Parser.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at Parser.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at Parser.parseMaybeConditional [as parseMaybeAssign] (node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at parseMaybeAssign (node_modules/@babel/parser/src/parser/expression.ts:257:12)
+      at Parser.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3197:16)
+      at Parser.allowInAnd [as parseMaybeAssignAllowIn] (node_modules/@babel/parser/src/parser/expression.ts:256:17)
+      at Parser.parseMaybeAssignAllowIn [as parseVar] (node_modules/@babel/parser/src/parser/statement.ts:1587:18)
+      at Parser.parseVar [as parseVarStatement] (node_modules/@babel/parser/src/parser/statement.ts:1251:10)
+      at Parser.parseVarStatement [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:612:21)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseStatementListItem] (node_modules/@babel/parser/src/parser/statement.ts:431:17)
+      at Parser.parseStatementListItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1444:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseBlock] (node_modules/@babel/parser/src/parser/statement.ts:1385:10)
+      at Parser.parseBlock [as parseFunctionBody] (node_modules/@babel/parser/src/parser/expression.ts:2626:24)
+      at Parser.parseFunctionBody [as parseFunctionBodyAndFinish] (node_modules/@babel/parser/src/parser/expression.ts:2595:10)
+      at Parser.parseFunctionBodyAndFinish [as parseMethod] (node_modules/@babel/parser/src/parser/expression.ts:2492:31)
+      at Parser.parseMethod [as pushClassMethod] (node_modules/@babel/parser/src/parser/statement.ts:2244:12)
+      at Parser.pushClassMethod [as parseClassMemberWithIsStatic] (node_modules/@babel/parser/src/parser/statement.ts:2023:12)
+      at Parser.parseClassMemberWithIsStatic [as parseClassMember] (node_modules/@babel/parser/src/parser/statement.ts:1938:10)
+      at parseClassMember (node_modules/@babel/parser/src/parser/statement.ts:1851:14)
+      at Parser.callback [as withSmartMixTopicForbiddingContext] (node_modules/@babel/parser/src/parser/expression.ts:3176:14)
+      at Parser.withSmartMixTopicForbiddingContext [as parseClassBody] (node_modules/@babel/parser/src/parser/statement.ts:1823:10)
+      at Parser.parseClassBody [as parseClass] (node_modules/@babel/parser/src/parser/statement.ts:1774:22)
+      at Parser.parseClass [as parseExportDeclaration] (node_modules/@babel/parser/src/parser/statement.ts:2628:25)
+      at Parser.parseExportDeclaration [as maybeParseExportDeclaration] (node_modules/@babel/parser/src/parser/statement.ts:2551:31)
+      at Parser.maybeParseExportDeclaration [as parseExport] (node_modules/@babel/parser/src/parser/statement.ts:2432:29)
+      at Parser.parseExport [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:649:25)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseModuleItem] (node_modules/@babel/parser/src/parser/statement.ts:419:17)
+      at Parser.parseModuleItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1443:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseProgram] (node_modules/@babel/parser/src/parser/statement.ts:229:10)
+      at Parser.parseProgram [as parseTopLevel] (node_modules/@babel/parser/src/parser/statement.ts:203:25)
+      at Parser.parseTopLevel [as parse] (node_modules/@babel/parser/src/parser/index.ts:88:25)
+      at parse (node_modules/@babel/parser/src/index.ts:86:38)
+      at parser (node_modules/@babel/core/src/parser/index.ts:29:19)
+          at parser.next (<anonymous>)
+      at normalizeFile (node_modules/@babel/core/src/transformation/normalize-file.ts:50:24)
+          at normalizeFile.next (<anonymous>)
+      at run (node_modules/@babel/core/src/transformation/index.ts:41:36)
+          at run.next (<anonymous>)
+      at transform (node_modules/@babel/core/src/transform.ts:29:20)
+          at transform.next (<anonymous>)
+      at evaluateSync (node_modules/gensync/index.js:251:28)
+      at sync (node_modules/gensync/index.js:89:14)
+      at fn (node_modules/@babel/core/src/errors/rewrite-stack-trace.ts:99:14)
+      at transformSync (node_modules/@babel/core/src/transform.ts:66:52)
+      at ScriptTransformer.transformSource (node_modules/@jest/transform/build/index.js:422:31)
+      at ScriptTransformer._transformAndBuildScript (node_modules/@jest/transform/build/index.js:519:40)
+      at ScriptTransformer.transform (node_modules/@jest/transform/build/index.js:558:19)
+      at require (tests/Security.test.js:140:18)
+      at Object.<anonymous> (tests/Security.test.js:140:18)
+
+  ● Security Hardening › Event Injection: Blocked if minigame not active
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation, specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    SyntaxError: /workspaces/Nadagotchi/js/MainScene.js: Unexpected reserved word 'await'. (95:26)
+
+      93 |
+      94 |         // --- Pet Initialization ---
+    > 95 |         const loadedPet = await this.persistence.loadPet();
+         |                           ^
+      96 |         if (data && data.newPetData) {
+      97 |             // New Game: Pass null for loadedData to ensure defaults are used
+      98 |             this.nadagotchi = new Nadagotchi(data.newPetData.dominantArchetype, null);
+
+      138 |     Nadagotchi = (await import('../js/Nadagotchi.js')).Nadagotchi;
+      139 |     PersistenceManager = (await import('../js/PersistenceManager.js')).PersistenceManager;
+    > 140 |     MainScene = (await import('../js/MainScene.js')).MainScene;
+          |                  ^
+      141 |     ArtisanMinigameScene = (await import('../js/ArtisanMinigameScene.js')).ArtisanMinigameScene;
+      142 |     Config = (await import('../js/Config.js')).Config;
+      143 |     Encoding = await import('../js/utils/Encoding.js');
+
+      at constructor (node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at Parser.toParseError [as raise] (node_modules/@babel/parser/src/tokenizer/index.ts:1507:19)
+      at Parser.raise [as checkReservedWord] (node_modules/@babel/parser/src/parser/expression.ts:2896:12)
+      at Parser.checkReservedWord [as parseIdentifierName] (node_modules/@babel/parser/src/parser/expression.ts:2858:12)
+      at Parser.parseIdentifierName [as parseIdentifier] (node_modules/@babel/parser/src/parser/expression.ts:2815:23)
+      at Parser.parseIdentifier [as parseExprAtom] (node_modules/@babel/parser/src/parser/expression.ts:1304:27)
+      at Parser.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:742:23)
+      at Parser.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at Parser.parseUpdate [as parseMaybeUnary] (node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at Parser.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at Parser.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at Parser.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at Parser.parseMaybeConditional [as parseMaybeAssign] (node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at parseMaybeAssign (node_modules/@babel/parser/src/parser/expression.ts:257:12)
+      at Parser.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3197:16)
+      at Parser.allowInAnd [as parseMaybeAssignAllowIn] (node_modules/@babel/parser/src/parser/expression.ts:256:17)
+      at Parser.parseMaybeAssignAllowIn [as parseVar] (node_modules/@babel/parser/src/parser/statement.ts:1587:18)
+      at Parser.parseVar [as parseVarStatement] (node_modules/@babel/parser/src/parser/statement.ts:1251:10)
+      at Parser.parseVarStatement [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:612:21)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseStatementListItem] (node_modules/@babel/parser/src/parser/statement.ts:431:17)
+      at Parser.parseStatementListItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1444:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseBlock] (node_modules/@babel/parser/src/parser/statement.ts:1385:10)
+      at Parser.parseBlock [as parseFunctionBody] (node_modules/@babel/parser/src/parser/expression.ts:2626:24)
+      at Parser.parseFunctionBody [as parseFunctionBodyAndFinish] (node_modules/@babel/parser/src/parser/expression.ts:2595:10)
+      at Parser.parseFunctionBodyAndFinish [as parseMethod] (node_modules/@babel/parser/src/parser/expression.ts:2492:31)
+      at Parser.parseMethod [as pushClassMethod] (node_modules/@babel/parser/src/parser/statement.ts:2244:12)
+      at Parser.pushClassMethod [as parseClassMemberWithIsStatic] (node_modules/@babel/parser/src/parser/statement.ts:2023:12)
+      at Parser.parseClassMemberWithIsStatic [as parseClassMember] (node_modules/@babel/parser/src/parser/statement.ts:1938:10)
+      at parseClassMember (node_modules/@babel/parser/src/parser/statement.ts:1851:14)
+      at Parser.callback [as withSmartMixTopicForbiddingContext] (node_modules/@babel/parser/src/parser/expression.ts:3176:14)
+      at Parser.withSmartMixTopicForbiddingContext [as parseClassBody] (node_modules/@babel/parser/src/parser/statement.ts:1823:10)
+      at Parser.parseClassBody [as parseClass] (node_modules/@babel/parser/src/parser/statement.ts:1774:22)
+      at Parser.parseClass [as parseExportDeclaration] (node_modules/@babel/parser/src/parser/statement.ts:2628:25)
+      at Parser.parseExportDeclaration [as maybeParseExportDeclaration] (node_modules/@babel/parser/src/parser/statement.ts:2551:31)
+      at Parser.maybeParseExportDeclaration [as parseExport] (node_modules/@babel/parser/src/parser/statement.ts:2432:29)
+      at Parser.parseExport [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:649:25)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseModuleItem] (node_modules/@babel/parser/src/parser/statement.ts:419:17)
+      at Parser.parseModuleItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1443:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseProgram] (node_modules/@babel/parser/src/parser/statement.ts:229:10)
+      at Parser.parseProgram [as parseTopLevel] (node_modules/@babel/parser/src/parser/statement.ts:203:25)
+      at Parser.parseTopLevel [as parse] (node_modules/@babel/parser/src/parser/index.ts:88:25)
+      at parse (node_modules/@babel/parser/src/index.ts:86:38)
+      at parser (node_modules/@babel/core/src/parser/index.ts:29:19)
+          at parser.next (<anonymous>)
+      at normalizeFile (node_modules/@babel/core/src/transformation/normalize-file.ts:50:24)
+          at normalizeFile.next (<anonymous>)
+      at run (node_modules/@babel/core/src/transformation/index.ts:41:36)
+          at run.next (<anonymous>)
+      at transform (node_modules/@babel/core/src/transform.ts:29:20)
+          at transform.next (<anonymous>)
+      at evaluateSync (node_modules/gensync/index.js:251:28)
+      at sync (node_modules/gensync/index.js:89:14)
+      at fn (node_modules/@babel/core/src/errors/rewrite-stack-trace.ts:99:14)
+      at transformSync (node_modules/@babel/core/src/transform.ts:66:52)
+      at ScriptTransformer.transformSource (node_modules/@jest/transform/build/index.js:422:31)
+      at ScriptTransformer._transformAndBuildScript (node_modules/@jest/transform/build/index.js:519:40)
+      at ScriptTransformer.transform (node_modules/@jest/transform/build/index.js:558:19)
+      at require (tests/Security.test.js:140:18)
+      at Object.<anonymous> (tests/Security.test.js:140:18)
+
+  ● Security Hardening › Event Injection: Allowed if valid
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation, specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    SyntaxError: /workspaces/Nadagotchi/js/MainScene.js: Unexpected reserved word 'await'. (95:26)
+
+      93 |
+      94 |         // --- Pet Initialization ---
+    > 95 |         const loadedPet = await this.persistence.loadPet();
+         |                           ^
+      96 |         if (data && data.newPetData) {
+      97 |             // New Game: Pass null for loadedData to ensure defaults are used
+      98 |             this.nadagotchi = new Nadagotchi(data.newPetData.dominantArchetype, null);
+
+      138 |     Nadagotchi = (await import('../js/Nadagotchi.js')).Nadagotchi;
+      139 |     PersistenceManager = (await import('../js/PersistenceManager.js')).PersistenceManager;
+    > 140 |     MainScene = (await import('../js/MainScene.js')).MainScene;
+          |                  ^
+      141 |     ArtisanMinigameScene = (await import('../js/ArtisanMinigameScene.js')).ArtisanMinigameScene;
+      142 |     Config = (await import('../js/Config.js')).Config;
+      143 |     Encoding = await import('../js/utils/Encoding.js');
+
+      at constructor (node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at Parser.toParseError [as raise] (node_modules/@babel/parser/src/tokenizer/index.ts:1507:19)
+      at Parser.raise [as checkReservedWord] (node_modules/@babel/parser/src/parser/expression.ts:2896:12)
+      at Parser.checkReservedWord [as parseIdentifierName] (node_modules/@babel/parser/src/parser/expression.ts:2858:12)
+      at Parser.parseIdentifierName [as parseIdentifier] (node_modules/@babel/parser/src/parser/expression.ts:2815:23)
+      at Parser.parseIdentifier [as parseExprAtom] (node_modules/@babel/parser/src/parser/expression.ts:1304:27)
+      at Parser.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:742:23)
+      at Parser.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at Parser.parseUpdate [as parseMaybeUnary] (node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at Parser.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at Parser.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at Parser.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at Parser.parseMaybeConditional [as parseMaybeAssign] (node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at parseMaybeAssign (node_modules/@babel/parser/src/parser/expression.ts:257:12)
+      at Parser.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3197:16)
+      at Parser.allowInAnd [as parseMaybeAssignAllowIn] (node_modules/@babel/parser/src/parser/expression.ts:256:17)
+      at Parser.parseMaybeAssignAllowIn [as parseVar] (node_modules/@babel/parser/src/parser/statement.ts:1587:18)
+      at Parser.parseVar [as parseVarStatement] (node_modules/@babel/parser/src/parser/statement.ts:1251:10)
+      at Parser.parseVarStatement [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:612:21)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseStatementListItem] (node_modules/@babel/parser/src/parser/statement.ts:431:17)
+      at Parser.parseStatementListItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1444:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseBlock] (node_modules/@babel/parser/src/parser/statement.ts:1385:10)
+      at Parser.parseBlock [as parseFunctionBody] (node_modules/@babel/parser/src/parser/expression.ts:2626:24)
+      at Parser.parseFunctionBody [as parseFunctionBodyAndFinish] (node_modules/@babel/parser/src/parser/expression.ts:2595:10)
+      at Parser.parseFunctionBodyAndFinish [as parseMethod] (node_modules/@babel/parser/src/parser/expression.ts:2492:31)
+      at Parser.parseMethod [as pushClassMethod] (node_modules/@babel/parser/src/parser/statement.ts:2244:12)
+      at Parser.pushClassMethod [as parseClassMemberWithIsStatic] (node_modules/@babel/parser/src/parser/statement.ts:2023:12)
+      at Parser.parseClassMemberWithIsStatic [as parseClassMember] (node_modules/@babel/parser/src/parser/statement.ts:1938:10)
+      at parseClassMember (node_modules/@babel/parser/src/parser/statement.ts:1851:14)
+      at Parser.callback [as withSmartMixTopicForbiddingContext] (node_modules/@babel/parser/src/parser/expression.ts:3176:14)
+      at Parser.withSmartMixTopicForbiddingContext [as parseClassBody] (node_modules/@babel/parser/src/parser/statement.ts:1823:10)
+      at Parser.parseClassBody [as parseClass] (node_modules/@babel/parser/src/parser/statement.ts:1774:22)
+      at Parser.parseClass [as parseExportDeclaration] (node_modules/@babel/parser/src/parser/statement.ts:2628:25)
+      at Parser.parseExportDeclaration [as maybeParseExportDeclaration] (node_modules/@babel/parser/src/parser/statement.ts:2551:31)
+      at Parser.maybeParseExportDeclaration [as parseExport] (node_modules/@babel/parser/src/parser/statement.ts:2432:29)
+      at Parser.parseExport [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:649:25)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseModuleItem] (node_modules/@babel/parser/src/parser/statement.ts:419:17)
+      at Parser.parseModuleItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1443:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseProgram] (node_modules/@babel/parser/src/parser/statement.ts:229:10)
+      at Parser.parseProgram [as parseTopLevel] (node_modules/@babel/parser/src/parser/statement.ts:203:25)
+      at Parser.parseTopLevel [as parse] (node_modules/@babel/parser/src/parser/index.ts:88:25)
+      at parse (node_modules/@babel/parser/src/index.ts:86:38)
+      at parser (node_modules/@babel/core/src/parser/index.ts:29:19)
+          at parser.next (<anonymous>)
+      at normalizeFile (node_modules/@babel/core/src/transformation/normalize-file.ts:50:24)
+          at normalizeFile.next (<anonymous>)
+      at run (node_modules/@babel/core/src/transformation/index.ts:41:36)
+          at run.next (<anonymous>)
+      at transform (node_modules/@babel/core/src/transform.ts:29:20)
+          at transform.next (<anonymous>)
+      at evaluateSync (node_modules/gensync/index.js:251:28)
+      at sync (node_modules/gensync/index.js:89:14)
+      at fn (node_modules/@babel/core/src/errors/rewrite-stack-trace.ts:99:14)
+      at transformSync (node_modules/@babel/core/src/transform.ts:66:52)
+      at ScriptTransformer.transformSource (node_modules/@jest/transform/build/index.js:422:31)
+      at ScriptTransformer._transformAndBuildScript (node_modules/@jest/transform/build/index.js:519:40)
+      at ScriptTransformer.transform (node_modules/@jest/transform/build/index.js:558:19)
+      at require (tests/Security.test.js:140:18)
+      at Object.<anonymous> (tests/Security.test.js:140:18)
+
+FAIL tests/Ancestors.test.js
+  ● Hall of Ancestors UI › showTab ANCESTORS should create buttons for each ancestor
+
+    ReferenceError: UIScene is not defined
+
+      53 |
+      54 |     beforeEach(() => {
+    > 55 |         uiScene = new UIScene();
+         |         ^
+      56 |
+      57 |         // Ensure the scene uses our mock persistence
+      58 |         mockPersistenceInstance = {
+
+      at Object.uiScene (tests/Ancestors.test.js:55:9)
+
+  ● Hall of Ancestors UI › showTab ANCESTORS should show empty state if no ancestors
+
+    ReferenceError: UIScene is not defined
+
+      53 |
+      54 |     beforeEach(() => {
+    > 55 |         uiScene = new UIScene();
+         |         ^
+      56 |
+      57 |         // Ensure the scene uses our mock persistence
+      58 |         mockPersistenceInstance = {
+
+      at Object.uiScene (tests/Ancestors.test.js:55:9)
+
+PASS tests/performance/GeneticsSystem.perf.test.js
+  ● Console
+
+    console.log
+      [Benchmark] GeneticsSystem.breed x 50000 with 200 items: 795ms
+
+      at Object.log (tests/performance/GeneticsSystem.perf.test.js:36:17)
+
+PASS tests/RelationshipSystem.test.js
+PASS tests/PersistenceManager.test.js
+PASS tests/StudyMinigameScene.test.js
+PASS tests/StartScene.test.js
+PASS tests/performance/SkyManager.perf.test.js
+  ● Console
+
+    console.log
+      [OPTIMIZED] Total canvas operations for 1000 transitions: 5296
+
+      at Object.log (tests/performance/SkyManager.perf.test.js:78:17)
+
+PASS tests/DebugConsole.test.js
+  ● Console
+
+    console.log
+      Currency system pending implementation.
+
+      at Object.log [as action] (js/DebugConsole.js:85:143)
+
+    console.log
+      [DEBUG] Executed: +1000 Coins (Placeholder)
+
+      at HTMLButtonElement.log (js/DebugConsole.js:121:29)
+
+    console.log
+      [DEBUG] Executed: +10 All Items
+
+      at HTMLButtonElement.log (js/DebugConsole.js:121:29)
+
+    console.log
+      [DEBUG] Executed: Toggle Hitbox Bounds
+
+      at HTMLButtonElement.log (js/DebugConsole.js:121:29)
+
+PASS tests/Minigames.test.js
+PASS tests/ExpeditionScene.test.js
+PASS tests/PreloaderScene.test.js
+  ● Console
+
+    console.warn
+      Web Audio API not supported or blocked. TypeError: AudioContext is not a constructor
+          at new SoundSynthesizer (/workspaces/Nadagotchi/js/utils/SoundSynthesizer.js:22:24)
+          at PreloaderScene.create (/workspaces/Nadagotchi/js/PreloaderScene.js:431:9)
+          at Object.create (/workspaces/Nadagotchi/tests/PreloaderScene.test.js:98:15)
+          at Promise.finally.completed (/workspaces/Nadagotchi/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/workspaces/Nadagotchi/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+          at _callCircusTest (/workspaces/Nadagotchi/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+          at _runTest (/workspaces/Nadagotchi/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+          at /workspaces/Nadagotchi/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+          at _runTestsForDescribeBlock (/workspaces/Nadagotchi/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+          at _runTestsForDescribeBlock (/workspaces/Nadagotchi/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+          at run (/workspaces/Nadagotchi/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+          at runAndTransformResultsToJestFormat (/workspaces/Nadagotchi/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+          at jestAdapter (/workspaces/Nadagotchi/node_modules/jest-circus/build/runner.js:101:19)
+          at runTestInternal (/workspaces/Nadagotchi/node_modules/jest-runner/build/index.js:275:16)
+          at runTest (/workspaces/Nadagotchi/node_modules/jest-runner/build/index.js:343:7)
+
+      27 |             this.setVolume(Config.SETTINGS.DEFAULT_VOLUME);
+      28 |         } catch (e) {
+    > 29 |             console.warn('Web Audio API not supported or blocked.', e);
+         |                     ^
+      30 |             this.ctx = null;
+      31 |         }
+      32 |
+
+      at new warn (js/utils/SoundSynthesizer.js:29:21)
+      at PreloaderScene.create (js/PreloaderScene.js:431:9)
+      at Object.create (tests/PreloaderScene.test.js:98:15)
+
+PASS tests/BreedingScene.test.js
+PASS tests/Achievement.test.js
+  ● Console
+
+    console.log
+      [AchievementManager] Unlocked: First Craft
+
+      at AchievementManager.log [as unlock] (js/AchievementManager.js:116:17)
+          at Array.forEach (<anonymous>)
+
+    console.log
+      [AchievementManager] Unlocked: First Craft
+
+      at AchievementManager.log [as unlock] (js/AchievementManager.js:116:17)
+          at Array.forEach (<anonymous>)
+
+    console.log
+      [AchievementManager] Unlocked: Socialite
+
+      at AchievementManager.log [as unlock] (js/AchievementManager.js:116:17)
+          at Array.forEach (<anonymous>)
+
+PASS tests/DebrisSystem.test.js
+PASS tests/HousingSystemII.test.js
+PASS tests/WeatherParticleManager.test.js
+PASS tests/Expedition.test.js
+PASS tests/Encoding.test.js
+PASS tests/QuestSystem.test.js
+  ● Console
+
+    console.error
+      Quest Transaction Aborted: Cannot add item 'Rare Gem' in quest 'masterwork_crafting' (Inventory Full/Limit)
+
+      139 |                 for (const [item, qty] of Object.entries(stageDef.rewards.items)) {
+      140 |                     if (!this.pet.inventorySystem.canAddItem(item, qty)) {
+    > 141 |                         console.error(`Quest Transaction Aborted: Cannot add item '${item}' in quest '${questId}' (Inventory Full/Limit)`);
+          |                                 ^
+      142 |                         return false;
+      143 |                     }
+      144 |                 }
+
+      at QuestSystem.error [as advanceQuest] (js/systems/QuestSystem.js:141:33)
+      at Object.advanceQuest (tests/QuestSystem.test.js:115:36)
+
+PASS tests/ClearWater.test.js
+PASS tests/WeatherSystem.test.js
+PASS tests/Genetics.test.js
+PASS tests/EventManager.test.js
+PASS tests/QuestSystem_generateDailyQuest.test.js
+PASS tests/ToastManager.test.js
+PASS tests/GhostSystem.test.js
+PASS tests/GhostScene.test.js
+PASS tests/Calendar.test.js
+PASS tests/CryptoUtils.test.js
+FAIL tests/performance/updateDominantArchetype.perf.test.js
+  ● Performance Benchmark: updateDominantArchetype › Benchmark updateDominantArchetype
+
+    TypeError: Cannot set properties of undefined (setting 'logic')
+
+      27 |             () => {
+      28 |                  pet.personalityPoints = { Adventurer: 10, Nurturer: 5, Mischievous: 2, Intellectual: 10, Recluse: 1 };
+    > 29 |                  pet.skills.logic = 10;
+         |                                  ^
+      30 |                  pet.skills.navigation = 10;
+      31 |             },
+      32 |
+
+      at Array.pet.dominantArchetype (tests/performance/updateDominantArchetype.perf.test.js:29:34)
+      at Object.<anonymous> (tests/performance/updateDominantArchetype.perf.test.js:52:40)
+
+FAIL tests/performance/debrisPenalty.perf.test.js
+  ● Performance Benchmark: Debris Penalty › Benchmark Debris Penalty Calculation
+
+    TypeError: Cannot read properties of undefined (reading 'random')
+
+      29 |                 type: type,
+      30 |                 // Use deterministic RNG from pet instead of Math.random()
+    > 31 |                 x: pet.rng.random(),
+         |                            ^
+      32 |                 y: pet.rng.random(),
+      33 |                 created: Date.now()
+      34 |             });
+
+      at Object.random (tests/performance/debrisPenalty.perf.test.js:31:28)
+
+FAIL tests/performance/WorldClock.perf.test.js
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation, specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    SyntaxError: /workspaces/Nadagotchi/js/WorldClock.js: 'return' outside of function. (42:8)
+
+      40 |             }
+      41 |         }
+    > 42 |         return "Night"; // Default case
+         |         ^
+      43 |     }
+      44 |
+      45 |     /**
+
+    > 1 | import { WorldClock } from '../../js/WorldClock.js';
+        | ^
+      2 | import { SeededRandom } from '../../js/utils/SeededRandom.js';
+      3 |
+      4 | // Mock Scene
+
+      at constructor (node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at Parser.toParseError [as raise] (node_modules/@babel/parser/src/tokenizer/index.ts:1507:19)
+      at Parser.raise [as parseReturnStatement] (node_modules/@babel/parser/src/parser/statement.ts:1103:12)
+      at Parser.parseReturnStatement [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:543:21)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseModuleItem] (node_modules/@babel/parser/src/parser/statement.ts:419:17)
+      at Parser.parseModuleItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1443:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseProgram] (node_modules/@babel/parser/src/parser/statement.ts:229:10)
+      at Parser.parseProgram [as parseTopLevel] (node_modules/@babel/parser/src/parser/statement.ts:203:25)
+      at Parser.parseTopLevel [as parse] (node_modules/@babel/parser/src/parser/index.ts:88:25)
+      at parse (node_modules/@babel/parser/src/index.ts:86:38)
+      at parser (node_modules/@babel/core/src/parser/index.ts:29:19)
+          at parser.next (<anonymous>)
+      at normalizeFile (node_modules/@babel/core/src/transformation/normalize-file.ts:50:24)
+          at normalizeFile.next (<anonymous>)
+      at run (node_modules/@babel/core/src/transformation/index.ts:41:36)
+          at run.next (<anonymous>)
+      at transform (node_modules/@babel/core/src/transform.ts:29:20)
+          at transform.next (<anonymous>)
+      at evaluateSync (node_modules/gensync/index.js:251:28)
+      at sync (node_modules/gensync/index.js:89:14)
+      at fn (node_modules/@babel/core/src/errors/rewrite-stack-trace.ts:99:14)
+      at transformSync (node_modules/@babel/core/src/transform.ts:66:52)
+      at ScriptTransformer.transformSource (node_modules/@jest/transform/build/index.js:422:31)
+      at ScriptTransformer._transformAndBuildScript (node_modules/@jest/transform/build/index.js:519:40)
+      at ScriptTransformer.transform (node_modules/@jest/transform/build/index.js:558:19)
+      at Object.require (tests/performance/WorldClock.perf.test.js:1:1)
+
+FAIL tests/performance/LightingManager.perf.test.js
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation, specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    SyntaxError: /workspaces/Nadagotchi/js/LightingManager.js: Missing semicolon. (19:12)
+
+      17 |      * Should be called in the scene's update loop.
+      18 |      */
+    > 19 |     update() {
+         |             ^
+      20 |         // Lighting effects should only be active in outdoor locations (GARDEN).
+      21 |         // Indoor locations (INDOOR) should rely on their own lighting/mood.
+      22 |         if (this.scene.location === 'INDOOR') {
+
+      4 | setupPhaserMock();
+      5 |
+    > 6 | import { LightingManager } from '../../js/LightingManager';
+        | ^
+      7 |
+      8 | describe('LightingManager Performance Benchmark', () => {
+      9 |     let scene;
+
+      at constructor (node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at Parser.toParseError [as raise] (node_modules/@babel/parser/src/tokenizer/index.ts:1507:19)
+      at Parser.raise [as semicolon] (node_modules/@babel/parser/src/parser/util.ts:149:10)
+      at Parser.semicolon [as parseExpressionStatement] (node_modules/@babel/parser/src/parser/statement.ts:1363:10)
+      at Parser.parseExpressionStatement [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:702:19)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseModuleItem] (node_modules/@babel/parser/src/parser/statement.ts:419:17)
+      at Parser.parseModuleItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1443:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseProgram] (node_modules/@babel/parser/src/parser/statement.ts:229:10)
+      at Parser.parseProgram [as parseTopLevel] (node_modules/@babel/parser/src/parser/statement.ts:203:25)
+      at Parser.parseTopLevel [as parse] (node_modules/@babel/parser/src/parser/index.ts:88:25)
+      at parse (node_modules/@babel/parser/src/index.ts:86:38)
+      at parser (node_modules/@babel/core/src/parser/index.ts:29:19)
+          at parser.next (<anonymous>)
+      at normalizeFile (node_modules/@babel/core/src/transformation/normalize-file.ts:50:24)
+          at normalizeFile.next (<anonymous>)
+      at run (node_modules/@babel/core/src/transformation/index.ts:41:36)
+          at run.next (<anonymous>)
+      at transform (node_modules/@babel/core/src/transform.ts:29:20)
+          at transform.next (<anonymous>)
+      at evaluateSync (node_modules/gensync/index.js:251:28)
+      at sync (node_modules/gensync/index.js:89:14)
+      at fn (node_modules/@babel/core/src/errors/rewrite-stack-trace.ts:99:14)
+      at transformSync (node_modules/@babel/core/src/transform.ts:66:52)
+      at ScriptTransformer.transformSource (node_modules/@jest/transform/build/index.js:422:31)
+      at ScriptTransformer._transformAndBuildScript (node_modules/@jest/transform/build/index.js:519:40)
+      at ScriptTransformer.transform (node_modules/@jest/transform/build/index.js:558:19)
+      at Object.require (tests/performance/LightingManager.perf.test.js:6:1)
+
+FAIL tests/repro_crafting_bug.test.js
+  ● Nadagotchi Crafting Logic › should NOT allow crafting an item that has not been discovered
+
+    TypeError: Cannot read properties of undefined (reading 'push')
+
+      573 |     addJournalEntry(text) {
+      574 |         const newEntry = { date: new Date().toLocaleString(), text: text };
+    > 575 |         this.journal.push(newEntry);
+          |                      ^
+      576 |
+      577 |         // Cap the journal growth
+      578 |         const limit = Config.LIMITS.MAX_JOURNAL_ENTRIES || 100;
+
+      at Nadagotchi.push [as addJournalEntry] (js/Nadagotchi.js:575:22)
+      at InventorySystem.addJournalEntry [as craftItem] (js/systems/InventorySystem.js:25:22)
+      at Nadagotchi.craftItem (js/Nadagotchi.js:534:30)
+      at Object.craftItem (tests/repro_crafting_bug.test.js:37:13)
+
+FAIL tests/legacy.test.js
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation, specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    SyntaxError: /workspaces/Nadagotchi/js/MainScene.js: Unexpected reserved word 'await'. (95:26)
+
+      93 |
+      94 |         // --- Pet Initialization ---
+    > 95 |         const loadedPet = await this.persistence.loadPet();
+         |                           ^
+      96 |         if (data && data.newPetData) {
+      97 |             // New Game: Pass null for loadedData to ensure defaults are used
+      98 |             this.nadagotchi = new Nadagotchi(data.newPetData.dominantArchetype, null);
+
+      132 | // This is handled by jest.config.js, so we can use require here.
+      133 | const { Nadagotchi } = require('../js/Nadagotchi.js');
+    > 134 | const { MainScene } = require('../js/MainScene.js');
+          |                       ^
+      135 | const { UIScene } = require('../js/UIScene.js');
+      136 | const { PersistenceManager } = require('../js/PersistenceManager.js');
+      137 | const { ButtonFactory } = require('../js/ButtonFactory.js');
+
+      at constructor (node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at Parser.toParseError [as raise] (node_modules/@babel/parser/src/tokenizer/index.ts:1507:19)
+      at Parser.raise [as checkReservedWord] (node_modules/@babel/parser/src/parser/expression.ts:2896:12)
+      at Parser.checkReservedWord [as parseIdentifierName] (node_modules/@babel/parser/src/parser/expression.ts:2858:12)
+      at Parser.parseIdentifierName [as parseIdentifier] (node_modules/@babel/parser/src/parser/expression.ts:2815:23)
+      at Parser.parseIdentifier [as parseExprAtom] (node_modules/@babel/parser/src/parser/expression.ts:1304:27)
+      at Parser.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:742:23)
+      at Parser.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at Parser.parseUpdate [as parseMaybeUnary] (node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at Parser.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at Parser.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at Parser.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at Parser.parseMaybeConditional [as parseMaybeAssign] (node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at parseMaybeAssign (node_modules/@babel/parser/src/parser/expression.ts:257:12)
+      at Parser.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3197:16)
+      at Parser.allowInAnd [as parseMaybeAssignAllowIn] (node_modules/@babel/parser/src/parser/expression.ts:256:17)
+      at Parser.parseMaybeAssignAllowIn [as parseVar] (node_modules/@babel/parser/src/parser/statement.ts:1587:18)
+      at Parser.parseVar [as parseVarStatement] (node_modules/@babel/parser/src/parser/statement.ts:1251:10)
+      at Parser.parseVarStatement [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:612:21)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseStatementListItem] (node_modules/@babel/parser/src/parser/statement.ts:431:17)
+      at Parser.parseStatementListItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1444:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseBlock] (node_modules/@babel/parser/src/parser/statement.ts:1385:10)
+      at Parser.parseBlock [as parseFunctionBody] (node_modules/@babel/parser/src/parser/expression.ts:2626:24)
+      at Parser.parseFunctionBody [as parseFunctionBodyAndFinish] (node_modules/@babel/parser/src/parser/expression.ts:2595:10)
+      at Parser.parseFunctionBodyAndFinish [as parseMethod] (node_modules/@babel/parser/src/parser/expression.ts:2492:31)
+      at Parser.parseMethod [as pushClassMethod] (node_modules/@babel/parser/src/parser/statement.ts:2244:12)
+      at Parser.pushClassMethod [as parseClassMemberWithIsStatic] (node_modules/@babel/parser/src/parser/statement.ts:2023:12)
+      at Parser.parseClassMemberWithIsStatic [as parseClassMember] (node_modules/@babel/parser/src/parser/statement.ts:1938:10)
+      at parseClassMember (node_modules/@babel/parser/src/parser/statement.ts:1851:14)
+      at Parser.callback [as withSmartMixTopicForbiddingContext] (node_modules/@babel/parser/src/parser/expression.ts:3176:14)
+      at Parser.withSmartMixTopicForbiddingContext [as parseClassBody] (node_modules/@babel/parser/src/parser/statement.ts:1823:10)
+      at Parser.parseClassBody [as parseClass] (node_modules/@babel/parser/src/parser/statement.ts:1774:22)
+      at Parser.parseClass [as parseExportDeclaration] (node_modules/@babel/parser/src/parser/statement.ts:2628:25)
+      at Parser.parseExportDeclaration [as maybeParseExportDeclaration] (node_modules/@babel/parser/src/parser/statement.ts:2551:31)
+      at Parser.maybeParseExportDeclaration [as parseExport] (node_modules/@babel/parser/src/parser/statement.ts:2432:29)
+      at Parser.parseExport [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:649:25)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseModuleItem] (node_modules/@babel/parser/src/parser/statement.ts:419:17)
+      at Parser.parseModuleItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1443:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseProgram] (node_modules/@babel/parser/src/parser/statement.ts:229:10)
+      at Parser.parseProgram [as parseTopLevel] (node_modules/@babel/parser/src/parser/statement.ts:203:25)
+      at Parser.parseTopLevel [as parse] (node_modules/@babel/parser/src/parser/index.ts:88:25)
+      at parse (node_modules/@babel/parser/src/index.ts:86:38)
+      at parser (node_modules/@babel/core/src/parser/index.ts:29:19)
+          at parser.next (<anonymous>)
+      at normalizeFile (node_modules/@babel/core/src/transformation/normalize-file.ts:50:24)
+          at normalizeFile.next (<anonymous>)
+      at run (node_modules/@babel/core/src/transformation/index.ts:41:36)
+          at run.next (<anonymous>)
+      at transform (node_modules/@babel/core/src/transform.ts:29:20)
+          at transform.next (<anonymous>)
+      at evaluateSync (node_modules/gensync/index.js:251:28)
+      at sync (node_modules/gensync/index.js:89:14)
+      at fn (node_modules/@babel/core/src/errors/rewrite-stack-trace.ts:99:14)
+      at transformSync (node_modules/@babel/core/src/transform.ts:66:52)
+      at ScriptTransformer.transformSource (node_modules/@jest/transform/build/index.js:422:31)
+      at ScriptTransformer._transformAndBuildScript (node_modules/@jest/transform/build/index.js:519:40)
+      at ScriptTransformer.transform (node_modules/@jest/transform/build/index.js:558:19)
+      at Object.require (tests/legacy.test.js:134:23)
+
+FAIL tests/debrisFunctional.test.js
+  ● Debris System Functional Tests › Spawn Daily Debris puts items in GARDEN
+
+    Cannot use spyOn on a primitive value; undefined given
+
+      19 |     test('Spawn Daily Debris puts items in GARDEN', () => {
+      20 |         // Use spy to control random chance for spawn logic
+    > 21 |         jest.spyOn(pet.rng, 'random').mockReturnValue(0.0); // Ensures spawn condition pass
+         |              ^
+      22 |
+      23 |         pet.debrisSystem.spawnDaily('Spring', 'Sunny');
+      24 |
+
+      at ModuleMocker.spyOn (node_modules/jest-mock/build/index.js:583:13)
+      at Object.spyOn (tests/debrisFunctional.test.js:21:14)
+
+  ● Debris System Functional Tests › Spawn Poop puts items in current location
+
+    Cannot use spyOn on a primitive value; undefined given
+
+      31 |
+      32 |         // Use spy to ensure valid placement search succeeds
+    > 33 |         jest.spyOn(pet.rng, 'random').mockReturnValue(0.1);
+         |              ^
+      34 |         jest.spyOn(pet.rng, 'range').mockReturnValue(50); // Mock range for coords if needed
+      35 |
+      36 |         pet.debrisSystem.spawnPoop();
+
+      at ModuleMocker.spyOn (node_modules/jest-mock/build/index.js:583:13)
+      at Object.spyOn (tests/debrisFunctional.test.js:33:14)
+
+FAIL tests/benchmark_save.test.js
+  ● PersistenceManager Performance Benchmark › Benchmark: savePet Execution Time (Async Scheduling)
+
+    TypeError: Cannot read properties of undefined (reading 'push')
+
+      573 |     addJournalEntry(text) {
+      574 |         const newEntry = { date: new Date().toLocaleString(), text: text };
+    > 575 |         this.journal.push(newEntry);
+          |                      ^
+      576 |
+      577 |         // Cap the journal growth
+      578 |         const limit = Config.LIMITS.MAX_JOURNAL_ENTRIES || 100;
+
+      at Nadagotchi.push [as addJournalEntry] (js/Nadagotchi.js:575:22)
+      at Object.addJournalEntry (tests/benchmark_save.test.js:48:17)
+
+FAIL tests/WorldClock.test.js
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation, specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    SyntaxError: /workspaces/Nadagotchi/js/WorldClock.js: 'return' outside of function. (42:8)
+
+      40 |             }
+      41 |         }
+    > 42 |         return "Night"; // Default case
+         |         ^
+      43 |     }
+      44 |
+      45 |     /**
+
+    > 1 | import { WorldClock } from '../js/WorldClock';
+        | ^
+      2 |
+      3 | // Mock Phaser Scene
+      4 | const mockScene = {};
+
+      at constructor (node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at Parser.toParseError [as raise] (node_modules/@babel/parser/src/tokenizer/index.ts:1507:19)
+      at Parser.raise [as parseReturnStatement] (node_modules/@babel/parser/src/parser/statement.ts:1103:12)
+      at Parser.parseReturnStatement [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:543:21)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseModuleItem] (node_modules/@babel/parser/src/parser/statement.ts:419:17)
+      at Parser.parseModuleItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1443:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseProgram] (node_modules/@babel/parser/src/parser/statement.ts:229:10)
+      at Parser.parseProgram [as parseTopLevel] (node_modules/@babel/parser/src/parser/statement.ts:203:25)
+      at Parser.parseTopLevel [as parse] (node_modules/@babel/parser/src/parser/index.ts:88:25)
+      at parse (node_modules/@babel/parser/src/index.ts:86:38)
+      at parser (node_modules/@babel/core/src/parser/index.ts:29:19)
+          at parser.next (<anonymous>)
+      at normalizeFile (node_modules/@babel/core/src/transformation/normalize-file.ts:50:24)
+          at normalizeFile.next (<anonymous>)
+      at run (node_modules/@babel/core/src/transformation/index.ts:41:36)
+          at run.next (<anonymous>)
+      at transform (node_modules/@babel/core/src/transform.ts:29:20)
+          at transform.next (<anonymous>)
+      at evaluateSync (node_modules/gensync/index.js:251:28)
+      at sync (node_modules/gensync/index.js:89:14)
+      at fn (node_modules/@babel/core/src/errors/rewrite-stack-trace.ts:99:14)
+      at transformSync (node_modules/@babel/core/src/transform.ts:66:52)
+      at ScriptTransformer.transformSource (node_modules/@jest/transform/build/index.js:422:31)
+      at ScriptTransformer._transformAndBuildScript (node_modules/@jest/transform/build/index.js:519:40)
+      at ScriptTransformer.transform (node_modules/@jest/transform/build/index.js:558:19)
+      at Object.require (tests/WorldClock.test.js:1:1)
+
+FAIL tests/UISceneRebuild.test.js
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation, specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    SyntaxError: /workspaces/Nadagotchi/js/UIScene.js: Unexpected token (1:61)
+
+    > 1 | import { ToastManager } from './systems/ToastManager.js';    }
+        |                                                              ^
+      2 |
+      3 |     create() {
+      4 |         this.currentTab = 'CARE';
+
+      127 | }));
+      128 |
+    > 129 | const { UIScene } = require('../js/UIScene');
+          |                     ^
+      130 | const { EventKeys } = require('../js/EventKeys');
+      131 |
+      132 | describe('UIScene Rebuild Logic', () => {
+
+      at constructor (node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at Parser.toParseError [as raise] (node_modules/@babel/parser/src/tokenizer/index.ts:1507:19)
+      at Parser.raise [as unexpected] (node_modules/@babel/parser/src/tokenizer/index.ts:1547:16)
+      at Parser.unexpected [as parseExprAtom] (node_modules/@babel/parser/src/parser/expression.ts:1355:22)
+      at Parser.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:742:23)
+      at Parser.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at Parser.parseUpdate [as parseMaybeUnary] (node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at Parser.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at Parser.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at Parser.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at Parser.parseMaybeConditional [as parseMaybeAssign] (node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at Parser.parseMaybeAssign [as parseExpressionBase] (node_modules/@babel/parser/src/parser/expression.ts:226:23)
+      at parseExpressionBase (node_modules/@babel/parser/src/parser/expression.ts:217:39)
+      at Parser.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3197:16)
+      at Parser.allowInAnd [as parseExpression] (node_modules/@babel/parser/src/parser/expression.ts:217:17)
+      at Parser.parseExpression [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:688:23)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseModuleItem] (node_modules/@babel/parser/src/parser/statement.ts:419:17)
+      at Parser.parseModuleItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1443:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseProgram] (node_modules/@babel/parser/src/parser/statement.ts:229:10)
+      at Parser.parseProgram [as parseTopLevel] (node_modules/@babel/parser/src/parser/statement.ts:203:25)
+      at Parser.parseTopLevel [as parse] (node_modules/@babel/parser/src/parser/index.ts:88:25)
+      at parse (node_modules/@babel/parser/src/index.ts:86:38)
+      at parser (node_modules/@babel/core/src/parser/index.ts:29:19)
+          at parser.next (<anonymous>)
+      at normalizeFile (node_modules/@babel/core/src/transformation/normalize-file.ts:50:24)
+          at normalizeFile.next (<anonymous>)
+      at run (node_modules/@babel/core/src/transformation/index.ts:41:36)
+          at run.next (<anonymous>)
+      at transform (node_modules/@babel/core/src/transform.ts:29:20)
+          at transform.next (<anonymous>)
+      at evaluateSync (node_modules/gensync/index.js:251:28)
+      at sync (node_modules/gensync/index.js:89:14)
+      at fn (node_modules/@babel/core/src/errors/rewrite-stack-trace.ts:99:14)
+      at transformSync (node_modules/@babel/core/src/transform.ts:66:52)
+      at ScriptTransformer.transformSource (node_modules/@jest/transform/build/index.js:422:31)
+      at ScriptTransformer._transformAndBuildScript (node_modules/@jest/transform/build/index.js:519:40)
+      at ScriptTransformer.transform (node_modules/@jest/transform/build/index.js:558:19)
+      at Object.require (tests/UISceneRebuild.test.js:129:21)
+
+FAIL tests/UISceneModalManagement.test.js
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation, specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    SyntaxError: /workspaces/Nadagotchi/js/UIScene.js: Unexpected token (1:61)
+
+    > 1 | import { ToastManager } from './systems/ToastManager.js';    }
+        |                                                              ^
+      2 |
+      3 |     create() {
+      4 |         this.currentTab = 'CARE';
+
+      115 | });
+      116 |
+    > 117 | const { UIScene } = require('../js/UIScene');
+          |                     ^
+      118 | const { EventKeys } = require('../js/EventKeys');
+      119 |
+      120 | describe('UIScene Modal Management', () => {
+
+      at constructor (node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at Parser.toParseError [as raise] (node_modules/@babel/parser/src/tokenizer/index.ts:1507:19)
+      at Parser.raise [as unexpected] (node_modules/@babel/parser/src/tokenizer/index.ts:1547:16)
+      at Parser.unexpected [as parseExprAtom] (node_modules/@babel/parser/src/parser/expression.ts:1355:22)
+      at Parser.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:742:23)
+      at Parser.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at Parser.parseUpdate [as parseMaybeUnary] (node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at Parser.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at Parser.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at Parser.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at Parser.parseMaybeConditional [as parseMaybeAssign] (node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at Parser.parseMaybeAssign [as parseExpressionBase] (node_modules/@babel/parser/src/parser/expression.ts:226:23)
+      at parseExpressionBase (node_modules/@babel/parser/src/parser/expression.ts:217:39)
+      at Parser.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3197:16)
+      at Parser.allowInAnd [as parseExpression] (node_modules/@babel/parser/src/parser/expression.ts:217:17)
+      at Parser.parseExpression [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:688:23)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseModuleItem] (node_modules/@babel/parser/src/parser/statement.ts:419:17)
+      at Parser.parseModuleItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1443:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseProgram] (node_modules/@babel/parser/src/parser/statement.ts:229:10)
+      at Parser.parseProgram [as parseTopLevel] (node_modules/@babel/parser/src/parser/statement.ts:203:25)
+      at Parser.parseTopLevel [as parse] (node_modules/@babel/parser/src/parser/index.ts:88:25)
+      at parse (node_modules/@babel/parser/src/index.ts:86:38)
+      at parser (node_modules/@babel/core/src/parser/index.ts:29:19)
+          at parser.next (<anonymous>)
+      at normalizeFile (node_modules/@babel/core/src/transformation/normalize-file.ts:50:24)
+          at normalizeFile.next (<anonymous>)
+      at run (node_modules/@babel/core/src/transformation/index.ts:41:36)
+          at run.next (<anonymous>)
+      at transform (node_modules/@babel/core/src/transform.ts:29:20)
+          at transform.next (<anonymous>)
+      at evaluateSync (node_modules/gensync/index.js:251:28)
+      at sync (node_modules/gensync/index.js:89:14)
+      at fn (node_modules/@babel/core/src/errors/rewrite-stack-trace.ts:99:14)
+      at transformSync (node_modules/@babel/core/src/transform.ts:66:52)
+      at ScriptTransformer.transformSource (node_modules/@jest/transform/build/index.js:422:31)
+      at ScriptTransformer._transformAndBuildScript (node_modules/@jest/transform/build/index.js:519:40)
+      at ScriptTransformer.transform (node_modules/@jest/transform/build/index.js:558:19)
+      at Object.require (tests/UISceneModalManagement.test.js:117:21)
+
+FAIL tests/UISceneActionButtons.test.js
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation, specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    SyntaxError: /workspaces/Nadagotchi/js/UIScene.js: Unexpected token (1:61)
+
+    > 1 | import { ToastManager } from './systems/ToastManager.js';    }
+        |                                                              ^
+      2 |
+      3 |     create() {
+      4 |         this.currentTab = 'CARE';
+
+      25 | };
+      26 |
+    > 27 | const { UIScene } = require('../js/UIScene');
+         |                     ^
+      28 | const { EventKeys } = require('../js/EventKeys');
+      29 |
+      30 | // Mock ButtonFactory
+
+      at constructor (node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at Parser.toParseError [as raise] (node_modules/@babel/parser/src/tokenizer/index.ts:1507:19)
+      at Parser.raise [as unexpected] (node_modules/@babel/parser/src/tokenizer/index.ts:1547:16)
+      at Parser.unexpected [as parseExprAtom] (node_modules/@babel/parser/src/parser/expression.ts:1355:22)
+      at Parser.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:742:23)
+      at Parser.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at Parser.parseUpdate [as parseMaybeUnary] (node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at Parser.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at Parser.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at Parser.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at Parser.parseMaybeConditional [as parseMaybeAssign] (node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at Parser.parseMaybeAssign [as parseExpressionBase] (node_modules/@babel/parser/src/parser/expression.ts:226:23)
+      at parseExpressionBase (node_modules/@babel/parser/src/parser/expression.ts:217:39)
+      at Parser.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3197:16)
+      at Parser.allowInAnd [as parseExpression] (node_modules/@babel/parser/src/parser/expression.ts:217:17)
+      at Parser.parseExpression [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:688:23)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseModuleItem] (node_modules/@babel/parser/src/parser/statement.ts:419:17)
+      at Parser.parseModuleItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1443:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseProgram] (node_modules/@babel/parser/src/parser/statement.ts:229:10)
+      at Parser.parseProgram [as parseTopLevel] (node_modules/@babel/parser/src/parser/statement.ts:203:25)
+      at Parser.parseTopLevel [as parse] (node_modules/@babel/parser/src/parser/index.ts:88:25)
+      at parse (node_modules/@babel/parser/src/index.ts:86:38)
+      at parser (node_modules/@babel/core/src/parser/index.ts:29:19)
+          at parser.next (<anonymous>)
+      at normalizeFile (node_modules/@babel/core/src/transformation/normalize-file.ts:50:24)
+          at normalizeFile.next (<anonymous>)
+      at run (node_modules/@babel/core/src/transformation/index.ts:41:36)
+          at run.next (<anonymous>)
+      at transform (node_modules/@babel/core/src/transform.ts:29:20)
+          at transform.next (<anonymous>)
+      at evaluateSync (node_modules/gensync/index.js:251:28)
+      at sync (node_modules/gensync/index.js:89:14)
+      at fn (node_modules/@babel/core/src/errors/rewrite-stack-trace.ts:99:14)
+      at transformSync (node_modules/@babel/core/src/transform.ts:66:52)
+      at ScriptTransformer.transformSource (node_modules/@jest/transform/build/index.js:422:31)
+      at ScriptTransformer._transformAndBuildScript (node_modules/@jest/transform/build/index.js:519:40)
+      at ScriptTransformer.transform (node_modules/@jest/transform/build/index.js:558:19)
+      at Object.require (tests/UISceneActionButtons.test.js:27:21)
+
+FAIL tests/UIScene.test.js
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation, specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    SyntaxError: /workspaces/Nadagotchi/js/UIScene.js: Unexpected token (1:61)
+
+    > 1 | import { ToastManager } from './systems/ToastManager.js';    }
+        |                                                              ^
+      2 |
+      3 |     create() {
+      4 |         this.currentTab = 'CARE';
+
+      23 | };
+      24 |
+    > 25 | const { UIScene } = require('../js/UIScene');
+         |                     ^
+      26 | const { EventKeys } = require('../js/EventKeys');
+      27 |
+      28 | // Mock Dependencies
+
+      at constructor (node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at Parser.toParseError [as raise] (node_modules/@babel/parser/src/tokenizer/index.ts:1507:19)
+      at Parser.raise [as unexpected] (node_modules/@babel/parser/src/tokenizer/index.ts:1547:16)
+      at Parser.unexpected [as parseExprAtom] (node_modules/@babel/parser/src/parser/expression.ts:1355:22)
+      at Parser.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:742:23)
+      at Parser.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at Parser.parseUpdate [as parseMaybeUnary] (node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at Parser.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at Parser.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at Parser.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at Parser.parseMaybeConditional [as parseMaybeAssign] (node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at Parser.parseMaybeAssign [as parseExpressionBase] (node_modules/@babel/parser/src/parser/expression.ts:226:23)
+      at parseExpressionBase (node_modules/@babel/parser/src/parser/expression.ts:217:39)
+      at Parser.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3197:16)
+      at Parser.allowInAnd [as parseExpression] (node_modules/@babel/parser/src/parser/expression.ts:217:17)
+      at Parser.parseExpression [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:688:23)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseModuleItem] (node_modules/@babel/parser/src/parser/statement.ts:419:17)
+      at Parser.parseModuleItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1443:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseProgram] (node_modules/@babel/parser/src/parser/statement.ts:229:10)
+      at Parser.parseProgram [as parseTopLevel] (node_modules/@babel/parser/src/parser/statement.ts:203:25)
+      at Parser.parseTopLevel [as parse] (node_modules/@babel/parser/src/parser/index.ts:88:25)
+      at parse (node_modules/@babel/parser/src/index.ts:86:38)
+      at parser (node_modules/@babel/core/src/parser/index.ts:29:19)
+          at parser.next (<anonymous>)
+      at normalizeFile (node_modules/@babel/core/src/transformation/normalize-file.ts:50:24)
+          at normalizeFile.next (<anonymous>)
+      at run (node_modules/@babel/core/src/transformation/index.ts:41:36)
+          at run.next (<anonymous>)
+      at transform (node_modules/@babel/core/src/transform.ts:29:20)
+          at transform.next (<anonymous>)
+      at evaluateSync (node_modules/gensync/index.js:251:28)
+      at sync (node_modules/gensync/index.js:89:14)
+      at fn (node_modules/@babel/core/src/errors/rewrite-stack-trace.ts:99:14)
+      at transformSync (node_modules/@babel/core/src/transform.ts:66:52)
+      at ScriptTransformer.transformSource (node_modules/@jest/transform/build/index.js:422:31)
+      at ScriptTransformer._transformAndBuildScript (node_modules/@jest/transform/build/index.js:519:40)
+      at ScriptTransformer.transform (node_modules/@jest/transform/build/index.js:558:19)
+      at Object.require (tests/UIScene.test.js:25:21)
+
+FAIL tests/SeededRNG.test.js
+  ● Nadagotchi RNG Integration › should initialize with a universe seed
+
+    expect(received).toBeDefined()
+
+    Received: undefined
+
+      89 |     it('should initialize with a universe seed', () => {
+      90 |         const pet = new Nadagotchi('Adventurer');
+    > 91 |         expect(pet.universeSeed).toBeDefined();
+         |                                  ^
+      92 |         expect(pet.rng).toBeInstanceOf(SeededRandom);
+      93 |     });
+      94 |
+
+      at Object.toBeDefined (tests/SeededRNG.test.js:91:34)
+
+  ● Nadagotchi RNG Integration › should reproduce deterministic behavior on reload
+
+    TypeError: Cannot read properties of undefined (reading 'energy')
+
+      230 |      */
+      231 |     forage() {
+    > 232 |         if (this.pet.stats.energy < Config.ACTIONS.FORAGE.ENERGY_COST) return;
+          |                            ^
+      233 |
+      234 |         this.pet.location = 'Forest';
+      235 |         this.pet.stats.energy -= Config.ACTIONS.FORAGE.ENERGY_COST;
+
+      at InventorySystem.energy (js/systems/InventorySystem.js:232:28)
+      at Nadagotchi.forage (js/Nadagotchi.js:542:30)
+      at Object.forage (tests/SeededRNG.test.js:106:14)
+
+  ● Nadagotchi RNG Integration › should generate deterministic offspring
+
+    TypeError: parent.calculateOffspring is not a function
+
+      128 |         parent.rng = new SeededRandom(123);
+      129 |
+    > 130 |         const offspring1 = parent.calculateOffspring([]);
+          |                                   ^
+      131 |
+      132 |         // Reset parent RNG
+      133 |         parent.rng = new SeededRandom(123);
+
+      at Object.calculateOffspring (tests/SeededRNG.test.js:130:35)
+
+FAIL tests/SeasonalCrafting.test.js
+  ● Task Verification › Recipe "Metabolism-Slowing Tonic" should exist
+
+    TypeError: Cannot set properties of undefined (setting 'energy')
+
+      28 |         pet = new Nadagotchi('Intellectual');
+      29 |         // Ensure plenty of energy
+    > 30 |         pet.stats.energy = 100;
+         |                         ^
+      31 |     });
+      32 |
+      33 |     test('Recipe "Metabolism-Slowing Tonic" should exist', () => {
+
+      at Object.<anonymous> (tests/SeasonalCrafting.test.js:30:25)
+
+  ● Task Verification › Foraging in Winter should yield "Frostbloom"
+
+    TypeError: Cannot set properties of undefined (setting 'energy')
+
+      28 |         pet = new Nadagotchi('Intellectual');
+      29 |         // Ensure plenty of energy
+    > 30 |         pet.stats.energy = 100;
+         |                         ^
+      31 |     });
+      32 |
+      33 |     test('Recipe "Metabolism-Slowing Tonic" should exist', () => {
+
+      at Object.<anonymous> (tests/SeasonalCrafting.test.js:30:25)
+
+  ● Task Verification › GeneticsSystem should recognize "Metabolism-Slowing Tonic"
+
+    TypeError: Cannot set properties of undefined (setting 'energy')
+
+      28 |         pet = new Nadagotchi('Intellectual');
+      29 |         // Ensure plenty of energy
+    > 30 |         pet.stats.energy = 100;
+         |                         ^
+      31 |     });
+      32 |
+      33 |     test('Recipe "Metabolism-Slowing Tonic" should exist', () => {
+
+      at Object.<anonymous> (tests/SeasonalCrafting.test.js:30:25)
+
+FAIL tests/RecipeDefinitions.test.js
+  ● Nadagotchi Broken Recipes Bug › should be able to craft "Logic-Boosting Snack" if materials are present
+
+    TypeError: Cannot read properties of undefined (reading 'push')
+
+      23 |
+      24 |         // 1. Force discovery
+    > 25 |         pet.discoveredRecipes.push("Logic-Boosting Snack");
+         |                               ^
+      26 |
+      27 |         // 2. We don't know materials yet, but let's assume what they might be for the fix.
+      28 |         // For now, if the recipe is undefined, craftItem returns early.
+
+      at Object.push (tests/RecipeDefinitions.test.js:25:31)
+
+  ● Nadagotchi Broken Recipes Bug › should be able to craft "Stamina-Up Tea" if materials are present
+
+    TypeError: Cannot read properties of undefined (reading 'push')
+
+      39 |
+      40 |     it('should be able to craft "Stamina-Up Tea" if materials are present', () => {
+    > 41 |         pet.discoveredRecipes.push("Stamina-Up Tea");
+         |                               ^
+      42 |         pet.craftItem("Stamina-Up Tea");
+      43 |
+      44 |         const lastEntry = pet.journal[pet.journal.length - 1];
+
+      at Object.push (tests/RecipeDefinitions.test.js:41:31)
+
+FAIL tests/QuestIntegration.test.js
+  ● Quest Integration › Masterwork Crafting Quest Flow
+
+    TypeError: Cannot read properties of undefined (reading 'energy')
+
+      28 |
+      29 |         // Check for energy cost
+    > 30 |         if (this.pet.stats.energy < Config.ACTIONS.INTERACT_NPC.ENERGY_COST) {
+         |                            ^
+      31 |             this.pet.addJournalEntry("I'm too tired to interact right now.");
+      32 |             return { text: "I'm too tired to interact right now.", options: [{ label: "Close", action: null }] };
+      33 |         }
+
+      at RelationshipSystem.energy [as interact] (js/systems/RelationshipSystem.js:30:28)
+      at Nadagotchi.interact (js/Nadagotchi.js:552:40)
+      at Object.interact (tests/QuestIntegration.test.js:37:26)
+
+FAIL tests/PetMovement.test.js
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation, specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    SyntaxError: /workspaces/Nadagotchi/js/MainScene.js: Unexpected reserved word 'await'. (95:26)
+
+      93 |
+      94 |         // --- Pet Initialization ---
+    > 95 |         const loadedPet = await this.persistence.loadPet();
+         |                           ^
+      96 |         if (data && data.newPetData) {
+      97 |             // New Game: Pass null for loadedData to ensure defaults are used
+      98 |             this.nadagotchi = new Nadagotchi(data.newPetData.dominantArchetype, null);
+
+      83 | }));
+      84 |
+    > 85 | const { MainScene } = require('../js/MainScene.js');
+         |                       ^
+      86 |
+      87 | describe('MainScene Pet Movement', () => {
+      88 |     let scene;
+
+      at constructor (node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at Parser.toParseError [as raise] (node_modules/@babel/parser/src/tokenizer/index.ts:1507:19)
+      at Parser.raise [as checkReservedWord] (node_modules/@babel/parser/src/parser/expression.ts:2896:12)
+      at Parser.checkReservedWord [as parseIdentifierName] (node_modules/@babel/parser/src/parser/expression.ts:2858:12)
+      at Parser.parseIdentifierName [as parseIdentifier] (node_modules/@babel/parser/src/parser/expression.ts:2815:23)
+      at Parser.parseIdentifier [as parseExprAtom] (node_modules/@babel/parser/src/parser/expression.ts:1304:27)
+      at Parser.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:742:23)
+      at Parser.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at Parser.parseUpdate [as parseMaybeUnary] (node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at Parser.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at Parser.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at Parser.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at Parser.parseMaybeConditional [as parseMaybeAssign] (node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at parseMaybeAssign (node_modules/@babel/parser/src/parser/expression.ts:257:12)
+      at Parser.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3197:16)
+      at Parser.allowInAnd [as parseMaybeAssignAllowIn] (node_modules/@babel/parser/src/parser/expression.ts:256:17)
+      at Parser.parseMaybeAssignAllowIn [as parseVar] (node_modules/@babel/parser/src/parser/statement.ts:1587:18)
+      at Parser.parseVar [as parseVarStatement] (node_modules/@babel/parser/src/parser/statement.ts:1251:10)
+      at Parser.parseVarStatement [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:612:21)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseStatementListItem] (node_modules/@babel/parser/src/parser/statement.ts:431:17)
+      at Parser.parseStatementListItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1444:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseBlock] (node_modules/@babel/parser/src/parser/statement.ts:1385:10)
+      at Parser.parseBlock [as parseFunctionBody] (node_modules/@babel/parser/src/parser/expression.ts:2626:24)
+      at Parser.parseFunctionBody [as parseFunctionBodyAndFinish] (node_modules/@babel/parser/src/parser/expression.ts:2595:10)
+      at Parser.parseFunctionBodyAndFinish [as parseMethod] (node_modules/@babel/parser/src/parser/expression.ts:2492:31)
+      at Parser.parseMethod [as pushClassMethod] (node_modules/@babel/parser/src/parser/statement.ts:2244:12)
+      at Parser.pushClassMethod [as parseClassMemberWithIsStatic] (node_modules/@babel/parser/src/parser/statement.ts:2023:12)
+      at Parser.parseClassMemberWithIsStatic [as parseClassMember] (node_modules/@babel/parser/src/parser/statement.ts:1938:10)
+      at parseClassMember (node_modules/@babel/parser/src/parser/statement.ts:1851:14)
+      at Parser.callback [as withSmartMixTopicForbiddingContext] (node_modules/@babel/parser/src/parser/expression.ts:3176:14)
+      at Parser.withSmartMixTopicForbiddingContext [as parseClassBody] (node_modules/@babel/parser/src/parser/statement.ts:1823:10)
+      at Parser.parseClassBody [as parseClass] (node_modules/@babel/parser/src/parser/statement.ts:1774:22)
+      at Parser.parseClass [as parseExportDeclaration] (node_modules/@babel/parser/src/parser/statement.ts:2628:25)
+      at Parser.parseExportDeclaration [as maybeParseExportDeclaration] (node_modules/@babel/parser/src/parser/statement.ts:2551:31)
+      at Parser.maybeParseExportDeclaration [as parseExport] (node_modules/@babel/parser/src/parser/statement.ts:2432:29)
+      at Parser.parseExport [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:649:25)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseModuleItem] (node_modules/@babel/parser/src/parser/statement.ts:419:17)
+      at Parser.parseModuleItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1443:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseProgram] (node_modules/@babel/parser/src/parser/statement.ts:229:10)
+      at Parser.parseProgram [as parseTopLevel] (node_modules/@babel/parser/src/parser/statement.ts:203:25)
+      at Parser.parseTopLevel [as parse] (node_modules/@babel/parser/src/parser/index.ts:88:25)
+      at parse (node_modules/@babel/parser/src/index.ts:86:38)
+      at parser (node_modules/@babel/core/src/parser/index.ts:29:19)
+          at parser.next (<anonymous>)
+      at normalizeFile (node_modules/@babel/core/src/transformation/normalize-file.ts:50:24)
+          at normalizeFile.next (<anonymous>)
+      at run (node_modules/@babel/core/src/transformation/index.ts:41:36)
+          at run.next (<anonymous>)
+      at transform (node_modules/@babel/core/src/transform.ts:29:20)
+          at transform.next (<anonymous>)
+      at evaluateSync (node_modules/gensync/index.js:251:28)
+      at sync (node_modules/gensync/index.js:89:14)
+      at fn (node_modules/@babel/core/src/errors/rewrite-stack-trace.ts:99:14)
+      at transformSync (node_modules/@babel/core/src/transform.ts:66:52)
+      at ScriptTransformer.transformSource (node_modules/@jest/transform/build/index.js:422:31)
+      at ScriptTransformer._transformAndBuildScript (node_modules/@jest/transform/build/index.js:519:40)
+      at ScriptTransformer.transform (node_modules/@jest/transform/build/index.js:558:19)
+      at Object.require (tests/PetMovement.test.js:85:23)
+
+FAIL tests/Performance_UpdateStats.test.js
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation, specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    SyntaxError: /workspaces/Nadagotchi/js/MainScene.js: Unexpected reserved word 'await'. (95:26)
+
+      93 |
+      94 |         // --- Pet Initialization ---
+    > 95 |         const loadedPet = await this.persistence.loadPet();
+         |                           ^
+      96 |         if (data && data.newPetData) {
+      97 |             // New Game: Pass null for loadedData to ensure defaults are used
+      98 |             this.nadagotchi = new Nadagotchi(data.newPetData.dominantArchetype, null);
+
+      24 | }));
+      25 |
+    > 26 | const { MainScene } = require('../js/MainScene');
+         |                       ^
+      27 | const { Nadagotchi } = require('../js/Nadagotchi');
+      28 | const { PersistenceManager } = require('../js/PersistenceManager');
+      29 | const { Calendar } = require('../js/Calendar');
+
+      at constructor (node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at Parser.toParseError [as raise] (node_modules/@babel/parser/src/tokenizer/index.ts:1507:19)
+      at Parser.raise [as checkReservedWord] (node_modules/@babel/parser/src/parser/expression.ts:2896:12)
+      at Parser.checkReservedWord [as parseIdentifierName] (node_modules/@babel/parser/src/parser/expression.ts:2858:12)
+      at Parser.parseIdentifierName [as parseIdentifier] (node_modules/@babel/parser/src/parser/expression.ts:2815:23)
+      at Parser.parseIdentifier [as parseExprAtom] (node_modules/@babel/parser/src/parser/expression.ts:1304:27)
+      at Parser.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:742:23)
+      at Parser.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at Parser.parseUpdate [as parseMaybeUnary] (node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at Parser.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at Parser.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at Parser.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at Parser.parseMaybeConditional [as parseMaybeAssign] (node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at parseMaybeAssign (node_modules/@babel/parser/src/parser/expression.ts:257:12)
+      at Parser.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3197:16)
+      at Parser.allowInAnd [as parseMaybeAssignAllowIn] (node_modules/@babel/parser/src/parser/expression.ts:256:17)
+      at Parser.parseMaybeAssignAllowIn [as parseVar] (node_modules/@babel/parser/src/parser/statement.ts:1587:18)
+      at Parser.parseVar [as parseVarStatement] (node_modules/@babel/parser/src/parser/statement.ts:1251:10)
+      at Parser.parseVarStatement [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:612:21)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseStatementListItem] (node_modules/@babel/parser/src/parser/statement.ts:431:17)
+      at Parser.parseStatementListItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1444:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseBlock] (node_modules/@babel/parser/src/parser/statement.ts:1385:10)
+      at Parser.parseBlock [as parseFunctionBody] (node_modules/@babel/parser/src/parser/expression.ts:2626:24)
+      at Parser.parseFunctionBody [as parseFunctionBodyAndFinish] (node_modules/@babel/parser/src/parser/expression.ts:2595:10)
+      at Parser.parseFunctionBodyAndFinish [as parseMethod] (node_modules/@babel/parser/src/parser/expression.ts:2492:31)
+      at Parser.parseMethod [as pushClassMethod] (node_modules/@babel/parser/src/parser/statement.ts:2244:12)
+      at Parser.pushClassMethod [as parseClassMemberWithIsStatic] (node_modules/@babel/parser/src/parser/statement.ts:2023:12)
+      at Parser.parseClassMemberWithIsStatic [as parseClassMember] (node_modules/@babel/parser/src/parser/statement.ts:1938:10)
+      at parseClassMember (node_modules/@babel/parser/src/parser/statement.ts:1851:14)
+      at Parser.callback [as withSmartMixTopicForbiddingContext] (node_modules/@babel/parser/src/parser/expression.ts:3176:14)
+      at Parser.withSmartMixTopicForbiddingContext [as parseClassBody] (node_modules/@babel/parser/src/parser/statement.ts:1823:10)
+      at Parser.parseClassBody [as parseClass] (node_modules/@babel/parser/src/parser/statement.ts:1774:22)
+      at Parser.parseClass [as parseExportDeclaration] (node_modules/@babel/parser/src/parser/statement.ts:2628:25)
+      at Parser.parseExportDeclaration [as maybeParseExportDeclaration] (node_modules/@babel/parser/src/parser/statement.ts:2551:31)
+      at Parser.maybeParseExportDeclaration [as parseExport] (node_modules/@babel/parser/src/parser/statement.ts:2432:29)
+      at Parser.parseExport [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:649:25)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseModuleItem] (node_modules/@babel/parser/src/parser/statement.ts:419:17)
+      at Parser.parseModuleItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1443:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseProgram] (node_modules/@babel/parser/src/parser/statement.ts:229:10)
+      at Parser.parseProgram [as parseTopLevel] (node_modules/@babel/parser/src/parser/statement.ts:203:25)
+      at Parser.parseTopLevel [as parse] (node_modules/@babel/parser/src/parser/index.ts:88:25)
+      at parse (node_modules/@babel/parser/src/index.ts:86:38)
+      at parser (node_modules/@babel/core/src/parser/index.ts:29:19)
+          at parser.next (<anonymous>)
+      at normalizeFile (node_modules/@babel/core/src/transformation/normalize-file.ts:50:24)
+          at normalizeFile.next (<anonymous>)
+      at run (node_modules/@babel/core/src/transformation/index.ts:41:36)
+          at run.next (<anonymous>)
+      at transform (node_modules/@babel/core/src/transform.ts:29:20)
+          at transform.next (<anonymous>)
+      at evaluateSync (node_modules/gensync/index.js:251:28)
+      at sync (node_modules/gensync/index.js:89:14)
+      at fn (node_modules/@babel/core/src/errors/rewrite-stack-trace.ts:99:14)
+      at transformSync (node_modules/@babel/core/src/transform.ts:66:52)
+      at ScriptTransformer.transformSource (node_modules/@jest/transform/build/index.js:422:31)
+      at ScriptTransformer._transformAndBuildScript (node_modules/@jest/transform/build/index.js:519:40)
+      at ScriptTransformer.transform (node_modules/@jest/transform/build/index.js:558:19)
+      at Object.require (tests/Performance_UpdateStats.test.js:26:23)
+
+FAIL tests/Performance_UIScene_Render.test.js
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation, specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    SyntaxError: /workspaces/Nadagotchi/js/UIScene.js: Unexpected token (1:61)
+
+    > 1 | import { ToastManager } from './systems/ToastManager.js';    }
+        |                                                              ^
+      2 |
+      3 |     create() {
+      4 |         this.currentTab = 'CARE';
+
+      123 | }));
+      124 |
+    > 125 | const { UIScene } = require('../js/UIScene');
+          |                     ^
+      126 | const { EventKeys } = require('../js/EventKeys');
+      127 |
+      128 | describe('Performance: UIScene Render Throttling', () => {
+
+      at constructor (node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at Parser.toParseError [as raise] (node_modules/@babel/parser/src/tokenizer/index.ts:1507:19)
+      at Parser.raise [as unexpected] (node_modules/@babel/parser/src/tokenizer/index.ts:1547:16)
+      at Parser.unexpected [as parseExprAtom] (node_modules/@babel/parser/src/parser/expression.ts:1355:22)
+      at Parser.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:742:23)
+      at Parser.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at Parser.parseUpdate [as parseMaybeUnary] (node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at Parser.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at Parser.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at Parser.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at Parser.parseMaybeConditional [as parseMaybeAssign] (node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at Parser.parseMaybeAssign [as parseExpressionBase] (node_modules/@babel/parser/src/parser/expression.ts:226:23)
+      at parseExpressionBase (node_modules/@babel/parser/src/parser/expression.ts:217:39)
+      at Parser.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3197:16)
+      at Parser.allowInAnd [as parseExpression] (node_modules/@babel/parser/src/parser/expression.ts:217:17)
+      at Parser.parseExpression [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:688:23)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseModuleItem] (node_modules/@babel/parser/src/parser/statement.ts:419:17)
+      at Parser.parseModuleItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1443:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseProgram] (node_modules/@babel/parser/src/parser/statement.ts:229:10)
+      at Parser.parseProgram [as parseTopLevel] (node_modules/@babel/parser/src/parser/statement.ts:203:25)
+      at Parser.parseTopLevel [as parse] (node_modules/@babel/parser/src/parser/index.ts:88:25)
+      at parse (node_modules/@babel/parser/src/index.ts:86:38)
+      at parser (node_modules/@babel/core/src/parser/index.ts:29:19)
+          at parser.next (<anonymous>)
+      at normalizeFile (node_modules/@babel/core/src/transformation/normalize-file.ts:50:24)
+          at normalizeFile.next (<anonymous>)
+      at run (node_modules/@babel/core/src/transformation/index.ts:41:36)
+          at run.next (<anonymous>)
+      at transform (node_modules/@babel/core/src/transform.ts:29:20)
+          at transform.next (<anonymous>)
+      at evaluateSync (node_modules/gensync/index.js:251:28)
+      at sync (node_modules/gensync/index.js:89:14)
+      at fn (node_modules/@babel/core/src/errors/rewrite-stack-trace.ts:99:14)
+      at transformSync (node_modules/@babel/core/src/transform.ts:66:52)
+      at ScriptTransformer.transformSource (node_modules/@jest/transform/build/index.js:422:31)
+      at ScriptTransformer._transformAndBuildScript (node_modules/@jest/transform/build/index.js:519:40)
+      at ScriptTransformer.transform (node_modules/@jest/transform/build/index.js:558:19)
+      at Object.require (tests/Performance_UIScene_Render.test.js:125:21)
+
+FAIL tests/Performance.test.js
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation, specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    SyntaxError: /workspaces/Nadagotchi/js/MainScene.js: Unexpected reserved word 'await'. (95:26)
+
+      93 |
+      94 |         // --- Pet Initialization ---
+    > 95 |         const loadedPet = await this.persistence.loadPet();
+         |                           ^
+      96 |         if (data && data.newPetData) {
+      97 |             // New Game: Pass null for loadedData to ensure defaults are used
+      98 |             this.nadagotchi = new Nadagotchi(data.newPetData.dominantArchetype, null);
+
+      25 | }));
+      26 |
+    > 27 | const { MainScene } = require('../js/MainScene');
+         |                       ^
+      28 | const { PersistenceManager } = require('../js/PersistenceManager');
+      29 | const { Calendar } = require('../js/Calendar');
+      30 | const { EventManager } = require('../js/EventManager');
+
+      at constructor (node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at Parser.toParseError [as raise] (node_modules/@babel/parser/src/tokenizer/index.ts:1507:19)
+      at Parser.raise [as checkReservedWord] (node_modules/@babel/parser/src/parser/expression.ts:2896:12)
+      at Parser.checkReservedWord [as parseIdentifierName] (node_modules/@babel/parser/src/parser/expression.ts:2858:12)
+      at Parser.parseIdentifierName [as parseIdentifier] (node_modules/@babel/parser/src/parser/expression.ts:2815:23)
+      at Parser.parseIdentifier [as parseExprAtom] (node_modules/@babel/parser/src/parser/expression.ts:1304:27)
+      at Parser.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:742:23)
+      at Parser.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at Parser.parseUpdate [as parseMaybeUnary] (node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at Parser.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at Parser.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at Parser.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at Parser.parseMaybeConditional [as parseMaybeAssign] (node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at parseMaybeAssign (node_modules/@babel/parser/src/parser/expression.ts:257:12)
+      at Parser.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3197:16)
+      at Parser.allowInAnd [as parseMaybeAssignAllowIn] (node_modules/@babel/parser/src/parser/expression.ts:256:17)
+      at Parser.parseMaybeAssignAllowIn [as parseVar] (node_modules/@babel/parser/src/parser/statement.ts:1587:18)
+      at Parser.parseVar [as parseVarStatement] (node_modules/@babel/parser/src/parser/statement.ts:1251:10)
+      at Parser.parseVarStatement [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:612:21)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseStatementListItem] (node_modules/@babel/parser/src/parser/statement.ts:431:17)
+      at Parser.parseStatementListItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1444:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseBlock] (node_modules/@babel/parser/src/parser/statement.ts:1385:10)
+      at Parser.parseBlock [as parseFunctionBody] (node_modules/@babel/parser/src/parser/expression.ts:2626:24)
+      at Parser.parseFunctionBody [as parseFunctionBodyAndFinish] (node_modules/@babel/parser/src/parser/expression.ts:2595:10)
+      at Parser.parseFunctionBodyAndFinish [as parseMethod] (node_modules/@babel/parser/src/parser/expression.ts:2492:31)
+      at Parser.parseMethod [as pushClassMethod] (node_modules/@babel/parser/src/parser/statement.ts:2244:12)
+      at Parser.pushClassMethod [as parseClassMemberWithIsStatic] (node_modules/@babel/parser/src/parser/statement.ts:2023:12)
+      at Parser.parseClassMemberWithIsStatic [as parseClassMember] (node_modules/@babel/parser/src/parser/statement.ts:1938:10)
+      at parseClassMember (node_modules/@babel/parser/src/parser/statement.ts:1851:14)
+      at Parser.callback [as withSmartMixTopicForbiddingContext] (node_modules/@babel/parser/src/parser/expression.ts:3176:14)
+      at Parser.withSmartMixTopicForbiddingContext [as parseClassBody] (node_modules/@babel/parser/src/parser/statement.ts:1823:10)
+      at Parser.parseClassBody [as parseClass] (node_modules/@babel/parser/src/parser/statement.ts:1774:22)
+      at Parser.parseClass [as parseExportDeclaration] (node_modules/@babel/parser/src/parser/statement.ts:2628:25)
+      at Parser.parseExportDeclaration [as maybeParseExportDeclaration] (node_modules/@babel/parser/src/parser/statement.ts:2551:31)
+      at Parser.maybeParseExportDeclaration [as parseExport] (node_modules/@babel/parser/src/parser/statement.ts:2432:29)
+      at Parser.parseExport [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:649:25)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseModuleItem] (node_modules/@babel/parser/src/parser/statement.ts:419:17)
+      at Parser.parseModuleItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1443:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseProgram] (node_modules/@babel/parser/src/parser/statement.ts:229:10)
+      at Parser.parseProgram [as parseTopLevel] (node_modules/@babel/parser/src/parser/statement.ts:203:25)
+      at Parser.parseTopLevel [as parse] (node_modules/@babel/parser/src/parser/index.ts:88:25)
+      at parse (node_modules/@babel/parser/src/index.ts:86:38)
+      at parser (node_modules/@babel/core/src/parser/index.ts:29:19)
+          at parser.next (<anonymous>)
+      at normalizeFile (node_modules/@babel/core/src/transformation/normalize-file.ts:50:24)
+          at normalizeFile.next (<anonymous>)
+      at run (node_modules/@babel/core/src/transformation/index.ts:41:36)
+          at run.next (<anonymous>)
+      at transform (node_modules/@babel/core/src/transform.ts:29:20)
+          at transform.next (<anonymous>)
+      at evaluateSync (node_modules/gensync/index.js:251:28)
+      at sync (node_modules/gensync/index.js:89:14)
+      at fn (node_modules/@babel/core/src/errors/rewrite-stack-trace.ts:99:14)
+      at transformSync (node_modules/@babel/core/src/transform.ts:66:52)
+      at ScriptTransformer.transformSource (node_modules/@jest/transform/build/index.js:422:31)
+      at ScriptTransformer._transformAndBuildScript (node_modules/@jest/transform/build/index.js:519:40)
+      at ScriptTransformer.transform (node_modules/@jest/transform/build/index.js:558:19)
+      at Object.require (tests/Performance.test.js:27:23)
+
+FAIL tests/Nadagotchi.test.js
+  ● Nadagotchi › constructor › should initialize from loadedData
+
+    TypeError: Cannot set properties of undefined (setting 'genotype')
+
+      28 |     beforeEach(async () => {        pet = new Nadagotchi('Intellectual');
+      29 |         // Force a deterministic genome to avoid random homozygous bonuses in general tests
+    > 30 |         pet.genome.genotype = {
+         |                            ^
+      31 |             Adventurer: [10, 20],
+      32 |             Nurturer: [10, 20],
+      33 |             Mischievous: [10, 20], // Definitely not homozygous
+
+      at Object.<anonymous> (tests/Nadagotchi.test.js:30:28)
+
+  ● Nadagotchi › constructor › craftItem should not work if materials are insufficient
+
+    TypeError: Cannot set properties of undefined (setting 'genotype')
+
+      28 |     beforeEach(async () => {        pet = new Nadagotchi('Intellectual');
+      29 |         // Force a deterministic genome to avoid random homozygous bonuses in general tests
+    > 30 |         pet.genome.genotype = {
+         |                            ^
+      31 |             Adventurer: [10, 20],
+      32 |             Nurturer: [10, 20],
+      33 |             Mischievous: [10, 20], // Definitely not homozygous
+
+      at Object.<anonymous> (tests/Nadagotchi.test.js:30:28)
+
+  ● Nadagotchi › constructor › INTERACT_FANCY_BOOKSHELF should provide a better study buff
+
+    TypeError: Cannot set properties of undefined (setting 'genotype')
+
+      28 |     beforeEach(async () => {        pet = new Nadagotchi('Intellectual');
+      29 |         // Force a deterministic genome to avoid random homozygous bonuses in general tests
+    > 30 |         pet.genome.genotype = {
+         |                            ^
+      31 |             Adventurer: [10, 20],
+      32 |             Nurturer: [10, 20],
+      33 |             Mischievous: [10, 20], // Definitely not homozygous
+
+      at Object.<anonymous> (tests/Nadagotchi.test.js:30:28)
+
+FAIL tests/MetaGame.test.js
+  ● Meta-Game Features › Nadagotchi Journal Automation › logs entry when mood changes
+
+    TypeError: pet.live is not a function
+
+      48 |             // Let's assume we implement it such that it tracks previous mood.
+      49 |
+    > 50 |             pet.live(); // Should detect change from 'neutral' (constructor) to 'happy' (calculated)
+         |                 ^
+      51 |
+      52 |             const lastEntry = pet.journal[pet.journal.length - 1];
+      53 |             expect(lastEntry).toBeDefined();
+
+      at Object.live (tests/MetaGame.test.js:50:17)
+
+  ● Meta-Game Features › Nadagotchi Journal Automation › logs entry when weather changes
+
+    TypeError: pet.live is not a function
+
+      60 |             const pet = new Nadagotchi('Recluse');
+      61 |             // Establish baseline
+    > 62 |             pet.live({ weather: 'Sunny', time: 'Day', activeEvent: null });
+         |                 ^
+      63 |
+      64 |             // Initial log might happen due to mood change or first weather.
+      65 |             const initialLogCount = pet.journal.length;
+
+      at Object.live (tests/MetaGame.test.js:62:17)
+
+  ● Meta-Game Features › Nadagotchi Journal Automation › logs entry on age milestone
+
+    TypeError: pet.live is not a function
+
+      85 |              pet.age = 0.999;
+      86 |              // next live adds 0.001 -> 1.0
+    > 87 |              pet.live();
+         |                  ^
+      88 |
+      89 |              const lastEntry = pet.journal[pet.journal.length - 1];
+      90 |              // Nurturer age text
+
+      at Object.live (tests/MetaGame.test.js:87:18)
+
+FAIL tests/MainSceneCoverage.test.js
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation, specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    SyntaxError: /workspaces/Nadagotchi/js/MainScene.js: Unexpected reserved word 'await'. (95:26)
+
+      93 |
+      94 |         // --- Pet Initialization ---
+    > 95 |         const loadedPet = await this.persistence.loadPet();
+         |                           ^
+      96 |         if (data && data.newPetData) {
+      97 |             // New Game: Pass null for loadedData to ensure defaults are used
+      98 |             this.nadagotchi = new Nadagotchi(data.newPetData.dominantArchetype, null);
+
+      24 | }));
+      25 |
+    > 26 | const { MainScene } = require('../js/MainScene');
+         |                       ^
+      27 | const { Nadagotchi } = require('../js/Nadagotchi');
+      28 | const { PersistenceManager } = require('../js/PersistenceManager');
+      29 | const { Calendar } = require('../js/Calendar');
+
+      at constructor (node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at Parser.toParseError [as raise] (node_modules/@babel/parser/src/tokenizer/index.ts:1507:19)
+      at Parser.raise [as checkReservedWord] (node_modules/@babel/parser/src/parser/expression.ts:2896:12)
+      at Parser.checkReservedWord [as parseIdentifierName] (node_modules/@babel/parser/src/parser/expression.ts:2858:12)
+      at Parser.parseIdentifierName [as parseIdentifier] (node_modules/@babel/parser/src/parser/expression.ts:2815:23)
+      at Parser.parseIdentifier [as parseExprAtom] (node_modules/@babel/parser/src/parser/expression.ts:1304:27)
+      at Parser.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:742:23)
+      at Parser.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at Parser.parseUpdate [as parseMaybeUnary] (node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at Parser.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at Parser.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at Parser.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at Parser.parseMaybeConditional [as parseMaybeAssign] (node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at parseMaybeAssign (node_modules/@babel/parser/src/parser/expression.ts:257:12)
+      at Parser.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3197:16)
+      at Parser.allowInAnd [as parseMaybeAssignAllowIn] (node_modules/@babel/parser/src/parser/expression.ts:256:17)
+      at Parser.parseMaybeAssignAllowIn [as parseVar] (node_modules/@babel/parser/src/parser/statement.ts:1587:18)
+      at Parser.parseVar [as parseVarStatement] (node_modules/@babel/parser/src/parser/statement.ts:1251:10)
+      at Parser.parseVarStatement [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:612:21)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseStatementListItem] (node_modules/@babel/parser/src/parser/statement.ts:431:17)
+      at Parser.parseStatementListItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1444:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseBlock] (node_modules/@babel/parser/src/parser/statement.ts:1385:10)
+      at Parser.parseBlock [as parseFunctionBody] (node_modules/@babel/parser/src/parser/expression.ts:2626:24)
+      at Parser.parseFunctionBody [as parseFunctionBodyAndFinish] (node_modules/@babel/parser/src/parser/expression.ts:2595:10)
+      at Parser.parseFunctionBodyAndFinish [as parseMethod] (node_modules/@babel/parser/src/parser/expression.ts:2492:31)
+      at Parser.parseMethod [as pushClassMethod] (node_modules/@babel/parser/src/parser/statement.ts:2244:12)
+      at Parser.pushClassMethod [as parseClassMemberWithIsStatic] (node_modules/@babel/parser/src/parser/statement.ts:2023:12)
+      at Parser.parseClassMemberWithIsStatic [as parseClassMember] (node_modules/@babel/parser/src/parser/statement.ts:1938:10)
+      at parseClassMember (node_modules/@babel/parser/src/parser/statement.ts:1851:14)
+      at Parser.callback [as withSmartMixTopicForbiddingContext] (node_modules/@babel/parser/src/parser/expression.ts:3176:14)
+      at Parser.withSmartMixTopicForbiddingContext [as parseClassBody] (node_modules/@babel/parser/src/parser/statement.ts:1823:10)
+      at Parser.parseClassBody [as parseClass] (node_modules/@babel/parser/src/parser/statement.ts:1774:22)
+      at Parser.parseClass [as parseExportDeclaration] (node_modules/@babel/parser/src/parser/statement.ts:2628:25)
+      at Parser.parseExportDeclaration [as maybeParseExportDeclaration] (node_modules/@babel/parser/src/parser/statement.ts:2551:31)
+      at Parser.maybeParseExportDeclaration [as parseExport] (node_modules/@babel/parser/src/parser/statement.ts:2432:29)
+      at Parser.parseExport [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:649:25)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseModuleItem] (node_modules/@babel/parser/src/parser/statement.ts:419:17)
+      at Parser.parseModuleItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1443:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseProgram] (node_modules/@babel/parser/src/parser/statement.ts:229:10)
+      at Parser.parseProgram [as parseTopLevel] (node_modules/@babel/parser/src/parser/statement.ts:203:25)
+      at Parser.parseTopLevel [as parse] (node_modules/@babel/parser/src/parser/index.ts:88:25)
+      at parse (node_modules/@babel/parser/src/index.ts:86:38)
+      at parser (node_modules/@babel/core/src/parser/index.ts:29:19)
+          at parser.next (<anonymous>)
+      at normalizeFile (node_modules/@babel/core/src/transformation/normalize-file.ts:50:24)
+          at normalizeFile.next (<anonymous>)
+      at run (node_modules/@babel/core/src/transformation/index.ts:41:36)
+          at run.next (<anonymous>)
+      at transform (node_modules/@babel/core/src/transform.ts:29:20)
+          at transform.next (<anonymous>)
+      at evaluateSync (node_modules/gensync/index.js:251:28)
+      at sync (node_modules/gensync/index.js:89:14)
+      at fn (node_modules/@babel/core/src/errors/rewrite-stack-trace.ts:99:14)
+      at transformSync (node_modules/@babel/core/src/transform.ts:66:52)
+      at ScriptTransformer.transformSource (node_modules/@jest/transform/build/index.js:422:31)
+      at ScriptTransformer._transformAndBuildScript (node_modules/@jest/transform/build/index.js:519:40)
+      at ScriptTransformer.transform (node_modules/@jest/transform/build/index.js:558:19)
+      at Object.require (tests/MainSceneCoverage.test.js:26:23)
+
+FAIL tests/LogicPuzzleScene.test.js
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation, specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    SyntaxError: /workspaces/Nadagotchi/js/LogicPuzzleScene.js: Unexpected token (3:16)
+
+      1 | import { EventKeys } from './EventKeys.js';
+      2 | import { Config } from './Config.js';                    endGame(true);
+    > 3 |                 } else {
+        |                 ^
+      4 |                     canPlayerClick = false;
+      5 |                     this.time.delayedCall(1000, () => generateSequence());
+      6 |                 }
+
+      33 | };
+      34 |
+    > 35 | const { LogicPuzzleScene } = require('../js/LogicPuzzleScene');
+         |                              ^
+      36 |
+      37 | // Re-use helper
+      38 | const createMockRectangle = () => {
+
+      at constructor (node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at Parser.toParseError [as raise] (node_modules/@babel/parser/src/tokenizer/index.ts:1507:19)
+      at Parser.raise [as unexpected] (node_modules/@babel/parser/src/tokenizer/index.ts:1547:16)
+      at Parser.unexpected [as parseExprAtom] (node_modules/@babel/parser/src/parser/expression.ts:1355:22)
+      at Parser.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:742:23)
+      at Parser.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at Parser.parseUpdate [as parseMaybeUnary] (node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at Parser.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at Parser.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at Parser.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at Parser.parseMaybeConditional [as parseMaybeAssign] (node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at Parser.parseMaybeAssign [as parseExpressionBase] (node_modules/@babel/parser/src/parser/expression.ts:226:23)
+      at parseExpressionBase (node_modules/@babel/parser/src/parser/expression.ts:217:39)
+      at Parser.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3197:16)
+      at Parser.allowInAnd [as parseExpression] (node_modules/@babel/parser/src/parser/expression.ts:217:17)
+      at Parser.parseExpression [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:688:23)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseModuleItem] (node_modules/@babel/parser/src/parser/statement.ts:419:17)
+      at Parser.parseModuleItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1443:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseProgram] (node_modules/@babel/parser/src/parser/statement.ts:229:10)
+      at Parser.parseProgram [as parseTopLevel] (node_modules/@babel/parser/src/parser/statement.ts:203:25)
+      at Parser.parseTopLevel [as parse] (node_modules/@babel/parser/src/parser/index.ts:88:25)
+      at parse (node_modules/@babel/parser/src/index.ts:86:38)
+      at parser (node_modules/@babel/core/src/parser/index.ts:29:19)
+          at parser.next (<anonymous>)
+      at normalizeFile (node_modules/@babel/core/src/transformation/normalize-file.ts:50:24)
+          at normalizeFile.next (<anonymous>)
+      at run (node_modules/@babel/core/src/transformation/index.ts:41:36)
+          at run.next (<anonymous>)
+      at transform (node_modules/@babel/core/src/transform.ts:29:20)
+          at transform.next (<anonymous>)
+      at evaluateSync (node_modules/gensync/index.js:251:28)
+      at sync (node_modules/gensync/index.js:89:14)
+      at fn (node_modules/@babel/core/src/errors/rewrite-stack-trace.ts:99:14)
+      at transformSync (node_modules/@babel/core/src/transform.ts:66:52)
+      at ScriptTransformer.transformSource (node_modules/@jest/transform/build/index.js:422:31)
+      at ScriptTransformer._transformAndBuildScript (node_modules/@jest/transform/build/index.js:519:40)
+      at ScriptTransformer.transform (node_modules/@jest/transform/build/index.js:558:19)
+      at Object.require (tests/LogicPuzzleScene.test.js:35:30)
+
+FAIL tests/LiveLoopIntegration.test.js
+  ● Live Loop Integration › Night Owl trait should reduce energy decay at Night
+
+    TypeError: Cannot read properties of undefined (reading 'phenotype')
+
+      30 |     test('Night Owl trait should reduce energy decay at Night', () => {
+      31 |         // Setup Night Owl
+    > 32 |         pet.genome.phenotype.specialAbility = 'Night Owl';
+         |                    ^
+      33 |         // Ensure metabolism is normalized (multiplier 1.0)
+      34 |         pet.genome.phenotype.metabolism = Config.GENETICS.METABOLISM_NORMALIZER;
+      35 |
+
+      at Object.phenotype (tests/LiveLoopIntegration.test.js:32:20)
+
+  ● Live Loop Integration › Adventurer should lose happiness in Rainy weather
+
+    TypeError: Cannot set properties of undefined (setting 'happiness')
+
+      55 |         pet.dominantArchetype = 'Adventurer';
+      56 |         const initialHappiness = 80;
+    > 57 |         pet.stats.happiness = initialHappiness;
+         |                            ^
+      58 |
+      59 |         const worldState = { weather: 'Rainy', time: 'Day', activeEvent: null };
+      60 |         pet.live(worldState);
+
+      at Object.<anonymous> (tests/LiveLoopIntegration.test.js:57:28)
+
+  ● Live Loop Integration › Metabolism should scale decay rates
+
+    TypeError: Cannot read properties of undefined (reading 'phenotype')
+
+      67 |     test('Metabolism should scale decay rates', () => {
+      68 |         // High Metabolism (10) -> 2.0x Multiplier
+    > 69 |         pet.genome.phenotype.metabolism = 10;
+         |                    ^
+      70 |         pet.genome.phenotype.specialAbility = null; // No traits
+      71 |
+      72 |         const initialHunger = 100;
+
+      at Object.phenotype (tests/LiveLoopIntegration.test.js:69:20)
+
+FAIL tests/LightingManager.test.js
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation, specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    SyntaxError: /workspaces/Nadagotchi/js/LightingManager.js: Missing semicolon. (19:12)
+
+      17 |      * Should be called in the scene's update loop.
+      18 |      */
+    > 19 |     update() {
+         |             ^
+      20 |         // Lighting effects should only be active in outdoor locations (GARDEN).
+      21 |         // Indoor locations (INDOOR) should rely on their own lighting/mood.
+      22 |         if (this.scene.location === 'INDOOR') {
+
+    > 1 | import { jest } from '@jest/globals';import { LightingManager } from '../js/LightingManager';
+        |                                      ^
+      2 |
+      3 | describe('LightingManager', () => {
+      4 |     let lightingManager;
+
+      at constructor (node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at Parser.toParseError [as raise] (node_modules/@babel/parser/src/tokenizer/index.ts:1507:19)
+      at Parser.raise [as semicolon] (node_modules/@babel/parser/src/parser/util.ts:149:10)
+      at Parser.semicolon [as parseExpressionStatement] (node_modules/@babel/parser/src/parser/statement.ts:1363:10)
+      at Parser.parseExpressionStatement [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:702:19)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseModuleItem] (node_modules/@babel/parser/src/parser/statement.ts:419:17)
+      at Parser.parseModuleItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1443:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseProgram] (node_modules/@babel/parser/src/parser/statement.ts:229:10)
+      at Parser.parseProgram [as parseTopLevel] (node_modules/@babel/parser/src/parser/statement.ts:203:25)
+      at Parser.parseTopLevel [as parse] (node_modules/@babel/parser/src/parser/index.ts:88:25)
+      at parse (node_modules/@babel/parser/src/index.ts:86:38)
+      at parser (node_modules/@babel/core/src/parser/index.ts:29:19)
+          at parser.next (<anonymous>)
+      at normalizeFile (node_modules/@babel/core/src/transformation/normalize-file.ts:50:24)
+          at normalizeFile.next (<anonymous>)
+      at run (node_modules/@babel/core/src/transformation/index.ts:41:36)
+          at run.next (<anonymous>)
+      at transform (node_modules/@babel/core/src/transform.ts:29:20)
+          at transform.next (<anonymous>)
+      at evaluateSync (node_modules/gensync/index.js:251:28)
+      at sync (node_modules/gensync/index.js:89:14)
+      at fn (node_modules/@babel/core/src/errors/rewrite-stack-trace.ts:99:14)
+      at transformSync (node_modules/@babel/core/src/transform.ts:66:52)
+      at ScriptTransformer.transformSource (node_modules/@jest/transform/build/index.js:422:31)
+      at ScriptTransformer._transformAndBuildScript (node_modules/@jest/transform/build/index.js:519:40)
+      at ScriptTransformer.transform (node_modules/@jest/transform/build/index.js:558:19)
+      at Object.require (tests/LightingManager.test.js:1:38)
+
+FAIL tests/Journal.test.js
+  ● Journal Capping and Batching › should cap journal entries at MAX_JOURNAL_ENTRIES
+
+    TypeError: Cannot read properties of undefined (reading 'MAX_JOURNAL_ENTRIES')
+
+      22 |
+      23 |     test('should cap journal entries at MAX_JOURNAL_ENTRIES', () => {
+    > 24 |         const limit = Config.LIMITS.MAX_JOURNAL_ENTRIES;
+         |                                     ^
+      25 |         for (let i = 0; i < limit + 50; i++) {
+      26 |             pet.addJournalEntry(`Entry ${i}`);
+      27 |         }
+
+      at Object.MAX_JOURNAL_ENTRIES (tests/Journal.test.js:24:37)
+
+  ● Journal Capping and Batching › should batch saves using queueMicrotask
+
+    Cannot use spyOn on a primitive value; undefined given
+
+      32 |
+      33 |     test('should batch saves using queueMicrotask', (done) => {
+    > 34 |         const saveSpy = jest.spyOn(pet.persistence, 'saveJournal');
+         |                              ^
+      35 |
+      36 |         pet.addJournalEntry('Entry 1');
+      37 |         pet.addJournalEntry('Entry 2');
+
+      at ModuleMocker.spyOn (node_modules/jest-mock/build/index.js:583:13)
+      at Object.spyOn (tests/Journal.test.js:34:30)
+
+PASS tests/InventorySystem_placeItem.test.js
+FAIL tests/InventoryCheck.test.js
+  ● Security Fix: Inventory Check in Breeding › calculateOffspring should ignore items not in inventory
+
+    TypeError: parent.calculateOffspring is not a function
+
+      26 |         const environmentalFactors = ['Ancient Tome'];
+      27 |
+    > 28 |         const childData = parent.calculateOffspring(environmentalFactors);
+         |                                  ^
+      29 |
+      30 |         // Inspect child's genome for Intellectual trait
+      31 |         const intellectualAlleles = childData.genome.genotype.Intellectual;
+
+      at Object.calculateOffspring (tests/InventoryCheck.test.js:28:34)
+
+  ● Security Fix: Inventory Check in Breeding › calculateOffspring should accept items that ARE in inventory
+
+    TypeError: parent.calculateOffspring is not a function
+
+      48 |
+      49 |         const environmentalFactors = ['Ancient Tome'];
+    > 50 |         const childData = parent.calculateOffspring(environmentalFactors);
+         |                                  ^
+      51 |
+      52 |         const intellectualAlleles = childData.genome.genotype.Intellectual;
+      53 |
+
+      at Object.calculateOffspring (tests/InventoryCheck.test.js:50:34)
+
+FAIL tests/Inventory.test.js
+  ● Inventory System › should consume Berries and restore hunger/energy
+
+    TypeError: Cannot read properties of undefined (reading 'hunger')
+
+      143 |             case 'Berries':
+      144 |                 // Berries provide a small amount of food and energy
+    > 145 |                 this.pet.stats.hunger = Math.min(this.pet.maxStats.hunger, this.pet.stats.hunger + 10);
+          |                                                                    ^
+      146 |                 this.pet.stats.energy = Math.min(this.pet.maxStats.energy, this.pet.stats.energy + 2);
+      147 |                 this.pet.addJournalEntry("I ate some Berries. Yummy!");
+      148 |                 consumed = true;
+
+      at InventorySystem.hunger [as consumeItem] (js/systems/InventorySystem.js:145:68)
+      at Nadagotchi.consumeItem (js/Nadagotchi.js:506:37)
+      at Object.consumeItem (tests/Inventory.test.js:77:13)
+
+  ● Inventory System › should consume Logic-Boosting Snack and boost logic/happiness
+
+    TypeError: Cannot read properties of undefined (reading 'logic')
+
+      85 |         pet.inventory['Logic-Boosting Snack'] = 1;
+      86 |         pet.stats.happiness = 20;
+    > 87 |         const initialLogic = pet.skills.logic;
+         |                                         ^
+      88 |
+      89 |         pet.consumeItem('Logic-Boosting Snack');
+      90 |
+
+      at Object.logic (tests/Inventory.test.js:87:41)
+
+  ● Inventory System › should consume Metabolism-Slowing Tonic and modify genome
+
+    TypeError: Cannot read properties of undefined (reading 'push')
+
+      573 |     addJournalEntry(text) {
+      574 |         const newEntry = { date: new Date().toLocaleString(), text: text };
+    > 575 |         this.journal.push(newEntry);
+          |                      ^
+      576 |
+      577 |         // Cap the journal growth
+      578 |         const limit = Config.LIMITS.MAX_JOURNAL_ENTRIES || 100;
+
+      at Nadagotchi.push [as addJournalEntry] (js/Nadagotchi.js:575:22)
+      at InventorySystem.addJournalEntry [as consumeItem] (js/systems/InventorySystem.js:182:30)
+      at Nadagotchi.consumeItem (js/Nadagotchi.js:506:37)
+      at Object.consumeItem (tests/Inventory.test.js:105:13)
+
+  ● Inventory System › handleAction should trigger consumeItem
+
+    TypeError: Cannot read properties of undefined (reading 'hunger')
+
+      143 |             case 'Berries':
+      144 |                 // Berries provide a small amount of food and energy
+    > 145 |                 this.pet.stats.hunger = Math.min(this.pet.maxStats.hunger, this.pet.stats.hunger + 10);
+          |                                                                    ^
+      146 |                 this.pet.stats.energy = Math.min(this.pet.maxStats.energy, this.pet.stats.energy + 2);
+      147 |                 this.pet.addJournalEntry("I ate some Berries. Yummy!");
+      148 |                 consumed = true;
+
+      at InventorySystem.hunger [as consumeItem] (js/systems/InventorySystem.js:145:68)
+      at Nadagotchi.consumeItem (js/Nadagotchi.js:506:37)
+      at Nadagotchi.consumeItem [as handleAction] (js/Nadagotchi.js:378:22)
+      at Object.handleAction (tests/Inventory.test.js:122:13)
+
+  ● Inventory System › should unlock Living Room via Deed if Entryway is unlocked
+
+    TypeError: this.pet.isRoomUnlocked is not a function
+
+      215 |
+      216 |         // Check Linear Progression: Ensure at least one connected room is unlocked.
+    > 217 |         const canUnlock = RoomDefinitions[targetRoom].connections.some(connId => this.pet.isRoomUnlocked(connId));
+          |                                                                                           ^
+      218 |
+      219 |         if (!canUnlock) {
+      220 |             return { success: false, message: "You must unlock a connecting room first!" };
+
+      at isRoomUnlocked (js/systems/InventorySystem.js:217:91)
+          at Array.some (<anonymous>)
+      at InventorySystem.some [as _processDeed] (js/systems/InventorySystem.js:217:67)
+      at InventorySystem._processDeed [as consumeItem] (js/systems/InventorySystem.js:190:33)
+      at Nadagotchi.consumeItem (js/Nadagotchi.js:506:37)
+      at Object.consumeItem (tests/Inventory.test.js:142:28)
+
+  ● Inventory System › should fail to unlock Kitchen if Living Room is locked
+
+    TypeError: this.pet.isRoomUnlocked is not a function
+
+      215 |
+      216 |         // Check Linear Progression: Ensure at least one connected room is unlocked.
+    > 217 |         const canUnlock = RoomDefinitions[targetRoom].connections.some(connId => this.pet.isRoomUnlocked(connId));
+          |                                                                                           ^
+      218 |
+      219 |         if (!canUnlock) {
+      220 |             return { success: false, message: "You must unlock a connecting room first!" };
+
+      at isRoomUnlocked (js/systems/InventorySystem.js:217:91)
+          at Array.some (<anonymous>)
+      at InventorySystem.some [as _processDeed] (js/systems/InventorySystem.js:217:67)
+      at InventorySystem._processDeed [as consumeItem] (js/systems/InventorySystem.js:190:33)
+      at Nadagotchi.consumeItem (js/Nadagotchi.js:506:37)
+      at Object.consumeItem (tests/Inventory.test.js:160:28)
+
+FAIL tests/InteractExploit.test.js
+  ● Interact Exploit Fix › interact (CHAT) should consume energy
+
+    TypeError: Cannot set properties of undefined (setting 'energy')
+
+      28 |         pet = new Nadagotchi('Adventurer');
+      29 |         // Ensure standard stats
+    > 30 |         pet.stats.energy = 100;
+         |                         ^
+      31 |         pet.relationships['Grizzled Scout'] = { level: 0 };
+      32 |     });
+      33 |
+
+      at Object.<anonymous> (tests/InteractExploit.test.js:30:25)
+
+  ● Interact Exploit Fix › interact should fail (return null) if insufficient energy
+
+    TypeError: Cannot set properties of undefined (setting 'energy')
+
+      28 |         pet = new Nadagotchi('Adventurer');
+      29 |         // Ensure standard stats
+    > 30 |         pet.stats.energy = 100;
+         |                         ^
+      31 |         pet.relationships['Grizzled Scout'] = { level: 0 };
+      32 |     });
+      33 |
+
+      at Object.<anonymous> (tests/InteractExploit.test.js:30:25)
+
+FAIL tests/HybridCareer.test.js
+  ● Hybrid Career System › should initialize research skill in constructor
+
+    TypeError: Cannot read properties of undefined (reading 'research')
+
+      37 |     test('should initialize research skill in constructor', () => {
+      38 |         const newPet = new Nadagotchi('Adventurer');
+    > 39 |         expect(newPet.skills.research).toBeDefined();
+         |                              ^
+      40 |         expect(newPet.skills.research).toBe(0);
+      41 |     });
+      42 |
+
+      at Object.research (tests/HybridCareer.test.js:39:30)
+
+  ● Hybrid Career System › STUDY should increase research skill
+
+    TypeError: Cannot read properties of undefined (reading 'energy')
+
+      239 |
+      240 |             case 'STUDY':
+    > 241 |                 if (this.stats.energy < Config.ACTIONS.STUDY.ENERGY_COST) return;
+          |                                ^
+      242 |                 if (this.stats.happiness < Config.ACTIONS.STUDY.HAPPINESS_COST) return;
+      243 |
+      244 |                 this.stats.energy = Math.max(0, this.stats.energy - Config.ACTIONS.STUDY.ENERGY_COST);
+
+      at Nadagotchi.energy [as handleAction] (js/Nadagotchi.js:241:32)
+      at Object.handleAction (tests/HybridCareer.test.js:45:13)
+
+  ● Hybrid Career System › INTERACT_BOOKSHELF should increase research skill
+
+    TypeError: Cannot read properties of undefined (reading 'energy')
+
+      270 |
+      271 |             case 'INTERACT_BOOKSHELF':
+    > 272 |                 if (this.stats.energy < Config.ACTIONS.INTERACT_BOOKSHELF.ENERGY_COST) return;
+          |                                ^
+      273 |                 if (this.stats.happiness < Config.ACTIONS.INTERACT_BOOKSHELF.HAPPINESS_COST) return;
+      274 |
+      275 |                 this.stats.energy -= Config.ACTIONS.INTERACT_BOOKSHELF.ENERGY_COST;
+
+      at Nadagotchi.energy [as handleAction] (js/Nadagotchi.js:272:32)
+      at Object.handleAction (tests/HybridCareer.test.js:51:13)
+
+  ● Hybrid Career System › should unlock Archaeologist hybrid career when requirements are met
+
+    TypeError: Cannot set properties of undefined (setting 'Adventurer')
+
+      55 |     test('should unlock Archaeologist hybrid career when requirements are met', () => {
+      56 |         // Requirements: High Adventurer, High Intellectual, Research, Navigation
+    > 57 |         pet.personalityPoints.Adventurer = 15;
+         |                                         ^
+      58 |         pet.personalityPoints.Intellectual = 15;
+      59 |         pet.skills.navigation = 11;
+      60 |         pet.skills.research = 11;
+
+      at Object.<anonymous> (tests/HybridCareer.test.js:57:41)
+
+  ● Hybrid Career System › should prioritize Hybrid Career over Standard Career if requirements for both are met
+
+    TypeError: Cannot set properties of undefined (setting 'Adventurer')
+
+      75 |
+      76 |         // Set up for Archaeologist (Hybrid)
+    > 77 |         pet.personalityPoints.Adventurer = 15;
+         |                                         ^
+      78 |         pet.personalityPoints.Intellectual = 15; // Tie or dominant
+      79 |         pet.skills.navigation = 11;
+      80 |         pet.skills.research = 11;
+
+      at Object.<anonymous> (tests/HybridCareer.test.js:77:41)
+
+FAIL tests/HousingSystem.test.js
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation, specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    SyntaxError: /workspaces/Nadagotchi/js/MainScene.js: Unexpected reserved word 'await'. (95:26)
+
+      93 |
+      94 |         // --- Pet Initialization ---
+    > 95 |         const loadedPet = await this.persistence.loadPet();
+         |                           ^
+      96 |         if (data && data.newPetData) {
+      97 |             // New Game: Pass null for loadedData to ensure defaults are used
+      98 |             this.nadagotchi = new Nadagotchi(data.newPetData.dominantArchetype, null);
+
+       8 |
+       9 | // Now require MainScene after global.Phaser is set
+    > 10 | const { MainScene } = require('../js/MainScene');
+         |                       ^
+      11 | const { EventKeys } = require('../js/EventKeys');
+      12 |
+      13 | // Mock Config
+
+      at constructor (node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at Parser.toParseError [as raise] (node_modules/@babel/parser/src/tokenizer/index.ts:1507:19)
+      at Parser.raise [as checkReservedWord] (node_modules/@babel/parser/src/parser/expression.ts:2896:12)
+      at Parser.checkReservedWord [as parseIdentifierName] (node_modules/@babel/parser/src/parser/expression.ts:2858:12)
+      at Parser.parseIdentifierName [as parseIdentifier] (node_modules/@babel/parser/src/parser/expression.ts:2815:23)
+      at Parser.parseIdentifier [as parseExprAtom] (node_modules/@babel/parser/src/parser/expression.ts:1304:27)
+      at Parser.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:742:23)
+      at Parser.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at Parser.parseUpdate [as parseMaybeUnary] (node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at Parser.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at Parser.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at Parser.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at Parser.parseMaybeConditional [as parseMaybeAssign] (node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at parseMaybeAssign (node_modules/@babel/parser/src/parser/expression.ts:257:12)
+      at Parser.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3197:16)
+      at Parser.allowInAnd [as parseMaybeAssignAllowIn] (node_modules/@babel/parser/src/parser/expression.ts:256:17)
+      at Parser.parseMaybeAssignAllowIn [as parseVar] (node_modules/@babel/parser/src/parser/statement.ts:1587:18)
+      at Parser.parseVar [as parseVarStatement] (node_modules/@babel/parser/src/parser/statement.ts:1251:10)
+      at Parser.parseVarStatement [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:612:21)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseStatementListItem] (node_modules/@babel/parser/src/parser/statement.ts:431:17)
+      at Parser.parseStatementListItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1444:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseBlock] (node_modules/@babel/parser/src/parser/statement.ts:1385:10)
+      at Parser.parseBlock [as parseFunctionBody] (node_modules/@babel/parser/src/parser/expression.ts:2626:24)
+      at Parser.parseFunctionBody [as parseFunctionBodyAndFinish] (node_modules/@babel/parser/src/parser/expression.ts:2595:10)
+      at Parser.parseFunctionBodyAndFinish [as parseMethod] (node_modules/@babel/parser/src/parser/expression.ts:2492:31)
+      at Parser.parseMethod [as pushClassMethod] (node_modules/@babel/parser/src/parser/statement.ts:2244:12)
+      at Parser.pushClassMethod [as parseClassMemberWithIsStatic] (node_modules/@babel/parser/src/parser/statement.ts:2023:12)
+      at Parser.parseClassMemberWithIsStatic [as parseClassMember] (node_modules/@babel/parser/src/parser/statement.ts:1938:10)
+      at parseClassMember (node_modules/@babel/parser/src/parser/statement.ts:1851:14)
+      at Parser.callback [as withSmartMixTopicForbiddingContext] (node_modules/@babel/parser/src/parser/expression.ts:3176:14)
+      at Parser.withSmartMixTopicForbiddingContext [as parseClassBody] (node_modules/@babel/parser/src/parser/statement.ts:1823:10)
+      at Parser.parseClassBody [as parseClass] (node_modules/@babel/parser/src/parser/statement.ts:1774:22)
+      at Parser.parseClass [as parseExportDeclaration] (node_modules/@babel/parser/src/parser/statement.ts:2628:25)
+      at Parser.parseExportDeclaration [as maybeParseExportDeclaration] (node_modules/@babel/parser/src/parser/statement.ts:2551:31)
+      at Parser.maybeParseExportDeclaration [as parseExport] (node_modules/@babel/parser/src/parser/statement.ts:2432:29)
+      at Parser.parseExport [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:649:25)
+      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at Parser.parseStatementLike [as parseModuleItem] (node_modules/@babel/parser/src/parser/statement.ts:419:17)
+      at Parser.parseModuleItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1443:16)
+      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at Parser.parseBlockBody [as parseProgram] (node_modules/@babel/parser/src/parser/statement.ts:229:10)
+      at Parser.parseProgram [as parseTopLevel] (node_modules/@babel/parser/src/parser/statement.ts:203:25)
+      at Parser.parseTopLevel [as parse] (node_modules/@babel/parser/src/parser/index.ts:88:25)
+      at parse (node_modules/@babel/parser/src/index.ts:86:38)
+      at parser (node_modules/@babel/core/src/parser/index.ts:29:19)
+          at parser.next (<anonymous>)
+      at normalizeFile (node_modules/@babel/core/src/transformation/normalize-file.ts:50:24)
+          at normalizeFile.next (<anonymous>)
+      at run (node_modules/@babel/core/src/transformation/index.ts:41:36)
+          at run.next (<anonymous>)
+      at transform (node_modules/@babel/core/src/transform.ts:29:20)
+          at transform.next (<anonymous>)
+      at evaluateSync (node_modules/gensync/index.js:251:28)
+      at sync (node_modules/gensync/index.js:89:14)
+      at fn (node_modules/@babel/core/src/errors/rewrite-stack-trace.ts:99:14)
+      at transformSync (node_modules/@babel/core/src/transform.ts:66:52)
+      at ScriptTransformer.transformSource (node_modules/@jest/transform/build/index.js:422:31)
+      at ScriptTransformer._transformAndBuildScript (node_modules/@jest/transform/build/index.js:519:40)
+      at ScriptTransformer.transform (node_modules/@jest/transform/build/index.js:558:19)
+      at Object.require (tests/HousingSystem.test.js:10:23)
+
+/workspaces/Nadagotchi/js/Nadagotchi.js:9843
+    this.journal.push(newEntry);
+                 ^
+
+[TypeError: Cannot read properties of undefined (reading 'push')]
+
+Node.js v24.11.1
