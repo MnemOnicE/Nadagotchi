@@ -72,10 +72,9 @@ export class DanceMinigameScene extends Phaser.Scene {
         const btnY = h - 60;
         const btnWidth = 60;
 
-        ButtonFactory.createButton(this, this.lanes[0].x, btnY, '←', () => this.handleInput('LEFT'), { width: btnWidth });
-        ButtonFactory.createButton(this, this.lanes[1].x, btnY, '↓', () => this.handleInput('DOWN'), { width: btnWidth });
-        ButtonFactory.createButton(this, this.lanes[2].x, btnY, '↑', () => this.handleInput('UP'), { width: btnWidth });
-        ButtonFactory.createButton(this, this.lanes[3].x, btnY, '→', () => this.handleInput('RIGHT'), { width: btnWidth });
+        this.lanes.forEach(lane => {
+            ButtonFactory.createButton(this, lane.x, btnY, this.getArrowChar(lane.key), () => this.handleInput(lane.key), { width: btnWidth });
+        });
 
 
         // Timer to end game
