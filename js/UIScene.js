@@ -1,11 +1,123 @@
-import { ToastManager } from './systems/ToastManager.js';    }
+import { ToastManager } from './systems/ToastManager.js';
+import { ButtonFactory } from './ButtonFactory.js';
+import { PersistenceManager } from './PersistenceManager.js';
+import { NarrativeSystem } from './NarrativeSystem.js';
+import { EventKeys } from './EventKeys.js';
+import { ItemDefinitions } from './ItemData.js';
+import { Config } from './Config.js';
+import { CareerDefinitions } from './CareerDefinitions.js';
+import { SoundSynthesizer } from './utils/SoundSynthesizer.js';
+import { Achievements } from './AchievementData.js';
+
+/**
+ * @fileoverview Manages the "Physical Shell" UI layer of the game.
+ * Handles the HUD, action buttons, modals, and user input mapping.
+ * Renders on top of the MainScene.
+ */
+
+export class UIScene extends Phaser.Scene {
+    constructor() {
+        super({ key: 'UIScene' });
+        this.lastActionSignature = '';
+        this.craftingGridState = new Array(9).fill(null);
+        this.selectedInventoryItem = null;
+        this.persistence = new PersistenceManager();
+        this.cachedAncestors = [];
+    }
 
     create() {
         this.currentTab = 'CARE';
         this.tabButtons = [];
         this.actionButtons = [];
         this.allModals = [];
-        this.toastManager = new ToastManager(this);    }
+        this.toastManager = new ToastManager(this);
+
+        this.dashboardBg = this.add.rectangle(0, 0, 1, 1, 0xA3B8A2).setOrigin(0);
+        this.dashboardBorder = this.add.rectangle(0, 0, 1, 1, 0x4A4A4A).setOrigin(0);
+
+        const safeTop = Config.UI.SAFE_AREA_TOP || 0;
+        this.statsText = this.add.text(10, 10 + safeTop, '', {
+            fontFamily: 'VT323, monospace', fontSize: '24px', color: '#ffffff', stroke: '#000000', strokeThickness: 3
+        });
+
+        // --- SECRET DEBUG TRIGGER ---
+        this.statsText.setInteractive({ useHandCursor: true });
+        this.statsTextClickCount = 0;
+        this.statsText.on('pointerdown', () => {
+             this.statsTextClickCount++;
+             if (this.statsTextClickCount === 1) {
+                  // Reset after 2 seconds
+                  this.time.delayedCall(2000, () => { this.statsTextClickCount = 0; });
+             }
+             if (this.statsTextClickCount >= 5) {
+                  this.statsTextClickCount = 0;
+                  const mainScene = this.scene.get('MainScene');
+                  if (mainScene && mainScene.debugConsole) {
+                       mainScene.debugConsole.toggle();
+                  }
+             }
+        });
+
+        this.lastStatsText = '';
+
+        this.actionButtons = [];
+
+        this.jobBoardButton = ButtonFactory.createButton(this, 0, 0, 'Job Board', () => {
+            this.handleJobBoardClick();
+        }, { width: 120, height: 50, color: 0x6A0DAD, fontSize: '20px' });
+        this.jobBoardButton.setAlpha(0.6);
+
+        this.retireButton = this.add.text(0, 50, 'Retire', {
+            fontFamily: 'Arial', fontSize: '16px', padding: { x: 15, y: 10 }, backgroundColor: '#ff00ff', color: '#ffffff'
+        }).setOrigin(1, 0).setInteractive({ useHandCursor: true }).setVisible(false)
+          .on('pointerdown', () => this.game.events.emit(EventKeys.UI_ACTION, EventKeys.RETIRE));
+
+        this.game.events.on(EventKeys.UPDATE_STATS, this.updateStatsUI, this);
+        this.game.events.on(EventKeys.UI_ACTION, this.handleUIActions, this);
+        this.game.events.on(EventKeys.START_TUTORIAL, this.startTutorial, this);
+        this.game.events.on(EventKeys.ACHIEVEMENT_UNLOCKED, this.handleAchievementUnlocked, this);
+        this.scale.on('resize', this.resize, this);
+
+        this.calendarDropdown = this.createCalendarDropdown();
+
+        this.journalModal = this.createModal("Journal");
+        this.recipeModal = this.createModal("Recipe Book");
+        this.hobbyModal = this.createModal("Hobbies");
+
+        // Crafting Modal
+        this.craftingModal = this.createModal("Crafting Table");
+
+        this.relationshipModal = this.createModal("Relationships");
+        this.decorateModal = this.createModal("Decorate");
+        this.ancestorModal = this.createModal("Hall of Ancestors");
+        this.inventoryModal = this.createModal("Inventory");
+        this.achievementsModal = this.createModal("Achievements");
+        this.dialogueModal = this.createModal("Conversation");
+        this.settingsModal = this.createSettingsModal();
+        this.showcaseModal = this.createShowcaseModal();
+        this.careerModal = this.createModal("Career Profile");
+        this.jobBoardModal = this.createModal("Job Board");
+
+        this.createTabs();
+        this.resize(this.scale);
+        this.showTab('CARE');
+
+        this.input.keyboard.on('keydown-ONE', () => this.showTab('CARE'));
+        this.input.keyboard.on('keydown-TWO', () => this.showTab('ACTION'));
+        this.input.keyboard.on('keydown-THREE', () => this.showTab('SYSTEM'));
+        this.input.keyboard.on('keydown-FOUR', () => this.showTab('ANCESTORS'));
+
+        // Initial async data load for UI
+        this.loadAsyncUIData();
+    }
+
+    async loadAsyncUIData() {
+        this.cachedAncestors = await this.persistence.loadHallOfFame();
+        // Trigger update if on Ancestors tab
+        if (this.currentTab === 'ANCESTORS') {
+            this.updateActionButtons(true);
+        }
+    }
 
     closeAllModals() { this.allModals.forEach(modal => modal.setVisible(false)); }
     handleJobBoardClick() { this.game.events.emit(EventKeys.UI_ACTION, EventKeys.OPEN_JOB_BOARD); }
@@ -28,7 +140,8 @@ import { ToastManager } from './systems/ToastManager.js';    }
             // Trigger refresh in case data wasn't ready (will loop if not handled carefully, but getTabActions is pure)
             if (this.cachedAncestors.length === 0) {
                  this.loadAsyncUIData(); // Attempt reload if empty
-            }        }
+            }
+        }
         return actions;
     }
     showTab(tabId, force = false) {
@@ -129,7 +242,8 @@ import { ToastManager } from './systems/ToastManager.js';    }
         this.retireButton.setVisible(isLegacyReady);
         if (newCareerUnlocked) { this.showCareerNotification(newCareerUnlocked); this.mainScene.nadagotchi.newCareerUnlocked = null; }
     }
-    getMoodEmoji(mood) { return Config.MOOD_VISUALS.EMOJIS[mood] || Config.MOOD_VISUALS.DEFAULT_EMOJI; }    showCareerNotification(message) { const txt = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2 - 30, `Career Unlocked: ${message}!`, { fontFamily: 'VT323, Arial', fontSize: '32px', color: '#000', backgroundColor: '#fff', padding: { x: 10, y: 5 }, align: 'center' }).setOrigin(0.5); this.time.delayedCall(3000, () => txt.destroy()); }
+    getMoodEmoji(mood) { return Config.MOOD_VISUALS.EMOJIS[mood] || Config.MOOD_VISUALS.DEFAULT_EMOJI; }
+    showCareerNotification(message) { const txt = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2 - 30, `Career Unlocked: ${message}!`, { fontFamily: 'VT323, Arial', fontSize: '32px', color: '#000', backgroundColor: '#fff', padding: { x: 10, y: 5 }, align: 'center' }).setOrigin(0.5); this.time.delayedCall(3000, () => txt.destroy()); }
     createCalendarDropdown() {
         const width = 150, collapsedHeight = 30, expandedHeight = 120;
         const container = this.add.container(0, 0);
@@ -266,12 +380,14 @@ import { ToastManager } from './systems/ToastManager.js';    }
     async openJournal() { this.closeAllModals(); const entries = await this.persistence.loadJournal(); const modal = this.journalModal; modal.entries = entries.slice().reverse(); modal.currentPage = 0; modal.entriesPerPage = 3; if (!modal.navButtons) { const mw = this.getModalWidth(); const mh = this.getModalHeight(); const yPos = mh/2 - 40; modal.btnPrev = ButtonFactory.createButton(this, -80, yPos, "< Prev", () => this.changeJournalPage(-1), { width: 80, height: 30 }); modal.btnNext = ButtonFactory.createButton(this, 80, yPos, "Next >", () => this.changeJournalPage(1), { width: 80, height: 30 }); modal.pageIndicator = this.add.text(0, yPos, "1/1", { fontFamily: 'VT323', fontSize: '20px' }).setOrigin(0.5); modal.add([modal.btnPrev, modal.btnNext, modal.pageIndicator]); modal.navButtons = true; } this.updateJournalPage(); this.journalModal.setVisible(true); this.scene.pause('MainScene'); }
     changeJournalPage(delta) { const modal = this.journalModal; const totalPages = Math.ceil(modal.entries.length / modal.entriesPerPage) || 1; let newPage = modal.currentPage + delta; if (newPage < 0) newPage = 0; if (newPage >= totalPages) newPage = totalPages - 1; modal.currentPage = newPage; this.updateJournalPage(); }
     updateJournalPage() { const modal = this.journalModal; const totalPages = Math.ceil(modal.entries.length / modal.entriesPerPage) || 1; const start = modal.currentPage * modal.entriesPerPage; const pageEntries = modal.entries.slice(start, start + modal.entriesPerPage); const text = pageEntries.length ? pageEntries.map(e => `[${e.date}]\n${e.text}`).join('\n\n---\n\n') : "No entries yet."; modal.content.setText(text); modal.pageIndicator.setText(`${modal.currentPage + 1}/${totalPages}`); modal.btnPrev.setDisabled(modal.currentPage === 0); modal.btnNext.setDisabled(modal.currentPage >= totalPages - 1); modal.btnPrev.setAlpha(modal.currentPage === 0 ? 0.5 : 1); modal.btnNext.setAlpha(modal.currentPage >= totalPages - 1 ? 0.5 : 1); }
-    async openRecipeBook() { this.closeAllModals(); const discovered = (this.nadagotchiData && this.nadagotchiData.discoveredRecipes) || await this.persistence.loadRecipes(); const allRecipes = (this.nadagotchiData && this.nadagotchiData.recipes) || {}; let text = (!discovered || discovered.length === 0) ? "No recipes discovered yet." : "Discovered Recipes:\n\n" + discovered.map(name => { const r = allRecipes[name]; return r ? `• ${name}\n  "${r.description}"\n  Req: ${Object.entries(r.materials).map(([m,c]) => `${c} ${m}`).join(', ')}` : `• ${name}`; }).join('\n\n'); this.recipeModal.content.setText(text); this.recipeModal.setVisible(true); this.scene.pause('MainScene'); }    openHobbyMenu() { this.closeAllModals(); if (!this.nadagotchiData) return; this.hobbyModal.content.setText(Object.entries(this.nadagotchiData.hobbies).map(([h, l]) => `${h}: Level ${l}`).join('\n')); this.hobbyModal.setVisible(true); this.scene.pause('MainScene'); }
+    async openRecipeBook() { this.closeAllModals(); const discovered = (this.nadagotchiData && this.nadagotchiData.discoveredRecipes) || await this.persistence.loadRecipes(); const allRecipes = (this.nadagotchiData && this.nadagotchiData.recipes) || {}; let text = (!discovered || discovered.length === 0) ? "No recipes discovered yet." : "Discovered Recipes:\n\n" + discovered.map(name => { const r = allRecipes[name]; return r ? `• ${name}\n  "${r.description}"\n  Req: ${Object.entries(r.materials).map(([m,c]) => `${c} ${m}`).join(', ')}` : `• ${name}`; }).join('\n\n'); this.recipeModal.content.setText(text); this.recipeModal.setVisible(true); this.scene.pause('MainScene'); }
+    openHobbyMenu() { this.closeAllModals(); if (!this.nadagotchiData) return; this.hobbyModal.content.setText(Object.entries(this.nadagotchiData.hobbies).map(([h, l]) => `${h}: Level ${l}`).join('\n')); this.hobbyModal.setVisible(true); this.scene.pause('MainScene'); }
     openRelationshipMenu() { this.closeAllModals(); if (!this.nadagotchiData) return; this.relationshipModal.content.setText(Object.entries(this.nadagotchiData.relationships).map(([n, d]) => `${n}: Friendship ${d.level}`).join('\n')); this.relationshipModal.setVisible(true); this.scene.pause('MainScene'); }
     openDecorateMenu() { this.closeAllModals(); if (!this.nadagotchiData) return; if (this.decorateButtons) this.decorateButtons.forEach(btn => btn.destroy()); this.decorateButtons = []; const mw = this.getModalWidth(); const startX = mw / 2 - 80; let yPos = -this.getModalHeight() / 2 + 100; const validTypes = ['FURNITURE', 'WALLPAPER', 'FLOORING']; const furniture = Object.entries(this.nadagotchiData.inventory).filter(([item, count]) => { const def = ItemDefinitions[item]; return def && validTypes.includes(def.type) && count > 0; }); let text = "Select an item to place:\n\n" + (furniture.length === 0 ? "You have no furniture or decor." : ""); furniture.forEach(([itemName, count]) => { text += `- ${itemName}: ${count}\n`; const def = ItemDefinitions[itemName]; const isSurface = def && (def.type === 'WALLPAPER' || def.type === 'FLOORING'); const actionKey = isSurface ? EventKeys.APPLY_HOME_DECOR : EventKeys.PLACE_FURNITURE; const btnText = isSurface ? 'Apply' : 'Place'; const placeButton = ButtonFactory.createButton(this, startX, yPos, btnText, () => { this.game.events.emit(EventKeys.UI_ACTION, actionKey, itemName); this.decorateModal.setVisible(false); this.scene.resume('MainScene'); }, { width: 80, height: 30, color: 0x228B22 }); this.decorateModal.add(placeButton); this.decorateButtons.push(placeButton); yPos += 35; }); const moveBtnY = this.getModalHeight() / 2 - 60; const toggleBtn = ButtonFactory.createButton(this, 0, moveBtnY, 'Move Furniture', () => { this.game.events.emit(EventKeys.UI_ACTION, EventKeys.TOGGLE_DECORATION_MODE); this.decorateModal.setVisible(false); this.scene.resume('MainScene'); }, { width: 160, height: 40, color: 0x4169E1 }); this.decorateModal.add(toggleBtn); this.decorateButtons.push(toggleBtn); this.decorateModal.content.setText(text); this.decorateModal.setVisible(true); this.scene.pause('MainScene'); }
     openInventoryMenu() { this.closeAllModals(); if (!this.nadagotchiData) return; if (this.inventoryButtons) this.inventoryButtons.forEach(btn => btn.destroy()); this.inventoryButtons = []; if (this.inventoryTexts) this.inventoryTexts.forEach(t => t.destroy()); this.inventoryTexts = []; const items = Object.entries(this.nadagotchiData.inventory || {}); this.inventoryModal.content.setText(items.length === 0 ? "Empty." : ""); const mw = this.getModalWidth(); let currentY = -this.getModalHeight() / 2 + 60; const startX = -mw / 2 + 20; items.forEach(([itemName, count]) => { const def = ItemDefinitions[itemName] || { description: "Unknown", emoji: "❓", type: "Misc" }; const itemStr = `${def.emoji} ${itemName} (x${count})`; const itemText = this.add.text(startX, currentY, itemStr, { font: '20px monospace', color: '#ffffff' }); const descText = this.add.text(startX + 20, currentY + 25, def.description, { font: '16px monospace', color: '#aaaaaa', wordWrap: { width: mw - 150 } }); this.inventoryModal.add([itemText, descText]); this.inventoryTexts.push(itemText, descText); if (def.type === 'Consumable' && count > 0) { const useButton = ButtonFactory.createButton(this, mw/2 - 60, currentY + 10, 'Use', () => { this.game.events.emit(EventKeys.UI_ACTION, EventKeys.CONSUME_ITEM, itemName); this.inventoryModal.setVisible(false); this.scene.resume('MainScene'); }, { width: 60, height: 30, color: 0x228B22 }); this.inventoryModal.add(useButton); this.inventoryButtons.push(useButton); } currentY += 60; }); this.inventoryModal.setVisible(true); this.scene.pause('MainScene'); }
     openAncestorModal(ancestorData) { this.closeAllModals(); if (!ancestorData) return; const advice = NarrativeSystem.getAdvice(ancestorData.dominantArchetype); const text = `Name: Generation ${ancestorData.generation}\nArchetype: ${ancestorData.dominantArchetype}\nCareer: ${ancestorData.currentCareer || 'None'}\n\nStats:\nHappiness: ${Math.floor(ancestorData.stats.happiness)}\nLogic: ${ancestorData.skills.logic.toFixed(1)}\nEmpathy: ${ancestorData.skills.empathy.toFixed(1)}\n\nAdvice:\n"${advice}"`; this.ancestorModal.content.setText(text); this.ancestorModal.setVisible(true); this.scene.pause('MainScene'); }
-    async openAchievementsModal() { this.closeAllModals(); const data = await this.persistence.loadAchievements(); const unlockedIds = data.unlocked || []; const text = Achievements.map(ach => unlockedIds.includes(ach.id) ? `${ach.icon} ${ach.name}\n${ach.description}` : `🔒 ${ach.name}\n(Locked)`).join('\n\n'); this.achievementsModal.content.setText(text); this.achievementsModal.setVisible(true); this.scene.pause('MainScene'); }    startTutorial() {
+    async openAchievementsModal() { this.closeAllModals(); const data = await this.persistence.loadAchievements(); const unlockedIds = data.unlocked || []; const text = Achievements.map(ach => unlockedIds.includes(ach.id) ? `${ach.icon} ${ach.name}\n${ach.description}` : `🔒 ${ach.name}\n(Locked)`).join('\n\n'); this.achievementsModal.content.setText(text); this.achievementsModal.setVisible(true); this.scene.pause('MainScene'); }
+    startTutorial() {
         this.closeAllModals();
         this.scene.pause('MainScene');
 
@@ -366,41 +482,37 @@ import { ToastManager } from './systems/ToastManager.js';    }
     const modal = this.createModal("Settings");
     const h = 400;
 
+    // Shared setting updater
+    const updateSetting = (key, value, displayElement, formatFn) => {
+        this.game.events.emit(EventKeys.UPDATE_SETTINGS, { [key]: value });
+        displayElement.setText(formatFn(value));
+        if (!this.settingsData) this.settingsData = {};
+        this.settingsData[key] = value;
+    };
+
     // Volume Controls
     const volLabel = this.add.text(0, -110, "Volume", { fontSize: '24px', fontFamily: 'VT323', monospace: true }).setOrigin(0.5);
+    const volDisplay = this.add.text(0, -70, "50%", { fontSize: '24px', fontFamily: 'VT323' }).setOrigin(0.5);
     const volDown = ButtonFactory.createButton(this, -80, -70, "-", () => {
         const newVol = Math.max(0, (this.settingsData?.volume ?? 0.5) - 0.1);
-        this.game.events.emit(EventKeys.UPDATE_SETTINGS, { volume: newVol });
-        this.settingsModal.volDisplay.setText(`${Math.round(newVol * 100)}%`);
-        if (!this.settingsData) this.settingsData = {};
-        this.settingsData.volume = newVol;
+        updateSetting('volume', newVol, volDisplay, v => `${Math.round(v * 100)}%`);
     }, { width: 40, height: 40, color: 0x808080 });
     const volUp = ButtonFactory.createButton(this, 80, -70, "+", () => {
         const newVol = Math.min(1, (this.settingsData?.volume ?? 0.5) + 0.1);
-        this.game.events.emit(EventKeys.UPDATE_SETTINGS, { volume: newVol });
-        this.settingsModal.volDisplay.setText(`${Math.round(newVol * 100)}%`);
-        if (!this.settingsData) this.settingsData = {};
-        this.settingsData.volume = newVol;
+        updateSetting('volume', newVol, volDisplay, v => `${Math.round(v * 100)}%`);
     }, { width: 40, height: 40, color: 0x808080 });
-    const volDisplay = this.add.text(0, -70, "50%", { fontSize: '24px', fontFamily: 'VT323' }).setOrigin(0.5);
 
     // Safe Area Padding Controls
     const safeLabel = this.add.text(0, -10, "Safe Area Border", { fontSize: '24px', fontFamily: 'VT323', monospace: true }).setOrigin(0.5);
+    const safeDisplay = this.add.text(0, 20, "0px", { fontSize: '24px', fontFamily: 'VT323' }).setOrigin(0.5);
     const safeDown = ButtonFactory.createButton(this, -80, 20, "-", () => {
         const newPad = Math.max(0, (this.settingsData?.safeAreaPadding ?? 0) - 10);
-        this.game.events.emit(EventKeys.UPDATE_SETTINGS, { safeAreaPadding: newPad });
-        this.settingsModal.safeDisplay.setText(`${newPad}px`);
-        if (!this.settingsData) this.settingsData = {};
-        this.settingsData.safeAreaPadding = newPad;
+        updateSetting('safeAreaPadding', newPad, safeDisplay, v => `${v}px`);
     }, { width: 40, height: 40, color: 0x808080 });
     const safeUp = ButtonFactory.createButton(this, 80, 20, "+", () => {
         const newPad = Math.min(100, (this.settingsData?.safeAreaPadding ?? 0) + 10);
-        this.game.events.emit(EventKeys.UPDATE_SETTINGS, { safeAreaPadding: newPad });
-        this.settingsModal.safeDisplay.setText(`${newPad}px`);
-        if (!this.settingsData) this.settingsData = {};
-        this.settingsData.safeAreaPadding = newPad;
+        updateSetting('safeAreaPadding', newPad, safeDisplay, v => `${v}px`);
     }, { width: 40, height: 40, color: 0x808080 });
-    const safeDisplay = this.add.text(0, 20, "0px", { fontSize: '24px', fontFamily: 'VT323' }).setOrigin(0.5);
 
     // Game Speed Controls
     const speedLabel = this.add.text(0, 80, "Game Speed", { fontSize: '24px', fontFamily: 'VT323' }).setOrigin(0.5);
@@ -440,6 +552,7 @@ import { ToastManager } from './systems/ToastManager.js';    }
 }
 
     createShowcaseModal() { const modal = this.createModal("Pet Passport"); const passportContainer = this.add.container(this.cameras.main.width / 2, this.cameras.main.height / 2); modal.add(passportContainer); modal.passportContainer = passportContainer; return modal; }
-    openShowcase() { this.closeAllModals(); if (!this.nadagotchiData) return; const container = this.showcaseModal.passportContainer; container.removeAll(true); const width = 400; const height = 250; const cardBg = this.add.rectangle(0, 0, width, height, 0xFFF8E7).setStrokeStyle(4, 0xD4AF37); const frame = Config.MOOD_VISUALS.FRAMES[this.nadagotchiData.mood] ?? Config.MOOD_VISUALS.DEFAULT_FRAME; const sprite = this.add.image(-120, 0, 'pet', frame).setScale(8); const name = `Archetype: ${this.nadagotchiData.dominantArchetype}`; const gen = `Generation: ${this.nadagotchiData.generation || 1}`; const career = `Career: ${this.nadagotchiData.currentCareer || 'Unemployed'}`; const age = `Age: ${Math.floor(this.nadagotchiData.age || 0)} Days`; const infoText = this.add.text(0, -60, `${name}\n${gen}\n${career}\n${age}`, { fontFamily: 'VT323, monospace', fontSize: '24px', color: '#000000', lineSpacing: 10 }).setOrigin(0, 0); const footer = this.add.text(0, 80, "OFFICIAL NADAGOTCHI PASSPORT", { fontFamily: 'Arial', fontSize: '12px', color: '#888888', fontStyle: 'italic' }).setOrigin(0.5); container.add([cardBg, sprite, infoText, footer]); this.showcaseModal.setVisible(true); this.scene.pause('MainScene'); }    openCareerMenu() { this.closeAllModals(); if (!this.nadagotchiData) return; const container = this.careerModal; if (this.careerDynamicItems) { this.careerDynamicItems.forEach(i => i.destroy()); } this.careerDynamicItems = []; const mw = this.getModalWidth(); const mh = this.getModalHeight(); let yPos = -mh / 2 + 80; const career = this.nadagotchiData.currentCareer; let infoText = ""; if (career) { const level = this.nadagotchiData.careerLevels[career] || 1; const xp = this.nadagotchiData.careerXP[career] || 0; const title = CareerDefinitions.TITLES[career] ? CareerDefinitions.TITLES[career][level] : 'Employee'; const nextThreshold = CareerDefinitions.XP_THRESHOLDS[level + 1] || 'MAX'; const payBonus = (Config.CAREER.LEVEL_MULTIPLIERS[level] - 1) * 100; infoText = `Current Job: ${career}\nTitle: ${title} (Lvl ${level})\nXP: ${xp} / ${nextThreshold}\nBonuses: +${Math.round(payBonus)}% Efficiency`; } else { infoText = "No Active Career.\nStudy or Explore to unlock paths!"; } const statsText = this.add.text(0, yPos, infoText, { fontFamily: 'VT323, monospace', fontSize: '24px', color: '#ffffff', align: 'center', wordWrap: { width: mw - 60 } }).setOrigin(0.5, 0); container.add(statsText); this.careerDynamicItems.push(statsText); yPos += 140; const listTitle = this.add.text(0, yPos, "Unlocked Career Paths:", { fontFamily: 'VT323', fontSize: '20px', color: '#AAAAAA' }).setOrigin(0.5); container.add(listTitle); this.careerDynamicItems.push(listTitle); yPos += 30; const unlocked = this.nadagotchiData.unlockedCareers || []; if (unlocked.length === 0) { const noneText = this.add.text(0, yPos, "(None yet)", { fontFamily: 'VT323', fontSize: '18px', color: '#888' }).setOrigin(0.5); container.add(noneText); this.careerDynamicItems.push(noneText); } else { unlocked.forEach(c => { const isCurrent = c === career; const lvl = this.nadagotchiData.careerLevels[c] || 1; const label = `${c} (Lvl ${lvl})`; const rowText = this.add.text(-mw/2 + 60, yPos + 10, label, { fontFamily: 'VT323', fontSize: '24px', color: isCurrent ? '#00FF00' : '#FFF' }); container.add(rowText); this.careerDynamicItems.push(rowText); if (!isCurrent) { const switchBtn = ButtonFactory.createButton(this, mw/2 - 80, yPos + 20, "Switch", () => { this.game.events.emit(EventKeys.UI_ACTION, EventKeys.SWITCH_CAREER, c); container.setVisible(false); this.scene.resume('MainScene'); }, { width: 80, height: 30, color: 0x4CAF50, fontSize: '18px' }); container.add(switchBtn); this.careerDynamicItems.push(switchBtn); } else { const activeLbl = this.add.text(mw/2 - 80, yPos + 10, "[Active]", { fontFamily: 'VT323', fontSize: '18px', color: '#00FF00' }); container.add(activeLbl); this.careerDynamicItems.push(activeLbl); } yPos += 45; }); } container.setVisible(true); this.scene.pause('MainScene'); }
+    openShowcase() { this.closeAllModals(); if (!this.nadagotchiData) return; const container = this.showcaseModal.passportContainer; container.removeAll(true); const width = 400; const height = 250; const cardBg = this.add.rectangle(0, 0, width, height, 0xFFF8E7).setStrokeStyle(4, 0xD4AF37); const frame = Config.MOOD_VISUALS.FRAMES[this.nadagotchiData.mood] ?? Config.MOOD_VISUALS.DEFAULT_FRAME; const sprite = this.add.image(-120, 0, 'pet', frame).setScale(8); const name = `Archetype: ${this.nadagotchiData.dominantArchetype}`; const gen = `Generation: ${this.nadagotchiData.generation || 1}`; const career = `Career: ${this.nadagotchiData.currentCareer || 'Unemployed'}`; const age = `Age: ${Math.floor(this.nadagotchiData.age || 0)} Days`; const infoText = this.add.text(0, -60, `${name}\n${gen}\n${career}\n${age}`, { fontFamily: 'VT323, monospace', fontSize: '24px', color: '#000000', lineSpacing: 10 }).setOrigin(0, 0); const footer = this.add.text(0, 80, "OFFICIAL NADAGOTCHI PASSPORT", { fontFamily: 'Arial', fontSize: '12px', color: '#888888', fontStyle: 'italic' }).setOrigin(0.5); container.add([cardBg, sprite, infoText, footer]); this.showcaseModal.setVisible(true); this.scene.pause('MainScene'); }
+    openCareerMenu() { this.closeAllModals(); if (!this.nadagotchiData) return; const container = this.careerModal; if (this.careerDynamicItems) { this.careerDynamicItems.forEach(i => i.destroy()); } this.careerDynamicItems = []; const mw = this.getModalWidth(); const mh = this.getModalHeight(); let yPos = -mh / 2 + 80; const career = this.nadagotchiData.currentCareer; let infoText = ""; if (career) { const level = this.nadagotchiData.careerLevels[career] || 1; const xp = this.nadagotchiData.careerXP[career] || 0; const title = CareerDefinitions.TITLES[career] ? CareerDefinitions.TITLES[career][level] : 'Employee'; const nextThreshold = CareerDefinitions.XP_THRESHOLDS[level + 1] || 'MAX'; const payBonus = (Config.CAREER.LEVEL_MULTIPLIERS[level] - 1) * 100; infoText = `Current Job: ${career}\nTitle: ${title} (Lvl ${level})\nXP: ${xp} / ${nextThreshold}\nBonuses: +${Math.round(payBonus)}% Efficiency`; } else { infoText = "No Active Career.\nStudy or Explore to unlock paths!"; } const statsText = this.add.text(0, yPos, infoText, { fontFamily: 'VT323, monospace', fontSize: '24px', color: '#ffffff', align: 'center', wordWrap: { width: mw - 60 } }).setOrigin(0.5, 0); container.add(statsText); this.careerDynamicItems.push(statsText); yPos += 140; const listTitle = this.add.text(0, yPos, "Unlocked Career Paths:", { fontFamily: 'VT323', fontSize: '20px', color: '#AAAAAA' }).setOrigin(0.5); container.add(listTitle); this.careerDynamicItems.push(listTitle); yPos += 30; const unlocked = this.nadagotchiData.unlockedCareers || []; if (unlocked.length === 0) { const noneText = this.add.text(0, yPos, "(None yet)", { fontFamily: 'VT323', fontSize: '18px', color: '#888' }).setOrigin(0.5); container.add(noneText); this.careerDynamicItems.push(noneText); } else { unlocked.forEach(c => { const isCurrent = c === career; const lvl = this.nadagotchiData.careerLevels[c] || 1; const label = `${c} (Lvl ${lvl})`; const rowText = this.add.text(-mw/2 + 60, yPos + 10, label, { fontFamily: 'VT323', fontSize: '24px', color: isCurrent ? '#00FF00' : '#FFF' }); container.add(rowText); this.careerDynamicItems.push(rowText); if (!isCurrent) { const switchBtn = ButtonFactory.createButton(this, mw/2 - 80, yPos + 20, "Switch", () => { this.game.events.emit(EventKeys.UI_ACTION, EventKeys.SWITCH_CAREER, c); container.setVisible(false); this.scene.resume('MainScene'); }, { width: 80, height: 30, color: 0x4CAF50, fontSize: '18px' }); container.add(switchBtn); this.careerDynamicItems.push(switchBtn); } else { const activeLbl = this.add.text(mw/2 - 80, yPos + 10, "[Active]", { fontFamily: 'VT323', fontSize: '18px', color: '#00FF00' }); container.add(activeLbl); this.careerDynamicItems.push(activeLbl); } yPos += 45; }); } container.setVisible(true); this.scene.pause('MainScene'); }
     openJobBoardMenu() { this.closeAllModals(); if (!this.nadagotchiData) return; const container = this.jobBoardModal; if (this.jobBoardDynamicItems) { this.jobBoardDynamicItems.forEach(i => i.destroy()); } this.jobBoardDynamicItems = []; const career = this.nadagotchiData.currentCareer; let text = ""; if (career) { text = `Active Assignment:\n${career}`; } else { text = "No Active Career Assignment."; } const infoText = this.add.text(0, -50, text, { fontFamily: 'VT323', fontSize: '32px', color: '#FFF', align: 'center' }).setOrigin(0.5); container.add(infoText); this.jobBoardDynamicItems.push(infoText); const startBtn = ButtonFactory.createButton(this, 0, 30, "Start Shift", () => { if (career) { this.game.events.emit(EventKeys.UI_ACTION, EventKeys.WORK); container.setVisible(false); } else { this.showToast("No Job", "Select a career first!", "🚫"); } }, { width: 160, height: 50, color: career ? 0x6A0DAD : 0x555555, fontSize: '24px' }); if (!career) startBtn.setDisabled(true); container.add(startBtn); this.jobBoardDynamicItems.push(startBtn); const careerBtn = ButtonFactory.createButton(this, 0, 100, "Career Profiles", () => { this.openCareerMenu(); }, { width: 160, height: 40, color: 0xD8A373, fontSize: '20px' }); container.add(careerBtn); this.jobBoardDynamicItems.push(careerBtn); container.setVisible(true); this.scene.pause('MainScene'); }
 }

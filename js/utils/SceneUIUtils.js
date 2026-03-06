@@ -9,7 +9,10 @@ export class SceneUIUtils {
      * @returns {number} The padding in pixels.
      */
     static getPadding(scene) {
-        return scene.game.registry.get('safeAreaPadding') || 0;
+        if (scene.game && scene.game.registry && typeof scene.game.registry.get === 'function') {
+            return scene.game.registry.get('safeAreaPadding') || 0;
+        }
+        return 0;
     }
 
     /**

@@ -12,6 +12,10 @@ export const mockGameObject = () => {
             if (listeners[event]) listeners[event](...args);
         },
         setInteractive: jest.fn().mockReturnThis(),
+        setVisible: jest.fn().mockReturnThis(),
+        disableInteractive: jest.fn().mockReturnThis(),
+        setVisible: jest.fn().mockReturnThis(),
+        setOrigin: jest.fn().mockReturnThis(),
         disableInteractive: jest.fn().mockReturnThis(),
         setVisible: jest.fn().mockReturnThis(),
         setOrigin: jest.fn().mockReturnThis(),
@@ -58,11 +62,18 @@ export const setupPhaserMock = () => {
         Scene: class Scene {
             constructor(config) {
                 this.config = config;
-                this.cameras = { main: { width: 800, height: 600, setBackgroundColor: jest.fn(), setSize: jest.fn(), setViewport: jest.fn() } };
+                this.events = { on: jest.fn(), off: jest.fn(), emit: jest.fn() };
+                this.scale = { on: jest.fn(), off: jest.fn(), width: 800, height: 600 };
+                 main: { width: 800, height: 600, setBackgroundColor: jest.fn(), setSize: jest.fn(), setViewport: jest.fn() } };
                 this.add = createMockAdd();
                 this.make = {
                     image: jest.fn(() => new Phaser.GameObjects.Image()),
-                    graphics: jest.fn(() => new Phaser.GameObjects.Graphics()),
+                    graphics: jest.fn(() => ({
+                        setDepth: jest.fn().mockReturnThis(),
+                        clear: jest.fn().mockReturnThis(),
+                        fillStyle: jest.fn().mockReturnThis(),
+                        fillRect: jest.fn().mockReturnThis()
+                    })),
                     text: jest.fn(() => new Phaser.GameObjects.Text())
                 };
                 this.time = {
@@ -79,7 +90,7 @@ export const setupPhaserMock = () => {
                 };
                 this.sys = { events: { once: jest.fn(), on: jest.fn(), off: jest.fn() } };
                 this.scene = { stop: jest.fn(), resume: jest.fn(), get: jest.fn(), launch: jest.fn(), start: jest.fn() };
-                this.game = { events: { emit: jest.fn(), on: jest.fn(), off: jest.fn() } };
+                this.game = { registry: { set: jest.fn(), get: jest.fn() }, events: { emit: jest.fn(), on: jest.fn(), off: jest.fn() } };
                 this.events = { on: jest.fn(), off: jest.fn(), emit: jest.fn() };
                 this.input = {
                     keyboard: { on: jest.fn(), off: jest.fn() },
@@ -156,7 +167,12 @@ export const setupPhaserMock = () => {
 export const createMockAdd = () => ({
     sprite: jest.fn(() => new Phaser.GameObjects.Sprite()),
     image: jest.fn(() => new Phaser.GameObjects.Image()),
-    graphics: jest.fn(() => new Phaser.GameObjects.Graphics()),
+    graphics: jest.fn(() => ({
+                        setDepth: jest.fn().mockReturnThis(),
+                        clear: jest.fn().mockReturnThis(),
+                        fillStyle: jest.fn().mockReturnThis(),
+                        fillRect: jest.fn().mockReturnThis()
+                    })),
     text: jest.fn(() => new Phaser.GameObjects.Text()),
     tileSprite: jest.fn(() => new Phaser.GameObjects.TileSprite()),
     rectangle: jest.fn(() => mockGameObject()),

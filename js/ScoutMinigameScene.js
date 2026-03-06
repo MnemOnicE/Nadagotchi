@@ -102,7 +102,8 @@ export class ScoutMinigameScene extends Phaser.Scene {
                     });
                     firstSelection = null;
                     secondSelection = null;
-                }, [firstSelection, secondSelection]);            }
+                }, [firstSelection, secondSelection]);
+            }
         };
 
         const handleCardClick = (card) => {
@@ -158,33 +159,5 @@ export class ScoutMinigameScene extends Phaser.Scene {
         });
     }
 
-    /**
-     * Handles window resize events to keep the minigame centered.
-     */
-    resize(gameSize) {
-        if (!gameSize) return;
-        const width = gameSize.width;
-        const height = gameSize.height;
-        this.cameras.main.setViewport(0, 0, width, height);
 
-        // Re-center primary UI elements (basic implementation)
-        const centerX = SceneUIUtils.getCenterX(this);
-        const centerY = SceneUIUtils.getCenterY(this);
-
-        this.children.list.forEach(child => {
-            if (child.type === 'Text') {
-                if (child.y < 150) {
-                    // Title/Status text at top
-                    child.setX(centerX);
-                } else if (child.y > height - 100) {
-                    // Footer text at bottom
-                    child.setX(centerX);
-                    // Optionally adjust Y to respect safe area bottom
-                    // child.setY(height - SceneUIUtils.getPadding(this) - 50);
-                }
-            }
-        });
-
-        SceneUIUtils.drawBezel(this, this.bezelGraphics);
-    }
 }

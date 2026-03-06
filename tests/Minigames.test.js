@@ -4,7 +4,8 @@ import { jest } from '@jest/globals';
 // 1. Setup Global Phaser Mock
 const createMockGameObject = () => {
     const handlers = {};
-    return { scene: {},        setOrigin: jest.fn().mockReturnThis(),
+    return { scene: {},
+        setOrigin: jest.fn().mockReturnThis(),
         setDepth: jest.fn().mockReturnThis(),
         setVisible: jest.fn().mockReturnThis(),
         setInteractive: jest.fn().mockReturnThis(),
@@ -42,8 +43,12 @@ const createMockContainer = () => ({
 
 const createMockRectangle = () => {
     const data = {};
+    const listeners = {};
     const handlers = {};
-    return { scene: {},        setOrigin: jest.fn().mockReturnThis(),
+    return { scene: {},
+        listeners,
+        emit: (event, ...args) => { if(listeners[event]) listeners[event](...args); },
+        setOrigin: jest.fn().mockReturnThis(),
         setDepth: jest.fn().mockReturnThis(),
         setVisible: jest.fn().mockReturnThis(),
         setInteractive: jest.fn().mockReturnThis(),
@@ -71,8 +76,16 @@ global.Phaser = {
     Scene: class Scene {
         constructor(config) {
             this.config = config;
-            this.cameras = { main: { width: 800, height: 600, setBackgroundColor: jest.fn() } };
+            this.game = { registry: { set: jest.fn(), get: jest.fn() } }; this.cameras = { main: { width: 800, height: 600, setBackgroundColor: jest.fn() } };
             this.add = {
+                text: jest.fn(() => ({ setOrigin: jest.fn().mockReturnThis() })),
+                graphics: jest.fn(() => ({ setDepth: jest.fn(), clear: jest.fn(), fillStyle: jest.fn(), fillRect: jest.fn() })), text: jest.fn(() => createMockText()),
+                graphics: jest.fn(() => ({
+                    setDepth: jest.fn().mockReturnThis(),
+                    clear: jest.fn().mockReturnThis(),
+                    fillStyle: jest.fn().mockReturnThis(),
+                    fillRect: jest.fn().mockReturnThis()
+                })),
                 text: jest.fn(() => createMockText()),
                 rectangle: jest.fn(() => createMockRectangle()),
                 container: jest.fn(() => createMockContainer()),
@@ -82,7 +95,8 @@ global.Phaser = {
                 zone: jest.fn(() => createMockGameObject())
             };
             this.time = {
-                delayedCall: jest.fn((delay, callback, args) => { if (args) callback(...args); else callback(); return { scene: {}, destroy: jest.fn() }; }),                addEvent: jest.fn(() => ({ destroy: jest.fn(), remove: jest.fn() }))
+                delayedCall: jest.fn((delay, callback, args) => { if (args) callback(...args); else callback(); return { scene: {}, destroy: jest.fn() }; }),
+                addEvent: jest.fn(() => ({ destroy: jest.fn(), remove: jest.fn() }))
             };
             this.sys = { events: { once: jest.fn(), on: jest.fn(), off: jest.fn() } };
             this.scene = { stop: jest.fn(), resume: jest.fn(), get: jest.fn() };
@@ -133,7 +147,20 @@ describe('Minigames Test Suite', () => {
         let scene;
 
         beforeEach(() => {
-            scene = new ArtisanMinigameScene();
+            scene = new ArtisanMinigameScene();  scene.time = { delayedCall: jest.fn((delay, cb, args) => { if(args) { cb(...args); } else { cb(); } }), addEvent: jest.fn() }; scene.add = { text: jest.fn(() => createMockText()) }; scene.scale = { on: jest.fn(), off: jest.fn(), width: 800, height: 600 }; scene.events = { on: jest.fn(), off: jest.fn(), emit: jest.fn() }; scene.game = { events: { emit: jest.fn() }, registry: { set: jest.fn(), get: jest.fn() } }; scene.cameras = { main: { width: 800, height: 600, setBackgroundColor: jest.fn() } }; scene.scene = { resume: jest.fn(), stop: jest.fn() }; scene.time = { delayedCall: jest.fn((delay, cb, args) => { if(args) { cb(...args); } else { cb(); } }), addEvent: jest.fn() }; scene.add = {
+                text: jest.fn(() => createMockText()),
+                rectangle: jest.fn(() => createMockRectangle()),
+                container: jest.fn(() => createMockContainer()),
+                sprite: jest.fn(() => createMockSprite()),
+                image: jest.fn(() => createMockImage()),
+                zone: jest.fn(() => createMockRectangle()),
+                graphics: jest.fn(() => ({
+                    setDepth: jest.fn().mockReturnThis(),
+                    clear: jest.fn().mockReturnThis(),
+                    fillStyle: jest.fn().mockReturnThis(),
+                    fillRect: jest.fn().mockReturnThis()
+                }))
+            };
         });
 
         test('create() initializes grid and displays pattern', () => {
@@ -206,7 +233,20 @@ describe('Minigames Test Suite', () => {
         let scene;
 
         beforeEach(() => {
-            scene = new HealerMinigameScene();
+            scene = new HealerMinigameScene();  scene.time = { delayedCall: jest.fn((delay, cb, args) => { if(args) { cb(...args); } else { cb(); } }), addEvent: jest.fn() }; scene.add = { text: jest.fn(() => createMockText()) }; scene.scale = { on: jest.fn(), off: jest.fn(), width: 800, height: 600 }; scene.events = { on: jest.fn(), off: jest.fn(), emit: jest.fn() }; scene.game = { events: { emit: jest.fn() }, registry: { set: jest.fn(), get: jest.fn() } }; scene.cameras = { main: { width: 800, height: 600, setBackgroundColor: jest.fn() } }; scene.scene = { resume: jest.fn(), stop: jest.fn() }; scene.time = { delayedCall: jest.fn((delay, cb, args) => { if(args) { cb(...args); } else { cb(); } }), addEvent: jest.fn() }; scene.add = {
+                text: jest.fn(() => createMockText()),
+                rectangle: jest.fn(() => createMockRectangle()),
+                container: jest.fn(() => createMockContainer()),
+                sprite: jest.fn(() => createMockSprite()),
+                image: jest.fn(() => createMockImage()),
+                zone: jest.fn(() => createMockRectangle()),
+                graphics: jest.fn(() => ({
+                    setDepth: jest.fn().mockReturnThis(),
+                    clear: jest.fn().mockReturnThis(),
+                    fillStyle: jest.fn().mockReturnThis(),
+                    fillRect: jest.fn().mockReturnThis()
+                }))
+            };
         });
 
         test('create() selects ailment and creates remedy buttons', () => {
@@ -230,7 +270,15 @@ describe('Minigames Test Suite', () => {
             const cureButtonZone = zones[zones.length - 1];
 
             // Debug: Trigger callback directly if possible, or verify emission
-            cureButtonZone.emit('pointerdown');
+            // Find the pointerdown handler from the 'on' mock calls
+const onCalls = cureButtonZone.on.mock.calls;
+const pointerdownCall = onCalls.find(call => call[0] === 'pointerdown');
+if (pointerdownCall) {
+    pointerdownCall[1]();
+}
+else {
+                cureButtonZone.listeners['pointerdown']();
+            }
 
             // Expect workResult event. Note: The mock for delayedCall executes the callback immediately.
             // If checkSolution works, it calls endGame, which calls delayedCall, which emits.
@@ -255,7 +303,15 @@ describe('Minigames Test Suite', () => {
             // Click Cure
             const zones = scene.add.zone.mock.results.map(r => r.value);
             const cureButtonZone = zones[zones.length - 1];
-            cureButtonZone.emit('pointerdown');
+            // Find the pointerdown handler from the 'on' mock calls
+const onCalls = cureButtonZone.on.mock.calls;
+const pointerdownCall = onCalls.find(call => call[0] === 'pointerdown');
+if (pointerdownCall) {
+    pointerdownCall[1]();
+}
+else {
+                cureButtonZone.listeners['pointerdown']();
+            }
 
             expect(scene.game.events.emit).toHaveBeenCalledWith('workResult', {
                 success: false,
@@ -268,7 +324,20 @@ describe('Minigames Test Suite', () => {
         let scene;
 
         beforeEach(() => {
-            scene = new ScoutMinigameScene();
+            scene = new ScoutMinigameScene();  scene.time = { delayedCall: jest.fn((delay, cb, args) => { if(args) { cb(...args); } else { cb(); } }), addEvent: jest.fn() }; scene.add = { text: jest.fn(() => createMockText()) }; scene.scale = { on: jest.fn(), off: jest.fn(), width: 800, height: 600 }; scene.events = { on: jest.fn(), off: jest.fn(), emit: jest.fn() }; scene.game = { events: { emit: jest.fn() }, registry: { set: jest.fn(), get: jest.fn() } }; scene.cameras = { main: { width: 800, height: 600, setBackgroundColor: jest.fn() } }; scene.scene = { resume: jest.fn(), stop: jest.fn() }; scene.time = { delayedCall: jest.fn((delay, cb, args) => { if(args) { cb(...args); } else { cb(); } }), addEvent: jest.fn() }; scene.add = {
+                text: jest.fn(() => createMockText()),
+                rectangle: jest.fn(() => createMockRectangle()),
+                container: jest.fn(() => createMockContainer()),
+                sprite: jest.fn(() => createMockSprite()),
+                image: jest.fn(() => createMockImage()),
+                zone: jest.fn(() => createMockRectangle()),
+                graphics: jest.fn(() => ({
+                    setDepth: jest.fn().mockReturnThis(),
+                    clear: jest.fn().mockReturnThis(),
+                    fillStyle: jest.fn().mockReturnThis(),
+                    fillRect: jest.fn().mockReturnThis()
+                }))
+            };
             scene.init();
         });
 
@@ -315,8 +384,17 @@ describe('Minigames Test Suite', () => {
             // Mock executes delayedCall immediately.
 
             // Check if reset
-            expect(cards[0].setData).toHaveBeenCalledWith('revealed', false);
-            expect(cards[1].setData).toHaveBeenCalledWith('revealed', false);
+            // Trigger delayed Call
+            if(scene.time.delayedCall.mock.calls.length > 0) {
+                scene.time.delayedCall.mock.calls[0][1]();
+            }
+            // console.log(cards[0].setData.mock.calls);
+            // Mock clock handles delayed call.
+            // In the Mismatch test, the delayedCall in the scene sets the cards back
+            const call1 = cards[0].setData.mock.calls.find(c => c[0] === 'revealed' && c[1] === false);
+            expect(call1).toBeTruthy();
+            const call2 = cards[1].setData.mock.calls.find(c => c[0] === 'revealed' && c[1] === false);
+            expect(call2).toBeTruthy();
         });
 
         test('Win condition', () => {
