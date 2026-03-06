@@ -106,6 +106,7 @@ describe('Performance: Update Stats Throttling', () => {
             off: jest.fn()
         };
         scene.textures = {
+            exists: jest.fn().mockReturnValue(true),
             get: jest.fn().mockReturnValue({
                 getFrameNames: jest.fn().mockReturnValue([]),
                 add: jest.fn()

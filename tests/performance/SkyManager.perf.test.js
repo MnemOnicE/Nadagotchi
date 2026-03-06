@@ -22,6 +22,7 @@ describe('SkyManager Performance Benchmark', () => {
         scene = new global.Phaser.Scene();
         scene.worldClock = mockWorldClock;
         scene.textures = {
+            exists: jest.fn().mockReturnValue(true),
             createCanvas: jest.fn(() => {
                 const canvas = mockGameObject();
                 // Ensure context is mocked with spies

@@ -104,6 +104,7 @@ describe('StartScene', () => {
 
         // Mock textures manager
         scene.textures = {
+            exists: jest.fn().mockReturnValue(true),
             createCanvas: jest.fn(() => ({
                 context: {
                     createLinearGradient: jest.fn(() => ({

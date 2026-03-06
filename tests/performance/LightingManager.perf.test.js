@@ -74,6 +74,7 @@ describe('LightingManager Performance Benchmark', () => {
 
         // Mock Textures Manager
         scene.textures = {
+            exists: jest.fn().mockReturnValue(true),
             createCanvas: jest.fn(() => mockLightTexture),
             addGraphics: jest.fn(),
             get: jest.fn().mockReturnValue({ key: 'light_soft' }),

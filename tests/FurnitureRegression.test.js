@@ -61,6 +61,7 @@ describe('MainScene Duplication Bug', () => {
 
         // Fix for SkyManager.resize calling setSize/clear on texture and LightingManager using createRadialGradient
         scene.textures = {
+            exists: jest.fn().mockReturnValue(true),
             get: jest.fn().mockReturnValue({ getFrameNames: jest.fn().mockReturnValue([]) }),
             createCanvas: jest.fn(() => ({
                 context: {
@@ -86,7 +87,8 @@ describe('MainScene Duplication Bug', () => {
         // Wait for async initialization
         await scene._initPromise;
 
-        // Ensure InventorySystem is linked (mocked by simple object in tests usually, but here we check property access)        scene.nadagotchi.inventory = {};
+        // Ensure InventorySystem is linked (mocked by simple object in tests usually, but here we check property access)
+        scene.nadagotchi.inventory = {};
     });
 
     test('Picking up furniture while holding selectedFurniture does NOT duplicate item', () => {
@@ -127,5 +129,6 @@ describe('MainScene Duplication Bug', () => {
         expect(mockNadagotchi.returnItemToInventory).not.toHaveBeenCalledWith('Chair');
 
         // Selected furniture should switch to the picked up item
-        expect(scene.selectedFurniture).toBe('Table');    });
+        expect(scene.selectedFurniture).toBe('Table');
+    });
 });
