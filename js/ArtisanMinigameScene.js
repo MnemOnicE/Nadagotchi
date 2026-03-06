@@ -1,4 +1,5 @@
 import { EventKeys } from './EventKeys.js';
+import { SceneUIUtils } from './utils/SceneUIUtils.js';
 
 /**
  * @fileoverview A mini-game for the Artisan career.
@@ -26,9 +27,21 @@ export class ArtisanMinigameScene extends Phaser.Scene {
      * Sets up the background, text, and initializes the game flow.
      */
     create() {
-        this.cameras.main.setBackgroundColor('#663399'); // A creative purple
-        this.add.text(this.cameras.main.width / 2, 50, 'Artisan Craft: Recreate the Pattern', { fontSize: '24px', fill: '#FFF' }).setOrigin(0.5);
-        this.statusText = this.add.text(this.cameras.main.width / 2, 100, 'Memorize the pattern!', { fontSize: '20px', fill: '#FFF' }).setOrigin(0.5);
+        this.cameras.main.setBackgroundColor('#663399');
+
+        // Handle resizing and safe area
+        this.bezelGraphics = this.add.graphics();
+        this.bezelGraphics.setDepth(1000); // Ensure it's on top
+        SceneUIUtils.drawBezel(this, this.bezelGraphics);
+
+        this.scale.on('resize', this.resize, this);
+        this.events.on('shutdown', () => {
+            this.scale.off('resize', this.resize, this);
+        });
+
+         // A creative purple
+        this.add.text(SceneUIUtils.getCenterX(this), 50, 'Artisan Craft: Recreate the Pattern', { fontSize: '24px', fill: '#FFF' }).setOrigin(0.5);
+        this.statusText = this.add.text(SceneUIUtils.getCenterX(this), 100, 'Memorize the pattern!', { fontSize: '20px', fill: '#FFF' }).setOrigin(0.5);
 
         // --- Private State (Closure Scope) ---
         // These variables are inaccessible from the browser console (game.scene.getScene...)
@@ -122,5 +135,35 @@ export class ArtisanMinigameScene extends Phaser.Scene {
         createGrid();
         generatePattern();
         displayPattern();
+    }
+
+    /**
+     * Handles window resize events to keep the minigame centered.
+     */
+    resize(gameSize) {
+        if (!gameSize) return;
+        const width = gameSize.width;
+        const height = gameSize.height;
+        this.cameras.main.setViewport(0, 0, width, height);
+
+        // Re-center primary UI elements (basic implementation)
+        const centerX = SceneUIUtils.getCenterX(this);
+        const centerY = SceneUIUtils.getCenterY(this);
+
+        this.children.list.forEach(child => {
+            if (child.type === 'Text') {
+                if (child.y < 150) {
+                    // Title/Status text at top
+                    child.setX(centerX);
+                } else if (child.y > height - 100) {
+                    // Footer text at bottom
+                    child.setX(centerX);
+                    // Optionally adjust Y to respect safe area bottom
+                    // child.setY(height - SceneUIUtils.getPadding(this) - 50);
+                }
+            }
+        });
+
+        SceneUIUtils.drawBezel(this, this.bezelGraphics);
     }
 }

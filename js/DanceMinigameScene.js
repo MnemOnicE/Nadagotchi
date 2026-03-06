@@ -1,4 +1,5 @@
 import { EventKeys } from './EventKeys.js';
+import { SceneUIUtils } from './utils/SceneUIUtils.js';
 import { ButtonFactory } from './ButtonFactory.js';
 import { SoundSynthesizer } from './utils/SoundSynthesizer.js';
 
@@ -15,7 +16,19 @@ export class DanceMinigameScene extends Phaser.Scene {
     }
 
     create() {
-        this.cameras.main.setBackgroundColor('#220033'); // Dark purple disco
+        this.cameras.main.setBackgroundColor('#220033');
+
+        // Handle resizing and safe area
+        this.bezelGraphics = this.add.graphics();
+        this.bezelGraphics.setDepth(1000); // Ensure it's on top
+        SceneUIUtils.drawBezel(this, this.bezelGraphics);
+
+        this.scale.on('resize', this.resize, this);
+        this.events.on('shutdown', () => {
+            this.scale.off('resize', this.resize, this);
+        });
+
+         // Dark purple disco
 
         // --- State ---
         this.score = 0;
@@ -221,5 +234,35 @@ export class DanceMinigameScene extends Phaser.Scene {
              // Better: Emit event back to MainScene
              this.game.events.emit(EventKeys.UI_ACTION, 'PLAY_COMPLETE', { score: this.score });
         }, { width: 150, height: 50 });
+    }
+
+    /**
+     * Handles window resize events to keep the minigame centered.
+     */
+    resize(gameSize) {
+        if (!gameSize) return;
+        const width = gameSize.width;
+        const height = gameSize.height;
+        this.cameras.main.setViewport(0, 0, width, height);
+
+        // Re-center primary UI elements (basic implementation)
+        const centerX = SceneUIUtils.getCenterX(this);
+        const centerY = SceneUIUtils.getCenterY(this);
+
+        this.children.list.forEach(child => {
+            if (child.type === 'Text') {
+                if (child.y < 150) {
+                    // Title/Status text at top
+                    child.setX(centerX);
+                } else if (child.y > height - 100) {
+                    // Footer text at bottom
+                    child.setX(centerX);
+                    // Optionally adjust Y to respect safe area bottom
+                    // child.setY(height - SceneUIUtils.getPadding(this) - 50);
+                }
+            }
+        });
+
+        SceneUIUtils.drawBezel(this, this.bezelGraphics);
     }
 }

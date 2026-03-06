@@ -1,4 +1,5 @@
 import { EventKeys } from './EventKeys.js';
+import { SceneUIUtils } from './utils/SceneUIUtils.js';
 import { ButtonFactory } from './ButtonFactory.js';
 import { SoundSynthesizer } from './utils/SoundSynthesizer.js';
 
@@ -27,7 +28,19 @@ export class HealerMinigameScene extends Phaser.Scene {
      * Phaser lifecycle method. Called once when the scene is created.
      */
     create() {
-        this.cameras.main.setBackgroundColor('#ADD8E6'); // Light blue, clinical feel
+        this.cameras.main.setBackgroundColor('#ADD8E6');
+
+        // Handle resizing and safe area
+        this.bezelGraphics = this.add.graphics();
+        this.bezelGraphics.setDepth(1000); // Ensure it's on top
+        SceneUIUtils.drawBezel(this, this.bezelGraphics);
+
+        this.scale.on('resize', this.resize, this);
+        this.events.on('shutdown', () => {
+            this.scale.off('resize', this.resize, this);
+        });
+
+         // Light blue, clinical feel
 
         // --- Game Config ---
         const totalTime = 15000; // 15 seconds
@@ -68,16 +81,16 @@ export class HealerMinigameScene extends Phaser.Scene {
         this.selectedRemedies = new Set();
 
         // --- UI ---
-        this.add.text(this.cameras.main.width / 2, 40, 'DIAGNOSIS REQUIRED', { fontFamily: 'VT323', fontSize: '32px', fill: '#000' }).setOrigin(0.5);
+        this.add.text(SceneUIUtils.getCenterX(this), 40, 'DIAGNOSIS REQUIRED', { fontFamily: 'VT323', fontSize: '32px', fill: '#000' }).setOrigin(0.5);
 
         // Timer Bar
-        this.timerBarBg = this.add.rectangle(this.cameras.main.width / 2, 80, 600, 20, 0x555555).setOrigin(0.5);
-        this.timerBarFill = this.add.rectangle(this.cameras.main.width / 2 - 300, 80, 600, 20, 0x00FF00).setOrigin(0, 0.5);
+        this.timerBarBg = this.add.rectangle(SceneUIUtils.getCenterX(this), 80, 600, 20, 0x555555).setOrigin(0.5);
+        this.timerBarFill = this.add.rectangle(SceneUIUtils.getCenterX(this) - 300, 80, 600, 20, 0x00FF00).setOrigin(0, 0.5);
 
         // Patient Display
-        this.add.text(this.cameras.main.width / 2, 130, 'Patient Symptoms:', { fontFamily: 'VT323', fontSize: '24px', fill: '#000' }).setOrigin(0.5);
+        this.add.text(SceneUIUtils.getCenterX(this), 130, 'Patient Symptoms:', { fontFamily: 'VT323', fontSize: '24px', fill: '#000' }).setOrigin(0.5);
 
-        let symX = this.cameras.main.width / 2 - ((patientSymptoms.length - 1) * 80) / 2;
+        let symX = SceneUIUtils.getCenterX(this) - ((patientSymptoms.length - 1) * 80) / 2;
         patientSymptoms.forEach(sym => {
             this.add.text(symX, 180, sym.emoji, { fontSize: '64px' }).setOrigin(0.5);
             this.add.text(symX, 220, sym.text, { fontFamily: 'VT323', fontSize: '20px', fill: '#000' }).setOrigin(0.5);
@@ -88,7 +101,7 @@ export class HealerMinigameScene extends Phaser.Scene {
         const buttonWidth = 180;
         const spacing = 20;
         // Grid layout for options (2x2 or 2x3)
-        const startX = this.cameras.main.width / 2 - 100;
+        const startX = SceneUIUtils.getCenterX(this) - 100;
         const startY = 320;
 
         options.forEach((remedy, index) => {
@@ -115,7 +128,7 @@ export class HealerMinigameScene extends Phaser.Scene {
         });
 
         // Cure Button
-        ButtonFactory.createButton(this, this.cameras.main.width / 2, 530, "ADMINISTER CURE", () => {
+        ButtonFactory.createButton(this, SceneUIUtils.getCenterX(this), 530, "ADMINISTER CURE", () => {
             this.checkSolution(requiredRemedies);
         }, { width: 300, height: 60, color: 0x4CAF50, fontSize: '32px' });
 
@@ -177,5 +190,35 @@ export class HealerMinigameScene extends Phaser.Scene {
 
     update(time, delta) {
         this.events.emit('update', time, delta);
+    }
+
+    /**
+     * Handles window resize events to keep the minigame centered.
+     */
+    resize(gameSize) {
+        if (!gameSize) return;
+        const width = gameSize.width;
+        const height = gameSize.height;
+        this.cameras.main.setViewport(0, 0, width, height);
+
+        // Re-center primary UI elements (basic implementation)
+        const centerX = SceneUIUtils.getCenterX(this);
+        const centerY = SceneUIUtils.getCenterY(this);
+
+        this.children.list.forEach(child => {
+            if (child.type === 'Text') {
+                if (child.y < 150) {
+                    // Title/Status text at top
+                    child.setX(centerX);
+                } else if (child.y > height - 100) {
+                    // Footer text at bottom
+                    child.setX(centerX);
+                    // Optionally adjust Y to respect safe area bottom
+                    // child.setY(height - SceneUIUtils.getPadding(this) - 50);
+                }
+            }
+        });
+
+        SceneUIUtils.drawBezel(this, this.bezelGraphics);
     }
 }

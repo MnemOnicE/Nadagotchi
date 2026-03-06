@@ -224,6 +224,7 @@ export const Config = {
     SETTINGS: {
         DEFAULT_VOLUME: 0.5,
         DEFAULT_SPEED: 0.5,
+        DEFAULT_SAFE_AREA_PADDING: 0,
         SPEED_MULTIPLIERS: {
             NORMAL: 1.0,
             FAST: 2.0,

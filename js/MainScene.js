@@ -153,6 +153,7 @@ export class MainScene extends Phaser.Scene {
             gameSpeed: Config.SETTINGS.DEFAULT_SPEED,
             ...savedSettings
         };
+        this.game.registry.set("safeAreaPadding", this.gameSettings.safeAreaPadding || 0);
 
         /** @type {number} Timestamp of the last stats update emission to throttle UI refreshes. */
         this.lastStatsUpdateTime = -1000;
@@ -541,6 +542,11 @@ export class MainScene extends Phaser.Scene {
     handleUpdateSettings(newSettings) {
         this.gameSettings = { ...this.gameSettings, ...newSettings };
         this.persistence.saveSettings(this.gameSettings);
+        if (newSettings.safeAreaPadding !== undefined) {
+            this.game.registry.set('safeAreaPadding', newSettings.safeAreaPadding);
+            // Trigger a resize to apply the padding immediately to the main scene
+            this.resize({ width: this.scale.width, height: this.scale.height });
+        }
     }
 
     /**
