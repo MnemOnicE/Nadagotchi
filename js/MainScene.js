@@ -63,48 +63,9 @@ export class MainScene extends Phaser.Scene {
         this.isMoving = false;
         /** @type {number} Timestamp for the next autonomous move. */
         this.nextMoveTime = 0;
-<<<<<<< HEAD
 
         /** @type {boolean} Flag indicating if async initialization is complete. */
-        this.isReady = false;
-=======
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-    }
-
-    /**
-     * Phaser lifecycle method called once, before the scene is created.
-     * Used to load all necessary assets like images, spritesheets, and audio.
-     */
-    preload() {
-        // Assets are now handled by PreloaderScene.js
-    }
-
-    /**
-     * Phaser lifecycle method called once, after `preload`.
-     * Sets up game objects, initializes systems, launches the UI scene, and registers event listeners.
-     * @param {object} [data] - Optional data object passed from another scene.
-     * @param {object} [data.newPetData] - Data for creating a new pet, typically from the BreedingScene.
-     */
-    create(data) {
-<<<<<<< HEAD
-        // Start async initialization
-        this._initPromise = this.initializeGame(data);
-    }
-
-    /**
-     * Async initialization wrapper for handling Promise-based persistence and setup.
-     * @param {object} data - Data passed from previous scene.
-     */
-    async initializeGame(data) {
-        // --- World Systems Initialization (Pre-Visuals) ---
-        this.persistence = new PersistenceManager();
-        const loadedCalendar = await this.persistence.loadCalendar();
-=======
-        // --- World Systems Initialization (Pre-Visuals) ---
-        this.persistence = new PersistenceManager();
-        const loadedCalendar = this.persistence.loadCalendar();
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-        this.calendar = new Calendar(loadedCalendar);
+        this.isReady = false;        this.calendar = new Calendar(loadedCalendar);
         this.eventManager = new EventManager(this.calendar);
         this.worldClock = new WorldClock(this);
         this.weatherSystem = new WeatherSystem(this);
@@ -131,12 +92,7 @@ export class MainScene extends Phaser.Scene {
         // Drawing handled in resize
 
         // --- Pet Initialization ---
-<<<<<<< HEAD
         const loadedPet = await this.persistence.loadPet();
-=======
-        const loadedPet = this.persistence.loadPet();
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-
         if (data && data.newPetData) {
             // New Game: Pass null for loadedData to ensure defaults are used
             this.nadagotchi = new Nadagotchi(data.newPetData.dominantArchetype, null);
@@ -149,28 +105,17 @@ export class MainScene extends Phaser.Scene {
             this.nadagotchi = new Nadagotchi('Adventurer', loadedPet);
         }
 
-<<<<<<< HEAD
         // Initialize heavy async data (Journal, Recipes)
         await this.nadagotchi.init();
 
         if (!loadedPet && !(data && data.newPetData)) {
-             await this.persistence.savePet(this.nadagotchi);
-=======
-        if (!loadedPet && !(data && data.newPetData)) {
-             this.persistence.savePet(this.nadagotchi);
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-        }
+             await this.persistence.savePet(this.nadagotchi);        }
 
         // Expose for verification/testing
         window.mainScene = this;
 
         // --- Settings Initialization ---
-<<<<<<< HEAD
-        const savedSettings = await this.persistence.loadSettings();
-=======
-        const savedSettings = this.persistence.loadSettings();
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-        this.gameSettings = {
+        const savedSettings = await this.persistence.loadSettings();        this.gameSettings = {
             volume: Config.SETTINGS.DEFAULT_VOLUME,
             gameSpeed: Config.SETTINGS.DEFAULT_SPEED,
             ...savedSettings
@@ -266,12 +211,7 @@ export class MainScene extends Phaser.Scene {
         // --- Final Setup ---
         this.resize({ width: this.scale.width, height: this.scale.height });
         this.skyManager.update(); // Initial draw
-<<<<<<< HEAD
-        await this.loadFurniture();
-=======
-        this.loadFurniture();
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-        this.renderDebris(); // Initial render of debris
+        await this.loadFurniture();        this.renderDebris(); // Initial render of debris
 
         // --- Tutorial Trigger ---
         if (data && data.startTutorial) {
@@ -279,67 +219,9 @@ export class MainScene extends Phaser.Scene {
                 this.game.events.emit(EventKeys.START_TUTORIAL);
             });
         }
-<<<<<<< HEAD
 
         // MARK AS READY
-        this.isReady = true;
-=======
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-    }
-
-    /**
-     * Updates the wallpaper texture and saves the configuration.
-     * @param {string} key - The new texture key.
-     */
-    updateWallpaper(key) {
-        if (this.wallpaperLayer) {
-            this.wallpaperLayer.setTexture(key);
-        }
-    }
-
-    /**
-     * Updates the flooring texture and saves the configuration.
-     * @param {string} key - The new texture key.
-     */
-    updateFlooring(key) {
-        if (this.flooringLayer) {
-            this.flooringLayer.setTexture(key);
-        }
-    }
-
-    /**
-     * Cleans up event listeners and resources when the scene shuts down.
-     */
-    shutdown() {
-        if (this.game) {
-            this.game.events.off(EventKeys.UI_ACTION, this.handleUIActionBound);
-            this.game.events.off(EventKeys.UPDATE_SETTINGS, this.handleUpdateSettingsBound);
-            this.game.events.off(EventKeys.WORK_RESULT, this.handleWorkResultBound);
-            this.game.events.off(EventKeys.SCENE_COMPLETE, this.handleSceneCompleteBound);
-        }
-        this.scale.off('resize', this.resize, this);
-        if (this.autoSaveTimer) this.autoSaveTimer.remove();
-
-        // Clean up placement listeners if active
-        if (this.isPlacementMode) {
-             if (this._placementMoveHandler) this.input.off('pointermove', this._placementMoveHandler);
-             if (this._placementDownHandler) this.input.off('pointerdown', this._placementDownHandler);
-        }
-    }
-
-    /**
-     * The core game loop, called every frame.
-     * Updates game state, systems, and visuals.
-     * @param {number} time - The current time in milliseconds.
-     * @param {number} delta - The time in milliseconds since the last frame.
-     */
-    update(time, delta) {
-<<<<<<< HEAD
-        if (!this.isReady) return;
-
-=======
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-        const dayPassed = this.worldClock.update(delta);
+        this.isReady = true;        const dayPassed = this.worldClock.update(delta);
         if (dayPassed) {
             this.calendar.advanceDay();
             // Apply daily friendship decay
@@ -666,79 +548,7 @@ export class MainScene extends Phaser.Scene {
         // Resize dynamic textures via managers
         if (this.skyManager) this.skyManager.resize(width, gameHeight);
         if (this.lightingManager) this.lightingManager.resize(width, gameHeight);
-<<<<<<< HEAD
-        if (this.weatherParticles) this.weatherParticles.resize(width, gameHeight);
-=======
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-
-        // Resize Wallpaper/Flooring
-        if (this.wallpaperLayer) {
-            this.wallpaperLayer.setSize(width, gameHeight - 100); // Floor is 100px high
-            this.wallpaperLayer.setPosition(width / 2, (gameHeight - 100) / 2);
-        }
-        if (this.flooringLayer) {
-            this.flooringLayer.setSize(width, 100);
-            this.flooringLayer.setPosition(width / 2, gameHeight - 50); // Center of bottom 100px
-        }
-
-        // Redraw Ground relative to new gameHeight
-        if (this.ground) {
-             this.ground.clear();
-             this.ground.fillStyle(0x228B22, 1);
-             this.ground.fillRect(0, gameHeight - 100, width, 100);
-        }
-
-        // Reposition Interactive Objects relative to new gameHeight
-        // Ensure they are visible above the dashboard
-        // Adjusted to -70 to prevent overlap with top items (at Y=250) in the compressed gameHeight
-        if (this.craftingTable) this.craftingTable.setPosition(80, gameHeight - 70);
-        if (this.npcScout) this.npcScout.setPosition(width - 150, gameHeight - 70);
-        if (this.npcVillager) this.npcVillager.setPosition(150, gameHeight / 2);
-        if (this.npcMerchant) this.npcMerchant.setPosition(300, gameHeight / 2); // Center-Left
-
-        // Update Plant/Bookshelf (pinned to top/corners, mostly fine but check X)
-        if (this.plant) this.plant.setPosition(width - 80, 250);
-
-        // Reposition Transition Objects
-        // House -> Garden (Center-Left)
-        if (this.houseObj) {
-            this.houseObj.setPosition(100, gameHeight - 80);
-        }
-        // Door -> Indoor (Right Side)
-        if (this.doorObj) this.doorObj.setPosition(width - 50, gameHeight - 130);
-
-        // Re-render debris to match new screen coordinates
-        this.renderDebris();
-
-        // Resize Room Doors
-        this._refreshRoomDoors();
-
-    }
-
-    /**
-     * Renders debris sprites based on screen coordinates.
-     */
-    renderDebris() {
-        this.debrisGroup.clear(true, true); // Clear old sprites
-
-<<<<<<< HEAD
-        const width = this.cameras.main.width;
-        const height = this.cameras.main.height;
-        const currentLocation = (this.location === 'INDOOR') ? this.currentRoom : 'GARDEN';
-
-        this.nadagotchi.debris.forEach(d => {
-            const dLocation = d.location || 'GARDEN';
-            if (dLocation !== currentLocation) return;
-
-=======
-        if (this.location === 'INDOOR') return; // Don't render if indoors
-
-        const width = this.cameras.main.width;
-        const height = this.cameras.main.height;
-
-        this.nadagotchi.debris.forEach(d => {
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-            const x = d.x * width;
+        if (this.weatherParticles) this.weatherParticles.resize(width, gameHeight);            const x = d.x * width;
             const y = d.y * height;
 
             const sprite = this.add.sprite(x, y, d.type).setInteractive({ useHandCursor: true }).setDepth(15);
@@ -806,25 +616,7 @@ export class MainScene extends Phaser.Scene {
     enterHouse() {
         this.location = 'INDOOR';
         this.currentRoom = 'Entryway';
-<<<<<<< HEAD
-        this.nadagotchi.location = 'Entryway'; // Sync location
-=======
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-        this.changeRoom('Entryway');
-        SoundSynthesizer.instance.playChime();
-        this.showNotification("Welcome Home!", '#FFFFFF');
-    }
-
-    /**
-     * Switches the view to 'GARDEN'.
-     */
-    exitHouse() {
-        this.location = 'GARDEN';
-<<<<<<< HEAD
-        this.nadagotchi.location = 'GARDEN'; // Sync location
-=======
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-        this.renderLocation();
+        this.nadagotchi.location = 'Entryway'; // Sync location        this.renderLocation();
         SoundSynthesizer.instance.playChime();
         this.showNotification("To the Garden!", '#FFFFFF');
     }
@@ -840,305 +632,7 @@ export class MainScene extends Phaser.Scene {
         // No explicit save needed here, PersistenceManager handles full object.
 
         this.currentRoom = roomId;
-<<<<<<< HEAD
-        this.nadagotchi.location = roomId; // Sync location
-=======
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-        const def = RoomDefinitions[roomId];
-
-        // 1. Update Backgrounds
-        // Check homeConfig for this room
-        // Ensure config exists
-        if (!this.nadagotchi.homeConfig.rooms[roomId]) {
-             this.nadagotchi.homeConfig.rooms[roomId] = {
-                 wallpaper: def.defaultWallpaper,
-                 flooring: def.defaultFlooring,
-                 wallpaperItem: 'Default',
-                 flooringItem: 'Default'
-             };
-        }
-        const config = this.nadagotchi.homeConfig.rooms[roomId];
-        this.updateWallpaper(config.wallpaper);
-        this.updateFlooring(config.flooring);
-
-        // 2. Render
-        this.renderLocation();
-
-        // 3. Navigation Doors
-        this._refreshRoomDoors();
-
-        this.showNotification(`${def.name}`, '#FFFFFF');
-    }
-
-    _refreshRoomDoors() {
-        // Clear existing doors
-        if (this.roomDoors) {
-            this.roomDoors.forEach(d => d.destroy());
-        }
-        this.roomDoors = [];
-
-        if (this.location !== 'INDOOR') return;
-
-        const def = RoomDefinitions[this.currentRoom];
-        const connections = def.connections;
-
-        // Create navigation targets
-        connections.forEach((targetId, index) => {
-            const isUnlocked = this.nadagotchi.isRoomUnlocked(targetId);
-
-            // Simple placement logic: Spaced out at the top
-            // Width/Height available via cameras
-            const w = this.cameras.main.width;
-            const h = this.cameras.main.height;
-            const x = (w / (connections.length + 1)) * (index + 1);
-            const y = 80;
-
-            if (isUnlocked) {
-                const door = this.add.text(x, y, `Go to\n${RoomDefinitions[targetId].name}`, {
-                     backgroundColor: '#333', padding: { x: 5, y: 5 }, align: 'center', fontFamily: 'VT323, Arial'
-                }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-
-                door.on('pointerdown', () => this.changeRoom(targetId));
-                this.roomDoors.push(door);
-            } else {
-                // Locked Door Logic
-                // Find Deed Name
-                // In a real app, maybe add 'Deed' to RoomDef or loop ItemDefs.
-                // Hardcoding mapping for speed/simplicity as logic is in InventorySystem reverse-lookup.
-                // Or show "Locked"
-                const door = this.add.text(x, y, `Locked\n${RoomDefinitions[targetId].name}\n(Needs Deed)`, {
-                     backgroundColor: '#555', color: '#AAA', padding: { x: 5, y: 5 }, align: 'center', fontFamily: 'VT323, Arial'
-                }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-
-                // Add Padlock Icon/Emoji?
-                // Visual feedback on click
-                door.on('pointerdown', () => {
-                    this.showNotification(`Locked! Requires Deed.`, '#FF0000');
-                    SoundSynthesizer.instance.playFailure();
-                });
-                this.roomDoors.push(door);
-            }
-        });
-    }
-
-    /**
-     * Updates the visibility of world objects based on the current location.
-     */
-    renderLocation() {
-        const isIndoor = this.location === 'INDOOR';
-
-        // 1. Backgrounds
-        this.skyManager.setVisible(!isIndoor); // Hide Sky Indoors
-        if (this.ground) this.ground.setVisible(!isIndoor);
-
-        if (this.wallpaperLayer) this.wallpaperLayer.setVisible(isIndoor);
-        if (this.flooringLayer) this.flooringLayer.setVisible(isIndoor);
-
-        // 2. Transition Objects
-        if (this.houseObj) this.houseObj.setVisible(!isIndoor);
-        if (this.doorObj) this.doorObj.setVisible(isIndoor && this.currentRoom === 'Entryway'); // Only exit from Entryway
-
-        // 3. Furniture (Indoor Only - Per Room)
-        // Hide ALL placed furniture first
-        Object.values(this.placedFurniture).flat().forEach(item => {
-            if (item.sprite) item.sprite.setVisible(false);
-        });
-
-        if (isIndoor) {
-            // Show furniture for CURRENT ROOM
-            const roomFurniture = this.placedFurniture[this.currentRoom] || [];
-            roomFurniture.forEach(item => {
-                if (item.sprite) item.sprite.setVisible(true);
-            });
-        }
-
-        // Toggle pre-placed furniture (Only visible in Entryway? Or assume Garden specific?)
-        // Bookshelf/Plant/Crafting Table are currently "Global Indoor" or "Entryway" items in legacy logic.
-        // Let's make them visible only in "Entryway" for now to keep them somewhere.
-        const isEntryway = isIndoor && this.currentRoom === 'Entryway';
-        if (this.bookshelf) this.bookshelf.setVisible(isEntryway);
-        if (this.plant) this.plant.setVisible(isEntryway);
-        if (this.craftingTable) this.craftingTable.setVisible(isEntryway);
-
-        // 4. NPCs (Garden Only)
-        if (this.npcScout) this.npcScout.setVisible(!isIndoor);
-        if (this.npcArtisan) this.npcArtisan.setVisible(!isIndoor);
-        if (this.npcVillager) this.npcVillager.setVisible(!isIndoor);
-
-        // 5. Navigation Doors (Refresh visibility)
-        if (!isIndoor) {
-             this.roomDoors.forEach(d => d.destroy());
-             this.roomDoors = [];
-        } else {
-            // Refresh called in changeRoom usually, but if we just toggle Garden->Indoor
-            // we need to ensure they are there.
-            if (this.roomDoors.length === 0) this._refreshRoomDoors();
-        }
-
-        // 6. Quest Indicators (Garden Only)
-        Object.values(this.questIndicators).forEach(i => i.setVisible(false)); // Hide all first
-        if (!isIndoor) {
-             this.updateQuestIndicators(); // Refresh valid ones
-        }
-    }
-
-    /**
-     * Checks if a career has just been unlocked and displays a temporary visual notification.
-     */
-    checkCareerUnlock() {
-        if (this.nadagotchi.newCareerUnlocked && !this.careerUnlockedNotified) {
-            this.careerUnlockedNotified = true;
-            this.showNotification(`Career Unlocked: ${this.nadagotchi.newCareerUnlocked}!`, '#FFD700');
-            this.nadagotchi.newCareerUnlocked = null; // Clear the flag in the 'brain'
-        }
-    }
-
-    /**
-     * Displays a temporary notification text in the center of the game view.
-     * @param {string} text - The text to display.
-     * @param {string} [color='#FFD700'] - The color of the text.
-     */
-    showNotification(text, color = '#FFD700') {
-        const gameHeight = this.cameras.main.height;
-        const notificationText = this.add.text(this.cameras.main.width / 2, gameHeight / 2 - 50, text,
-            { fontFamily: 'VT323, Arial', fontSize: '24px', color: color, backgroundColor: 'rgba(0,0,0,0.7)', padding: { x: 15, y: 10 } }
-        ).setOrigin(0.5);
-
-        this.tweens.add({ targets: notificationText, alpha: { from: 0, to: 1 }, duration: 500, yoyo: true, hold: 2500, onComplete: () => notificationText.destroy() });
-    }
-
-    /**
-     * Updates the pet's sprite frame and animation to reflect its current mood.
-     * Only triggers updates when the mood actually changes to prevent jitter.
-     */
-    updateSpriteMood() {
-        if (this.currentMood !== this.nadagotchi.mood) {
-            this.currentMood = this.nadagotchi.mood;
-            // Map game moods to sprite frames:
-            // Happy (0), Angry (1), Tired/Sad (2), Content/Neutral (3)
-            const moodMap = { 'happy': 0, 'angry': 1, 'sad': 2, 'neutral': 3 };
-            this.sprite.setFrame(moodMap[this.currentMood] ?? 3);
-            this.startIdleAnimation(this.currentMood);
-        }
-    }
-
-    /**
-     * Starts a procedural idle animation based on the pet's mood and archetype.
-     * Uses Phaser Tweens to create life-like movement.
-     * @param {string} mood - The current mood ('happy', 'sad', 'angry', 'neutral').
-     */
-    startIdleAnimation(mood) {
-        // Kill existing tweens on the sprite to prevent conflicts
-        this.tweens.killTweensOf(this.sprite);
-
-        // Fix for "Movement Warp" bug: Use the sprite's CURRENT position as the base
-        const baseX = this.sprite.x;
-        const baseY = this.sprite.y;
-
-        // Reset properties to base state (except position)
-        this.sprite.setScale(4);
-        this.sprite.setAngle(0);
-        this.sprite.setAlpha(1);
-
-        const archetype = this.nadagotchi.dominantArchetype;
-
-        if (mood === 'happy') {
-            // Archetype-Specific Happy Animations
-            if (archetype === 'Adventurer') {
-                 // Jump and Shake (Excitement)
-                 this.tweens.add({
-                    targets: this.sprite,
-                    y: baseY - 20,
-                    angle: { from: -5, to: 5 },
-                    duration: 300,
-                    yoyo: true,
-                    repeat: -1,
-                    ease: 'Sine.easeInOut'
-                 });
-            } else if (archetype === 'Nurturer') {
-                 // Gentle Sway / Swell with pride
-                 this.tweens.add({
-                    targets: this.sprite,
-                    scaleX: 4.3,
-                    scaleY: 3.7,
-                    angle: { from: -2, to: 2 },
-                    duration: 1000,
-                    yoyo: true,
-                    repeat: -1,
-                    ease: 'Sine.easeInOut'
-                 });
-            } else if (archetype === 'Mischievous') {
-                 // Fast Jitter/Flip
-                 this.tweens.add({
-                    targets: this.sprite,
-                    x: { from: baseX - 5, to: baseX + 5 },
-                    scaleY: { from: 4, to: 3.5 }, // Squash
-                    duration: 100,
-                    yoyo: true,
-                    repeat: -1,
-                    ease: 'Bounce.easeInOut'
-                 });
-            } else if (archetype === 'Intellectual') {
-                 // Hover (Sine Wave)
-                 this.tweens.add({
-                    targets: this.sprite,
-                    y: baseY - 10,
-                    duration: 1000,
-                    yoyo: true,
-                    repeat: -1,
-                    ease: 'Sine.easeInOut'
-                 });
-            } else if (archetype === 'Recluse') {
-                 // Subtle, content bounce
-                 this.tweens.add({
-                    targets: this.sprite,
-                    y: baseY - 5,
-                    duration: 600,
-                    yoyo: true,
-                    repeat: -1,
-                    ease: 'Sine.easeInOut'
-                 });
-            } else {
-                // Default Happy Hop
-                this.tweens.add({
-                    targets: this.sprite,
-                    y: baseY - 15,
-                    scaleY: 3.8,
-                    scaleX: 4.2,
-                    duration: 400,
-                    yoyo: true,
-                    repeat: -1,
-                    ease: 'Sine.easeInOut'
-                 });
-            }
-
-        } else if (mood === 'sad') {
-             if (archetype === 'Recluse') {
-                 // Fade / Shrink slightly
-                 this.tweens.add({
-                     targets: this.sprite,
-                     alpha: 0.7,
-                     scaleX: 3.8,
-                     scaleY: 3.8,
-                     duration: 1000,
-                     yoyo: true,
-                     repeat: -1
-                 });
-             } else {
-                 // Default Sad Sway
-                this.tweens.add({
-                    targets: this.sprite,
-                    angle: { from: -5, to: 5 },
-                    duration: 1500,
-                    yoyo: true,
-                    repeat: -1,
-                    ease: 'Sine.easeInOut'
-<<<<<<< HEAD
-                 });
-=======
-                });
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-             }
+        this.nadagotchi.location = roomId; // Sync location             }
         } else if (mood === 'angry') {
              // Angry Shake
              this.tweens.add({
@@ -1163,300 +657,6 @@ export class MainScene extends Phaser.Scene {
         }
     }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-    /**
-     * Checks for and triggers spontaneous, "proactive" behaviors based on the pet's state.
-     */
-    checkProactiveBehaviors() {
-        if (this.thoughtBubble.visible || this.exploreBubble.visible) return;
-
-        if (this.nadagotchi.mood === 'happy' && this.nadagotchi.dominantArchetype === 'Adventurer' && Phaser.Math.Between(1, 750) === 1) {
-            this.exploreBubble.setVisible(true);
-            this.time.delayedCall(2000, () => this.exploreBubble.setVisible(false));
-        }
-    }
-
-    /**
-     * Updates autonomous pet movement when Indoors.
-     * @param {number} time - Current game time.
-     */
-    updatePetMovement(time) {
-        // Only move autonomously if Indoors
-        if (this.location !== 'INDOOR') {
-            this.isMoving = false;
-            return;
-        }
-
-        // Do not interrupt existing movement
-        if (this.isMoving) return;
-
-        // Check cooldown
-        if (time < this.nextMoveTime) return;
-
-        // Movement Trigger Chance (approx 1% per frame if cooldown passed)
-        // Mood affects frequency: Happy/Energetic pets move more
-        let chance = 100; // Base 1 in 100
-        if (this.nadagotchi.mood === 'happy') chance = 50;
-        if (this.nadagotchi.mood === 'sad') chance = 300; // Lethargic
-
-        if (Phaser.Math.Between(1, chance) === 1) {
-            const width = this.cameras.main.width;
-            // Pick a random spot within room bounds (leaving 50px buffer)
-            const targetX = Phaser.Math.Between(50, width - 50);
-            this.walkTo(targetX);
-        }
-    }
-
-    /**
-     * Commands the pet to walk to a specific X coordinate.
-     * @param {number} targetX - The target X coordinate.
-     */
-    walkTo(targetX) {
-        this.isMoving = true;
-
-        // Kill idle animations
-        this.tweens.killTweensOf(this.sprite);
-
-        // Determine direction
-        const currentX = this.sprite.x;
-        const distance = Math.abs(targetX - currentX);
-        const direction = targetX > currentX ? 1 : -1;
-
-        // Flip sprite to face direction
-        // Default sprite faces Right. if direction is -1 (Left), flipX = true.
-        this.sprite.setFlipX(direction < 0);
-
-        // Ensure vertical position is correct for walking (slightly lower than idle bounce?)
-        // Let's stick to the current Y or the calculated floor Y
-        const dashboardHeight = Math.floor(this.scale.height * Config.UI.DASHBOARD_HEIGHT_RATIO);
-        const gameHeight = this.scale.height - dashboardHeight;
-        const centerY = gameHeight / 2;
-
-        // Reset scale/rotation from idle anims
-        this.sprite.setAngle(0);
-        this.sprite.setScale(4);
-        this.sprite.y = centerY;
-
-        // Bobbing animation while walking
-        const bobTween = this.tweens.add({
-            targets: this.sprite,
-            y: centerY - 5,
-            duration: 150,
-            yoyo: true,
-            repeat: -1
-        });
-
-        // Movement Tween
-        const speed = 0.1; // pixels per ms
-        const duration = distance / speed;
-
-        this.tweens.add({
-            targets: this.sprite,
-            x: targetX,
-            duration: duration,
-            ease: 'Linear',
-            onComplete: () => {
-                this.isMoving = false;
-                bobTween.stop();
-                this.sprite.y = centerY; // Reset Y
-                this.nextMoveTime = this.time.now + Phaser.Math.Between(2000, 5000); // Wait 2-5s before next move
-
-                // Resume idle with updated position
-                if (this.currentMood) this.startIdleAnimation(this.currentMood);
-            }
-        });
-    }
-
-    /**
-     * Toggles placement mode for furniture items.
-     * @param {?string} item - The name of the item to place, or null to exit placement mode.
-     */
-    togglePlacementMode(item) {
-        this.isPlacementMode = !this.isPlacementMode;
-        this.selectedFurniture = this.isPlacementMode ? item : null;
-
-        if (this.isPlacementMode) {
-            // Ensure decoration mode is OFF when entering new placement mode to avoid conflicts
-            if (this.isDecorationMode) this.toggleDecorationMode();
-
-            this.placementIndicator = this.add.graphics();
-            this.placementIndicator.lineStyle(2, 0xff0000, 1);
-            this.placementIndicator.strokeRect(0, 0, 64, 64);
-
-            this.showNotification(`Placing: ${item}. Click item to pick up.`, '#00FFFF');
-
-            // Store references to handlers so they can be removed specifically
-            this._placementMoveHandler = (pointer) => {
-                if (this.placementIndicator) {
-                    this.placementIndicator.setPosition(pointer.x - 32, pointer.y - 32);
-                }
-            };
-            this._placementDownHandler = (pointer) => {
-                // Block if we just handled a sprite click (Pickup)
-                if (this.blockPlacement) {
-                    this.blockPlacement = false;
-                    return;
-                }
-
-                this.game.events.emit(EventKeys.UI_ACTION, EventKeys.PLACE_FURNITURE, { x: pointer.x, y: pointer.y });
-            };
-
-            this.input.on('pointermove', this._placementMoveHandler);
-            this.input.on('pointerdown', this._placementDownHandler);
-        } else {
-            if (this.placementIndicator) {
-                this.placementIndicator.destroy();
-                this.placementIndicator = null;
-            }
-            // Safely remove only our specific listeners
-            if (this._placementMoveHandler) {
-                this.input.off('pointermove', this._placementMoveHandler);
-                this._placementMoveHandler = null;
-            }
-            if (this._placementDownHandler) {
-                this.input.off('pointerdown', this._placementDownHandler);
-                this._placementDownHandler = null;
-            }
-        }
-    }
-
-    /**
-     * Toggles the "Decoration Mode" which allows moving existing furniture.
-     */
-    toggleDecorationMode() {
-        this.isDecorationMode = !this.isDecorationMode;
-
-        if (this.isDecorationMode) {
-            this.showNotification("DECORATION MODE: Drag to Move", '#00FFFF');
-            this.input.setDefaultCursor('move');
-        } else {
-            this.showNotification("Exited Decoration Mode", '#00FFFF');
-            this.input.setDefaultCursor('default');
-            this.saveFurniture(); // Save positions on exit
-        }
-
-        // Update interactivity of all placed furniture (in current room)
-        const roomFurniture = this.placedFurniture[this.currentRoom] || [];
-        roomFurniture.forEach(item => {
-            if (item.sprite) {
-                if (this.isDecorationMode) {
-                    item.sprite.setTint(0xDDDDDD);
-                    this.input.setDraggable(item.sprite);
-                } else {
-                    item.sprite.clearTint();
-                    this.input.setDraggable(item.sprite, false);
-                }
-            }
-        });
-    }
-
-    /**
-     * Places the selected furniture item at the specified coordinates.
-     * @param {number} x - The x-coordinate for the furniture.
-     * @param {number} y - The y-coordinate for the furniture.
-     */
-    placeFurniture(x, y) {
-        if (!this.isPlacementMode || !this.selectedFurniture) return;
-
-        // Prevent placement in the dashboard area (bottom 25%)
-        if (y > this.cameras.main.height) {
-            this.showNotification("Can't place here!", '#FF0000');
-            SoundSynthesizer.instance.playFailure();
-            return;
-        }
-
-        // --- COLLISION CHECK ---
-        // Assume default 64x64 item size centered
-        const newItemBounds = new Phaser.Geom.Rectangle(x - 32, y - 32, 64, 64);
-        const existing = this.placedFurniture[this.currentRoom] || [];
-
-        for (const item of existing) {
-            let bounds;
-            if (item.sprite) {
-                bounds = item.sprite.getBounds();
-            } else {
-                 bounds = new Phaser.Geom.Rectangle(item.x - 32, item.y - 32, 64, 64);
-            }
-
-            if (Phaser.Geom.Intersects.RectangleToRectangle(newItemBounds, bounds)) {
-                 this.showNotification("Overlaps existing furniture!", '#FF0000');
-                 SoundSynthesizer.instance.playFailure();
-                 return;
-            }
-        }
-
-        if (this.nadagotchi.placeItem(this.selectedFurniture)) {
-            const furnitureKey = this.selectedFurniture.toLowerCase().replace(' ', '_');
-            const newFurniture = this.createPlacedFurnitureSprite(x, y, furnitureKey, this.selectedFurniture);
-
-            if (!this.placedFurniture[this.currentRoom]) {
-                 this.placedFurniture[this.currentRoom] = [];
-            }
-            this.placedFurniture[this.currentRoom].push({ key: this.selectedFurniture, x: x, y: y, sprite: newFurniture });
-            this.saveFurniture();
-
-            SoundSynthesizer.instance.playChime();
-            this.togglePlacementMode(null);
-        } else {
-            // Should not happen if UI filtered correctly, but just in case
-            this.togglePlacementMode(null);
-        }
-    }
-
-    /**
-     * Creates a sprite for placed furniture with interaction logic (Pickup/Interact).
-     * @param {number} x - X coordinate.
-     * @param {number} y - Y coordinate.
-     * @param {string} textureKey - Texture key.
-     * @param {string} itemName - The inventory item name.
-     * @returns {Phaser.GameObjects.Sprite} The created sprite.
-     */
-    createPlacedFurnitureSprite(x, y, textureKey, itemName) {
-        const sprite = this.add.sprite(x, y, textureKey).setInteractive({ useHandCursor: true }).setDepth(5);
-
-        // Add drag listeners to support Decoration Mode
-        sprite.on('drag', (pointer, dragX, dragY) => {
-            if (this.isDecorationMode) {
-                // Bound check
-                const maxY = this.cameras.main.height - 32;
-                sprite.x = dragX;
-                sprite.y = Math.min(dragY, maxY);
-            }
-        });
-
-        sprite.on('dragend', () => {
-            if (this.isDecorationMode) {
-                // Update the stored position in the array
-                // Find in CURRENT ROOM
-                const roomList = this.placedFurniture[this.currentRoom];
-                if (roomList) {
-                    const entry = roomList.find(f => f.sprite === sprite);
-                    if (entry) {
-                        entry.x = sprite.x;
-                        entry.y = sprite.y;
-                    }
-                }
-            }
-        });
-
-        sprite.on('pointerdown', (pointer) => {
-            if (this.isPlacementMode) {
-                // SIGNAL TO BLOCK SCENE CLICK
-                this.blockPlacement = true;
-
-                // PICK UP LOGIC
-                sprite.destroy();
-
-                const roomList = this.placedFurniture[this.currentRoom] || [];
-<<<<<<< HEAD
-                // Optimized: Match by sprite instance to avoid redundant property checks
-=======
-                const index = roomList.findIndex(f => f.key === itemName && f.x === x && f.y === y); // Match original props? No, sprites can move.
-                // Better to match by sprite instance
->>>>>>> 74fdaab (Update js/DebugConsole.js)
                 const liveIndex = roomList.findIndex(f => f.sprite === sprite);
 
                 if (liveIndex > -1) roomList.splice(liveIndex, 1);
@@ -1480,35 +680,18 @@ export class MainScene extends Phaser.Scene {
      * Persists the placed furniture data.
      * Serializes only the necessary data (key, x, y), stripping sprite references.
      */
-<<<<<<< HEAD
-    async saveFurniture() {
-=======
-    saveFurniture() {
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-        const serializable = {};
+    async saveFurniture() {        const serializable = {};
         for (const [roomId, items] of Object.entries(this.placedFurniture)) {
             serializable[roomId] = items.map(f => ({ key: f.key, x: f.x, y: f.y }));
         }
-<<<<<<< HEAD
-        await this.persistence.saveFurniture(serializable);
-=======
-        this.persistence.saveFurniture(serializable);
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-    }
+        await this.persistence.saveFurniture(serializable);    }
 
     /**
      * Loads and renders previously placed furniture.
      */
-<<<<<<< HEAD
     async loadFurniture() {
         // loadFurniture returns { RoomID: [...] } now (via PersistenceManager migration)
         const loadedData = await this.persistence.loadFurniture() || { "Entryway": [] };
-=======
-    loadFurniture() {
-        // loadFurniture returns { RoomID: [...] } now (via PersistenceManager migration)
-        const loadedData = this.persistence.loadFurniture() || { "Entryway": [] };
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-
         // Clear object but keep reference
         this.placedFurniture = {};
 

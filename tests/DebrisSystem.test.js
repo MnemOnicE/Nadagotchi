@@ -19,10 +19,7 @@ class MockPet {
         };
         this.addJournalEntry = jest.fn();
         this.generateUUID = () => 'test-id';
-<<<<<<< HEAD
         this.recalculateCleanlinessPenalty = jest.fn();
-=======
->>>>>>> 74fdaab (Update js/DebugConsole.js)
     }
 }
 

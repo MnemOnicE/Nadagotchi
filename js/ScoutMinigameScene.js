@@ -77,7 +77,6 @@ export class ScoutMinigameScene extends Phaser.Scene {
                 }
             } else {
                 // Not a match, flip them back after a delay
-<<<<<<< HEAD
                 // Pass current selections as arguments to closure to ensure we flip the correct cards
                 // even if global state shifts (though input is blocked).
                 this.time.delayedCall(1000, (card1, card2) => {
@@ -90,19 +89,7 @@ export class ScoutMinigameScene extends Phaser.Scene {
                     });
                     firstSelection = null;
                     secondSelection = null;
-                }, [firstSelection, secondSelection]);
-=======
-                this.time.delayedCall(1000, () => {
-                    [firstSelection, secondSelection].forEach(card => {
-                        card.getData('iconText').setText('');
-                        card.setData('revealed', false);
-                        card.setFillStyle(0xDEB887);
-                    });
-                    firstSelection = null;
-                    secondSelection = null;
-                });
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-            }
+                }, [firstSelection, secondSelection]);            }
         };
 
         const handleCardClick = (card) => {

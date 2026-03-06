@@ -1,38 +1,7 @@
 import { ButtonFactory } from './ButtonFactory.js';
 import { EventKeys } from './EventKeys.js';
-<<<<<<< HEAD
 import { Config } from './Config.js';
-import { ToastManager } from './systems/ToastManager.js';
-=======
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-
-/**
- * @fileoverview A dedicated scene for the "Pet Passport" / Showcase system.
- * Displays detailed pet statistics, visualizes the pet, and allows DNA export/import.
- * Designed to be a "Pause" screen that overlays or replaces the main game view temporarily.
- */
-
-export class ShowcaseScene extends Phaser.Scene {
-    constructor() {
-        super({ key: 'ShowcaseScene' });
-    }
-
-    /**
-     * Initializes the scene with data passed from the calling scene.
-     * @param {object} data - The payload containing the pet data.
-     * @param {import('./Nadagotchi.js').Nadagotchi} data.nadagotchi - The current pet instance.
-     */
-    init(data) {
-        this.petData = data.nadagotchi;
-    }
-
-    create() {
-        const width = this.cameras.main.width;
-<<<<<<< HEAD
-        this.toastManager = new ToastManager(this);
-=======
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-        const height = this.cameras.main.height;
+import { ToastManager } from './systems/ToastManager.js';        const height = this.cameras.main.height;
 
         // 1. Background (Solid color with slight transparency to hint at pause state, or full solid)
         // Using a "Passport" dark blue theme
@@ -52,13 +21,7 @@ export class ShowcaseScene extends Phaser.Scene {
 
         // Pet Sprite (Scaled up)
         // We reuse the 'pet' texture but maybe use a specific frame based on mood
-<<<<<<< HEAD
-        const frame = Config.MOOD_VISUALS.FRAMES[this.petData.mood] ?? Config.MOOD_VISUALS.DEFAULT_FRAME;
-=======
-        const moodMap = { 'happy': 0, 'neutral': 1, 'sad': 2, 'angry': 3 };
-        const frame = moodMap[this.petData.mood] ?? 1;
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-        const sprite = this.add.sprite(0, 0, 'pet', frame).setScale(8);
+        const frame = Config.MOOD_VISUALS.FRAMES[this.petData.mood] ?? Config.MOOD_VISUALS.DEFAULT_FRAME;        const sprite = this.add.sprite(0, 0, 'pet', frame).setScale(8);
 
         // Add a simple idle tween
         this.tweens.add({
@@ -163,30 +126,5 @@ export class ShowcaseScene extends Phaser.Scene {
      * Duplicated from UIScene (should potentially be a utility, but keeping isolated for now).
      */
     showToast(title, message) {
-<<<<<<< HEAD
-        this.toastManager.show({ title, message, style: 'DARK' });
-=======
-        const width = this.cameras.main.width;
-        const toastWidth = 300;
-        const toastHeight = 60;
-        const x = width / 2 - toastWidth / 2;
-        const y = this.cameras.main.height - 100;
-
-        const container = this.add.container(x, y);
-        const bg = this.add.rectangle(0, 0, toastWidth, toastHeight, 0x333333).setOrigin(0).setStrokeStyle(2, 0xffffff);
-        const text = this.add.text(toastWidth/2, toastHeight/2, `${title}: ${message}`, {
-            fontFamily: 'VT323', fontSize: '20px', color: '#fff'
-        }).setOrigin(0.5);
-
-        container.add([bg, text]);
-
-        this.tweens.add({
-            targets: container,
-            alpha: 0,
-            duration: 500,
-            delay: 2000,
-            onComplete: () => container.destroy()
-        });
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-    }
+        this.toastManager.show({ title, message, style: 'DARK' });    }
 }

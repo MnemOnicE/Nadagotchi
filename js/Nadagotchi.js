@@ -29,211 +29,8 @@ export class Nadagotchi {
      * @param {object} [loadedData=null] - Optional saved data to load from. If provided, overrides defaults.
      */
     constructor(initialArchetype, loadedData = null) {
-<<<<<<< HEAD
         /** @type {boolean} Indicates if the asynchronous initialization is complete. */
         this.isInitialized = false;
-
-=======
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-        // --- RNG Initialization ---
-        if (loadedData) {
-             // Load the universe seed (The "Big Bang")
-             this.universeSeed = loadedData.universeSeed || this._generateSeed(); // Migration for old saves
-             this.rng = new SeededRandom(this.universeSeed);
-             // Restore RNG state if available to ensure continuity
-             if (loadedData.rng && loadedData.rng.state) {
-                 this.rng.state = loadedData.rng.state;
-             }
-        } else {
-             // New Game: Generate a new universe seed
-             this.universeSeed = this._generateSeed();
-             this.rng = new SeededRandom(this.universeSeed);
-        }
-
-        if (loadedData) {
-            // This is a loaded pet. Populate all properties from the save file.
-            /** @type {string} Unique identifier for this pet instance (Salt). */
-            this.uuid = loadedData.uuid || this.generateUUID(); // Migration for old saves
-
-            /** @type {string} The name of the pet. */
-            this.name = loadedData.name || "Nadagotchi";
-
-            /** @type {string} The pet's current mood (e.g., 'happy', 'sad'). */
-            this.mood = loadedData.mood;
-            /** @type {string} The dominant personality trait. */
-            this.dominantArchetype = loadedData.dominantArchetype;
-            /** @type {Object.<string, number>} A map of personality points for each archetype. */
-            this.personalityPoints = loadedData.personalityPoints;
-            /** @type {{hunger: number, energy: number, happiness: number}} The pet's core stats. */
-            this.stats = loadedData.stats;
-            /** @type {Object.<string, number>} A map of the pet's skills and their levels. */
-            this.skills = loadedData.skills;
-            // Legacy migration for Research skill
-            if (this.skills.research === undefined) {
-                this.skills.research = 0;
-            }
-
-            /** @type {?string} The pet's current career, if any. */
-            this.currentCareer = loadedData.currentCareer;
-            /** @type {Array<string>} List of careers the pet has unlocked. */
-            this.unlockedCareers = loadedData.unlockedCareers || (this.currentCareer ? [this.currentCareer] : []);
-            /** @type {Object.<string, number>} Current level in each career. */
-            this.careerLevels = loadedData.careerLevels || {};
-            /** @type {Object.<string, number>} Current XP in each career. */
-            this.careerXP = loadedData.careerXP || {};
-
-            // Migration: Ensure active career has level data
-            if (this.currentCareer && !this.careerLevels[this.currentCareer]) {
-                this.careerLevels[this.currentCareer] = 1;
-                this.careerXP[this.currentCareer] = 0;
-            }
-
-            /** @type {?object} The active daily quest. */
-            this.dailyQuest = loadedData.dailyQuest || null;
-
-            /** @type {Object.<string, number>} The items the pet is currently holding. */
-            this.inventory = loadedData.inventory || {};
-            /** @type {number} The pet's age. */
-            this.age = loadedData.age;
-            /** @type {number} The generation number of the pet. */
-            this.generation = loadedData.generation || 1;
-            /** @type {boolean} Whether the pet is ready for the legacy/breeding system. */
-            this.isLegacyReady = loadedData.isLegacyReady || false;
-            /** @type {Array<string>} Special traits inherited from ancestors. */
-            this.legacyTraits = loadedData.legacyTraits || [];
-             /** @type {number} A 1-10 scale affecting mood swing intensity. */
-            this.moodSensitivity = loadedData.moodSensitivity || Config.INITIAL_STATE.MOOD_SENSITIVITY_DEFAULT;
-
-            // Initialize Genome
-            if (loadedData.genome) {
-                if (loadedData.genome.genotype) {
-                     // New Genome format
-                     // Pass loaded phenotype if available to avoid random recalculation
-                     const phenotype = loadedData.genome.phenotype || null;
-                     this.genome = new Genome(loadedData.genome.genotype, phenotype, this.rng);
-                } else {
-                    // Legacy migration: Create homozygous genotype from old data
-                    const migratedGenotype = {};
-                    // Personality
-                    ['Adventurer', 'Nurturer', 'Mischievous', 'Intellectual', 'Recluse'].forEach(trait => {
-                         const val = loadedData.genome.personalityGenes ? (loadedData.genome.personalityGenes[trait] || 0) : 0;
-                         migratedGenotype[trait] = [val, val];
-                    });
-                    // Physio
-                    const moodSens = loadedData.genome.moodSensitivity || Config.INITIAL_STATE.MOOD_SENSITIVITY_DEFAULT;
-                    migratedGenotype.moodSensitivity = [moodSens, moodSens];
-                    migratedGenotype.metabolism = [Config.GENETICS.METABOLISM_NORMALIZER, Config.GENETICS.METABOLISM_NORMALIZER]; // Default 5
-                    migratedGenotype.specialAbility = [null, null];
-
-                    // Attempt to preserve legacy trait
-                    if (loadedData.genome.legacyTraits && loadedData.genome.legacyTraits.length > 0) {
-                        const trait = loadedData.genome.legacyTraits[0];
-                        migratedGenotype.specialAbility = [trait, trait];
-                    }
-
-                    this.genome = new Genome(migratedGenotype, null, this.rng);
-                }
-            } else {
-                // Should not happen for valid saves, but fallback
-                this.genome = new Genome(null, null, this.rng);
-            }
-
-            // --- Home Config Migration ---
-            if (loadedData.homeConfig && loadedData.homeConfig.rooms) {
-                 this.homeConfig = loadedData.homeConfig;
-            } else if (loadedData.homeConfig) {
-                 // Partially migrated or legacy flat structure
-                 this.homeConfig = this._migrateHomeConfig(loadedData.homeConfig);
-            } else {
-                 // Load default or try Persistence (for very old saves where it was separate)
-                 // NOTE: Ideally PersistenceManager should have passed it in `loadedData`.
-                 // If not, we initialize defaults.
-                 this.homeConfig = this._migrateHomeConfig({});
-            }
-
-
-        } else {
-            // This is a brand new game. Start from defaults.
-            this.uuid = this.generateUUID();
-            this.name = "Nadagotchi"; // Default, can be overridden immediately after
-            this.mood = 'neutral';
-            this.dominantArchetype = initialArchetype;
-            this.personalityPoints = {
-                Adventurer: 0, Nurturer: 0, Mischievous: 0,
-                Intellectual: 0, Recluse: 0
-            };
-            this.personalityPoints[initialArchetype] = Config.INITIAL_STATE.PERSONALITY_POINTS_STARTER;
-
-            // Clone initial stats from Config to avoid reference issues
-            this.stats = { ...Config.INITIAL_STATE.STATS };
-            this.skills = { ...Config.INITIAL_STATE.SKILLS };
-
-            this.currentCareer = null;
-            this.unlockedCareers = [];
-            this.careerLevels = {};
-            this.careerXP = {};
-            this.dailyQuest = null;
-            this.inventory = {};
-            this.age = 0;
-            this.generation = 1;
-            this.isLegacyReady = false;
-            this.legacyTraits = [];
-            this.moodSensitivity = Config.INITIAL_STATE.MOOD_SENSITIVITY_DEFAULT;
-
-            // Initialize Genome for new game
-            // Start with random defaults (using RNG), then bias towards the chosen starter
-            this.genome = new Genome(null, null, this.rng);
-            // Boost the dominant archetype to ensure it wins against the wild traits (10-30)
-            if (this.genome.genotype[initialArchetype]) {
-                const val = Config.INITIAL_STATE.GENOME_STARTER_VAL;
-                this.genome.genotype[initialArchetype] = [val, val];
-            }
-            // Recalculate phenotype after manual genotype modification
-            this.genome.phenotype = this.genome.calculatePhenotype(this.rng);
-
-            // Initialize Home Config
-            this.homeConfig = {
-                rooms: {
-                    "Entryway": {
-                        wallpaper: 'wallpaper_default',
-                        flooring: 'flooring_default',
-                        wallpaperItem: 'Default',
-                        flooringItem: 'Default'
-                    }
-                }
-            };
-        }
-
-        /** @type {{hunger: number, energy: number, happiness: number}} Maximum values for stats. */
-        this.maxStats = { hunger: Config.LIMITS.MAX_STATS, energy: Config.LIMITS.MAX_STATS, happiness: Config.LIMITS.MAX_STATS };
-        if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousMetabolism) {
-            this.maxStats.energy += Config.GENETICS.HOMOZYGOUS_ENERGY_BONUS;
-        }
-
-        /** @type {?string} A flag used by the UI to show a one-time notification when a career is unlocked. */
-        this.newCareerUnlocked = null;
-
-        /** @type {PersistenceManager} Manages saving and loading game data. */
-        this.persistence = new PersistenceManager();
-<<<<<<< HEAD
-
-        // --- Async Data Holders (Initialized in init()) ---
-        /** @type {Array<{date: string, text: string}>} A log of significant events. */
-        this.journal = [];
-        /** @type {Array<string>} A list of crafting recipes the pet has discovered. */
-        this.discoveredRecipes = [];
-=======
-        /** @type {Array<{date: string, text: string}>} A log of significant events. */
-        this.journal = this.persistence.loadJournal();
-        /** @type {Array<string>} A list of crafting recipes the pet has discovered. */
-        this.discoveredRecipes = this.persistence.loadRecipes();
-
-        // Ensure default recipes are discovered for new games
-        if (this.discoveredRecipes.length === 0) {
-            this.discoveredRecipes.push("Fancy Bookshelf");
-            this.persistence.saveRecipes(this.discoveredRecipes);
-        }
->>>>>>> 74fdaab (Update js/DebugConsole.js)
 
         /** @type {Object.<string, {materials: Object.<string, number>, description: string}>} */
         this.recipes = Recipes;
@@ -282,7 +79,6 @@ export class Nadagotchi {
             writable: true
         });
 
-<<<<<<< HEAD
         // Optimization: Cleanliness Penalty Caching
         this.recalculateCleanlinessPenalty();
 
@@ -291,11 +87,6 @@ export class Nadagotchi {
         this.location = loadedData ? loadedData.location : 'GARDEN';
         // Migration: Treat 'Home' as 'GARDEN'
         if (this.location === 'Home') this.location = 'GARDEN';
-=======
-        /** @type {string} The pet's current location. */
-        this.location = loadedData ? loadedData.location : 'Home';
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-
         // --- Runtime State Tracking (Not persisted) ---
         /** @type {?string} Tracks the last known weather to detect changes. */
         this.lastWeather = null;
@@ -314,7 +105,6 @@ export class Nadagotchi {
     }
 
     /**
-<<<<<<< HEAD
      * Asynchronously initializes heavy/external data (Journal, Recipes).
      * MUST be called after constructor.
      * @returns {Promise<void>}
@@ -333,275 +123,6 @@ export class Nadagotchi {
     }
 
     /**
-=======
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-     * Helper to migrate legacy home config data to the new room-based structure.
-     * @param {object} data
-     * @returns {object}
-     * @private
-     */
-    _migrateHomeConfig(data) {
-        // Default State
-        const defaultState = {
-            rooms: {
-                "Entryway": {
-                    wallpaper: 'wallpaper_default',
-                    flooring: 'flooring_default',
-                    wallpaperItem: 'Default',
-                    flooringItem: 'Default',
-                    unlocked: true
-                }
-            }
-        };
-
-        if (!data) return defaultState;
-
-        // Migration: If data has 'wallpaper' at root level (Legacy)
-        if (data.wallpaper || data.flooring) {
-            return {
-                rooms: {
-                    "Entryway": {
-                        wallpaper: data.wallpaper || 'wallpaper_default',
-                        flooring: data.flooring || 'flooring_default',
-                        wallpaperItem: data.wallpaperItem || 'Default',
-                        flooringItem: data.flooringItem || 'Default',
-                        unlocked: true
-                    }
-                }
-            };
-        }
-
-        // Ensure rooms object exists if partial data
-        if (!data.rooms) return defaultState;
-
-        return data;
-    }
-
-    /**
-     * Generates a random seed for the universe.
-     * Uses Math.random() as the bootstrap entropy source.
-     * @returns {number} A large random integer.
-     * @private
-     */
-    _generateSeed() {
-        return Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
-    }
-
-    /**
-     * Generates a deterministic UUID for the pet using the seeded RNG.
-     * @returns {string} A unique identifier.
-     */
-    generateUUID() {
-        // Deterministic UUID generation using SeededRandom
-        const chars = '0123456789abcdef';
-        let uuid = '';
-        for (let i = 0; i < 36; i++) {
-            if (i === 8 || i === 13 || i === 18 || i === 23) {
-                uuid += '-';
-            } else if (i === 14) {
-                uuid += '4';
-            } else if (i === 19) {
-                // (r & 0x3 | 0x8) logic
-                const r = this.rng.range(0, 16);
-                uuid += chars[(r & 0x3) | 0x8];
-            } else {
-                uuid += chars[this.rng.range(0, 16)];
-            }
-        }
-        return uuid;
-    }
-
-    /**
-     * Calculates data for the offspring of this Nadagotchi.
-     * Uses the GeneticsSystem to determine traits and stats based on inheritance.
-     * @param {string[]} environmentalFactors - List of items present during breeding (e.g., from inventory).
-     * @returns {object} The data object for the new Nadagotchi.
-     */
-    calculateOffspring(environmentalFactors) {
-        // Security Fix: Filter environmental factors to ensure they are present in inventory.
-        // Prevents injection of items the user doesn't own.
-        const validFactors = environmentalFactors.filter(item => this.inventory[item] && this.inventory[item] > 0);
-
-        // Pass the RNG to GeneticsSystem.breed
-        const childGenome = GeneticsSystem.breed(this.genome, validFactors, this.rng);
-        const childPhenotype = childGenome.phenotype;
-
-        // Determine dominant archetype from the phenotype
-        let maxScore = -1;
-        let dominant = 'Adventurer'; // Default
-        const personalityKeys = ['Adventurer', 'Nurturer', 'Mischievous', 'Intellectual', 'Recluse'];
-
-        for (const type of personalityKeys) {
-            if (childPhenotype[type] > maxScore) {
-                maxScore = childPhenotype[type];
-            }
-        }
-
-        const contenders = personalityKeys.filter(type => childPhenotype[type] === maxScore);
-        if (contenders.length > 0) {
-            // Use RNG for deterministic tie-breaking
-            dominant = this.rng.choice(contenders);
-        }
-
-        // Initialize personality points based on phenotype
-        const initialPoints = {};
-        personalityKeys.forEach(key => initialPoints[key] = childPhenotype[key]);
-
-        // Legacy Traits from Phenotype
-        const newLegacyTraits = [];
-        if (childPhenotype.specialAbility) {
-            newLegacyTraits.push(childPhenotype.specialAbility);
-        }
-
-        // Initialize Home Config for Child (Inherit nothing? Or default?)
-        // Default for new life.
-        const initialHomeConfig = {
-            rooms: {
-                "Entryway": {
-                    wallpaper: 'wallpaper_default',
-                    flooring: 'flooring_default',
-                    wallpaperItem: 'Default',
-                        flooringItem: 'Default',
-                        unlocked: true
-                }
-            }
-        };
-
-        return {
-            uuid: this.generateUUID(), // New UUID for the child
-            mood: 'neutral',
-            dominantArchetype: dominant,
-            personalityPoints: initialPoints,
-            stats: { ...Config.INITIAL_STATE.STATS },
-            skills: { ...Config.INITIAL_STATE.SKILLS },
-            currentCareer: null,
-            inventory: {},
-            age: 0,
-            generation: this.generation + 1,
-            isLegacyReady: false,
-            legacyTraits: newLegacyTraits,
-            moodSensitivity: childPhenotype.moodSensitivity,
-            hobbies: { painting: 0, music: 0 },
-            relationships: {
-                'Grizzled Scout': { level: 0 },
-                'Master Artisan': { level: 0 },
-                'Sickly Villager': { level: 0 }
-            },
-            quests: {}, // Quests reset for new generation
-            location: 'Home',
-            genome: childGenome,
-            homeConfig: initialHomeConfig,
-            // Pass the parent's universe seed to the child to maintain the "Timeline"?
-            // Or let the child generate a new one?
-            // "If you share an 'Egg' (a seed), the recipient must generate the exact same pet."
-            // The logic above creates the data. MainScene uses this data to instantiate a new Nadagotchi.
-            // MainScene: new Nadagotchi(null, newPetData).
-            // Nadagotchi constructor will use newPetData.universeSeed if present, or generate new.
-            // If we want the child to be deterministic from this point, we should probably pass a derived seed.
-            // Let's generate a seed for the child using our RNG.
-            universeSeed: this.rng.range(0, Number.MAX_SAFE_INTEGER)
-        };
-    }
-
-    /**
-     * Simulates the passage of time for the Nadagotchi.
-     * This method should be called in the main game loop. It handles stat decay, mood changes, and aging.
-     * @param {number} dt - The time elapsed since the last update in milliseconds.
-     * @param {object} [worldState={ weather: "Sunny", time: "Day", activeEvent: null }] - An object containing information about the game world.
-     * @param {string} worldState.weather - The current weather (e.g., "Sunny", "Rainy").
-     * @param {string} worldState.time - The current time of day (e.g., "Day", "Night").
-     * @param {?object} worldState.activeEvent - The currently active world event, if any.
-     */
-    live(dt, worldState = { weather: "Sunny", time: "Day", activeEvent: null }) {
-        // Fallback for legacy calls or tests omitting dt
-        if (typeof dt === 'object') {
-             worldState = dt;
-             dt = Config.GAME_LOOP.MS_PER_FRAME;
-        } else if (dt === undefined) {
-             dt = Config.GAME_LOOP.MS_PER_FRAME;
-        }
-
-        const ticksPassed = dt / Config.GAME_LOOP.MS_PER_FRAME;
-        const oldMood = this.mood;
-
-        if (worldState.season) {
-            this.currentSeason = worldState.season;
-        }
-
-        // 1. Setup Base Decay Rates
-        let hungerDecay = Config.DECAY.HUNGER * ticksPassed;
-        let energyDecay = Config.DECAY.ENERGY * ticksPassed;
-        let happinessChange = 0;
-
-        // 2. Get Metabolism Factor from Genome (Phenotype)
-        // Range 1 (Slow) to 10 (Fast). Normalize to 0.2x - 2.0x multiplier.
-        let metabolismMult = 1.0;
-        if (this.genome && this.genome.phenotype && this.genome.phenotype.metabolism) {
-            metabolismMult = (this.genome.phenotype.metabolism / Config.GENETICS.METABOLISM_NORMALIZER);
-        }
-
-        // 3. Check Passive Traits
-        let traitModifier = 1.0;
-        const activeTrait = this.genome && this.genome.phenotype ? this.genome.phenotype.specialAbility : null;
-
-        if (activeTrait === "Photosynthetic" && worldState.time === "Day") {
-            traitModifier = Config.TRAITS.PHOTOSYNTHETIC_MULT; // 50% less energy drain
-        } else if (activeTrait === "Night Owl" && worldState.time === "Night") {
-            traitModifier = Config.TRAITS.NIGHT_OWL_MULT; // 20% less energy drain
-        }
-
-        if (worldState.activeEvent && worldState.activeEvent.name.includes('Festival')) {
-            this.stats.happiness += Config.ENV_MODIFIERS.FESTIVAL_HAPPINESS * ticksPassed;
-        }
-
-        switch (worldState.weather) {
-            case "Rainy":
-                if (this.dominantArchetype === "Adventurer") happinessChange += Config.ENV_MODIFIERS.RAINY.ADVENTURER_HAPPINESS * ticksPassed;
-                if (this.dominantArchetype === "Nurturer") energyDecay *= Config.ENV_MODIFIERS.RAINY.NURTURER_ENERGY_MULT;
-                break;
-            case "Stormy":
-                if (this.dominantArchetype === "Adventurer") happinessChange += Config.ENV_MODIFIERS.STORMY.ADVENTURER_HAPPINESS * ticksPassed;
-                if (this.dominantArchetype === "Recluse") happinessChange += Config.ENV_MODIFIERS.STORMY.RECLUSE_HAPPINESS * ticksPassed;
-                energyDecay *= Config.ENV_MODIFIERS.STORMY.ENERGY_MULT;
-                break;
-            case "Cloudy":
-                energyDecay *= Config.ENV_MODIFIERS.CLOUDY.ENERGY_MULT;
-                break;
-            case "Sunny":
-                if (this.dominantArchetype === "Adventurer") happinessChange += Config.ENV_MODIFIERS.SUNNY.ADVENTURER_HAPPINESS * ticksPassed;
-                energyDecay *= Config.ENV_MODIFIERS.SUNNY.ENERGY_MULT;
-                break;
-        }
-
-        switch (worldState.time) {
-            case "Night":
-                hungerDecay *= Config.ENV_MODIFIERS.NIGHT.HUNGER_MULT;
-                if (this.dominantArchetype === "Recluse") happinessChange += Config.ENV_MODIFIERS.NIGHT.RECLUSE_HAPPINESS * ticksPassed;
-                if (this.dominantArchetype === "Adventurer") energyDecay *= Config.ENV_MODIFIERS.NIGHT.ADVENTURER_ENERGY_MULT;
-                break;
-            case "Dusk":
-            case "Dawn":
-                energyDecay *= Config.ENV_MODIFIERS.TWILIGHT.ENERGY_MULT;
-                break;
-            case "Day":
-                if (this.dominantArchetype === "Intellectual") energyDecay *= Config.ENV_MODIFIERS.DAY.INTELLECTUAL_ENERGY_MULT;
-                break;
-        }
-
-        // 4. Apply Final Decays
-        // Debris Penalties
-<<<<<<< HEAD
-        // Debris Penalties
-        // Optimization: Use cached values. Local debris hurts twice as much (Global + Local).
-        let cleanlinessPenalty = this._cachedGlobalPenalty + (this._cachedLocalPenalties[this.location] || 0);
-=======
-        let cleanlinessPenalty = 0;
-        this.debris.forEach(d => {
-            if (d.type === 'weed') cleanlinessPenalty += Config.DEBRIS.HAPPINESS_PENALTY_PER_WEED;
-            if (d.type === 'poop') cleanlinessPenalty += Config.DEBRIS.HAPPINESS_PENALTY_PER_POOP;
-        });
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-
         this.stats.hunger -= (hungerDecay * metabolismMult);
         this.stats.energy -= (energyDecay * metabolismMult * traitModifier);
         this.stats.happiness += (happinessChange - (cleanlinessPenalty * ticksPassed));
@@ -1062,14 +583,8 @@ export class Nadagotchi {
         // Batch serialization and persistence to reduce frequency
         if (!this._journalSavePending) {
             this._journalSavePending = true;
-<<<<<<< HEAD
             const performSave = async () => {
-                await this.persistence.saveJournal(this.journal);
-=======
-            const performSave = () => {
-                this.persistence.saveJournal(this.journal);
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-                this._journalSavePending = false;
+                await this.persistence.saveJournal(this.journal);                this._journalSavePending = false;
             };
 
             // Use queueMicrotask or Promise for efficient batching
@@ -1097,7 +612,6 @@ export class Nadagotchi {
      * @param {string} roomId
      * @returns {boolean}
      */
-<<<<<<< HEAD
     /**
      * Recalculates the cached cleanliness penalty values.
      * Optimization to avoid iterating debris every frame.
@@ -1118,33 +632,12 @@ export class Nadagotchi {
             }
         }
     }
-=======
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-    isRoomUnlocked(roomId) {
-        if (this.homeConfig.rooms[roomId] && this.homeConfig.rooms[roomId].unlocked !== undefined) {
-            return this.homeConfig.rooms[roomId].unlocked;
-        }
-        return RoomDefinitions[roomId] ? RoomDefinitions[roomId].unlocked : false;
-    }
 
     /**
-     * Cleans up a specific debris item.
-     * @param {string} id
-     * @returns {object} Result
+     * Unlocks a specific room in the home.
+     * @param {string} roomId - The ID of the room to unlock
      */
-    cleanDebris(id) {
-        return this.debrisSystem.clean(id);
-    }
-
-    /**
-     * Unlocks a room permanently.
-     * @param {string} roomId
-     */
-<<<<<<< HEAD
     async unlockRoom(roomId) {
-=======
-    unlockRoom(roomId) {
->>>>>>> 74fdaab (Update js/DebugConsole.js)
         if (!RoomDefinitions[roomId]) return;
 
         // Ensure room object exists in config
@@ -1160,11 +653,7 @@ export class Nadagotchi {
 
         this.homeConfig.rooms[roomId].unlocked = true;
         this.addJournalEntry(`I unlocked the ${RoomDefinitions[roomId].name}! More space to decorate.`);
-<<<<<<< HEAD
         await this.persistence.savePet(this);
-=======
-        this.persistence.savePet(this);
->>>>>>> 74fdaab (Update js/DebugConsole.js)
     }
 
     /**
