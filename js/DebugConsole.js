@@ -82,7 +82,7 @@ export class DebugConsole {
             { label: "+10 All Items", action: () => this.addAllItems() },
             { label: "Clear Inventory", action: () => this.clearInventory() },
             { label: "Unlock All Careers", action: () => { this.scene.nadagotchi.unlockAllCareers(); this.refreshGame(); } },
-            { label: "+1000 Coins (Placeholder)", action: () => { this.showToast("Not Implemented", "No currency system yet!", "💰"); console.log("Currency system pending implementation."); } }
+            { label: "+1000 Coins", action: () => { this.scene.nadagotchi.coins += 1000; this.scene.nadagotchi.save(); this.showToast("Added Coins", "+1000 Coins", "💰"); this.refreshGame(); } }
         ]);
 
         this.addSection("Debug Tools", [
@@ -118,7 +118,6 @@ export class DebugConsole {
             b.onclick = () => {
                 try {
                     btn.action();
-                    console.log(`[DEBUG] Executed: ${btn.label}`);
                     // Flash button
                     b.style.background = "#00FF00";
                     b.style.color = "#000";
@@ -167,8 +166,11 @@ export class DebugConsole {
         // Check EventManager structure from MainScene
         if (this.scene.eventManager) {
              // Mock an event object
-             this.scene.eventManager.activeEvent = { name: eventName, timeLeft: 10000 };
-             this.scene.checkMerchantVisibility(); // specific handler in MainScene
+             this.scene.eventManager._activeEvent = { name: eventName, timeLeft: 10000 };
+             this.scene.isMerchantActive = true;
+             if (this.scene.npcMerchant) {
+                 this.scene.npcMerchant.setVisible(this.scene.location !== "INDOOR");
+             }
              this.refreshGame();
         }
     }
@@ -283,7 +285,6 @@ export class DebugConsole {
         if (uiScene && uiScene.showToast) {
             uiScene.showToast(title, message, icon);
         } else {
-            console.log(`[TOAST] ${icon} ${title}: ${message}`);
         }
     }
 }

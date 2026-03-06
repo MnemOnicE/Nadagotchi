@@ -40,12 +40,12 @@ export class DanceMinigameScene extends Phaser.Scene {
         this.add.line(0, 0, 150, this.targetY, 650, this.targetY, 0xFFFFFF).setOrigin(0);
 
         // Lane Indicators (Targets)
-        this.laneTargets = [];
+        this.laneIndicators = {};
         this.lanes.forEach(lane => {
             const t = this.add.text(lane.x, this.targetY, this.getArrowChar(lane.key), {
                 fontSize: '40px', color: '#555555'
             }).setOrigin(0.5);
-            this.laneTargets.push(t);
+            this.laneIndicators[lane.key] = t;
         });
 
         // Notes Group
@@ -63,6 +63,19 @@ export class DanceMinigameScene extends Phaser.Scene {
         this.input.keyboard.on('keydown-DOWN', () => this.handleInput('DOWN'));
         this.input.keyboard.on('keydown-UP', () => this.handleInput('UP'));
         this.input.keyboard.on('keydown-RIGHT', () => this.handleInput('RIGHT'));
+
+        // Mobile Support - Directional Buttons
+        // Always show on smaller screens or explicitly mobile
+        const h = this.cameras.main.height;
+
+        // Always add them for compatibility, they don't hurt on desktop
+        const btnY = h - 60;
+        const btnWidth = 60;
+
+        this.lanes.forEach(lane => {
+            ButtonFactory.createButton(this, lane.x, btnY, this.getArrowChar(lane.key), () => this.handleInput(lane.key), { width: btnWidth });
+        });
+
 
         // Timer to end game
         this.gameTimer = this.time.addEvent({ delay: 30000, callback: this.endGame, callbackScope: this }); // 30s song
@@ -134,7 +147,7 @@ export class DanceMinigameScene extends Phaser.Scene {
         } else {
             this.breakCombo();
             // Visual feedback for miss?
-            const indicator = this.laneTargets[this.lanes.findIndex(l => l.key === key)];
+            const indicator = this.laneIndicators[key];
             indicator.setColor('#FF0000');
             this.time.delayedCall(100, () => indicator.setColor('#555555'));
         }
@@ -155,9 +168,9 @@ export class DanceMinigameScene extends Phaser.Scene {
         this.notes = this.notes.filter(n => n !== note);
 
         // Flash target
-        const laneIdx = this.lanes.findIndex(l => l.key === note.laneKey);
-        this.laneTargets[laneIdx].setColor('#00FFFF');
-        this.time.delayedCall(100, () => this.laneTargets[laneIdx].setColor('#555555'));
+        const indicator = this.laneIndicators[note.laneKey];
+        if (indicator) indicator.setColor('#00FFFF');
+        if (indicator) this.time.delayedCall(100, () => indicator.setColor('#555555'));
     }
 
     breakCombo() {

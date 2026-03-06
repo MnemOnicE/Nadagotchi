@@ -129,10 +129,10 @@ export class ShowcaseScene extends Phaser.Scene {
                 console.error("Clipboard failed", err);
                 this.showToast("Error", "Could not copy DNA.");
                 // Fallback: Log to console
-                console.log("NADAGOTCHI DNA:", text);
+
             });
         } else {
-            console.log("NADAGOTCHI DNA:", text);
+
             this.showToast("Console", "DNA logged to console (Clipboard API missing).");
         }
     }

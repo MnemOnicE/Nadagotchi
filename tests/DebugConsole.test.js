@@ -18,6 +18,8 @@ describe('DebugConsole', () => {
         };
 
         mockScene = {
+        nadagotchi: { coins: 0, save: jest.fn() },
+        nadagotchi: { coins: 0, save: jest.fn() },
             events: { on: jest.fn(), emit: jest.fn() },
             game: { events: { emit: jest.fn(), on: jest.fn() }, loop: { actualFps: 60 } },
             scene: {
@@ -71,7 +73,7 @@ describe('DebugConsole', () => {
         // Verify alert was NOT called (it is currently called, so this test fails initially)
         // And verify showToast WAS called
         expect(window.alert).not.toHaveBeenCalled();
-        expect(mockUIScene.showToast).toHaveBeenCalledWith("Not Implemented", expect.stringContaining("No currency system"), expect.any(String));
+        expect(mockUIScene.showToast).toHaveBeenCalledWith("Added Coins", "+1000 Coins", "💰");
     });
 
     test('should use showToast for addAllItems', () => {
