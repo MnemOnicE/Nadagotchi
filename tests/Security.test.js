@@ -215,7 +215,15 @@ describe('Security Hardening', () => {
 
     test('Minigame Privacy: State is hidden', () => {
         const scene = new ArtisanMinigameScene();
-        scene.add = new global.Phaser.Scene({key:'test'}).add; // Ensure mock exists
+        scene.game = { registry: { set: jest.fn(), get: jest.fn() }, events: { emit: jest.fn() } };
+        scene.scale = { on: jest.fn(), off: jest.fn(), width: 800, height: 600 };
+        scene.events = { on: jest.fn(), off: jest.fn(), emit: jest.fn() };
+        scene.cameras = { main: { setBackgroundColor: jest.fn(), width: 800, height: 600 } }; scene.game = { registry: { get: jest.fn(), set: jest.fn() }, events: { emit: jest.fn() } }; scene.scale = { on: jest.fn(), off: jest.fn(), width: 800, height: 600 }; scene.add = { text: jest.fn(() => ({ setOrigin: jest.fn().mockReturnThis(), setText: jest.fn().mockReturnThis() })), rectangle: jest.fn(() => ({ setInteractive: jest.fn().mockReturnThis(), on: jest.fn().mockReturnThis(), setData: jest.fn().mockReturnThis(), setFillStyle: jest.fn().mockReturnThis() })), graphics: jest.fn(() => ({ setDepth: jest.fn().mockReturnThis(), clear: jest.fn().mockReturnThis(), fillStyle: jest.fn().mockReturnThis(), fillRect: jest.fn().mockReturnThis() })) };
+        scene.add = {
+            text: jest.fn(() => ({ setOrigin: jest.fn().mockReturnThis(), setText: jest.fn().mockReturnThis() })),
+            rectangle: jest.fn(() => ({ setInteractive: jest.fn().mockReturnThis(), on: jest.fn().mockReturnThis(), setData: jest.fn().mockReturnThis(), setFillStyle: jest.fn().mockReturnThis() })),
+            graphics: jest.fn(() => ({ setDepth: jest.fn().mockReturnThis(), clear: jest.fn().mockReturnThis(), fillStyle: jest.fn().mockReturnThis(), fillRect: jest.fn().mockReturnThis() }))
+        }; // Ensure mock exists
         scene.create();
 
         // Check if pattern is exposed

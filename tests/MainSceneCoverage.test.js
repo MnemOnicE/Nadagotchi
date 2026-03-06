@@ -116,6 +116,10 @@ describe('MainScene Coverage', () => {
         };
 
         scene = new MainScene();
+        scene.game = {
+            events: { on: jest.fn(), off: jest.fn(), emit: jest.fn() },
+            registry: { set: jest.fn(), get: jest.fn() }
+        };
         scene.add = mockAdd;
         scene.cameras = {
             main: {

@@ -1,4 +1,5 @@
 import { EventKeys } from './EventKeys.js';
+import { SceneUIUtils } from './utils/SceneUIUtils.js';
 
 /**
  * @fileoverview A mini-game for the Scout career.
@@ -36,8 +37,20 @@ export class ScoutMinigameScene extends Phaser.Scene {
      * Sets up the background, text, timer, and game grid.
      */
     create() {
-        this.cameras.main.setBackgroundColor('#2E8B57'); // Forest green
-        this.add.text(this.cameras.main.width / 2, 50, `${this.careerName} Mission: Match the Pairs!`, { fontSize: '24px', fill: '#FFF' }).setOrigin(0.5);
+        this.cameras.main.setBackgroundColor('#2E8B57');
+
+        // Handle resizing and safe area
+        this.bezelGraphics = this.add.graphics();
+        this.bezelGraphics.setDepth(1000); // Ensure it's on top
+        SceneUIUtils.drawBezel(this, this.bezelGraphics);
+
+        this.scale.on('resize', this.resize, this);
+        this.events.on('shutdown', () => {
+            this.scale.off('resize', this.resize, this);
+        });
+
+         // Forest green
+        this.add.text(SceneUIUtils.getCenterX(this), 50, `${this.careerName} Mission: Match the Pairs!`, { fontSize: '24px', fill: '#FFF' }).setOrigin(0.5);
         const timerText = this.add.text(this.cameras.main.width - 150, 50, `Time: 30`, { fontSize: '20px', fill: '#FFF' }).setOrigin(0.5);
 
         // --- Private State (Closure Scope) ---
@@ -89,7 +102,8 @@ export class ScoutMinigameScene extends Phaser.Scene {
                     });
                     firstSelection = null;
                     secondSelection = null;
-                }, [firstSelection, secondSelection]);            }
+                }, [firstSelection, secondSelection]);
+            }
         };
 
         const handleCardClick = (card) => {
@@ -144,4 +158,6 @@ export class ScoutMinigameScene extends Phaser.Scene {
             loop: true
         });
     }
+
+
 }

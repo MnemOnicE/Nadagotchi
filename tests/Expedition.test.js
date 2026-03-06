@@ -122,3 +122,33 @@ describe('ExpeditionSystem', () => {
         expect(result.outcome).toBe('failure');
     });
 });
+
+describe('ExpeditionSystem Edge Cases', () => {
+    test('should fallback to range if random is not a function', () => {
+        const fakeRng = {
+            range: (min, max) => min
+        };
+        const sys = new ExpeditionSystem(fakeRng);
+        const path = sys.generatePath('Spring', 'Sunny', 'Forest', 1);
+        expect(path.length).toBe(1);
+    });
+
+    test('should resolve choice success if no skill check exists', () => {
+        const pet = { skills: {} };
+        const choice = { success: { text: "Auto Success" } };
+        const sys = new ExpeditionSystem({});
+        const result = sys.resolveChoice(choice, pet);
+        expect(result.outcome).toBe('success');
+        expect(result.details.text).toBe("Auto Success");
+    });
+
+    test('should fallback to last valid node on floating point precision issues', () => {
+        const fakeRng = {
+            random: () => 0.9999999999999, // Force it past the normal total weight logic
+            range: (min, max) => max - 1
+        };
+        const sys = new ExpeditionSystem(fakeRng);
+        const path = sys.generatePath('Spring', 'Sunny', 'Forest', 1);
+        expect(path.length).toBe(1);
+    });
+});

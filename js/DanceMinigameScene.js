@@ -1,4 +1,5 @@
 import { EventKeys } from './EventKeys.js';
+import { SceneUIUtils } from './utils/SceneUIUtils.js';
 import { ButtonFactory } from './ButtonFactory.js';
 import { SoundSynthesizer } from './utils/SoundSynthesizer.js';
 
@@ -15,7 +16,19 @@ export class DanceMinigameScene extends Phaser.Scene {
     }
 
     create() {
-        this.cameras.main.setBackgroundColor('#220033'); // Dark purple disco
+        this.cameras.main.setBackgroundColor('#220033');
+
+        // Handle resizing and safe area
+        this.bezelGraphics = this.add.graphics();
+        this.bezelGraphics.setDepth(1000); // Ensure it's on top
+        SceneUIUtils.drawBezel(this, this.bezelGraphics);
+
+        this.scale.on('resize', this.resize, this);
+        this.events.on('shutdown', () => {
+            this.scale.off('resize', this.resize, this);
+        });
+
+         // Dark purple disco
 
         // --- State ---
         this.score = 0;
@@ -222,4 +235,6 @@ export class DanceMinigameScene extends Phaser.Scene {
              this.game.events.emit(EventKeys.UI_ACTION, 'PLAY_COMPLETE', { score: this.score });
         }, { width: 150, height: 50 });
     }
+
+
 }

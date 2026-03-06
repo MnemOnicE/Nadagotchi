@@ -102,6 +102,7 @@ export class WeatherParticleManager {
                 quantity: 1
             });
         });
+
         // Correct approach for Phaser 3:
         if (this.emitters.rain) this.emitters.rain.setBounds(0, 0, width, height);
     }

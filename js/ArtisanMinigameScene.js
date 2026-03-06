@@ -1,4 +1,5 @@
 import { EventKeys } from './EventKeys.js';
+import { SceneUIUtils } from './utils/SceneUIUtils.js';
 
 /**
  * @fileoverview A mini-game for the Artisan career.
@@ -26,9 +27,21 @@ export class ArtisanMinigameScene extends Phaser.Scene {
      * Sets up the background, text, and initializes the game flow.
      */
     create() {
-        this.cameras.main.setBackgroundColor('#663399'); // A creative purple
-        this.add.text(this.cameras.main.width / 2, 50, 'Artisan Craft: Recreate the Pattern', { fontSize: '24px', fill: '#FFF' }).setOrigin(0.5);
-        this.statusText = this.add.text(this.cameras.main.width / 2, 100, 'Memorize the pattern!', { fontSize: '20px', fill: '#FFF' }).setOrigin(0.5);
+        this.cameras.main.setBackgroundColor('#663399');
+
+        // Handle resizing and safe area
+        this.bezelGraphics = this.add.graphics();
+        this.bezelGraphics.setDepth(1000); // Ensure it's on top
+        SceneUIUtils.drawBezel(this, this.bezelGraphics);
+
+        this.scale.on('resize', this.resize, this);
+        this.events.on('shutdown', () => {
+            this.scale.off('resize', this.resize, this);
+        });
+
+         // A creative purple
+        this.add.text(SceneUIUtils.getCenterX(this), 50, 'Artisan Craft: Recreate the Pattern', { fontSize: '24px', fill: '#FFF' }).setOrigin(0.5);
+        this.statusText = this.add.text(SceneUIUtils.getCenterX(this), 100, 'Memorize the pattern!', { fontSize: '20px', fill: '#FFF' }).setOrigin(0.5);
 
         // --- Private State (Closure Scope) ---
         // These variables are inaccessible from the browser console (game.scene.getScene...)
@@ -123,4 +136,6 @@ export class ArtisanMinigameScene extends Phaser.Scene {
         generatePattern();
         displayPattern();
     }
+
+
 }

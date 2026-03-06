@@ -1,4 +1,5 @@
 import { EventKeys } from './EventKeys.js';
+import { SceneUIUtils } from './utils/SceneUIUtils.js';
 import { ButtonFactory } from './ButtonFactory.js';
 import { SoundSynthesizer } from './utils/SoundSynthesizer.js';
 
@@ -15,7 +16,19 @@ export class StudyMinigameScene extends Phaser.Scene {
     }
 
     create() {
-        this.cameras.main.setBackgroundColor('#2E1A0F'); // Dark wood
+        this.cameras.main.setBackgroundColor('#2E1A0F');
+
+        // Handle resizing and safe area
+        this.bezelGraphics = this.add.graphics();
+        this.bezelGraphics.setDepth(1000); // Ensure it's on top
+        SceneUIUtils.drawBezel(this, this.bezelGraphics);
+
+        this.scale.on('resize', this.resize, this);
+        this.events.on('shutdown', () => {
+            this.scale.off('resize', this.resize, this);
+        });
+
+         // Dark wood
 
         // --- State ---
         this.gridSize = 5;
@@ -189,4 +202,6 @@ export class StudyMinigameScene extends Phaser.Scene {
         this.scene.resume('MainScene');
         this.scene.stop();
     }
+
+
 }

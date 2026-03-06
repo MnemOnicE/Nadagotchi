@@ -1,6 +1,7 @@
 import { ButtonFactory } from './ButtonFactory.js';
 import { ExpeditionSystem } from './systems/ExpeditionSystem.js';
 import { EventKeys } from './EventKeys.js';
+import { SceneUIUtils } from './utils/SceneUIUtils.js';
 import { SoundSynthesizer } from './utils/SoundSynthesizer.js';
 
 /**
@@ -37,6 +38,18 @@ export class ExpeditionScene extends Phaser.Scene {
 
     create() {
         this.cameras.main.setBackgroundColor('#1a2b1a');
+
+        // Handle resizing and safe area
+        this.bezelGraphics = this.add.graphics();
+        this.bezelGraphics.setDepth(1000); // Ensure it's on top
+        SceneUIUtils.drawBezel(this, this.bezelGraphics);
+
+        this.scale.on('resize', this.resize, this);
+        this.events.on('shutdown', () => {
+            this.scale.off('resize', this.resize, this);
+        });
+
+
 
         this.headerText = this.add.text(400, 40, "EXPEDITION MAP", {
             fontFamily: 'VT323', fontSize: '32px', color: '#88DDAA'
@@ -377,4 +390,6 @@ export class ExpeditionScene extends Phaser.Scene {
 
         this.encounterContainer.add([bg, text, btn]);
     }
+
+
 }

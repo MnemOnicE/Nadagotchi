@@ -44,7 +44,8 @@ global.Phaser = {
     }
 };
 
-// Now import the scene using require to ensure global.Phaser is set firstconst { UIScene } = require('../js/UIScene.js');
+// Now import the scene using require to ensure global.Phaser is set first
+const { UIScene } = require('../js/UIScene.js');
 const { PersistenceManager } = require('../js/PersistenceManager.js');
 
 describe('Hall of Ancestors UI', () => {
@@ -89,5 +90,6 @@ describe('Hall of Ancestors UI', () => {
         const actions = uiScene.getTabActions('ANCESTORS');
 
         expect(actions).toHaveLength(1);
-        expect(actions[0].text).toBe('No Ancestors Yet');    });
+        expect(actions[0].text).toBe('No Ancestors Yet');
+    });
 });
