@@ -89,8 +89,7 @@ export class ScoutMinigameScene extends Phaser.Scene {
                     });
                     firstSelection = null;
                     secondSelection = null;
-                }, [firstSelection, secondSelection]);
-            }
+                }, [firstSelection, secondSelection]);            }
         };
 
         const handleCardClick = (card) => {

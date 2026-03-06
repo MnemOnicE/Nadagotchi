@@ -56,7 +56,6 @@ describe('Housing System II', () => {
             expect(result).toHaveProperty('rooms');
             expect(result.rooms.Entryway.wallpaper).toBe('Blue');
 
-            spy.mockRestore();
-        });
+            spy.mockRestore();        });
     });
 });
