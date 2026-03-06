@@ -113,7 +113,6 @@ export class AchievementManager {
         this.game.events.emit(EventKeys.ACHIEVEMENT_UNLOCKED, achievement);
         this.persistence.saveAchievements(this.state);
         // Console log for debug/headless verification
-        console.log(`[AchievementManager] Unlocked: ${achievement.name}`);
     }
 
     /**

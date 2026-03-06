@@ -1,6 +1,7 @@
 import { ToastManager } from './systems/ToastManager.js';
 import { ButtonFactory } from './ButtonFactory.js';
 import { PersistenceManager } from './PersistenceManager.js';
+import { WikiUI } from "./WikiUI.js";
 import { NarrativeSystem } from './NarrativeSystem.js';
 import { EventKeys } from './EventKeys.js';
 import { ItemDefinitions } from './ItemData.js';
@@ -91,6 +92,8 @@ export class UIScene extends Phaser.Scene {
         this.decorateModal = this.createModal("Decorate");
         this.ancestorModal = this.createModal("Hall of Ancestors");
         this.inventoryModal = this.createModal("Inventory");
+        this.wikiUI = new WikiUI(this);
+        if(this.scene && this.scene.get) this.wikiUI.create();
         this.achievementsModal = this.createModal("Achievements");
         this.dialogueModal = this.createModal("Conversation");
         this.settingsModal = this.createSettingsModal();
@@ -132,7 +135,7 @@ export class UIScene extends Phaser.Scene {
         let actions = [];
         if (tabId === 'CARE') actions = [{ text: 'Feed', action: EventKeys.FEED }, { text: 'Play', action: EventKeys.PLAY }, { text: 'Meditate', action: EventKeys.MEDITATE }];
         else if (tabId === 'ACTION') actions = [{ text: 'Explore', action: EventKeys.EXPLORE }, { text: 'Study', action: EventKeys.STUDY }, { text: 'Work', action: EventKeys.WORK, condition: () => this.nadagotchiData && this.nadagotchiData.currentCareer, disabledMessage: "You need a Career first!" }, { text: 'Craft', action: EventKeys.OPEN_CRAFTING_MENU }];
-        else if (tabId === 'SYSTEM') actions = [{ text: 'Passport', action: EventKeys.OPEN_SHOWCASE }, { text: 'Career', action: EventKeys.OPEN_CAREER_MENU }, { text: 'Journal', action: EventKeys.OPEN_JOURNAL }, { text: 'Inventory', action: EventKeys.OPEN_INVENTORY }, { text: 'Recipes', action: EventKeys.OPEN_RECIPES }, { text: 'Hobbies', action: EventKeys.OPEN_HOBBIES }, { text: 'Achievements', action: EventKeys.OPEN_ACHIEVEMENTS }, { text: 'Showcase', action: EventKeys.OPEN_SHOWCASE }, { text: 'Decorate', action: EventKeys.DECORATE }, { text: 'Settings', action: EventKeys.OPEN_SETTINGS }, { text: 'Retire', action: EventKeys.RETIRE, condition: () => this.nadagotchiData && this.nadagotchiData.isLegacyReady, disabledMessage: "Not ready yet." }];
+        else if (tabId === 'SYSTEM') actions = [{ text: 'Passport', action: EventKeys.OPEN_SHOWCASE }, { text: 'Career', action: EventKeys.OPEN_CAREER_MENU }, { text: 'Journal', action: EventKeys.OPEN_JOURNAL }, { text: 'Inventory', action: EventKeys.OPEN_INVENTORY }, { text: 'Recipes', action: EventKeys.OPEN_RECIPES }, { text: 'Hobbies', action: EventKeys.OPEN_HOBBIES }, { text: 'Wiki', action: EventKeys.OPEN_WIKI }, { text: 'Achievements', action: EventKeys.OPEN_ACHIEVEMENTS }, { text: 'Decorate', action: EventKeys.DECORATE }, { text: 'Settings', action: EventKeys.OPEN_SETTINGS }, { text: 'Retire', action: EventKeys.RETIRE, condition: () => this.nadagotchiData && this.nadagotchiData.isLegacyReady, disabledMessage: "Not ready yet." }];
         else if (tabId === 'ANCESTORS') {
             const ancestors = this.cachedAncestors || [];
             if (ancestors.length === 0) actions = [{ text: 'No Ancestors Yet', action: EventKeys.NONE, condition: () => true }];
@@ -216,6 +219,7 @@ export class UIScene extends Phaser.Scene {
             case EventKeys.OPEN_ANCESTOR_MODAL: this.openAncestorModal(data); break;
             case EventKeys.OPEN_INVENTORY: this.openInventoryMenu(); break;
             case EventKeys.OPEN_ACHIEVEMENTS: this.openAchievementsModal(); break;
+            case EventKeys.OPEN_WIKI: this.openWikiMenu(); break;
             case EventKeys.OPEN_SETTINGS: this.openSettingsMenu(); break;
             case EventKeys.OPEN_CAREER_MENU: this.openCareerMenu(); break;
             case EventKeys.OPEN_JOB_BOARD: this.openJobBoardMenu(); break;
@@ -387,6 +391,7 @@ export class UIScene extends Phaser.Scene {
     openInventoryMenu() { this.closeAllModals(); if (!this.nadagotchiData) return; if (this.inventoryButtons) this.inventoryButtons.forEach(btn => btn.destroy()); this.inventoryButtons = []; if (this.inventoryTexts) this.inventoryTexts.forEach(t => t.destroy()); this.inventoryTexts = []; const items = Object.entries(this.nadagotchiData.inventory || {}); this.inventoryModal.content.setText(items.length === 0 ? "Empty." : ""); const mw = this.getModalWidth(); let currentY = -this.getModalHeight() / 2 + 60; const startX = -mw / 2 + 20; items.forEach(([itemName, count]) => { const def = ItemDefinitions[itemName] || { description: "Unknown", emoji: "❓", type: "Misc" }; const itemStr = `${def.emoji} ${itemName} (x${count})`; const itemText = this.add.text(startX, currentY, itemStr, { font: '20px monospace', color: '#ffffff' }); const descText = this.add.text(startX + 20, currentY + 25, def.description, { font: '16px monospace', color: '#aaaaaa', wordWrap: { width: mw - 150 } }); this.inventoryModal.add([itemText, descText]); this.inventoryTexts.push(itemText, descText); if (def.type === 'Consumable' && count > 0) { const useButton = ButtonFactory.createButton(this, mw/2 - 60, currentY + 10, 'Use', () => { this.game.events.emit(EventKeys.UI_ACTION, EventKeys.CONSUME_ITEM, itemName); this.inventoryModal.setVisible(false); this.scene.resume('MainScene'); }, { width: 60, height: 30, color: 0x228B22 }); this.inventoryModal.add(useButton); this.inventoryButtons.push(useButton); } currentY += 60; }); this.inventoryModal.setVisible(true); this.scene.pause('MainScene'); }
     openAncestorModal(ancestorData) { this.closeAllModals(); if (!ancestorData) return; const advice = NarrativeSystem.getAdvice(ancestorData.dominantArchetype); const text = `Name: Generation ${ancestorData.generation}\nArchetype: ${ancestorData.dominantArchetype}\nCareer: ${ancestorData.currentCareer || 'None'}\n\nStats:\nHappiness: ${Math.floor(ancestorData.stats.happiness)}\nLogic: ${ancestorData.skills.logic.toFixed(1)}\nEmpathy: ${ancestorData.skills.empathy.toFixed(1)}\n\nAdvice:\n"${advice}"`; this.ancestorModal.content.setText(text); this.ancestorModal.setVisible(true); this.scene.pause('MainScene'); }
     async openAchievementsModal() { this.closeAllModals(); const data = await this.persistence.loadAchievements(); const unlockedIds = data.unlocked || []; const text = Achievements.map(ach => unlockedIds.includes(ach.id) ? `${ach.icon} ${ach.name}\n${ach.description}` : `🔒 ${ach.name}\n(Locked)`).join('\n\n'); this.achievementsModal.content.setText(text); this.achievementsModal.setVisible(true); this.scene.pause('MainScene'); }
+    openWikiMenu() { this.closeAllModals(); this.wikiUI.show(); this.scene.pause("MainScene"); }
     startTutorial() {
         this.closeAllModals();
         this.scene.pause('MainScene');

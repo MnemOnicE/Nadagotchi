@@ -23,6 +23,13 @@ import { DebrisSystem } from './systems/DebrisSystem.js';
  * @class Nadagotchi
  */
 export class Nadagotchi {
+    unlockAllCareers() {
+        const allCareerIds = Object.keys(Config.CAREER.CAREERS || {});
+        const unlockedSet = new Set(this.unlockedCareers || []);
+        allCareerIds.forEach(id => unlockedSet.add(id));
+        this.unlockedCareers = Array.from(unlockedSet);
+        this.save();
+    }
     /**
      * Creates a new Nadagotchi instance.
      * @param {string} initialArchetype - The initial archetype of the Nadagotchi (e.g., 'Adventurer').
@@ -171,6 +178,7 @@ export class Nadagotchi {
             this.careerXP = {};
             this.dailyQuest = null;
             this.inventory = {};
+        this.coins = 0;
             this.age = 0;
             this.generation = 1;
             this.isLegacyReady = false;
@@ -452,6 +460,7 @@ export class Nadagotchi {
             skills: { ...Config.INITIAL_STATE.SKILLS },
             currentCareer: null,
             inventory: {},
+            coins: 0,
             age: 0,
             generation: this.generation + 1,
             isLegacyReady: false,
@@ -1356,6 +1365,7 @@ export class Nadagotchi {
             careerXP: {},
             dailyQuest: null,
             inventory: {},
+            coins: 0,
             age: 0,
             generation: 1, // Imported pets start their own lineage
             isLegacyReady: false,

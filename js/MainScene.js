@@ -1,5 +1,6 @@
 import { Nadagotchi } from './Nadagotchi.js';
 import { PersistenceManager } from './PersistenceManager.js';
+import { WikiSystem } from "./WikiSystem.js";
 import { Calendar } from './Calendar.js';
 import { EventManager } from './EventManager.js';
 import { WorldClock } from './WorldClock.js';
@@ -94,6 +95,8 @@ export class MainScene extends Phaser.Scene {
     async initializeGame(data) {
         // --- World Systems Initialization (Pre-Visuals) ---
         this.persistence = new PersistenceManager();
+        this.wikiSystem = new WikiSystem(this.persistence);
+        await this.wikiSystem.init();
         const loadedCalendar = await this.persistence.loadCalendar();
         this.calendar = new Calendar(loadedCalendar);
         this.eventManager = new EventManager(this.calendar);
