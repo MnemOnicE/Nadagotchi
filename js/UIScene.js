@@ -207,11 +207,11 @@ export class UIScene extends Phaser.Scene {
             if (container.content) container.content.setStyle({ wordWrap: { width: modalWidth - 40 } });
         });
     }
-    handleUIActions(action, data) {
+    async handleUIActions(action, data) {
         switch (action) {
             case EventKeys.OPEN_SHOWCASE: this.scene.pause('MainScene'); this.scene.sleep(); this.scene.launch('ShowcaseScene', { nadagotchi: this.nadagotchiData }); break;
-            case EventKeys.OPEN_JOURNAL: this.openJournal(); break;
-            case EventKeys.OPEN_RECIPES: this.openRecipeBook(); break;
+            case EventKeys.OPEN_JOURNAL: await this.openJournal(); break;
+            case EventKeys.OPEN_RECIPES: await this.openRecipeBook(); break;
             case EventKeys.OPEN_HOBBIES: this.openHobbyMenu(); break;
             case EventKeys.OPEN_CRAFTING_MENU: this.openCraftingMenu(); break;
             case EventKeys.DECORATE: this.openDecorateMenu(); break;
