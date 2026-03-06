@@ -225,7 +225,7 @@ describe('BreedingScene', () => {
 
         breedingScene.parentData = parentData;
         breedingScene.persistence = {
-            saveToHallOfFame: jest.fn().mockResolvedValue(),
+            saveToHallOfFame: jest.fn(),
             clearActivePet: jest.fn(),
         };
         breedingScene.scene = {
@@ -265,12 +265,12 @@ describe('BreedingScene', () => {
         expect(newPetData.genome).toBeDefined();
     });
 
-    test('finalizeLegacy should save parent, clear old data, and start the main scene', async () => {
+    test('finalizeLegacy should save parent, clear old data, and start the main scene', () => {
         // Arrange
         const newPetData = { generation: 2 };
 
         // Act
-        await breedingScene.finalizeLegacy(newPetData);
+        breedingScene.finalizeLegacy(newPetData);
 
         // Assert
         expect(breedingScene.persistence.saveToHallOfFame).toHaveBeenCalledWith(parentData);

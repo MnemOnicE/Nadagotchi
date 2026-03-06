@@ -5,10 +5,9 @@
 
 import { SeededRandom } from './utils/SeededRandom.js';
 import { Config } from './Config.js';
+import { CryptoUtils } from './utils/CryptoUtils.js';
 
-// Base64 Helpers for Environment Compatibility (Browser/Node)
-const toBase64 = (str) => (typeof btoa === 'function') ? btoa(str) : Buffer.from(str).toString('base64');
-const fromBase64 = (str) => (typeof atob === 'function') ? atob(str) : Buffer.from(str, 'base64').toString('utf-8');
+import { toBase64, fromBase64 } from './utils/Encoding.js';
 
 /**
  * Constants for the Genetics System.
@@ -124,6 +123,29 @@ export class Genome {
  */
 export class GeneticsSystem {
     /**
+     * Map of item IDs to Gene targets and values.
+     */
+    static ENV_MAP = {
+        'Ancient Tome': { gene: 'Intellectual', value: 70 },
+        'Heart Amulet': { gene: 'Nurturer', value: 70 },
+        'Muse Flower': { gene: 'Mischievous', value: 70 },
+        'Nutrient Bar': { gene: 'metabolism', value: 8 },
+        'Espresso': { gene: 'metabolism', value: 9 },
+        'Chamomile': { gene: 'metabolism', value: 2 },
+        'Metabolism-Slowing Tonic': { gene: 'metabolism', value: 2 },
+        'book': { gene: 'Intellectual', value: 80 },          // Generic Book (for tests/flexibility)
+
+        // Expanded Environment Influence (Crafted Items & Resources)
+        'Fancy Bookshelf': { gene: 'Intellectual', value: 75 },
+        'Masterwork Chair': { gene: 'Recluse', value: 75 },
+        'Logic-Boosting Snack': { gene: 'Intellectual', value: 60 },
+        'Stamina-Up Tea': { gene: 'Adventurer', value: 65 },
+        'Shiny Stone': { gene: 'Mischievous', value: 60 },
+        'Frostbloom': { gene: 'Recluse', value: 70 },
+        'Berries': { gene: 'Nurturer', value: 50 }
+    };
+
+    /**
      * Generates a new Genome based on a parent Genome and environmental items.
      * The environment acts as a "second parent" for allele contribution.
      * @param {Genome} parentGenome - The genome of the parent.
@@ -139,27 +161,15 @@ export class GeneticsSystem {
         const newGenotype = {};
         const parentGenotype = parentGenome.genotype;
 
-        // Environment Mapping
-        // Maps item IDs (from BreedingScene) to Gene targets and values.
-        const envMap = {
-            'Ancient Tome': { gene: 'Intellectual', value: 70 },
-            'Heart Amulet': { gene: 'Nurturer', value: 70 },
-            'Muse Flower': { gene: 'Mischievous', value: 70 },
-            'Nutrient Bar': { gene: 'metabolism', value: 8 },
-            'Espresso': { gene: 'metabolism', value: 9 },
-            'Chamomile': { gene: 'metabolism', value: 2 },
-            'Metabolism-Slowing Tonic': { gene: 'metabolism', value: 2 },
-            'book': { gene: 'Intellectual', value: 80 },          // Generic Book (for tests/flexibility)
-
-            // Expanded Environment Influence (Crafted Items & Resources)
-            'Fancy Bookshelf': { gene: 'Intellectual', value: 75 },
-            'Masterwork Chair': { gene: 'Recluse', value: 75 },
-            'Logic-Boosting Snack': { gene: 'Intellectual', value: 60 },
-            'Stamina-Up Tea': { gene: 'Adventurer', value: 65 },
-            'Shiny Stone': { gene: 'Mischievous', value: 60 },
-            'Frostbloom': { gene: 'Recluse', value: 70 },
-            'Berries': { gene: 'Nurturer', value: 50 }
-        };
+        // Pre-process environmental items to map genes to values
+        // Strategy: First valid item for a gene wins (preserves original priority)
+        const geneTargetMap = {};
+        for (const item of environmentalItems) {
+            const mapping = GeneticsSystem.ENV_MAP[item];
+            if (mapping && geneTargetMap[mapping.gene] === undefined) {
+                geneTargetMap[mapping.gene] = mapping.value;
+            }
+        }
 
         for (const geneKey in parentGenotype) {
             // --- Step 1: Meiosis (Parental Contribution) ---
@@ -168,17 +178,8 @@ export class GeneticsSystem {
             let parentAllele = choice(parentAlleles);
 
             // --- Step 2: Environmental Contribution (The "Second Parent") ---
-            let envAllele = null;
-
-            // Check if any environmental item targets this gene
-            for (const item of environmentalItems) {
-                const mapping = envMap[item];
-                // Check if the item maps to the current gene
-                if (mapping && mapping.gene === geneKey) {
-                    envAllele = mapping.value;
-                    break; // Use the first matching item found
-                }
-            }
+            // Direct lookup instead of iteration
+            let envAllele = geneTargetMap[geneKey] ?? null;
 
             // If no item targets this gene, provide a random "Wild" allele
             if (envAllele === null) {
@@ -245,9 +246,9 @@ export class GeneticsSystem {
      * Serializes a Genome into a secure, shareable string.
      * Format: [Base64(JSON(Genotype))].[Checksum]
      * @param {Genome} genome - The genome to export.
-     * @returns {string} The encoded DNA string.
+     * @returns {Promise<string>} The encoded DNA string.
      */
-    static serialize(genome) {
+    static async serialize(genome) {
         if (!genome || !genome.genotype) throw new Error("Invalid Genome for Serialization");
 
         // 1. Serialize Genotype (Only DNA, no state)
@@ -257,7 +258,7 @@ export class GeneticsSystem {
         const encoded = toBase64(jsonStr);
 
         // 3. Generate Checksum
-        const checksum = GeneticsSystem._generateChecksum(encoded + Config.SECURITY.DNA_SALT);
+        const checksum = await GeneticsSystem._generateChecksum(encoded);
 
         // 4. Combine
         return `${encoded}.${checksum}`;
@@ -266,16 +267,16 @@ export class GeneticsSystem {
     /**
      * Deserializes a DNA string into a Genome object.
      * @param {string} dnaString - The encoded DNA string.
-     * @returns {Genome} A new Genome instance.
+     * @returns {Promise<Genome>} A new Genome instance.
      * @throws {Error} If integrity check fails or format is invalid.
      */
-    static deserialize(dnaString) {
+    static async deserialize(dnaString) {
         const parts = dnaString.split('.');
         if (parts.length !== 2) throw new Error("Invalid DNA Format");
         const [encoded, checksum] = parts;
 
         // 1. Verify Checksum
-        const expectedChecksum = GeneticsSystem._generateChecksum(encoded + Config.SECURITY.DNA_SALT);
+        const expectedChecksum = await GeneticsSystem._generateChecksum(encoded);
         if (checksum !== expectedChecksum) throw new Error("DNA Integrity Check Failed");
 
         // 2. Decode
@@ -308,17 +309,13 @@ export class GeneticsSystem {
     }
 
     /**
-     * Generates a simple DJB2 checksum for a string.
+     * Generates a secure SHA-256 checksum for a string.
      * @param {string} str - The input string.
-     * @returns {string} The checksum as a hex string.
+     * @returns {Promise<string>} The checksum as a hex string.
      * @private
      */
-    static _generateChecksum(str) {
-        let hash = 5381;
-        for (let i = 0; i < str.length; i++) {
-            hash = ((hash << 5) + hash) + str.charCodeAt(i); /* hash * 33 + c */
-        }
-        // Convert to unsigned 32-bit integer then hex
-        return (hash >>> 0).toString(16);
+    static async _generateChecksum(str) {
+        // Use the salt from Config to prevent tampering
+        return await CryptoUtils.generateHash(str, Config.SECURITY.DNA_SALT);
     }
 }

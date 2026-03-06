@@ -108,16 +108,16 @@ const mockInput = {
 };
 
 const mockPersistence = {
-    saveFurniture: jest.fn().mockResolvedValue(),
-    loadFurniture: jest.fn().mockResolvedValue([]),
-    loadCalendar: jest.fn().mockResolvedValue({}),
-    loadPet: jest.fn().mockResolvedValue(null), // New pet
-    savePet: jest.fn().mockResolvedValue(),
-    loadSettings: jest.fn().mockResolvedValue({}),
-    saveSettings: jest.fn().mockResolvedValue(),
-    loadJournal: jest.fn().mockResolvedValue([]),
-    loadRecipes: jest.fn().mockResolvedValue([]),
-    loadAchievements: jest.fn().mockResolvedValue({ unlocked: [], progress: {} })
+    saveFurniture: jest.fn(),
+    loadFurniture: jest.fn().mockReturnValue([]),
+    loadCalendar: jest.fn().mockReturnValue({}),
+    loadPet: jest.fn().mockReturnValue(null), // New pet
+    savePet: jest.fn(),
+    loadSettings: jest.fn().mockReturnValue({}),
+    saveSettings: jest.fn(),
+    loadJournal: jest.fn().mockReturnValue([]),
+    loadRecipes: jest.fn().mockReturnValue([]),
+    loadAchievements: jest.fn().mockReturnValue({ unlocked: [], progress: {} })
 };
 
 // MainScene Mocks
@@ -165,7 +165,15 @@ const mockAdd = {
             start: jest.fn(),
             stop: jest.fn(),
             setPosition: jest.fn(),
+<<<<<<< HEAD
+            setDepth: jest.fn().mockReturnThis(),
+            setEmitZone: jest.fn().mockReturnThis(),
+            setBounds: jest.fn().mockReturnThis(),
+            setQuantity: jest.fn().mockReturnThis(),
+            setFrequency: jest.fn().mockReturnThis()
+=======
             setDepth: jest.fn().mockReturnThis()
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
         }),
         setDepth: jest.fn().mockReturnThis(),
         destroy: jest.fn()

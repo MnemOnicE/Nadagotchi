@@ -40,6 +40,16 @@ export const Config = {
         }
     },
 
+<<<<<<< HEAD
+    // Minigame Settings
+    MINIGAMES: {
+        LOGIC_PUZZLE: {
+            LEVEL_CAP: 5
+        }
+    },
+
+=======
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
     // Stat Decay Rates
     DECAY: {
         HUNGER: 0.05,
@@ -195,6 +205,27 @@ export const Config = {
         NEUTRAL: 1.0
     },
 
+<<<<<<< HEAD
+    // Mood Visuals (Centralized)
+    MOOD_VISUALS: {
+        DEFAULT_FRAME: 1,
+        DEFAULT_EMOJI: '❓',
+        FRAMES: {
+            'happy': 0,
+            'neutral': 1,
+            'sad': 2,
+            'angry': 3
+        },
+        EMOJIS: {
+            'happy': '😊',
+            'sad': '😢',
+            'angry': '😠',
+            'neutral': '😐'
+        }
+    },
+
+=======
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
     // Global Settings Defaults
     SETTINGS: {
         DEFAULT_VOLUME: 0.5,

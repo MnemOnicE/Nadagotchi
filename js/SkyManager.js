@@ -27,6 +27,8 @@ export class SkyManager {
 
         /** @type {number} Cache to avoid redundant drawing */
         this.lastDaylightFactor = -1;
+        /** @type {number} Timestamp of the last sky update */
+        this.lastUpdateTimestamp = 0;
     }
 
     /**
@@ -36,10 +38,22 @@ export class SkyManager {
     update() {
         if (!this.skyTexture || !this.skyTexture.context) return;
         const daylightFactor = this.scene.worldClock.getDaylightFactor();
+        const now = this.scene.time ? this.scene.time.now : Date.now();
 
-        // OPTIMIZATION: Skip expensive gradient and star drawing if the sky state hasn't changed.
-        if (this.lastDaylightFactor === daylightFactor) return;
+        // OPTIMIZATION: Skip expensive gradient and star drawing if the sky state hasn't changed significantly.
+        // We update if:
+        // 1. It's the first update (lastDaylightFactor is -1)
+        // 2. The daylight factor has changed by more than 0.01 (visual threshold)
+        // 3. More than 3 seconds have passed since the last update (ensure eventual consistency)
+        const factorDelta = Math.abs(this.lastDaylightFactor - daylightFactor);
+        const timeDelta = now - this.lastUpdateTimestamp;
+
+        if (this.lastDaylightFactor !== -1 && factorDelta < 0.01 && timeDelta < 3000) {
+            return;
+        }
+
         this.lastDaylightFactor = daylightFactor;
+        this.lastUpdateTimestamp = now;
 
         const nightTop = new Phaser.Display.Color(0, 0, 51);
         const nightBottom = new Phaser.Display.Color(0, 0, 0);

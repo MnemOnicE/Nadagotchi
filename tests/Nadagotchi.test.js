@@ -10,9 +10,7 @@ class LocalStorageMock {
     setItem(key, value) { this.store[key] = String(value); }
     removeItem(key) { delete this.store[key]; }
 }
-const mockStorage = new LocalStorageMock();
-global.localStorage = mockStorage;
-globalThis.localStorage = mockStorage; // Ensure globalThis has it too
+global.localStorage = new LocalStorageMock();
 
 // Mock Phaser since it's not available in the Node.js test environment
 const Phaser = {
@@ -27,9 +25,12 @@ global.Phaser = Phaser;
 describe('Nadagotchi', () => {
     let pet;
 
+<<<<<<< HEAD
     beforeEach(async () => {
+=======
+    beforeEach(() => {
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
         pet = new Nadagotchi('Intellectual');
-        await pet.init();
         // Force a deterministic genome to avoid random homozygous bonuses in general tests
         pet.genome.genotype = {
             Adventurer: [10, 20],
@@ -42,10 +43,24 @@ describe('Nadagotchi', () => {
             specialAbility: [null, null]
         };
         pet.genome.phenotype = pet.genome.calculatePhenotype();
+<<<<<<< HEAD
+
+        // Async Init
+        await pet.init();
+
+        // Manually ensure recipes are loaded for tests that need them,
+        // as the mock persistence might return empty arrays by default
+        pet.discoveredRecipes = ['Fancy Bookshelf'];
+    });
+
+    describe('constructor', () => {
+        test('should initialize from loadedData', async () => {
+=======
     });
 
     describe('constructor', () => {
         test('should initialize from loadedData', () => {
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
             const loadedData = {
                 mood: 'happy',
                 dominantArchetype: 'Nurturer',
@@ -64,6 +79,10 @@ describe('Nadagotchi', () => {
                 location: 'Home'
             };
             const loadedPet = new Nadagotchi('Adventurer', loadedData);
+<<<<<<< HEAD
+            await loadedPet.init();
+=======
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
 
             expect(loadedPet.mood).toBe('happy');
             expect(loadedPet.dominantArchetype).toBe('Nurturer');
@@ -356,6 +375,10 @@ describe('Nadagotchi', () => {
 
         test('craftItem should consume materials and add the new item to inventory', () => {
             pet.inventory = { 'Sticks': 10, 'Shiny Stone': 2 };
+<<<<<<< HEAD
+            // Ensure recipe is discovered (added manually in beforeEach)
+=======
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
             pet.craftItem('Fancy Bookshelf');
             expect(pet.inventory['Sticks']).toBe(5);
             expect(pet.inventory['Shiny Stone']).toBe(1);

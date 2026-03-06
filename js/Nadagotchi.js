@@ -29,6 +29,12 @@ export class Nadagotchi {
      * @param {object} [loadedData=null] - Optional saved data to load from. If provided, overrides defaults.
      */
     constructor(initialArchetype, loadedData = null) {
+<<<<<<< HEAD
+        /** @type {boolean} Indicates if the asynchronous initialization is complete. */
+        this.isInitialized = false;
+
+=======
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
         // --- RNG Initialization ---
         if (loadedData) {
              // Load the universe seed (The "Big Bang")
@@ -47,7 +53,7 @@ export class Nadagotchi {
         if (loadedData) {
             // This is a loaded pet. Populate all properties from the save file.
             /** @type {string} Unique identifier for this pet instance (Salt). */
-            this.uuid = loadedData.uuid || this._generateUUID(); // Migration for old saves
+            this.uuid = loadedData.uuid || this.generateUUID(); // Migration for old saves
 
             /** @type {string} The name of the pet. */
             this.name = loadedData.name || "Nadagotchi";
@@ -148,7 +154,7 @@ export class Nadagotchi {
 
         } else {
             // This is a brand new game. Start from defaults.
-            this.uuid = this._generateUUID();
+            this.uuid = this.generateUUID();
             this.name = "Nadagotchi"; // Default, can be overridden immediately after
             this.mood = 'neutral';
             this.dominantArchetype = initialArchetype;
@@ -209,10 +215,25 @@ export class Nadagotchi {
 
         /** @type {PersistenceManager} Manages saving and loading game data. */
         this.persistence = new PersistenceManager();
+<<<<<<< HEAD
+
+        // --- Async Data Holders (Initialized in init()) ---
         /** @type {Array<{date: string, text: string}>} A log of significant events. */
-        this.journal = []; // Loaded in init()
+        this.journal = [];
         /** @type {Array<string>} A list of crafting recipes the pet has discovered. */
-        this.discoveredRecipes = []; // Loaded in init()
+        this.discoveredRecipes = [];
+=======
+        /** @type {Array<{date: string, text: string}>} A log of significant events. */
+        this.journal = this.persistence.loadJournal();
+        /** @type {Array<string>} A list of crafting recipes the pet has discovered. */
+        this.discoveredRecipes = this.persistence.loadRecipes();
+
+        // Ensure default recipes are discovered for new games
+        if (this.discoveredRecipes.length === 0) {
+            this.discoveredRecipes.push("Fancy Bookshelf");
+            this.persistence.saveRecipes(this.discoveredRecipes);
+        }
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
 
         /** @type {Object.<string, {materials: Object.<string, number>, description: string}>} */
         this.recipes = Recipes;
@@ -261,8 +282,19 @@ export class Nadagotchi {
             writable: true
         });
 
+<<<<<<< HEAD
+        // Optimization: Cleanliness Penalty Caching
+        this.recalculateCleanlinessPenalty();
+
+
+        /** @type {string} The pet's current location. */
+        this.location = loadedData ? loadedData.location : 'GARDEN';
+        // Migration: Treat 'Home' as 'GARDEN'
+        if (this.location === 'Home') this.location = 'GARDEN';
+=======
         /** @type {string} The pet's current location. */
         this.location = loadedData ? loadedData.location : 'Home';
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
 
         // --- Runtime State Tracking (Not persisted) ---
         /** @type {?string} Tracks the last known weather to detect changes. */
@@ -282,8 +314,10 @@ export class Nadagotchi {
     }
 
     /**
-     * Initializes asynchronous data (Journal, Recipes).
-     * Must be called after construction.
+<<<<<<< HEAD
+     * Asynchronously initializes heavy/external data (Journal, Recipes).
+     * MUST be called after constructor.
+     * @returns {Promise<void>}
      */
     async init() {
         this.journal = await this.persistence.loadJournal();
@@ -294,9 +328,13 @@ export class Nadagotchi {
             this.discoveredRecipes.push("Fancy Bookshelf");
             await this.persistence.saveRecipes(this.discoveredRecipes);
         }
+
+        this.isInitialized = true;
     }
 
     /**
+=======
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
      * Helper to migrate legacy home config data to the new room-based structure.
      * @param {object} data
      * @returns {object}
@@ -352,9 +390,8 @@ export class Nadagotchi {
     /**
      * Generates a deterministic UUID for the pet using the seeded RNG.
      * @returns {string} A unique identifier.
-     * @private
      */
-    _generateUUID() {
+    generateUUID() {
         // Deterministic UUID generation using SeededRandom
         const chars = '0123456789abcdef';
         let uuid = '';
@@ -431,7 +468,7 @@ export class Nadagotchi {
         };
 
         return {
-            uuid: this._generateUUID(), // New UUID for the child
+            uuid: this.generateUUID(), // New UUID for the child
             mood: 'neutral',
             dominantArchetype: dominant,
             personalityPoints: initialPoints,
@@ -553,11 +590,17 @@ export class Nadagotchi {
 
         // 4. Apply Final Decays
         // Debris Penalties
+<<<<<<< HEAD
+        // Debris Penalties
+        // Optimization: Use cached values. Local debris hurts twice as much (Global + Local).
+        let cleanlinessPenalty = this._cachedGlobalPenalty + (this._cachedLocalPenalties[this.location] || 0);
+=======
         let cleanlinessPenalty = 0;
         this.debris.forEach(d => {
             if (d.type === 'weed') cleanlinessPenalty += Config.DEBRIS.HAPPINESS_PENALTY_PER_WEED;
             if (d.type === 'poop') cleanlinessPenalty += Config.DEBRIS.HAPPINESS_PENALTY_PER_POOP;
         });
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
 
         this.stats.hunger -= (hungerDecay * metabolismMult);
         this.stats.energy -= (energyDecay * metabolismMult * traitModifier);
@@ -1019,14 +1062,14 @@ export class Nadagotchi {
         // Batch serialization and persistence to reduce frequency
         if (!this._journalSavePending) {
             this._journalSavePending = true;
+<<<<<<< HEAD
             const performSave = async () => {
-                try {
-                    await this.persistence.saveJournal(this.journal);
-                } catch (e) {
-                    console.error("Failed to save journal:", e);
-                } finally {
-                    this._journalSavePending = false;
-                }
+                await this.persistence.saveJournal(this.journal);
+=======
+            const performSave = () => {
+                this.persistence.saveJournal(this.journal);
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
+                this._journalSavePending = false;
             };
 
             // Use queueMicrotask or Promise for efficient batching
@@ -1054,6 +1097,29 @@ export class Nadagotchi {
      * @param {string} roomId
      * @returns {boolean}
      */
+<<<<<<< HEAD
+    /**
+     * Recalculates the cached cleanliness penalty values.
+     * Optimization to avoid iterating debris every frame.
+     */
+    recalculateCleanlinessPenalty() {
+        this._cachedGlobalPenalty = 0;
+        this._cachedLocalPenalties = {};
+
+        for (const d of this.debris) {
+            let penalty = 0;
+            if (d.type === 'weed') penalty = Config.DEBRIS.HAPPINESS_PENALTY_PER_WEED;
+            else if (d.type === 'poop') penalty = Config.DEBRIS.HAPPINESS_PENALTY_PER_POOP;
+
+            if (penalty > 0) {
+                this._cachedGlobalPenalty += penalty;
+                const loc = d.location || 'GARDEN';
+                this._cachedLocalPenalties[loc] = (this._cachedLocalPenalties[loc] || 0) + penalty;
+            }
+        }
+    }
+=======
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
     isRoomUnlocked(roomId) {
         if (this.homeConfig.rooms[roomId] && this.homeConfig.rooms[roomId].unlocked !== undefined) {
             return this.homeConfig.rooms[roomId].unlocked;
@@ -1074,7 +1140,11 @@ export class Nadagotchi {
      * Unlocks a room permanently.
      * @param {string} roomId
      */
+<<<<<<< HEAD
+    async unlockRoom(roomId) {
+=======
     unlockRoom(roomId) {
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
         if (!RoomDefinitions[roomId]) return;
 
         // Ensure room object exists in config
@@ -1090,7 +1160,11 @@ export class Nadagotchi {
 
         this.homeConfig.rooms[roomId].unlocked = true;
         this.addJournalEntry(`I unlocked the ${RoomDefinitions[roomId].name}! More space to decorate.`);
-        this.persistence.savePet(this).catch(console.error);
+<<<<<<< HEAD
+        await this.persistence.savePet(this);
+=======
+        this.persistence.savePet(this);
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
     }
 
     /**
@@ -1101,84 +1175,79 @@ export class Nadagotchi {
      */
     updateDominantArchetype() {
         let maxPoints = -1;
-        let potentialDominantArchetypes = [];
+        let candidates = [];
 
-        // First, find the maximum number of points.
+        // Single pass to find candidates with maximum points
         for (const archetype in this.personalityPoints) {
-            if (this.personalityPoints[archetype] > maxPoints) {
-                maxPoints = this.personalityPoints[archetype];
+            const points = this.personalityPoints[archetype];
+            if (points > maxPoints) {
+                maxPoints = points;
+                candidates = [archetype];
+            } else if (points === maxPoints) {
+                candidates.push(archetype);
             }
         }
 
-        // Next, gather all archetypes that have that maximum score.
-        for (const archetype in this.personalityPoints) {
-            if (this.personalityPoints[archetype] === maxPoints) {
-                potentialDominantArchetypes.push(archetype);
+        if (candidates.length === 0) return;
+
+        // Optimization: If only one candidate, update and return immediately
+        if (candidates.length === 1) {
+            this.dominantArchetype = candidates[0];
+            return;
+        }
+
+        // Handle ties based on skills
+        // If tied on points, the one with the highest relevant skill score wins.
+        // If tied on skill score, pick randomly (unless incumbent is one of them).
+
+        let maxSkillScore = -1;
+        let skillWinners = [];
+        let incumbentInCandidates = false;
+
+        for (const archetype of candidates) {
+            if (archetype === this.dominantArchetype) {
+                incumbentInCandidates = true;
+            }
+
+            let score = 0;
+            switch (archetype) {
+                case 'Adventurer':
+                    score = this.skills.navigation;
+                    break;
+                case 'Nurturer':
+                    score = this.skills.empathy;
+                    break;
+                case 'Intellectual':
+                    score = this.skills.logic + this.skills.research;
+                    break;
+                case 'Recluse':
+                    score = this.skills.focus + this.skills.crafting;
+                    break;
+                case 'Mischievous':
+                    score = this.skills.communication;
+                    break;
+            }
+
+            if (score > maxSkillScore) {
+                maxSkillScore = score;
+                skillWinners = [archetype];
+            } else if (score === maxSkillScore) {
+                skillWinners.push(archetype);
             }
         }
 
-        // If the current dominant archetype is one of the tied contenders, it remains dominant unless another contender has higher skills.
-        // Otherwise, we break ties based on relevant skills.
-        if (potentialDominantArchetypes.length > 0) {
-            // Shuffle potentialDominantArchetypes to break ties randomly and avoid index bias
-            for (let i = potentialDominantArchetypes.length - 1; i > 0; i--) {
-                const j = this.rng.range(0, i + 1);
-                [potentialDominantArchetypes[i], potentialDominantArchetypes[j]] = [potentialDominantArchetypes[j], potentialDominantArchetypes[i]];
-            }
+        // Apply Incumbent Rule:
+        // If incumbent is a candidate (tied for points) AND has the highest skill score (tied or unique), it wins.
+        // Note: If incumbent is tied for max skill score, it wins tie-break against challengers.
+        if (incumbentInCandidates && skillWinners.includes(this.dominantArchetype)) {
+            return; // Keep current
+        }
 
-            // We need to compare against the current archetype as well if it's in the running.
-            // If the current archetype is NOT in the top list, we just pick the best from the list.
-            // If it IS in the list, we only switch if another candidate is strictly better (higher skills).
-
-            let bestCandidate = null;
-            let highestSkillScore = -1;
-            let currentArchetypeScore = 0; // Fix: Initialize to 0 instead of -1 to avoid brittle logic
-
-            potentialDominantArchetypes.forEach(archetype => {
-                let score = 0;
-                switch (archetype) {
-                    case 'Adventurer':
-                        score = this.skills.navigation;
-                        break;
-                    case 'Nurturer':
-                        score = this.skills.empathy;
-                        break;
-                    case 'Intellectual':
-                        score = this.skills.logic + this.skills.research;
-                        break;
-                    case 'Recluse':
-                        score = this.skills.focus + this.skills.crafting;
-                        break;
-                    case 'Mischievous':
-                        score = this.skills.communication;
-                        break;
-                }
-
-                if (archetype === this.dominantArchetype) {
-                    currentArchetypeScore = score;
-                }
-
-                if (score > highestSkillScore) {
-                    highestSkillScore = score;
-                    bestCandidate = archetype;
-                }
-            });
-
-            // If we found a candidate (list not empty)
-            if (bestCandidate) {
-                // If the current archetype is in the list, we prioritize it unless bestCandidate has a higher score.
-                if (potentialDominantArchetypes.includes(this.dominantArchetype)) {
-                    if (highestSkillScore > currentArchetypeScore) {
-                         this.dominantArchetype = bestCandidate;
-                    }
-                    // Else: keep current (tie goes to incumbent)
-                } else {
-                     this.dominantArchetype = bestCandidate;
-                }
-            } else {
-                 // Fallback if no candidate found (should be impossible given length > 0 check)
-                 this.dominantArchetype = potentialDominantArchetypes[0];
-            }
+        // Otherwise, pick a winner from the skill winners.
+        // If there's a tie in skill scores, pick randomly.
+        if (skillWinners.length > 0) {
+            // Use RNG for deterministic tie-breaking
+            this.dominantArchetype = this.rng.choice(skillWinners);
         }
     }
 
@@ -1266,20 +1335,20 @@ export class Nadagotchi {
 
     /**
      * Exports the pet's DNA string for sharing.
-     * @returns {string} The serialized DNA.
+     * @returns {Promise<string>} The serialized DNA.
      */
-    exportDNA() {
-        return GeneticsSystem.serialize(this.genome);
+    async exportDNA() {
+        return await GeneticsSystem.serialize(this.genome);
     }
 
     /**
      * Creates a new Nadagotchi data object from a DNA string.
      * Useful for starting a new game with an imported egg.
      * @param {string} dnaString - The imported DNA string.
-     * @returns {object} Data object suitable for the Nadagotchi constructor.
+     * @returns {Promise<object>} Data object suitable for the Nadagotchi constructor.
      */
-    static generateDataFromDNA(dnaString) {
-        const genome = GeneticsSystem.deserialize(dnaString);
+    static async generateDataFromDNA(dnaString) {
+        const genome = await GeneticsSystem.deserialize(dnaString);
 
         // Extract checksum for seeding to ensure deterministic phenotype from the same DNA
         const parts = dnaString.split('.');

@@ -1,4 +1,8 @@
 import { EventKeys } from './EventKeys.js';
+<<<<<<< HEAD
+import { Config } from './Config.js';
+=======
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
 
 /**
  * @fileoverview A mini-game for the Innovator career.
@@ -59,7 +63,11 @@ export class LogicPuzzleScene extends Phaser.Scene {
             // Check for sequence completion
             if (playerSequence.length === sequence.length) {
                 level++;
+<<<<<<< HEAD
+                if (level > Config.MINIGAMES.LOGIC_PUZZLE.LEVEL_CAP) { // Win after completing the required sequence length
+=======
                 if (level > 5) { // Win after completing a sequence of 5
+>>>>>>> 74fdaab (Update js/DebugConsole.js)
                     endGame(true);
                 } else {
                     canPlayerClick = false;

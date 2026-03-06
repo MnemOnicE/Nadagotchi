@@ -1,50 +1,47 @@
-
 /**
- * @fileoverview Cryptographic utility functions for secure data handling.
- * Wraps the Web Crypto API for hashing and integrity checks.
+ * @fileoverview Utility class for cryptographic operations.
+ * Provides a unified interface for hashing (SHA-256) across Browser and Node.js environments.
  */
-
-// Polyfill TextEncoder/TextDecoder for environments where they are missing (e.g. some Jest setups)
-if (typeof global !== 'undefined' && !global.TextEncoder) {
-    try {
-        const { TextEncoder, TextDecoder } = require('util');
-        global.TextEncoder = TextEncoder;
-        global.TextDecoder = TextDecoder;
-    } catch (e) {
-        console.warn("TextEncoder/TextDecoder polyfill failed:", e);
-    }
-}
 
 export class CryptoUtils {
     /**
-     * Generates a SHA-256 hash of the input string using the Web Crypto API.
+     * Generates a SHA-256 hash of the input string + salt.
      * @param {string} message - The string to hash.
-     * @returns {Promise<string>} The hex string of the hash.
+     * @param {string} salt - The salt to append.
+     * @returns {Promise<string>} The hash as a hex string.
      */
-    static async digest(message) {
-        const encoder = new TextEncoder();
-        const data = encoder.encode(message);
+    static async generateHash(message, salt) {
+        const data = message + salt;
 
-        // Browser / Modern Node.js (v19+)
-        if (typeof crypto !== 'undefined' && crypto.subtle) {
-            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-            return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+        // Browser Environment
+        if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle) {
+            // Ensure TextEncoder is available
+            const Encoder = (typeof TextEncoder === 'undefined')
+                ? class { encode(s) { return new Uint8Array([...s].map(c => c.charCodeAt(0))); } }
+                : TextEncoder;
+
+            const encoder = new Encoder();
+            const dataBuffer = encoder.encode(data);
+            const hashBuffer = await window.crypto.subtle.digest('SHA-256', dataBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex;
         }
 
-        // Node.js fallback (v16-v18)
-        if (typeof process !== 'undefined' && process.versions && process.versions.node) {
-             try {
-                 // Use dynamic import to avoid bundling issues in browser
-                 const { webcrypto } = await import('node:crypto');
-                 if (webcrypto && webcrypto.subtle) {
-                     const hashBuffer = await webcrypto.subtle.digest('SHA-256', data);
-                     return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
-                 }
-             } catch (e) {
-                 console.warn("Node crypto import failed:", e);
-             }
+        // Node.js Environment (Jest/Test)
+        // We check for 'process' to avoid bundling issues in some build tools, though 'require' check is usually enough.
+        if (typeof process !== 'undefined' && typeof require !== 'undefined') {
+            try {
+                // Dynamic require to prevent bundlers from trying to bundle 'crypto' for the browser
+                // (though Vite usually handles this gracefully or ignores it)
+                const crypto = require('crypto');
+                return crypto.createHash('sha256').update(data).digest('hex');
+            } catch (e) {
+                console.warn("Crypto module not found in Node environment.", e);
+            }
         }
 
-        throw new Error("Secure Context Required: crypto.subtle not available.");
+        // Fallback for very old environments or strict CSP blocking (Should fail secure)
+        throw new Error("Secure hashing (SHA-256) not available in this environment.");
     }
 }
