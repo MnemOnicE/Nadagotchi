@@ -49,8 +49,6 @@ export class LightingManager {
 
         /** @type {Array<{x: number, y: number, r: number}>} Cache to avoid redundant drawing */
         this.lastLights = [];
-        this.currentLights = [];
-        this.activeLightCount = 0;
     }
 
     /**
@@ -102,40 +100,22 @@ export class LightingManager {
      * @private
      */
     _processLights() {
-        this.activeLightCount = 0;
+        // Collect all light sources
+        const lights = [];
 
-        const addLight = (x, y, r) => {
-            if (this.activeLightCount < this.currentLights.length) {
-                const light = this.currentLights[this.activeLightCount];
-                light.x = x;
-                light.y = y;
-                light.r = r;
-            } else {
-                this.currentLights.push({ x, y, r });
-            }
-            this.activeLightCount++;
-        };
+        // 1. Player (Increased Radius)
+        lights.push({ x: this.scene.sprite.x, y: this.scene.sprite.y, r: 250 });
 
-        addLight(this.scene.sprite.x, this.scene.sprite.y, 250);
+        // 2. NPCs (If visible)
+        if (this.scene.npcScout && this.scene.npcScout.visible) lights.push({ x: this.scene.npcScout.x, y: this.scene.npcScout.y, r: 80 });
+        if (this.scene.npcArtisan && this.scene.npcArtisan.visible) lights.push({ x: this.scene.npcArtisan.x, y: this.scene.npcArtisan.y, r: 80 });
+        if (this.scene.npcVillager && this.scene.npcVillager.visible) lights.push({ x: this.scene.npcVillager.x, y: this.scene.npcVillager.y, r: 80 });
 
-        if (this.scene.npcScout && this.scene.npcScout.visible) addLight(this.scene.npcScout.x, this.scene.npcScout.y, 80);
-        if (this.scene.npcArtisan && this.scene.npcArtisan.visible) addLight(this.scene.npcArtisan.x, this.scene.npcArtisan.y, 80);
-        if (this.scene.npcVillager && this.scene.npcVillager.visible) addLight(this.scene.npcVillager.x, this.scene.npcVillager.y, 80);
-
-        if (this._needsRedraw()) {
-            this.drawLight();
-            for (let i = 0; i < this.activeLightCount; i++) {
-                const curr = this.currentLights[i];
-                if (i < this.lastLights.length) {
-                    const last = this.lastLights[i];
-                    last.x = curr.x;
-                    last.y = curr.y;
-                    last.r = curr.r;
-                } else {
-                    this.lastLights.push({ x: curr.x, y: curr.y, r: curr.r });
-                }
-            }
-            this.lastLights.length = this.activeLightCount;
+        // Check if redraw is needed (Hysteresis)
+        if (this._needsRedraw(lights)) {
+            this.drawLight(lights);
+            // Clone lights for next comparison
+            this.lastLights = lights.map(l => ({...l}));
         }
     }
 
@@ -144,11 +124,11 @@ export class LightingManager {
      * @param {Array} currentLights
      * @returns {boolean}
      */
-    _needsRedraw() {
-        if (this.activeLightCount !== this.lastLights.length) return true;
+    _needsRedraw(currentLights) {
+        if (currentLights.length !== this.lastLights.length) return true;
 
-        for (let i = 0; i < this.activeLightCount; i++) {
-            const curr = this.currentLights[i];
+        for (let i = 0; i < currentLights.length; i++) {
+            const curr = currentLights[i];
             const prev = this.lastLights[i];
 
             if (Math.abs(curr.x - prev.x) > this.movementThreshold ||
@@ -164,24 +144,30 @@ export class LightingManager {
      * Draws the spotlight gradient onto the RenderTexture.
      * @param {Array} lights
      */
-    drawLight() {
+    drawLight(lights) {
         if (!this.renderTexture) return;
 
+        // Clear with Black (Darkness)
+        // Note: fill(0x000000) fills with opaque black.
         this.renderTexture.fill(0x000000, 1);
 
-        for (let i = 0; i < this.activeLightCount; i++) {
-            const light = this.currentLights[i];
+        lights.forEach(light => {
+            // Scale position to RenderTexture space
             const tx = light.x * this.scaleRatio;
             const ty = light.y * this.scaleRatio;
 
+            // Calculate scale for the light cookie
+            // Cookie is 512px. Target diameter = r * 2 * scaleRatio
             const targetDiameter = light.r * 2 * this.scaleRatio;
             const spriteScale = targetDiameter / 512;
 
             this.dummyLight.setScale(spriteScale);
             this.dummyLight.setPosition(tx, ty);
 
+            // Draw the light cookie
+            // Standard blending works well here (alpha blending on top of black)
             this.renderTexture.draw(this.dummyLight);
-        }
+        });
     }
 
     /**
