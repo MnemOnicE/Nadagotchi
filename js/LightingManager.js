@@ -58,11 +58,11 @@
      * @param {Array} currentLights
      * @returns {boolean}
      */
-    _needsRedraw(currentLights) {
-        if (currentLights.length !== this.lastLights.length) return true;
+    _needsRedraw() {
+        if (this.activeLightCount !== this.lastLights.length) return true;
 
-        for (let i = 0; i < currentLights.length; i++) {
-            const curr = currentLights[i];
+        for (let i = 0; i < this.activeLightCount; i++) {
+            const curr = this.currentLights[i];
             const prev = this.lastLights[i];
 
             if (Math.abs(curr.x - prev.x) > this.movementThreshold ||
@@ -78,28 +78,22 @@
      * Draws the spotlight gradient onto the RenderTexture.
      * @param {Array} lights
      */
-    drawLight(lights) {
+    drawLight() {
         if (!this.renderTexture) return;
 
-        // Clear with Black (Darkness)
-        // Note: fill(0x000000) fills with opaque black.
         this.renderTexture.fill(0x000000, 1);
 
-        lights.forEach(light => {
-            // Scale position to RenderTexture space
+        for (let i = 0; i < this.activeLightCount; i++) {
+            const light = this.currentLights[i];
             const tx = light.x * this.scaleRatio;
             const ty = light.y * this.scaleRatio;
 
-            // Calculate scale for the light cookie
-            // Cookie is 512px. Target diameter = r * 2 * scaleRatio
             const targetDiameter = light.r * 2 * this.scaleRatio;
             const spriteScale = targetDiameter / 512;
 
             this.dummyLight.setScale(spriteScale);
             this.dummyLight.setPosition(tx, ty);
 
-            // Draw the light cookie
-            // Standard blending works well here (alpha blending on top of black)
             this.renderTexture.draw(this.dummyLight);
         });    }
 
