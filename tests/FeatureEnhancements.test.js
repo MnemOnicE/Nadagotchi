@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> 74fdaab (Update js/DebugConsole.js)
 import { Nadagotchi } from '../js/Nadagotchi';
 import { GeneticsSystem, Genome } from '../js/GeneticsSystem';
 
@@ -28,15 +24,10 @@ global.Phaser = Phaser;
 describe('Feature Enhancements', () => {
     let pet;
 
-<<<<<<< HEAD
     beforeEach(async () => {
         pet = new Nadagotchi('Intellectual');
         await pet.init();
 
-=======
-    beforeEach(() => {
-        pet = new Nadagotchi('Intellectual');
->>>>>>> 74fdaab (Update js/DebugConsole.js)
         // Ensure genome exists (should be created by constructor)
         if (!pet.genome) pet.genome = new Genome();
     });
@@ -58,15 +49,10 @@ describe('Feature Enhancements', () => {
             expect(pet.stats.happiness).toBe(65);
         });
 
-<<<<<<< HEAD
         test('isHomozygousAdventurer grants bonus happiness on EXPLORE', async () => {
             pet = new Nadagotchi('Adventurer');
             await pet.init();
 
-=======
-        test('isHomozygousAdventurer grants bonus happiness on EXPLORE', () => {
-            pet = new Nadagotchi('Adventurer');
->>>>>>> 74fdaab (Update js/DebugConsole.js)
             pet.genome.phenotype.isHomozygousAdventurer = true;
             pet.stats.happiness = 50;
 
@@ -78,15 +64,10 @@ describe('Feature Enhancements', () => {
             expect(pet.stats.happiness).toBe(80);
         });
 
-<<<<<<< HEAD
         test('isHomozygousNurturer grants bonus empathy on INTERACT_PLANT', async () => {
             pet = new Nadagotchi('Nurturer');
             await pet.init();
 
-=======
-        test('isHomozygousNurturer grants bonus empathy on INTERACT_PLANT', () => {
-            pet = new Nadagotchi('Nurturer');
->>>>>>> 74fdaab (Update js/DebugConsole.js)
             pet.genome.phenotype.isHomozygousNurturer = true;
             const initialEmpathy = pet.skills.empathy;
 
@@ -98,15 +79,10 @@ describe('Feature Enhancements', () => {
             expect(pet.skills.empathy).toBeCloseTo(initialEmpathy + 0.425);
         });
 
-<<<<<<< HEAD
         test('isHomozygousMischievous grants energy refund on PLAY', async () => {
             pet = new Nadagotchi('Mischievous');
             await pet.init();
 
-=======
-        test('isHomozygousMischievous grants energy refund on PLAY', () => {
-            pet = new Nadagotchi('Mischievous');
->>>>>>> 74fdaab (Update js/DebugConsole.js)
             pet.genome.phenotype.isHomozygousMischievous = true;
             pet.stats.energy = 50;
 
@@ -119,15 +95,10 @@ describe('Feature Enhancements', () => {
             expect(pet.stats.energy).toBe(45);
         });
 
-<<<<<<< HEAD
         test('isHomozygousRecluse grants bonus focus on MEDITATE', async () => {
             pet = new Nadagotchi('Recluse');
             await pet.init();
 
-=======
-        test('isHomozygousRecluse grants bonus focus on MEDITATE', () => {
-            pet = new Nadagotchi('Recluse');
->>>>>>> 74fdaab (Update js/DebugConsole.js)
             pet.genome.phenotype.isHomozygousRecluse = true;
             const initialFocus = pet.skills.focus;
 

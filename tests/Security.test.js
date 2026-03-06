@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> 74fdaab (Update js/DebugConsole.js)
 import { jest } from '@jest/globals';
 
 // Mock localStorage
@@ -178,30 +174,18 @@ describe('Security Hardening', () => {
 
     test('Persistence Salt: Save includes UUID and verifies correctly', async () => {
         nadagotchi.stats.hunger = 50;
-<<<<<<< HEAD
         await persistence.savePet(nadagotchi);
 
         await new Promise(r => setTimeout(r, 300));
 
         const loaded = await persistence.loadPet();
-=======
-        persistence.savePet(nadagotchi);
-
-        await new Promise(r => setTimeout(r, 300));
-
-        const loaded = persistence.loadPet();
->>>>>>> 74fdaab (Update js/DebugConsole.js)
         expect(loaded).not.toBeNull();
         expect(loaded.uuid).toBe(nadagotchi.uuid);
         expect(loaded.stats.hunger).toBe(50);
     });
 
     test('Persistence Salt: Tampering fails verification', async () => {
-<<<<<<< HEAD
         await persistence.savePet(nadagotchi);
-=======
-        persistence.savePet(nadagotchi);
->>>>>>> 74fdaab (Update js/DebugConsole.js)
 
         await new Promise(r => setTimeout(r, 300));
 
@@ -216,7 +200,6 @@ describe('Security Hardening', () => {
 
         // Attacker tries to use the old hash (invalid because content changed)
         localStorage.setItem('nadagotchi_save', `${newEncoded}|${hash}`);
-<<<<<<< HEAD
         expect(await persistence.loadPet()).toBeNull();
 
         // Attacker tries to generate new hash WITHOUT salt (because they don't know uuid is part of salt logic, or assume standard hash)
@@ -228,17 +211,6 @@ describe('Security Hardening', () => {
 
         // Should fail because _load uses hash(newEncoded + uuid)
         expect(await persistence.loadPet()).toBeNull();
-=======
-        expect(persistence.loadPet()).toBeNull();
-
-        // Attacker tries to generate new hash WITHOUT salt (because they don't know uuid is part of salt logic, or assume standard hash)
-        // Simulate attacker hash: hash(newEncoded)
-        const attackerHash = persistence._hash(newEncoded);
-        localStorage.setItem('nadagotchi_save', `${newEncoded}|${attackerHash}`);
-
-        // Should fail because _load uses hash(newEncoded + uuid)
-        expect(persistence.loadPet()).toBeNull();
->>>>>>> 74fdaab (Update js/DebugConsole.js)
     });
 
     test('Minigame Privacy: State is hidden', () => {

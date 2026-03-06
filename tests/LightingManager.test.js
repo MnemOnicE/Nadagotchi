@@ -1,14 +1,8 @@
-<<<<<<< HEAD
-import { jest } from '@jest/globals';
-=======
-
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-import { LightingManager } from '../js/LightingManager';
+import { jest } from '@jest/globals';import { LightingManager } from '../js/LightingManager';
 
 describe('LightingManager', () => {
     let lightingManager;
     let mockScene;
-<<<<<<< HEAD
     let mockRenderTexture;
     let mockDummyLight;
     let mockCanvasTexture;
@@ -58,62 +52,20 @@ describe('LightingManager', () => {
                 renderTexture: jest.fn().mockReturnValue(mockRenderTexture)
             },
             make: {
-                image: jest.fn().mockReturnValue(mockDummyLight)
-=======
-    let mockLightImage;
-    let mockLightTexture;
-
-    beforeEach(() => {
-        mockLightImage = {
-            setVisible: jest.fn().mockReturnThis(),
-            setOrigin: jest.fn().mockReturnThis(),
-            setBlendMode: jest.fn().mockReturnThis(),
-            setDepth: jest.fn().mockReturnThis(),
-        };
-
-        mockLightTexture = {
-            context: {
-                globalCompositeOperation: 'source-over',
-                fillStyle: '',
-                fillRect: jest.fn(),
-                createRadialGradient: jest.fn().mockReturnValue({
-                    addColorStop: jest.fn()
-                }),
-            },
-            width: 800,
-            height: 600,
-            refresh: jest.fn(),
-            setSize: jest.fn()
-        };
-
-        mockScene = {
-            scale: { width: 800, height: 600 },
-            textures: {
-                createCanvas: jest.fn().mockReturnValue(mockLightTexture)
-            },
-            add: {
-                image: jest.fn().mockReturnValue(mockLightImage)
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-            },
+                image: jest.fn().mockReturnValue(mockDummyLight)            },
             worldState: {
                 time: 'Day'
             },
             location: 'GARDEN',
-<<<<<<< HEAD
             sprite: { x: 100, y: 100 },
             // NPCs
             npcScout: { x: 200, y: 200, visible: true },
             npcArtisan: { x: 300, y: 300, visible: true },
-            npcVillager: { x: 400, y: 400, visible: true }
-=======
-            sprite: { x: 100, y: 100 }
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-        };
+            npcVillager: { x: 400, y: 400, visible: true }        };
 
         lightingManager = new LightingManager(mockScene);
     });
 
-<<<<<<< HEAD
     test('should initialize and create light cookie if missing', () => {
         expect(mockScene.textures.exists).toHaveBeenCalledWith('light_soft');
         expect(mockScene.textures.createCanvas).toHaveBeenCalledWith('light_soft', 512, 512);
@@ -125,19 +77,11 @@ describe('LightingManager', () => {
     test('should be invisible during Day', () => {
         mockScene.worldState.time = 'Day';
         lightingManager.update();
-        expect(mockRenderTexture.setVisible).toHaveBeenCalledWith(false);
-=======
-    test('should be invisible during Day', () => {
-        mockScene.worldState.time = 'Day';
-        lightingManager.update();
-        expect(mockLightImage.setVisible).toHaveBeenCalledWith(false);
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-    });
+        expect(mockRenderTexture.setVisible).toHaveBeenCalledWith(false);    });
 
     test('should be visible and draw during Night', () => {
         mockScene.worldState.time = 'Night';
         lightingManager.update();
-<<<<<<< HEAD
         expect(mockRenderTexture.setVisible).toHaveBeenCalledWith(true);
         // Verify drawing logic
         expect(mockRenderTexture.fill).toHaveBeenCalledWith(0x000000, 1);
@@ -147,25 +91,12 @@ describe('LightingManager', () => {
     test('should be visible during Dusk', () => {
         mockScene.worldState.time = 'Dusk';
         lightingManager.update();
-        expect(mockRenderTexture.setVisible).toHaveBeenCalledWith(true);
-=======
-        expect(mockLightImage.setVisible).toHaveBeenCalledWith(true);
-        // Verify drawing logic (e.g. fillRect called)
-        expect(mockLightTexture.context.fillRect).toHaveBeenCalled();
-    });
-
-    test('should be visible and draw during Dusk', () => {
-        mockScene.worldState.time = 'Dusk';
-        lightingManager.update();
-        expect(mockLightImage.setVisible).toHaveBeenCalledWith(true);
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-    });
+        expect(mockRenderTexture.setVisible).toHaveBeenCalledWith(true);    });
 
     test('should be invisible when INDOOR even if Night', () => {
         mockScene.worldState.time = 'Night';
         mockScene.location = 'INDOOR';
         lightingManager.update();
-<<<<<<< HEAD
         expect(mockRenderTexture.setVisible).toHaveBeenCalledWith(false);
     });
 
@@ -208,9 +139,5 @@ describe('LightingManager', () => {
         lightingManager.resize(1000, 800);
         // Expect scaled resize
         expect(mockRenderTexture.resize).toHaveBeenCalledWith(500, 400); // 1000*0.5, 800*0.5
-        expect(mockRenderTexture.setScale).toHaveBeenCalledWith(2);
-=======
-        expect(mockLightImage.setVisible).toHaveBeenCalledWith(false);
->>>>>>> 74fdaab (Update js/DebugConsole.js)
-    });
+        expect(mockRenderTexture.setScale).toHaveBeenCalledWith(2);    });
 });
