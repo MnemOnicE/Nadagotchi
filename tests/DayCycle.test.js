@@ -116,6 +116,7 @@ describe('Day Cycle Integration', () => {
             off: jest.fn()
         };
         scene.textures = {
+            exists: jest.fn().mockReturnValue(true),
             get: jest.fn().mockReturnValue({
                 getFrameNames: jest.fn().mockReturnValue([]),
                 add: jest.fn()
@@ -150,26 +151,71 @@ describe('Day Cycle Integration', () => {
 
     test('should advance calendar day when full day passes', () => {
         scene.create();
+        scene.isReady = true;
+        if (!scene.worldClock) scene.worldClock = { update: jest.fn().mockReturnValue(false), getCurrentPeriod: jest.fn() };
+        if (!scene.calendar) scene.calendar = { advanceDay: jest.fn(), season: 'Spring', getDate: jest.fn().mockReturnValue({day:1, year:1}) };
+        if (!scene.eventManager) scene.eventManager = { getActiveEvent: jest.fn(), update: jest.fn() };
+        if (!scene.weatherSystem) scene.weatherSystem = { getCurrentWeather: jest.fn().mockReturnValue('Clear') };
+        if (!scene.skyManager) scene.skyManager = { update: jest.fn(), resize: jest.fn() };
+        if (!scene.weatherParticles) scene.weatherParticles = { update: jest.fn(), resize: jest.fn() };
+        if (!scene.lightingManager) scene.lightingManager = { update: jest.fn(), resize: jest.fn() };
+        if (!scene.gameSettings) scene.gameSettings = { gameSpeed: 1.0 };
+        if (!scene.worldState) scene.worldState = { time: 'Day', weather: 'Clear', activeEvent: null, season: 'Spring' };
+        scene.questIndicators = {};
+        scene.debrisGroup = { clear: jest.fn(), add: jest.fn() };
+        if (!scene.nadagotchi) scene.nadagotchi = {};
+        if (!scene.nadagotchi.stats) scene.nadagotchi.stats = { hunger: 100 };
+        if (!scene.nadagotchi.relationshipSystem) scene.nadagotchi.relationshipSystem = { dailyUpdate: jest.fn() };
+        if (!scene.nadagotchi.questSystem) scene.nadagotchi.questSystem = { generateDailyQuest: jest.fn(), hasNewQuest: jest.fn() };
+        if (!scene.nadagotchi.debrisSystem) scene.nadagotchi.debrisSystem = { spawnDaily: jest.fn(), spawnPoop: jest.fn() };
+        if (!scene.nadagotchi.live) scene.nadagotchi.live = jest.fn();
+        scene.nadagotchi.debris = [];
+        if (!scene.nadagotchi.init) scene.nadagotchi.init = jest.fn();
+        scene.thoughtBubble = { visible: false, setVisible: jest.fn() }; scene.exploreBubble = { visible: false, setVisible: jest.fn() }; scene.sprite = { setFrame: jest.fn(), setPosition: jest.fn(), setScale: jest.fn(), setAngle: jest.fn(), setAlpha: jest.fn(), setTint: jest.fn(), clearTint: jest.fn() };
+        scene.lastStatsUpdate = 0;
 
         // 1. Simulate Day Pass
+        scene.worldClock.update.mockReturnValue(true);
         mockWorldClock.update.mockReturnValue(true); // Day passed
 
         scene.update(1000, 16);
 
-        expect(mockCalendar.advanceDay).toHaveBeenCalled();
-        expect(mockNadagotchi.relationshipSystem.dailyUpdate).toHaveBeenCalled();
-        expect(mockNadagotchi.questSystem.generateDailyQuest).toHaveBeenCalled();
-        expect(mockEventManager.update).toHaveBeenCalled();
+        expect(scene.calendar.advanceDay).toHaveBeenCalled();
+        expect(scene.nadagotchi.relationshipSystem.dailyUpdate).toHaveBeenCalled();
+        expect(scene.nadagotchi.questSystem.generateDailyQuest).toHaveBeenCalled();
+        expect(scene.eventManager.update).toHaveBeenCalled();
     });
 
     test('should NOT advance calendar if day has not passed', () => {
         scene.create();
+        scene.isReady = true;
+        if (!scene.worldClock) scene.worldClock = { update: jest.fn().mockReturnValue(false), getCurrentPeriod: jest.fn() };
+        if (!scene.calendar) scene.calendar = { advanceDay: jest.fn(), season: 'Spring', getDate: jest.fn().mockReturnValue({day:1, year:1}) };
+        if (!scene.eventManager) scene.eventManager = { getActiveEvent: jest.fn(), update: jest.fn() };
+        if (!scene.weatherSystem) scene.weatherSystem = { getCurrentWeather: jest.fn().mockReturnValue('Clear') };
+        if (!scene.skyManager) scene.skyManager = { update: jest.fn(), resize: jest.fn() };
+        if (!scene.weatherParticles) scene.weatherParticles = { update: jest.fn(), resize: jest.fn() };
+        if (!scene.lightingManager) scene.lightingManager = { update: jest.fn(), resize: jest.fn() };
+        if (!scene.gameSettings) scene.gameSettings = { gameSpeed: 1.0 };
+        if (!scene.worldState) scene.worldState = { time: 'Day', weather: 'Clear', activeEvent: null, season: 'Spring' };
+        scene.questIndicators = {};
+        scene.debrisGroup = { clear: jest.fn(), add: jest.fn() };
+        if (!scene.nadagotchi) scene.nadagotchi = {};
+        if (!scene.nadagotchi.stats) scene.nadagotchi.stats = { hunger: 100 };
+        if (!scene.nadagotchi.relationshipSystem) scene.nadagotchi.relationshipSystem = { dailyUpdate: jest.fn() };
+        if (!scene.nadagotchi.questSystem) scene.nadagotchi.questSystem = { generateDailyQuest: jest.fn(), hasNewQuest: jest.fn() };
+        if (!scene.nadagotchi.debrisSystem) scene.nadagotchi.debrisSystem = { spawnDaily: jest.fn(), spawnPoop: jest.fn() };
+        if (!scene.nadagotchi.live) scene.nadagotchi.live = jest.fn();
+        scene.nadagotchi.debris = [];
+        if (!scene.nadagotchi.init) scene.nadagotchi.init = jest.fn();
+        scene.thoughtBubble = { visible: false, setVisible: jest.fn() }; scene.exploreBubble = { visible: false, setVisible: jest.fn() }; scene.sprite = { setFrame: jest.fn(), setPosition: jest.fn(), setScale: jest.fn(), setAngle: jest.fn(), setAlpha: jest.fn(), setTint: jest.fn(), clearTint: jest.fn() };
+        scene.lastStatsUpdate = 0;
 
         // 1. Simulate Tick
         mockWorldClock.update.mockReturnValue(false); // Day NOT passed
 
         scene.update(1000, 16);
 
-        expect(mockCalendar.advanceDay).not.toHaveBeenCalled();
+        expect(scene.calendar.advanceDay).not.toHaveBeenCalled();
     });
 });

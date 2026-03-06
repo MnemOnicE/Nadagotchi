@@ -80,6 +80,7 @@ export const setupPhaserMock = () => {
                 this.sys = { events: { once: jest.fn(), on: jest.fn(), off: jest.fn() } };
                 this.textures = { exists: jest.fn().mockReturnValue(true), generate: jest.fn(), createCanvas: jest.fn() };
                 this.textures = { exists: jest.fn().mockReturnValue(true), generate: jest.fn(), createCanvas: jest.fn() };
+                this.textures = { exists: jest.fn().mockReturnValue(true), generate: jest.fn(), createCanvas: jest.fn() };
                 this.scene = { textures: { exists: jest.fn().mockReturnValue(true) }, stop: jest.fn(), resume: jest.fn(), get: jest.fn(), launch: jest.fn(), start: jest.fn() };
                                                                                 this.textures = { exists: jest.fn().mockReturnValue(true), generate: jest.fn(), createCanvas: jest.fn() };
                 this.scene = { textures: { exists: jest.fn().mockReturnValue(true), generate: jest.fn(), createCanvas: jest.fn() }, stop: jest.fn(), resume: jest.fn(), get: jest.fn(), launch: jest.fn(), start: jest.fn() };

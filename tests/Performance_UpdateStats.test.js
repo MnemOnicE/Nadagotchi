@@ -106,6 +106,7 @@ describe('Performance: Update Stats Throttling', () => {
             off: jest.fn()
         };
         scene.textures = {
+            exists: jest.fn().mockReturnValue(true),
             get: jest.fn().mockReturnValue({
                 getFrameNames: jest.fn().mockReturnValue([]),
                 add: jest.fn()
@@ -139,6 +140,27 @@ describe('Performance: Update Stats Throttling', () => {
 
     test('should throttle UPDATE_STATS events', () => {
         scene.create();
+        scene.isReady = true;
+        if (!scene.worldClock) scene.worldClock = { update: jest.fn().mockReturnValue(false), getCurrentPeriod: jest.fn() };
+        if (!scene.calendar) scene.calendar = { advanceDay: jest.fn(), season: 'Spring', getDate: jest.fn().mockReturnValue({day:1, year:1}) };
+        if (!scene.eventManager) scene.eventManager = { getActiveEvent: jest.fn(), update: jest.fn() };
+        if (!scene.weatherSystem) scene.weatherSystem = { getCurrentWeather: jest.fn().mockReturnValue('Clear') };
+        if (!scene.skyManager) scene.skyManager = { update: jest.fn(), resize: jest.fn() };
+        if (!scene.weatherParticles) scene.weatherParticles = { update: jest.fn(), resize: jest.fn() };
+        if (!scene.lightingManager) scene.lightingManager = { update: jest.fn(), resize: jest.fn() };
+        if (!scene.gameSettings) scene.gameSettings = { gameSpeed: 1.0 };
+        if (!scene.worldState) scene.worldState = { time: 'Day', weather: 'Clear', activeEvent: null, season: 'Spring' };
+        scene.questIndicators = {};
+        scene.debrisGroup = { clear: jest.fn(), add: jest.fn() };
+        if (!scene.nadagotchi) scene.nadagotchi = {};
+        if (!scene.nadagotchi.stats) scene.nadagotchi.stats = { hunger: 100 };
+        if (!scene.nadagotchi.relationshipSystem) scene.nadagotchi.relationshipSystem = { dailyUpdate: jest.fn() };
+        if (!scene.nadagotchi.questSystem) scene.nadagotchi.questSystem = { generateDailyQuest: jest.fn(), hasNewQuest: jest.fn() };
+        if (!scene.nadagotchi.debrisSystem) scene.nadagotchi.debrisSystem = { spawnDaily: jest.fn(), spawnPoop: jest.fn() };
+        if (!scene.nadagotchi.live) scene.nadagotchi.live = jest.fn();
+        if (!scene.nadagotchi.init) scene.nadagotchi.init = jest.fn();
+        scene.thoughtBubble = { visible: false, setVisible: jest.fn() }; scene.exploreBubble = { visible: false, setVisible: jest.fn() }; scene.sprite = { setFrame: jest.fn(), setPosition: jest.fn(), setScale: jest.fn(), setAngle: jest.fn(), setAlpha: jest.fn(), setTint: jest.fn(), clearTint: jest.fn() };
+        scene.lastStatsUpdate = 0;
 
         // Simulating 60 frames at 16ms delta
         // Total time: ~1000ms
