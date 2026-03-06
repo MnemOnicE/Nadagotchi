@@ -4,7 +4,8 @@ import { jest } from '@jest/globals';
 // 1. Setup Global Phaser Mock
 const createMockGameObject = () => {
     const handlers = {};
-    return { scene: {},        setOrigin: jest.fn().mockReturnThis(),
+    return { scene: {},
+        setOrigin: jest.fn().mockReturnThis(),
         setDepth: jest.fn().mockReturnThis(),
         setVisible: jest.fn().mockReturnThis(),
         setInteractive: jest.fn().mockReturnThis(),
@@ -43,7 +44,8 @@ const createMockContainer = () => ({
 const createMockRectangle = () => {
     const data = {};
     const handlers = {};
-    return { scene: {},        setOrigin: jest.fn().mockReturnThis(),
+    return { scene: {},
+        setOrigin: jest.fn().mockReturnThis(),
         setDepth: jest.fn().mockReturnThis(),
         setVisible: jest.fn().mockReturnThis(),
         setInteractive: jest.fn().mockReturnThis(),
@@ -82,7 +84,8 @@ global.Phaser = {
                 zone: jest.fn(() => createMockGameObject())
             };
             this.time = {
-                delayedCall: jest.fn((delay, callback, args) => { if (args) callback(...args); else callback(); return { scene: {}, destroy: jest.fn() }; }),                addEvent: jest.fn(() => ({ destroy: jest.fn(), remove: jest.fn() }))
+                delayedCall: jest.fn((delay, callback, args) => { if (args) callback(...args); else callback(); return { scene: {}, destroy: jest.fn() }; }),
+                addEvent: jest.fn(() => ({ destroy: jest.fn(), remove: jest.fn() }))
             };
             this.sys = { events: { once: jest.fn(), on: jest.fn(), off: jest.fn() } };
             this.scene = { stop: jest.fn(), resume: jest.fn(), get: jest.fn() };

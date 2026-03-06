@@ -167,9 +167,9 @@ describe('UIScene Modal Management', () => {
         };
     });
 
-    test('opening a new modal should close existing open modals', () => {
+    test('opening a new modal should close existing open modals', async () => {
         // 1. Open Journal
-        scene.handleUIActions(EventKeys.OPEN_JOURNAL);
+        await scene.handleUIActions(EventKeys.OPEN_JOURNAL);
         expect(scene.journalModal.visible).toBe(true);
 
         // 2. Open Inventory
@@ -180,8 +180,8 @@ describe('UIScene Modal Management', () => {
         expect(scene.journalModal.visible).toBe(false);
     });
 
-    test('opening settings should close other modals', () => {
-        scene.handleUIActions(EventKeys.OPEN_RECIPES);
+    test('opening settings should close other modals', async () => {
+        await scene.handleUIActions(EventKeys.OPEN_RECIPES);
         expect(scene.recipeModal.visible).toBe(true);
 
         scene.handleUIActions(EventKeys.OPEN_SETTINGS);

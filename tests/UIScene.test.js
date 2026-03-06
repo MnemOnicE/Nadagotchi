@@ -223,12 +223,12 @@ describe('UIScene', () => {
         expect(mockGameEvents.emit).toHaveBeenCalledWith(EventKeys.UI_ACTION, EventKeys.OPEN_JOB_BOARD);
     });
 
-    test('should open modals correctly', () => {
+    test('should open modals correctly', async () => {
         scene.create();
         scene.nadagotchiData = { inventory: {} }; // Mock data needed for some modals
 
         // Journal
-        scene.handleUIActions(EventKeys.OPEN_JOURNAL);
+        await scene.handleUIActions(EventKeys.OPEN_JOURNAL);
         expect(scene.journalModal.setVisible).toHaveBeenCalledWith(true);
         expect(scene.scene.pause).toHaveBeenCalledWith('MainScene');
         expect(mockLoadJournal).toHaveBeenCalled();

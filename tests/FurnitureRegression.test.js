@@ -86,7 +86,8 @@ describe('MainScene Duplication Bug', () => {
         // Wait for async initialization
         await scene._initPromise;
 
-        // Ensure InventorySystem is linked (mocked by simple object in tests usually, but here we check property access)        scene.nadagotchi.inventory = {};
+        // Ensure InventorySystem is linked (mocked by simple object in tests usually, but here we check property access)
+        scene.nadagotchi.inventory = {};
     });
 
     test('Picking up furniture while holding selectedFurniture does NOT duplicate item', () => {
@@ -127,5 +128,6 @@ describe('MainScene Duplication Bug', () => {
         expect(mockNadagotchi.returnItemToInventory).not.toHaveBeenCalledWith('Chair');
 
         // Selected furniture should switch to the picked up item
-        expect(scene.selectedFurniture).toBe('Table');    });
+        expect(scene.selectedFurniture).toBe('Table');
+    });
 });
