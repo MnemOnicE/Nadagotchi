@@ -1,8 +1,0 @@
-💡 **What:** Optimized `LightingManager` to prevent creating new light objects on every single redraw inside its hot loop. Instead of `const lights = []` with array allocations and mapping, it now maintains `currentLights` arrays on the class instance, using `activeLightCount` to simply reuse and update properties.
-
-🎯 **Why:** Previously, the `_processLights()` method invoked an object literal allocation `lights.push({...})` for the player and every visible NPC on each update, followed by a mapped array clone `lights.map(l => ({...l}))` that generated *more* new objects, causing huge garbage collection (GC) overhead in the rendering loop.
-
-📊 **Measured Improvement:** We added a tight loop execution benchmark via `tests/performance/LightingManager.perf.test.js`.
-- Baseline CPU time for 100k iteration test: ~48ms-55ms
-- Optimized CPU time for 100k iteration test: ~16ms-18ms
-- Improvement: This resulted in a **~66% reduction in CPU execution time** for the lighting loop, with practically zero garbage collection required during gameplay.
