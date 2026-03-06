@@ -1,5 +1,6 @@
 import { PersistenceManager } from '../js/PersistenceManager.js';
 import { setupLocalStorageMock } from './helpers/mockLocalStorage.js';
+
 describe('PersistenceManager', () => {
     let persistenceManager;
 
@@ -48,7 +49,8 @@ describe('PersistenceManager', () => {
         const retiredPet = { name: 'Old Timer', archetype: 'Recluse' };
         await persistenceManager.saveToHallOfFame(retiredPet);
 
-        const hallOfFame = await persistenceManager.loadHallOfFame();        expect(hallOfFame).toHaveLength(1);
+        const hallOfFame = await persistenceManager.loadHallOfFame();
+        expect(hallOfFame).toHaveLength(1);
         expect(hallOfFame[0]).toEqual(retiredPet);
     });
 
@@ -90,6 +92,7 @@ describe('PersistenceManager', () => {
     });
 
     test('should return empty array when no recipes are saved', async () => {
-        const loadedRecipes = await persistenceManager.loadRecipes();        expect(loadedRecipes).toEqual([]);
+        const loadedRecipes = await persistenceManager.loadRecipes();
+        expect(loadedRecipes).toEqual([]);
     });
 });

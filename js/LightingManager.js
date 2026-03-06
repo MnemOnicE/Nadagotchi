@@ -10,7 +10,69 @@
  * during darker times of day.
  *
  * Optimization: Uses a GPU-based RenderTexture with resolution scaling and
- * micro-movement hysteresis to minimize performance cost.    }
+ * micro-movement hysteresis to minimize performance cost.
+ */
+export class LightingManager {
+    /**
+     * Creates an instance of LightingManager.
+     * @param {Phaser.Scene} scene - The scene this manager belongs to (MainScene).
+     */
+    constructor(scene) {
+        /** @type {Phaser.Scene} */
+        this.scene = scene;
+
+        // Configuration
+        this.scaleRatio = 0.5; // Render at 50% resolution
+        this.movementThreshold = 0.1; // Ignore movements smaller than 0.1px
+
+        const width = this.scene.scale.width;
+        const height = this.scene.scale.height;
+
+        // Ensure we have the "Light Cookie" texture
+        if (!this.scene.textures.exists('light_soft')) {
+            this._createLightCookie();
+        }
+
+        // Create the RenderTexture
+        // Initialize with scaled dimensions
+        this.renderTexture = this.scene.add.renderTexture(0, 0, width * this.scaleRatio, height * this.scaleRatio);
+        this.renderTexture.setOrigin(0, 0);
+        this.renderTexture.setScrollFactor(0);
+        this.renderTexture.setScale(1 / this.scaleRatio); // Scale back up to fit screen
+        this.renderTexture.setBlendMode('MULTIPLY');
+        this.renderTexture.setDepth(100); // High depth to cover everything except UI
+        this.renderTexture.setVisible(false);
+
+        // Helper object for drawing lights
+        this.dummyLight = this.scene.make.image({ key: 'light_soft', add: false });
+        this.dummyLight.setOrigin(0.5); // Center origin for correct positioning
+
+        /** @type {Array<{x: number, y: number, r: number}>} Cache to avoid redundant drawing */
+        this.lastLights = [];
+    }
+
+    /**
+     * Generates a reusable radial gradient texture for lights.
+     * @private
+     */
+    _createLightCookie() {
+        const size = 512;
+        const half = size / 2;
+
+        // Use a temporary canvas to draw the gradient
+        const texture = this.scene.textures.createCanvas('light_soft', size, size);
+        const ctx = texture.context;
+
+        // Radial gradient: White (center) to Transparent (edge)
+        const gradient = ctx.createRadialGradient(half, half, 0, half, half, half);
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, size, size);
+
+        texture.refresh();
+    }
 
     /**
      * Updates the lighting effect.
@@ -20,7 +82,8 @@
         // Lighting effects should only be active in outdoor locations (GARDEN).
         // Indoor locations (INDOOR) should rely on their own lighting/mood.
         if (this.scene.location === 'INDOOR') {
-            this.renderTexture.setVisible(false);            return;
+            this.renderTexture.setVisible(false);
+            return;
         }
 
         const worldState = this.scene.worldState;
@@ -28,20 +91,23 @@
              this.renderTexture.setVisible(true);
              this._processLights();
         } else {
-             this.renderTexture.setVisible(false);        }
+             this.renderTexture.setVisible(false);
+        }
     }
 
     /**
      * Internal method to process and draw lights if needed.
      * @private
      */
-    _processLights() {        // Collect all light sources
+    _processLights() {
+        // Collect all light sources
         const lights = [];
 
         // 1. Player (Increased Radius)
         lights.push({ x: this.scene.sprite.x, y: this.scene.sprite.y, r: 250 });
 
-        // 2. NPCs (If visible)        if (this.scene.npcScout && this.scene.npcScout.visible) lights.push({ x: this.scene.npcScout.x, y: this.scene.npcScout.y, r: 80 });
+        // 2. NPCs (If visible)
+        if (this.scene.npcScout && this.scene.npcScout.visible) lights.push({ x: this.scene.npcScout.x, y: this.scene.npcScout.y, r: 80 });
         if (this.scene.npcArtisan && this.scene.npcArtisan.visible) lights.push({ x: this.scene.npcArtisan.x, y: this.scene.npcArtisan.y, r: 80 });
         if (this.scene.npcVillager && this.scene.npcVillager.visible) lights.push({ x: this.scene.npcVillager.x, y: this.scene.npcVillager.y, r: 80 });
 
@@ -95,7 +161,8 @@
             this.dummyLight.setPosition(tx, ty);
 
             this.renderTexture.draw(this.dummyLight);
-        });    }
+        });
+    }
 
     /**
      * Handles resizing of the lighting texture.
@@ -110,6 +177,7 @@
             // Force redraw next frame
             this.lastLights = [];
             // We can call update() here or wait for loop
-            // But usually resize happens outside loop.        }
+            // But usually resize happens outside loop.
+        }
     }
 }

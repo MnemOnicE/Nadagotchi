@@ -157,7 +157,8 @@ const mockAdd = {
             setEmitZone: jest.fn().mockReturnThis(),
             setBounds: jest.fn().mockReturnThis(),
             setQuantity: jest.fn().mockReturnThis(),
-            setFrequency: jest.fn().mockReturnThis()        }),
+            setFrequency: jest.fn().mockReturnThis()
+        }),
         setDepth: jest.fn().mockReturnThis(),
         destroy: jest.fn()
     })
