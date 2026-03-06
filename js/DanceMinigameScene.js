@@ -65,9 +65,7 @@ export class DanceMinigameScene extends Phaser.Scene {
         this.input.keyboard.on('keydown-RIGHT', () => this.handleInput('RIGHT'));
 
         // Mobile Support - Directional Buttons
-        const isMobile = this.sys.game.device.os.android || this.sys.game.device.os.iOS;
         // Always show on smaller screens or explicitly mobile
-        const w = this.cameras.main.width;
         const h = this.cameras.main.height;
 
         // Always add them for compatibility, they don't hurt on desktop
