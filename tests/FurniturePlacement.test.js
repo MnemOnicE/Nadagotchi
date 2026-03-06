@@ -120,6 +120,8 @@ const mockPersistence = {
 
 // MainScene Mocks
 const mockAdd = {
+    renderTexture: jest.fn(() => ({ setOrigin: jest.fn(), setScrollFactor: jest.fn(), setScale: jest.fn(), setBlendMode: jest.fn(), setDepth: jest.fn(), setVisible: jest.fn(), resize: jest.fn(), draw: jest.fn() })),
+
     sprite: jest.fn().mockReturnValue(mockSprite),
     graphics: jest.fn().mockReturnValue({
         ...mockGraphics,
@@ -173,7 +175,7 @@ const mockCameras = {
     }
 };
 
-const mockTextures = {
+const mockTextures = { exists: jest.fn().mockReturnValue(true),
     createCanvas: jest.fn().mockReturnValue({
         getContext: jest.fn().mockReturnValue({
             createLinearGradient: jest.fn().mockReturnValue({ addColorStop: jest.fn() }),
@@ -263,7 +265,7 @@ describe('Furniture Placement Logic (Bug Repro)', () => {
         scene.placeFurniture(100, dashboardY);
 
         expect(scene.nadagotchi.placeItem).not.toHaveBeenCalled();
-        expect(scene.placedFurniture['Entryway']).toHaveLength(0);
+        expect(scene.placedFurniture["Entryway"] || []).toHaveLength(0);
     });
 
     test('Should allow placement if Y < gameHeight (Game Area)', () => {
