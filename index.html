@@ -21,19 +21,17 @@
 
             const title = document.createElement('h3');
             title.textContent = 'CRASH DETECTED';
-            errorBox.appendChild(title);
 
             const msgPara = document.createElement('p');
             msgPara.textContent = msg;
-            errorBox.appendChild(msgPara);
 
             const infoPara = document.createElement('p');
             infoPara.textContent = `${url}:${lineNo}:${columnNo}`;
-            errorBox.appendChild(infoPara);
 
             const stackPre = document.createElement('pre');
             stackPre.textContent = error ? error.stack : '';
-            errorBox.appendChild(stackPre);
+
+            errorBox.append(title, msgPara, infoPara, stackPre);
 
             // Add a "Copy to Clipboard" button
             const copyBtn = document.createElement('button');
