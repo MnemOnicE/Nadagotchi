@@ -36,9 +36,8 @@ export class AchievementManager {
     /**
      * Handles UI Action events to update progress counters.
      * @param {string} actionType - The type of action.
-     * @param {*} data - Data associated with the action.
      */
-    handleUIAction(actionType, data) {
+    handleUIAction(actionType) {
         let changed = false;
 
         // Initialize counters if missing
