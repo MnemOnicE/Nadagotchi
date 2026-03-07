@@ -96,33 +96,35 @@ describe('PersistenceManager', () => {
         expect(loadedRecipes).toEqual([]);
     });
 
-    test('should return null and log error if standard JSON parsing fails', async () => {
+    test.each([
+        {
+            name: 'standard',
+            setup: () => {
+                // Valid base64 but invalid JSON
+                const invalidJson = "This is not JSON";
+                const encoded = Buffer.from(invalidJson).toString('base64');
+                const hash = "0".repeat(64); // Dummy hash
+                localStorage.setItem("nadagotchi_save", `${encoded}|${hash}`);
+            },
+            expectedError: 'Failed to parse JSON for key nadagotchi_save:'
+        },
+        {
+            name: 'legacy',
+            setup: () => {
+                // Looks like legacy JSON (starts with {) but is invalid
+                const invalidLegacyJson = "{ this is not valid json }";
+                localStorage.setItem("nadagotchi_save", invalidLegacyJson);
+            },
+            expectedError: 'Failed to parse legacy save for key nadagotchi_save:'
+        }
+    ])('should return null and log error if $name JSON parsing fails', async ({ setup, expectedError }) => {
         const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-        // Valid base64 but invalid JSON
-        const invalidJson = "This is not JSON";
-        const encoded = Buffer.from(invalidJson).toString('base64');
-        const hash = "0".repeat(64); // Dummy hash
-        localStorage.setItem("nadagotchi_save", `${encoded}|${hash}`);
+        setup();
 
         const loadedData = await persistenceManager.loadPet();
         expect(loadedData).toBeNull();
         expect(consoleSpy).toHaveBeenCalledWith(
-            expect.stringContaining('Failed to parse JSON for key nadagotchi_save:'),
-            expect.any(Error)
-        );
-        consoleSpy.mockRestore();
-    });
-
-    test('should return null and log error if legacy JSON parsing fails', async () => {
-        const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-        // Looks like legacy JSON (starts with {) but is invalid
-        const invalidLegacyJson = "{ this is not valid json }";
-        localStorage.setItem("nadagotchi_save", invalidLegacyJson);
-
-        const loadedData = await persistenceManager.loadPet();
-        expect(loadedData).toBeNull();
-        expect(consoleSpy).toHaveBeenCalledWith(
-            expect.stringContaining('Failed to parse legacy save for key nadagotchi_save:'),
+            expect.stringContaining(expectedError),
             expect.any(Error)
         );
         consoleSpy.mockRestore();
