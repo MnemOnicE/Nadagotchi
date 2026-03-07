@@ -33,7 +33,9 @@ describe('DebugConsole', () => {
                 stats: {},
                 inventorySystem: { addItem: jest.fn() },
                 unlockAllCareers: jest.fn(),
-                inventory: {}
+                inventory: {},
+                coins: 0,
+                save: jest.fn()
             },
             gameSettings: {},
             add: {
