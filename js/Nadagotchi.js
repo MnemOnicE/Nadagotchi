@@ -24,10 +24,11 @@ import { DebrisSystem } from './systems/DebrisSystem.js';
  */
 export class Nadagotchi {
     unlockAllCareers() {
-        const allCareerIds = Object.keys(Config.CAREER.CAREERS || {});
-        const unlockedSet = new Set(this.unlockedCareers || []);
-        allCareerIds.forEach(id => unlockedSet.add(id));
-        this.unlockedCareers = Array.from(unlockedSet);
+        if (!this.unlockedCareers) this.unlockedCareers = [];
+        const allCareers = Object.keys(Config.CAREER.CAREERS || {});
+        allCareers.forEach(c => {
+            if (!this.unlockedCareers.includes(c)) this.unlockedCareers.push(c);
+        });
         this.save();
     }
     /**
@@ -1385,4 +1386,3 @@ export class Nadagotchi {
         };
     }
 }
-// CI Integrity Check Fix

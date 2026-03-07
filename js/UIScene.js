@@ -135,7 +135,7 @@ export class UIScene extends Phaser.Scene {
         let actions = [];
         if (tabId === 'CARE') actions = [{ text: 'Feed', action: EventKeys.FEED }, { text: 'Play', action: EventKeys.PLAY }, { text: 'Meditate', action: EventKeys.MEDITATE }];
         else if (tabId === 'ACTION') actions = [{ text: 'Explore', action: EventKeys.EXPLORE }, { text: 'Study', action: EventKeys.STUDY }, { text: 'Work', action: EventKeys.WORK, condition: () => this.nadagotchiData && this.nadagotchiData.currentCareer, disabledMessage: "You need a Career first!" }, { text: 'Craft', action: EventKeys.OPEN_CRAFTING_MENU }];
-        else if (tabId === 'SYSTEM') actions = [{ text: 'Passport', action: EventKeys.OPEN_SHOWCASE }, { text: 'Career', action: EventKeys.OPEN_CAREER_MENU }, { text: 'Journal', action: EventKeys.OPEN_JOURNAL }, { text: 'Inventory', action: EventKeys.OPEN_INVENTORY }, { text: 'Recipes', action: EventKeys.OPEN_RECIPES }, { text: 'Hobbies', action: EventKeys.OPEN_HOBBIES }, { text: 'Wiki', action: EventKeys.OPEN_WIKI }, { text: 'Achievements', action: EventKeys.OPEN_ACHIEVEMENTS }, { text: 'Decorate', action: EventKeys.DECORATE }, { text: 'Settings', action: EventKeys.OPEN_SETTINGS }, { text: 'Retire', action: EventKeys.RETIRE, condition: () => this.nadagotchiData && this.nadagotchiData.isLegacyReady, disabledMessage: "Not ready yet." }];
+        else if (tabId === 'SYSTEM') actions = [{ text: 'Passport', action: EventKeys.OPEN_SHOWCASE }, { text: 'Career', action: EventKeys.OPEN_CAREER_MENU }, { text: 'Journal', action: EventKeys.OPEN_JOURNAL }, { text: 'Inventory', action: EventKeys.OPEN_INVENTORY }, { text: 'Recipes', action: EventKeys.OPEN_RECIPES }, { text: 'Hobbies', action: EventKeys.OPEN_HOBBIES }, { text: 'Wiki', action: EventKeys.OPEN_WIKI }, { text: 'Achievements', action: EventKeys.OPEN_ACHIEVEMENTS }, { text: 'Showcase', action: EventKeys.OPEN_SHOWCASE }, { text: 'Decorate', action: EventKeys.DECORATE }, { text: 'Settings', action: EventKeys.OPEN_SETTINGS }, { text: 'Retire', action: EventKeys.RETIRE, condition: () => this.nadagotchiData && this.nadagotchiData.isLegacyReady, disabledMessage: "Not ready yet." }];
         else if (tabId === 'ANCESTORS') {
             const ancestors = this.cachedAncestors || [];
             if (ancestors.length === 0) actions = [{ text: 'No Ancestors Yet', action: EventKeys.NONE, condition: () => true }];
@@ -207,11 +207,11 @@ export class UIScene extends Phaser.Scene {
             if (container.content) container.content.setStyle({ wordWrap: { width: modalWidth - 40 } });
         });
     }
-    async handleUIActions(action, data) {
+    handleUIActions(action, data) {
         switch (action) {
             case EventKeys.OPEN_SHOWCASE: this.scene.pause('MainScene'); this.scene.sleep(); this.scene.launch('ShowcaseScene', { nadagotchi: this.nadagotchiData }); break;
-            case EventKeys.OPEN_JOURNAL: await this.openJournal(); break;
-            case EventKeys.OPEN_RECIPES: await this.openRecipeBook(); break;
+            case EventKeys.OPEN_JOURNAL: this.openJournal(); break;
+            case EventKeys.OPEN_RECIPES: this.openRecipeBook(); break;
             case EventKeys.OPEN_HOBBIES: this.openHobbyMenu(); break;
             case EventKeys.OPEN_CRAFTING_MENU: this.openCraftingMenu(); break;
             case EventKeys.DECORATE: this.openDecorateMenu(); break;

@@ -98,5 +98,3 @@ export class WorldClock {
         return 0;
     }
 }
-// CI Syntax Fix
-// CI Integrity Check Fix

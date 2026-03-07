@@ -170,23 +170,23 @@ describe('UIScene Modal Management', () => {
     test('opening a new modal should close existing open modals', async () => {
         // 1. Open Journal
         await scene.handleUIActions(EventKeys.OPEN_JOURNAL);
-        expect(scene.journalModal.visible).toBe(true);
+        expect(scene.journalModal.setVisible).toHaveBeenCalledWith(true);
 
         // 2. Open Inventory
-        scene.handleUIActions(EventKeys.OPEN_INVENTORY);
-        expect(scene.inventoryModal.visible).toBe(true);
+        await scene.handleUIActions(EventKeys.OPEN_INVENTORY);
+        expect(scene.inventoryModal.setVisible).toHaveBeenCalledWith(true);
 
         // 3. Assert Journal is CLOSED (This is the bug fix requirement)
-        expect(scene.journalModal.visible).toBe(false);
+        expect(scene.journalModal.setVisible).toHaveBeenCalledWith(false);
     });
 
     test('opening settings should close other modals', async () => {
         await scene.handleUIActions(EventKeys.OPEN_RECIPES);
-        expect(scene.recipeModal.visible).toBe(true);
+        expect(scene.recipeModal.setVisible).toHaveBeenCalledWith(true);
 
-        scene.handleUIActions(EventKeys.OPEN_SETTINGS);
-        expect(scene.settingsModal.visible).toBe(true);
-        expect(scene.recipeModal.visible).toBe(false);
+        await scene.handleUIActions(EventKeys.OPEN_SETTINGS);
+        expect(scene.settingsModal.setVisible).toHaveBeenCalledWith(true);
+        expect(scene.recipeModal.setVisible).toHaveBeenCalledWith(false);
     });
 
     test('opening passport should pause MainScene and sleep UIScene', () => {

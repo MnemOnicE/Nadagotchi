@@ -1,4 +1,4 @@
-import { WorldClock } from '../js/WorldClock.js';
+import { WorldClock } from '../js/WorldClock';
 
 // Mock Phaser Scene
 const mockScene = {};

@@ -234,7 +234,7 @@ describe('UIScene', () => {
         expect(mockLoadJournal).toHaveBeenCalled();
 
         // Inventory
-        scene.handleUIActions(EventKeys.OPEN_INVENTORY);
+        await scene.handleUIActions(EventKeys.OPEN_INVENTORY);
         expect(scene.inventoryModal.setVisible).toHaveBeenCalledWith(true);
     });
 

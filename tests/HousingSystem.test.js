@@ -186,7 +186,7 @@ const mockCameras = {
 };
 
 const mockTextures = {
-    createCanvas: jest.fn().mockReturnValue({
+    exists: jest.fn().mockReturnValue(true), createCanvas: jest.fn().mockReturnValue({
         getContext: jest.fn().mockReturnValue({
             createLinearGradient: jest.fn().mockReturnValue({ addColorStop: jest.fn() }),
             createRadialGradient: jest.fn().mockReturnValue({ addColorStop: jest.fn() }),

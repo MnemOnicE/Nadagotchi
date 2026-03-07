@@ -15,7 +15,7 @@ setupPhaserMock();
 const { MainScene } = require('../js/MainScene');
 
 // Mock Dependencies
-jest.mock('../js/Nadagotchi');
+jest.mock('../js/Nadagotchi', () => { return { Nadagotchi: jest.fn().mockImplementation(() => { return { init: jest.fn().mockResolvedValue(true), save: jest.fn(), calculateStats: jest.fn(), modifyStat: jest.fn(), updateStats: jest.fn(), isSick: false, stats: { hunger: 50, energy: 50, happiness: 50 }, skills: {} }; }) }; });
 jest.mock('../js/PersistenceManager');
 jest.mock('../js/Calendar');
 jest.mock('../js/EventManager');

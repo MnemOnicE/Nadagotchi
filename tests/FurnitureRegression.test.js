@@ -61,7 +61,7 @@ describe('MainScene Duplication Bug', () => {
 
         // Fix for SkyManager.resize calling setSize/clear on texture and LightingManager using createRadialGradient
         scene.textures = {
-            get: jest.fn().mockReturnValue({ getFrameNames: jest.fn().mockReturnValue([]) }),
+            get: jest.fn().mockReturnValue({ getFrameNames: jest.fn().mockReturnValue([]) }), exists: jest.fn().mockReturnValue(true),
             createCanvas: jest.fn(() => ({
                 context: {
                     createLinearGradient: jest.fn(() => ({ addColorStop: jest.fn() })),

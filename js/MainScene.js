@@ -140,7 +140,7 @@ export class MainScene extends Phaser.Scene {
         }
 
         // Initialize heavy async data (Journal, Recipes)
-        if (this.nadagotchi && typeof this.nadagotchi.init === "function") { await this.nadagotchi.init(); }
+        await this.nadagotchi.init();
 
         if (!loadedPet && !(data && data.newPetData)) {
              await this.persistence.savePet(this.nadagotchi);
