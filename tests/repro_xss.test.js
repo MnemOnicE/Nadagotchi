@@ -1,37 +1,46 @@
+import fs from 'fs';
+import path from 'path';
+import { jest } from '@jest/globals';
+
 /**
  * @jest-environment jsdom
  */
-const fs = require('fs');
-const path = require('path');
 
 describe('Global Error Handler XSS Reproduction', () => {
     let errorHandler;
 
     beforeAll(() => {
-        const html = fs.readFileSync(path.resolve(__dirname, '../index.html'), 'utf8');
-        // Extract the function body of window.onerror
-        const startMarker = 'window.onerror = function (msg, url, lineNo, columnNo, error) {';
-        const endMarker = 'return false;\n        };';
+        // Use a more explicit path to avoid path traversal warnings
+        const indexPath = path.join(process.cwd(), 'index.html');
+        const html = fs.readFileSync(indexPath, 'utf8');
 
-        const startIndex = html.indexOf(startMarker);
-        const endIndex = html.indexOf(endMarker, startIndex);
+        // Extract the script content safely
+        const scriptMatch = html.match(/\/\/ --- GLOBAL ERROR TRAP ---[\s\S]*?window\.onerror = function[\s\S]*?return false;\n\s+};/);
 
-        if (startIndex === -1 || endIndex === -1) {
+        if (!scriptMatch) {
             throw new Error('Could not find window.onerror in index.html');
         }
 
-        const functionBody = html.substring(startIndex + startMarker.length, endIndex + 'return false;'.length);
-        errorHandler = new Function('msg', 'url', 'lineNo', 'columnNo', 'error', functionBody);
+        const scriptContent = scriptMatch[0];
+
+        // Inject script into JSDOM instead of using new Function()
+        const scriptElement = document.createElement('script');
+        scriptElement.textContent = scriptContent;
+        document.head.appendChild(scriptElement);
+
+        errorHandler = window.onerror;
     });
 
     afterEach(() => {
         // Clean up any error boxes added to the body
         const errorBoxes = document.querySelectorAll('div');
         errorBoxes.forEach(box => {
-            if (box.style.cssText.includes('background: rgba(100, 0, 0, 0.9)') || box.innerHTML.includes('CRASH DETECTED')) {
+            if (box.style.cssText.includes('background: rgba(100, 0, 0, 0.9)') ||
+                (box.textContent && box.textContent.includes('CRASH DETECTED'))) {
                 box.remove();
             }
         });
+        jest.clearAllMocks();
     });
 
     test('should NOT parse XSS payload in error message as HTML', () => {
@@ -40,8 +49,6 @@ describe('Global Error Handler XSS Reproduction', () => {
         errorHandler(xssPayload, 'test.js', 1, 1, null);
 
         const img = document.getElementById('xss-img');
-        // This EXPECTATION is what we want to PASS after the fix.
-        // Currently, it should FAIL because innerHTML will create the img element.
         expect(img).toBeNull();
     });
 
@@ -51,8 +58,6 @@ describe('Global Error Handler XSS Reproduction', () => {
         errorHandler('Some error', xssPayload, 1, 1, null);
 
         const script = document.getElementById('xss-script');
-        // This EXPECTATION is what we want to PASS after the fix.
-        // Currently, it should FAIL because innerHTML will create the script element.
         expect(script).toBeNull();
     });
 });
