@@ -30,6 +30,14 @@ export class Nadagotchi {
         this.unlockedCareers = Array.from(unlockedSet);
         this.save();
     }
+
+    /**
+     * Persists the Nadagotchi's state to local storage.
+     * @returns {Promise<void>}
+     */
+    async save() {
+        await this.persistence.savePet(this);
+    }
     /**
      * Creates a new Nadagotchi instance.
      * @param {string} initialArchetype - The initial archetype of the Nadagotchi (e.g., 'Adventurer').
