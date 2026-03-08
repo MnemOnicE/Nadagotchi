@@ -981,12 +981,16 @@ export class MainScene extends Phaser.Scene {
     startIdleAnimation(mood) {
         // Kill existing tweens on the sprite to prevent conflicts
         this.tweens.killTweensOf(this.sprite);
+        this.isMoving = false; // Reset movement flag if interrupted
 
         // Fix for "Movement Warp" bug: Use the sprite's CURRENT position as the base
+        // to ensure idle animations stay where the pet was last moved or walked.
         const baseX = this.sprite.x;
         const baseY = this.sprite.y;
 
-        // Reset properties to base state (except position)
+        // Reset properties to base state and ensure we are starting from the base position.
+        // This prevents cumulative "drift" or mid-air floating if the mood changes during a hop.
+        this.sprite.setPosition(baseX, baseY);
         this.sprite.setScale(4);
         this.sprite.setAngle(0);
         this.sprite.setAlpha(1);
