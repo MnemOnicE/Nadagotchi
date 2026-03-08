@@ -1,5 +1,5 @@
 // tests/Nadagotchi.test.js
-import { Nadagotchi } from '../js/Nadagotchi';
+import { Nadagotchi } from '../js/Nadagotchi.js';
 import { PersistenceManager } from '../js/PersistenceManager';
 
 // Mock localStorage

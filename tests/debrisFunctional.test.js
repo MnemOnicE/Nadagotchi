@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { Nadagotchi } from '../js/Nadagotchi';
+import { Nadagotchi } from '../js/Nadagotchi.js';
 import { setupPhaserMock } from './helpers/mockPhaser';
 import { setupLocalStorageMock } from './helpers/mockLocalStorage';
 import { Config } from '../js/Config';
@@ -12,7 +12,7 @@ describe('Debris System Functional Tests', () => {
 
     beforeEach(() => {
         pet = new Nadagotchi('Adventurer');
-        pet.debris = [];
+        pet.debris = {};
         pet.recalculateCleanlinessPenalty();
     });
 
@@ -22,8 +22,9 @@ describe('Debris System Functional Tests', () => {
 
         pet.debrisSystem.spawnDaily('Spring', 'Sunny');
 
-        expect(pet.debris.length).toBeGreaterThan(0);
-        expect(pet.debris[0].location).toBe('GARDEN');
+        const debrisValues = Object.values(pet.debris);
+        expect(debrisValues.length).toBeGreaterThan(0);
+        expect(debrisValues[0].location).toBe('GARDEN');
     });
 
     test('Spawn Poop puts items in current location', () => {
@@ -34,15 +35,16 @@ describe('Debris System Functional Tests', () => {
         jest.spyOn(pet.rng, 'range').mockReturnValue(50); // Mock range for coords if needed
 
         pet.debrisSystem.spawnPoop();
-        expect(pet.debris.length).toBeGreaterThan(0);
-        const poop = pet.debris.find(d => d.type === 'poop');
+        const debrisValues = Object.values(pet.debris);
+        expect(debrisValues.length).toBeGreaterThan(0);
+        const poop = debrisValues.find(d => d.type === 'poop');
         expect(poop.location).toBe('Kitchen');
     });
 
     test('Penalty calculation includes Global + Local', () => {
         // 1. Add debris manually with location
-        pet.debris.push({ type: 'weed', location: 'GARDEN' });
-        pet.debris.push({ type: 'poop', location: 'Kitchen' });
+        pet.debris['id-1'] = { type: 'weed', location: 'GARDEN' };
+        pet.debris['id-2'] = { type: 'poop', location: 'Kitchen' };
         pet.recalculateCleanlinessPenalty();
 
         const weedPenalty = Config.DEBRIS.HAPPINESS_PENALTY_PER_WEED;

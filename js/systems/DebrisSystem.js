@@ -19,7 +19,7 @@ export class DebrisSystem {
      */
     spawnDaily(season, weather) {
         // Limit max debris
-        if (this.pet.debris.length >= Config.DEBRIS.MAX_COUNT) return;
+        if (this.pet.debrisCount >= Config.DEBRIS.MAX_COUNT) return;
 
         // Base Chance
         if (this.pet.rng.random() > Config.DEBRIS.SPAWN_CHANCE_DAILY) return;
@@ -33,10 +33,6 @@ export class DebrisSystem {
 
         const type = this.pet.rng.choice(types);
 
-        // Generate Position (Will be refined by MainScene relative to screen)
-        // We store normalized 0-1 coords to be safe across resolutions?
-        // Or just generic "Garden" coords (0-800, 300-600)
-        // Let's store generic relative coords (x: 0.1-0.9, y: 0.6-0.9)
         const x = this.pet.rng.range(10, 90) / 100;
         const y = this.pet.rng.range(60, 90) / 100;
 
@@ -49,18 +45,18 @@ export class DebrisSystem {
             created: Date.now()
         };
 
-        this.pet.debris.push(debris);
+        this.pet.debris[debris.id] = debris;
+        this.pet.debrisCount++;
         this.pet.recalculateCleanlinessPenalty();
         this.pet.addJournalEntry(`Something appeared in the garden: ${type}`);
     }
 
     /**
-     * Spawns a poop item. Called when hunger is processed?
-     * Or simpler: Daily check.
+     * Spawns a poop item.
      */
     spawnPoop() {
         // Limit
-        if (this.pet.debris.length >= Config.DEBRIS.MAX_COUNT) return;
+        if (this.pet.debrisCount >= Config.DEBRIS.MAX_COUNT) return;
 
         let x, y;
         let valid = false;
@@ -68,28 +64,30 @@ export class DebrisSystem {
         const maxAttempts = 10;
         const overlapThreshold = 0.05;
 
-        // Try to find a spot that doesn't overlap existing debris
         while (!valid && attempts < maxAttempts) {
             attempts++;
             x = this.pet.rng.range(10, 90) / 100;
             y = this.pet.rng.range(60, 90) / 100;
 
-            // Check overlap with existing debris in same location
             const location = this.pet.location || 'GARDEN';
-            valid = !this.pet.debris.some(d => {
-                // Ignore debris in other locations
+            let isOverlapping = false;
+
+            // Optimized overlap check using safe iteration
+            for (const id of Object.keys(this.pet.debris)) {
+                const d = this.pet.debris[id];
                 const dLoc = d.location || 'GARDEN';
-                if (dLoc !== location) return false;
+                if (dLoc !== location) continue;
 
                 const dist = Math.hypot(d.x - x, d.y - y);
-                return dist < overlapThreshold;
-            });
+                if (dist < overlapThreshold) {
+                    isOverlapping = true;
+                    break;
+                }
+            }
+            valid = !isOverlapping;
         }
 
-        if (!valid) {
-             // Failed to find spot, skip spawn to avoid clutter
-             return;
-        }
+        if (!valid) return;
 
         const debris = {
             id: this.pet.generateUUID(),
@@ -99,10 +97,10 @@ export class DebrisSystem {
             y: y,
             created: Date.now()
         };
-        this.pet.debris.push(debris);
+        this.pet.debris[debris.id] = debris;
+        this.pet.debrisCount++;
         this.pet.recalculateCleanlinessPenalty();
 
-        // Chance for a funny journal entry (10%)
         if (this.pet.rng.random() < 0.1) {
              this.pet.addJournalEntry("The garden has received a... natural gift.");
         } else {
@@ -116,31 +114,30 @@ export class DebrisSystem {
      * @returns {object} Result { success, message, reward }
      */
     clean(id) {
-        const index = this.pet.debris.findIndex(d => d.id === id);
-        if (index === -1) return { success: false, message: "Item not found." };
+        // Security: Ensure it's an own property to prevent prototype injection
+        if (!Object.prototype.hasOwnProperty.call(this.pet.debris, id)) {
+            return { success: false, message: "Item not found." };
+        }
 
-        const item = this.pet.debris[index];
+        const item = this.pet.debris[id];
 
-        // Cost
         if (this.pet.stats.energy < Config.DEBRIS.CLEAN_ENERGY_COST) {
             return { success: false, message: "Too tired to clean." };
         }
         this.pet.stats.energy -= Config.DEBRIS.CLEAN_ENERGY_COST;
 
-        // Remove
-        this.pet.debris.splice(index, 1);
+        delete this.pet.debris[id];
+        this.pet.debrisCount--;
         this.pet.recalculateCleanlinessPenalty();
 
         let message = "";
-
-        // Logic based on Type
         if (item.type === 'weed') {
             message = "You pulled a weed.";
             this.pet.skills.resilience += Config.DEBRIS.CLEAN_SKILL_GAIN;
         } else if (item.type === 'poop') {
             message = "Yuck! You cleaned it up.";
             this.pet.skills.resilience += (Config.DEBRIS.CLEAN_SKILL_GAIN * 2);
-            this.pet.stats.happiness += 5; // Relief
+            this.pet.stats.happiness += 5;
         } else if (item.type === 'rock_small') {
             message = "You found a Shiny Stone!";
             this.pet.inventorySystem.addItem('Shiny Stone', 1);

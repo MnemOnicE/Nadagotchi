@@ -7,7 +7,7 @@ import { setupPhaserMock, createMockAdd } from './helpers/mockPhaser';
 setupPhaserMock();
 
 // Now require MainScene after global.Phaser is set
-const { MainScene } = require('../js/MainScene');
+const { MainScene } = require('../js/MainScene.js');
 const { EventKeys } = require('../js/EventKeys');
 
 // Mock Config
