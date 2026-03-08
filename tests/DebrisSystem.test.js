@@ -7,6 +7,7 @@ import { Config } from '../js/Config.js';
 class MockPet {
     constructor() {
         this.debris = {};
+         this.debrisCount = 0;
         this.rng = {
             random: jest.fn(),
             choice: jest.fn(arr => arr[0]),
@@ -54,6 +55,7 @@ describe('DebrisSystem', () => {
         for (let i = 0; i < Config.DEBRIS.MAX_COUNT; i++) {
             pet.debris[`id-${i}`] = {};
         }
+         pet.debrisCount = Config.DEBRIS.MAX_COUNT;
         pet.rng.random.mockReturnValue(0.1);
 
         system.spawnDaily('Spring', 'Sunny');
@@ -161,6 +163,7 @@ describe('DebrisSystem', () => {
             for (let i = 0; i < Config.DEBRIS.MAX_COUNT; i++) {
                 pet.debris[`id-${i}`] = { x: 0.1 * i, y: 0.1 * i };
             }
+            pet.debrisCount = Config.DEBRIS.MAX_COUNT;
 
             system.spawnPoop();
             expect(Object.keys(pet.debris).length).toBe(Config.DEBRIS.MAX_COUNT);

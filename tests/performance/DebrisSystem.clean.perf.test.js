@@ -9,8 +9,8 @@ class MockPet {
                 id: `id-${i}`,
                 type: 'weed',
                 location: 'GARDEN',
-                x: Math.random(),
-                y: Math.random(),
+                x: 0.5, // Constant or use a seeded RNG to avoid SonarCloud hotspots
+                y: 0.5,
                 created: Date.now()
             };
         }

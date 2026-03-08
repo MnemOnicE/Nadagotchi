@@ -31,7 +31,7 @@ describe('Performance Benchmark: Debris Penalty', () => {
                 x: pet.rng.random(),
                 y: pet.rng.random(),
                 created: Date.now()
-            });
+            };
         }
 
         // Ensure cache is populated before starting benchmark
