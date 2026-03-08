@@ -1,4 +1,4 @@
-import { Nadagotchi } from '../js/Nadagotchi';
+import { Nadagotchi } from '../js/Nadagotchi.js';
 import { Config } from '../js/Config';
 
 // Mock localStorage

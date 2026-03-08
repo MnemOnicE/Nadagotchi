@@ -19,7 +19,7 @@ export class DebrisSystem {
      */
     spawnDaily(season, weather) {
         // Limit max debris
-        if (this.pet.debris.length >= Config.DEBRIS.MAX_COUNT) return;
+        if (this.pet.debrisCount >= Config.DEBRIS.MAX_COUNT) return;
 
         // Base Chance
         if (this.pet.rng.random() > Config.DEBRIS.SPAWN_CHANCE_DAILY) return;
@@ -49,7 +49,8 @@ export class DebrisSystem {
             created: Date.now()
         };
 
-        this.pet.debris.push(debris);
+        this.pet.debris[debris.id] = debris;
+        this.pet.debrisCount++;
         this.pet.recalculateCleanlinessPenalty();
         this.pet.addJournalEntry(`Something appeared in the garden: ${type}`);
     }
@@ -60,7 +61,7 @@ export class DebrisSystem {
      */
     spawnPoop() {
         // Limit
-        if (this.pet.debris.length >= Config.DEBRIS.MAX_COUNT) return;
+        if (this.pet.debrisCount >= Config.DEBRIS.MAX_COUNT) return;
 
         let x, y;
         let valid = false;
@@ -76,7 +77,7 @@ export class DebrisSystem {
 
             // Check overlap with existing debris in same location
             const location = this.pet.location || 'GARDEN';
-            valid = !this.pet.debris.some(d => {
+            valid = !Object.values(this.pet.debris).some(d => {
                 // Ignore debris in other locations
                 const dLoc = d.location || 'GARDEN';
                 if (dLoc !== location) return false;
@@ -99,7 +100,8 @@ export class DebrisSystem {
             y: y,
             created: Date.now()
         };
-        this.pet.debris.push(debris);
+        this.pet.debris[debris.id] = debris;
+        this.pet.debrisCount++;
         this.pet.recalculateCleanlinessPenalty();
 
         // Chance for a funny journal entry (10%)
@@ -116,10 +118,8 @@ export class DebrisSystem {
      * @returns {object} Result { success, message, reward }
      */
     clean(id) {
-        const index = this.pet.debris.findIndex(d => d.id === id);
-        if (index === -1) return { success: false, message: "Item not found." };
-
-        const item = this.pet.debris[index];
+        const item = this.pet.debris[id];
+        if (!item) return { success: false, message: "Item not found." };
 
         // Cost
         if (this.pet.stats.energy < Config.DEBRIS.CLEAN_ENERGY_COST) {
@@ -128,7 +128,8 @@ export class DebrisSystem {
         this.pet.stats.energy -= Config.DEBRIS.CLEAN_ENERGY_COST;
 
         // Remove
-        this.pet.debris.splice(index, 1);
+        delete this.pet.debris[id];
+        this.pet.debrisCount--;
         this.pet.recalculateCleanlinessPenalty();
 
         let message = "";

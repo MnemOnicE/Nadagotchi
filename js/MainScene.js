@@ -693,9 +693,10 @@ export class MainScene extends Phaser.Scene {
         const height = this.cameras.main.height;
         const currentLocation = (this.location === 'INDOOR') ? this.currentRoom : 'GARDEN';
 
-        this.nadagotchi.debris.forEach(d => {
+        for (const debrisId in this.nadagotchi.debris) {
+            const d = this.nadagotchi.debris[debrisId];
             const dLocation = d.location || 'GARDEN';
-            if (dLocation !== currentLocation) return;
+            if (dLocation !== currentLocation) continue;
 
             const x = d.x * width;
             const y = d.y * height;
@@ -717,7 +718,7 @@ export class MainScene extends Phaser.Scene {
             });
 
             this.debrisGroup.add(sprite);
-        });
+        }
     }
 
     checkMerchantVisibility() {

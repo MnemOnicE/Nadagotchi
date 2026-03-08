@@ -1,5 +1,5 @@
 
-import { Nadagotchi } from '../js/Nadagotchi';
+import { Nadagotchi } from '../js/Nadagotchi.js';
 import { GeneticsSystem, Genome } from '../js/GeneticsSystem';
 
 class LocalStorageMock {

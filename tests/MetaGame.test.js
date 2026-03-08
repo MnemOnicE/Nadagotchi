@@ -1,4 +1,4 @@
-import { Nadagotchi } from '../js/Nadagotchi';
+import { Nadagotchi } from '../js/Nadagotchi.js';
 import { NarrativeSystem } from '../js/NarrativeSystem';
 
 describe('Meta-Game Features', () => {

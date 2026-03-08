@@ -1,5 +1,5 @@
 import { PersistenceManager } from '../js/PersistenceManager';
-import { Nadagotchi } from '../js/Nadagotchi';
+import { Nadagotchi } from '../js/Nadagotchi.js';
 
 // Mock localStorage
 class LocalStorageMock {

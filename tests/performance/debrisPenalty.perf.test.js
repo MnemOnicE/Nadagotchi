@@ -14,7 +14,7 @@ describe('Performance Benchmark: Debris Penalty', () => {
     beforeEach(() => {
         pet = new Nadagotchi('Adventurer');
         // Clear any existing debris
-        pet.debris = [];
+        pet.debris = {};
     });
 
     test('Benchmark Debris Penalty Calculation', () => {
@@ -24,7 +24,7 @@ describe('Performance Benchmark: Debris Penalty', () => {
         // Setup: Create a mix of debris types
         for (let i = 0; i < debrisCount; i++) {
             const type = i % 2 === 0 ? 'weed' : 'poop';
-            pet.debris.push({
+            pet.debris[`debris-${i}`] = {
                 id: `debris-${i}`,
                 type: type,
                 // Use deterministic RNG from pet instead of Math.random()
