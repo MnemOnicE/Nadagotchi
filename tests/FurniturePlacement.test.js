@@ -7,7 +7,7 @@ import { setupPhaserMock, createMockAdd } from './helpers/mockPhaser';
 setupPhaserMock();
 
 // Require MainScene after Phaser is defined
-const { MainScene } = require('../js/MainScene');
+const { MainScene } = require('../js/MainScene.js');
 
 // Mock Config
 jest.mock('../js/Config.js', () => ({

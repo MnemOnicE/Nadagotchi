@@ -1,14 +1,14 @@
 
 import { jest } from '@jest/globals';
-import { Nadagotchi } from '../js/Nadagotchi';
+import { Nadagotchi } from '../js/Nadagotchi.js';
 import { setupPhaserMock, createMockAdd, mockGameObject } from './helpers/mockPhaser';
 
 // 1. Setup Phaser Mock
 setupPhaserMock();
 
 // 2. Mock Dependencies
-jest.mock('../js/Nadagotchi');
-jest.mock('../js/PersistenceManager');
+jest.mock('../js/Nadagotchi.js');
+jest.mock('../js/PersistenceManager.js');
 jest.mock('../js/Calendar');
 jest.mock('../js/EventManager');
 jest.mock('../js/WorldClock');
@@ -24,12 +24,12 @@ jest.mock('../js/utils/SoundSynthesizer', () => ({
     }
 }));
 
-const { MainScene } = require('../js/MainScene');
-const { PersistenceManager } = require('../js/PersistenceManager');
-const { Calendar } = require('../js/Calendar');
-const { EventManager } = require('../js/EventManager');
-const { WorldClock } = require('../js/WorldClock');
-const { WeatherSystem } = require('../js/WeatherSystem');
+const { MainScene } = require('../js/MainScene.js');
+const { PersistenceManager } = require('../js/PersistenceManager.js');
+const { Calendar } = require('../js/Calendar.js');
+const { EventManager } = require('../js/EventManager.js');
+const { WorldClock } = require('../js/WorldClock.js');
+const { WeatherSystem } = require('../js/WeatherSystem.js');
 const { EventKeys } = require('../js/EventKeys');
 
 describe('Performance Repro: Event Emission', () => {
@@ -47,7 +47,7 @@ describe('Performance Repro: Event Emission', () => {
              skills: { logic: 10 },
              currentCareer: 'Innovator',
              inventory: {},
-             debris: [],
+             debris: {},
              questSystem: {
                  generateDailyQuest: jest.fn(),
                  hasNewQuest: jest.fn().mockReturnValue(false)
@@ -169,6 +169,7 @@ describe('Performance Repro: Event Emission', () => {
         if (!scene.nadagotchi.relationshipSystem) scene.nadagotchi.relationshipSystem = { dailyUpdate: jest.fn() };
         if (!scene.nadagotchi.questSystem) scene.nadagotchi.questSystem = { generateDailyQuest: jest.fn(), hasNewQuest: jest.fn() };
         if (!scene.nadagotchi.debrisSystem) scene.nadagotchi.debrisSystem = { spawnDaily: jest.fn(), spawnPoop: jest.fn() };
+        scene.nadagotchi.debris = {};
         if (!scene.nadagotchi.live) scene.nadagotchi.live = jest.fn();
         if (!scene.nadagotchi.init) scene.nadagotchi.init = jest.fn();
         scene.thoughtBubble = { visible: false, setVisible: jest.fn() }; scene.exploreBubble = { visible: false, setVisible: jest.fn() }; scene.sprite = { setFrame: jest.fn(), setPosition: jest.fn(), setScale: jest.fn(), setAngle: jest.fn(), setAlpha: jest.fn(), setTint: jest.fn(), clearTint: jest.fn() };

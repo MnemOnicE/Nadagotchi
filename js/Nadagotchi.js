@@ -272,8 +272,21 @@ export class Nadagotchi {
             writable: true
         });
 
-        /** @type {Array<object>} Debris items in the world (weeds, rocks, etc.). */
-        this.debris = loadedData ? (loadedData.debris || []) : [];
+        /** @type {Object.<string, object>} Debris items in the world (weeds, rocks, etc.). */
+        if (loadedData && loadedData.debris) {
+            if (Array.isArray(loadedData.debris)) {
+                this.debris = {};
+                loadedData.debris.forEach(d => {
+                    if (d.id) this.debris[d.id] = d;
+                });
+            } else {
+                this.debris = loadedData.debris;
+            }
+        } else {
+            this.debris = {};
+        }
+        /** @type {number} Cached count of debris items for O(1) length checks. */
+        this.debrisCount = Object.keys(this.debris).length;
 
         // Initialize Debris System
         Object.defineProperty(this, 'debrisSystem', {
@@ -1085,7 +1098,8 @@ export class Nadagotchi {
         this._cachedGlobalPenalty = 0;
         this._cachedLocalPenalties = {};
 
-        for (const d of this.debris) {
+        for (const debrisId in this.debris) {
+            const d = this.debris[debrisId];
             let penalty = 0;
             if (d.type === 'weed') penalty = Config.DEBRIS.HAPPINESS_PENALTY_PER_WEED;
             else if (d.type === 'poop') penalty = Config.DEBRIS.HAPPINESS_PENALTY_PER_POOP;

@@ -1,6 +1,6 @@
 
 import { PersistenceManager } from '../js/PersistenceManager';
-import { Nadagotchi } from '../js/Nadagotchi';
+import { Nadagotchi } from '../js/Nadagotchi.js';
 import { jest } from '@jest/globals';
 
 // Mock crypto for Nadagotchi - Use safer implementation for tests if possible

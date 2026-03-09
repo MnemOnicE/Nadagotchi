@@ -17,8 +17,8 @@ jest.mock('../js/utils/SoundSynthesizer', () => ({
     }
 }));
 
-const { MainScene } = require('../js/MainScene');
-const { Nadagotchi } = require('../js/Nadagotchi');
+const { MainScene } = require('../js/MainScene.js');
+const { Nadagotchi } = require('../js/Nadagotchi.js');
 const { PersistenceManager } = require('../js/PersistenceManager');
 const { EventKeys } = require('../js/EventKeys');
 

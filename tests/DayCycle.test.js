@@ -1,6 +1,6 @@
 
 import { jest } from '@jest/globals';
-import { Nadagotchi } from '../js/Nadagotchi';
+import { Nadagotchi } from '../js/Nadagotchi.js';
 import { Calendar } from '../js/Calendar';
 import { WorldClock } from '../js/WorldClock';
 import { EventManager } from '../js/EventManager';
@@ -12,11 +12,11 @@ import { setupPhaserMock, createMockAdd, mockGameObject } from './helpers/mockPh
 setupPhaserMock();
 
 // Required AFTER global.Phaser is set
-const { MainScene } = require('../js/MainScene');
+const { MainScene } = require('../js/MainScene.js');
 
 // Mock Dependencies
-jest.mock('../js/Nadagotchi');
-jest.mock('../js/PersistenceManager');
+jest.mock('../js/Nadagotchi.js');
+jest.mock('../js/PersistenceManager.js');
 jest.mock('../js/Calendar');
 jest.mock('../js/EventManager');
 jest.mock('../js/WorldClock');
@@ -32,7 +32,7 @@ jest.mock('../js/utils/SoundSynthesizer', () => ({
     }
 }));
 
-const { PersistenceManager } = require('../js/PersistenceManager');
+const { PersistenceManager } = require('../js/PersistenceManager.js');
 
 describe('Day Cycle Integration', () => {
     let scene;
@@ -53,7 +53,7 @@ describe('Day Cycle Integration', () => {
              stats: { happiness: 50, hunger: 50, energy: 50 },
              maxStats: { happiness: 100, hunger: 100, energy: 100 },
              inventory: {},
-             debris: [],
+             debris: {},
              relationshipSystem: { dailyUpdate: jest.fn() },
              questSystem: {
                  generateDailyQuest: jest.fn(),
@@ -169,7 +169,7 @@ describe('Day Cycle Integration', () => {
         if (!scene.nadagotchi.questSystem) scene.nadagotchi.questSystem = { generateDailyQuest: jest.fn(), hasNewQuest: jest.fn() };
         if (!scene.nadagotchi.debrisSystem) scene.nadagotchi.debrisSystem = { spawnDaily: jest.fn(), spawnPoop: jest.fn() };
         if (!scene.nadagotchi.live) scene.nadagotchi.live = jest.fn();
-        scene.nadagotchi.debris = [];
+        scene.nadagotchi.debris = {};
         if (!scene.nadagotchi.init) scene.nadagotchi.init = jest.fn();
         scene.thoughtBubble = { visible: false, setVisible: jest.fn() }; scene.exploreBubble = { visible: false, setVisible: jest.fn() }; scene.sprite = { setFrame: jest.fn(), setPosition: jest.fn(), setScale: jest.fn(), setAngle: jest.fn(), setAlpha: jest.fn(), setTint: jest.fn(), clearTint: jest.fn() };
         scene.lastStatsUpdate = 0;
