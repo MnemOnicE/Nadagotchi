@@ -30,14 +30,6 @@ export class Nadagotchi {
         this.unlockedCareers = Array.from(unlockedSet);
         this.save();
     }
-
-    /**
-     * Persists the Nadagotchi's state to local storage.
-     * @returns {Promise<void>}
-     */
-    async save() {
-        await this.persistence.savePet(this);
-    }
     /**
      * Creates a new Nadagotchi instance.
      * @param {string} initialArchetype - The initial archetype of the Nadagotchi (e.g., 'Adventurer').
@@ -272,20 +264,27 @@ export class Nadagotchi {
             writable: true
         });
 
+        // --- Optimized Debris Map Implementation ---
         /** @type {Object.<string, object>} Debris items in the world (weeds, rocks, etc.). */
+        this.debris = {};
         if (loadedData && loadedData.debris) {
             if (Array.isArray(loadedData.debris)) {
-                this.debris = {};
+                // Migration logic for legacy array-based saves
                 loadedData.debris.forEach(d => {
-                    if (d.id) this.debris[d.id] = d;
+                    if (d.id && d.id !== '__proto__' && d.id !== 'constructor') {
+                        this.debris[d.id] = d;
+                    }
                 });
             } else {
-                this.debris = loadedData.debris;
+                // Own property check for security
+                for (const key of Object.keys(loadedData.debris)) {
+                    if (key !== '__proto__' && key !== 'constructor') {
+                        this.debris[key] = loadedData.debris[key];
+                    }
+                }
             }
-        } else {
-            this.debris = {};
         }
-        /** @type {number} Cached count of debris items for O(1) length checks. */
+        /** @type {number} Cached count for O(1) size checks. */
         this.debrisCount = Object.keys(this.debris).length;
 
         // Initialize Debris System
@@ -1093,13 +1092,16 @@ export class Nadagotchi {
     /**
      * Recalculates the cached cleanliness penalty values.
      * Optimization to avoid iterating debris every frame.
+     * Iterates over the debris map to calculate aggregate penalties.
      */
     recalculateCleanlinessPenalty() {
         this._cachedGlobalPenalty = 0;
         this._cachedLocalPenalties = {};
 
-        for (const debrisId in this.debris) {
-            const d = this.debris[debrisId];
+        // Use Object.keys for iteration to avoid intermediate array allocation from Object.values()
+        // and reduce Garbage Collection pressure in the live loop.
+        for (const id of Object.keys(this.debris)) {
+            const d = this.debris[id];
             let penalty = 0;
             if (d.type === 'weed') penalty = Config.DEBRIS.HAPPINESS_PENALTY_PER_WEED;
             else if (d.type === 'poop') penalty = Config.DEBRIS.HAPPINESS_PENALTY_PER_POOP;

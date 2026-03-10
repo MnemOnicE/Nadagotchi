@@ -7,7 +7,7 @@ import { Config } from '../js/Config.js';
 class MockPet {
     constructor() {
         this.debris = {};
-         this.debrisCount = 0;
+        this.debrisCount = 0;
         this.rng = {
             random: jest.fn(),
             choice: jest.fn(arr => arr[0]),
@@ -35,17 +35,14 @@ describe('DebrisSystem', () => {
     });
 
     test('spawnDaily adds debris when successful', () => {
-        // Force random to pass check (> CHANCE, so we need low number for success? No, spawnDaily logic is:
-        // if (random() > CHANCE) return;
-        // Config.DEBRIS.SPAWN_CHANCE_DAILY is 0.8
-        // So 0.1 passes.
+        // Config.DEBRIS.SPAWN_CHANCE_DAILY is 0.8. 0.1 passes.
         pet.rng.random.mockReturnValue(0.1);
         pet.rng.choice.mockReturnValue('weed');
 
         system.spawnDaily('Spring', 'Sunny');
 
+        expect(pet.debrisCount).toBe(1);
         const debrisValues = Object.values(pet.debris);
-        expect(debrisValues.length).toBe(1);
         expect(debrisValues[0].type).toBe('weed');
         expect(pet.addJournalEntry).toHaveBeenCalled();
     });
@@ -54,12 +51,12 @@ describe('DebrisSystem', () => {
         // Fill debris
         for (let i = 0; i < Config.DEBRIS.MAX_COUNT; i++) {
             pet.debris[`id-${i}`] = {};
+            pet.debrisCount++;
         }
-         pet.debrisCount = Config.DEBRIS.MAX_COUNT;
         pet.rng.random.mockReturnValue(0.1);
 
         system.spawnDaily('Spring', 'Sunny');
-        expect(Object.keys(pet.debris).length).toBe(Config.DEBRIS.MAX_COUNT); // Should not increase
+        expect(pet.debrisCount).toBe(Config.DEBRIS.MAX_COUNT); // Should not increase
     });
 
     describe('Seasonal Spawning', () => {
@@ -76,8 +73,8 @@ describe('DebrisSystem', () => {
 
             system.spawnDaily(season, 'Sunny');
 
+            expect(pet.debrisCount).toBe(1);
             const debrisValues = Object.values(pet.debris);
-            expect(debrisValues.length).toBe(1);
             expect(debrisValues[0].type).toBe(expectedItem);
             expect(pet.rng.choice).toHaveBeenCalledWith(expect.arrayContaining([expectedItem]));
         });
@@ -100,26 +97,29 @@ describe('DebrisSystem', () => {
     describe('Cleaning', () => {
         test('clean removes item and applies rewards (Weed)', () => {
             pet.debris['test-weed'] = { id: 'test-weed', type: 'weed' };
+            pet.debrisCount = 1;
 
             const result = system.clean('test-weed');
 
             expect(result.success).toBe(true);
-            expect(Object.keys(pet.debris).length).toBe(0);
+            expect(pet.debrisCount).toBe(0);
             expect(pet.stats.energy).toBe(100 - Config.DEBRIS.CLEAN_ENERGY_COST);
             expect(pet.skills.resilience).toBe(Config.DEBRIS.CLEAN_SKILL_GAIN);
         });
 
         test('clean fails if not enough energy', () => {
             pet.debris['test-weed'] = { id: 'test-weed', type: 'weed' };
+            pet.debrisCount = 1;
             pet.stats.energy = 0;
 
             const result = system.clean('test-weed');
             expect(result.success).toBe(false);
-            expect(Object.keys(pet.debris).length).toBe(1);
+            expect(pet.debrisCount).toBe(1);
         });
 
         test('clean (Poop) increases happiness', () => {
             pet.debris['test-poop'] = { id: 'test-poop', type: 'poop' };
+            pet.debrisCount = 1;
             pet.stats.happiness = 50;
 
             system.clean('test-poop');
@@ -134,6 +134,7 @@ describe('DebrisSystem', () => {
             ['Sticks', 'Sticks']
         ])('clean (%s) adds %s to inventory', (type, expectedInventoryItem) => {
             pet.debris['test-item'] = { id: 'test-item', type: type };
+            pet.debrisCount = 1;
 
             system.clean('test-item');
 
@@ -150,8 +151,8 @@ describe('DebrisSystem', () => {
 
             system.spawnPoop();
 
+            expect(pet.debrisCount).toBe(1);
             const debrisValues = Object.values(pet.debris);
-            expect(debrisValues.length).toBe(1);
             expect(debrisValues[0].type).toBe('poop');
             expect(debrisValues[0].x).toBe(0.5);
             expect(debrisValues[0].y).toBe(0.5);
@@ -162,16 +163,17 @@ describe('DebrisSystem', () => {
             // Fill debris
             for (let i = 0; i < Config.DEBRIS.MAX_COUNT; i++) {
                 pet.debris[`id-${i}`] = { x: 0.1 * i, y: 0.1 * i };
+                pet.debrisCount++;
             }
-            pet.debrisCount = Config.DEBRIS.MAX_COUNT;
 
             system.spawnPoop();
-            expect(Object.keys(pet.debris).length).toBe(Config.DEBRIS.MAX_COUNT);
+            expect(pet.debrisCount).toBe(Config.DEBRIS.MAX_COUNT);
         });
 
         test('spawnPoop retries on overlap and finds valid spot', () => {
             // Pre-fill item at (0.5, 0.5)
             pet.debris['existing'] = { id: 'existing', x: 0.5, y: 0.5 };
+            pet.debrisCount = 1;
 
             // rng.range calls come in pairs: (x, y).
             // First call pair: Return (50, 50) -> (0.5, 0.5) -> COLLISION
@@ -182,8 +184,9 @@ describe('DebrisSystem', () => {
 
             system.spawnPoop();
 
-            expect(Object.keys(pet.debris).length).toBe(2);
-            const newItem = Object.values(pet.debris).find(d => d.id !== 'existing');
+            expect(pet.debrisCount).toBe(2);
+            const debrisValues = Object.values(pet.debris);
+            const newItem = debrisValues.find(d => d.id !== 'existing');
             expect(newItem.type).toBe('poop');
             expect(newItem.x).toBe(0.8);
             expect(newItem.y).toBe(0.8);
@@ -192,6 +195,7 @@ describe('DebrisSystem', () => {
         test('spawnPoop aborts if no valid spot found', () => {
              // Pre-fill item at (0.5, 0.5)
              pet.debris['existing'] = { id: 'existing', x: 0.5, y: 0.5 };
+             pet.debrisCount = 1;
 
              // Force rng to always return (50, 50) -> Collision
              pet.rng.range.mockReturnValue(50);
@@ -199,7 +203,7 @@ describe('DebrisSystem', () => {
              system.spawnPoop();
 
              // Should not add item
-             expect(Object.keys(pet.debris).length).toBe(1);
+             expect(pet.debrisCount).toBe(1);
         });
 
         test('spawnPoop adds funny journal entry on chance', () => {

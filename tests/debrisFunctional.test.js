@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { Nadagotchi } from '../js/Nadagotchi.js';
+import { Nadagotchi } from '../js/Nadagotchi';
 import { setupPhaserMock } from './helpers/mockPhaser';
 import { setupLocalStorageMock } from './helpers/mockLocalStorage';
 import { Config } from '../js/Config';
@@ -13,6 +13,7 @@ describe('Debris System Functional Tests', () => {
     beforeEach(() => {
         pet = new Nadagotchi('Adventurer');
         pet.debris = {};
+        pet.debrisCount = 0;
         pet.recalculateCleanlinessPenalty();
     });
 
@@ -22,8 +23,8 @@ describe('Debris System Functional Tests', () => {
 
         pet.debrisSystem.spawnDaily('Spring', 'Sunny');
 
+        expect(pet.debrisCount).toBeGreaterThan(0);
         const debrisValues = Object.values(pet.debris);
-        expect(debrisValues.length).toBeGreaterThan(0);
         expect(debrisValues[0].location).toBe('GARDEN');
     });
 
@@ -35,16 +36,17 @@ describe('Debris System Functional Tests', () => {
         jest.spyOn(pet.rng, 'range').mockReturnValue(50); // Mock range for coords if needed
 
         pet.debrisSystem.spawnPoop();
+        expect(pet.debrisCount).toBeGreaterThan(0);
         const debrisValues = Object.values(pet.debris);
-        expect(debrisValues.length).toBeGreaterThan(0);
         const poop = debrisValues.find(d => d.type === 'poop');
         expect(poop.location).toBe('Kitchen');
     });
 
     test('Penalty calculation includes Global + Local', () => {
-        // 1. Add debris manually with location
-        pet.debris['id-1'] = { type: 'weed', location: 'GARDEN' };
-        pet.debris['id-2'] = { type: 'poop', location: 'Kitchen' };
+        // 1. Add debris manually with unique IDs and locations
+        pet.debris['id1'] = { type: 'weed', location: 'GARDEN' };
+        pet.debris['id2'] = { type: 'poop', location: 'Kitchen' };
+        pet.debrisCount = 2;
         pet.recalculateCleanlinessPenalty();
 
         const weedPenalty = Config.DEBRIS.HAPPINESS_PENALTY_PER_WEED;

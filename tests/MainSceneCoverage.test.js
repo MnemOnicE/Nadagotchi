@@ -25,11 +25,11 @@ jest.mock('../js/utils/SoundSynthesizer', () => ({
 
 const { MainScene } = require('../js/MainScene.js');
 const { Nadagotchi } = require('../js/Nadagotchi.js');
-const { PersistenceManager } = require('../js/PersistenceManager');
-const { Calendar } = require('../js/Calendar');
-const { EventManager } = require('../js/EventManager');
-const { WorldClock } = require('../js/WorldClock');
-const { WeatherSystem } = require('../js/WeatherSystem');
+const { PersistenceManager } = require('../js/PersistenceManager.js');
+const { Calendar } = require('../js/Calendar.js');
+const { EventManager } = require('../js/EventManager.js');
+const { WorldClock } = require('../js/WorldClock.js');
+const { WeatherSystem } = require('../js/WeatherSystem.js');
 const { WeatherParticleManager } = require('../js/WeatherParticleManager');
 const { EventKeys } = require('../js/EventKeys');
 
