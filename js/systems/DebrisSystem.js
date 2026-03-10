@@ -37,19 +37,30 @@ export class DebrisSystem {
         const x = this.pet.rng.range(10, 90) / 100;
         const y = this.pet.rng.range(60, 90) / 100;
 
+        this._addDebris(type, x, y, 'GARDEN');
+        this.pet.addJournalEntry(`Something appeared in the garden: ${type}`);
+    }
+
+    /**
+     * Internal helper to add a debris item to the pet's map and update state.
+     * @param {string} type
+     * @param {number} x
+     * @param {number} y
+     * @param {string} location
+     * @private
+     */
+    _addDebris(type, x, y, location) {
         const debris = {
             id: this.pet.generateUUID(),
             type: type,
-            location: 'GARDEN',
+            location: location,
             x: x,
             y: y,
             created: Date.now()
         };
-
         this.pet.debris[debris.id] = debris;
         this.pet.debrisCount++;
         this.pet.recalculateCleanlinessPenalty();
-        this.pet.addJournalEntry(`Something appeared in the garden: ${type}`);
     }
 
     /**
@@ -90,17 +101,7 @@ export class DebrisSystem {
 
         if (!valid) return;
 
-        const debris = {
-            id: this.pet.generateUUID(),
-            type: 'poop',
-            location: this.pet.location || 'GARDEN',
-            x: x,
-            y: y,
-            created: Date.now()
-        };
-        this.pet.debris[debris.id] = debris;
-        this.pet.debrisCount++;
-        this.pet.recalculateCleanlinessPenalty();
+        this._addDebris('poop', x, y, this.pet.location || 'GARDEN');
 
         // Chance for a funny journal entry (10%)
         if (this.pet.rng.random() < 0.1) {

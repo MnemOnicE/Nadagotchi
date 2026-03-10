@@ -30,12 +30,12 @@ describe('DebugConsole', () => {
             nadagotchi: {
                 coins: 0,
                 save: jest.fn(),
-                stats: {},
+                stats: { hunger: 100, energy: 100, happiness: 100 },
                 inventorySystem: { addItem: jest.fn() },
                 unlockAllCareers: jest.fn(),
                 inventory: {}
             },
-            gameSettings: {},
+            gameSettings: { gameSpeed: 1.0 },
             add: {
                 graphics: jest.fn().mockReturnValue({
                     clear: jest.fn(),
@@ -70,10 +70,10 @@ describe('DebugConsole', () => {
         // Execute click
         coinButton.click();
 
-        // Verify alert was NOT called (it is currently called, so this test fails initially)
-        // And verify showToast WAS called
+        // Verify alert was NOT called
         expect(window.alert).not.toHaveBeenCalled();
         expect(mockUIScene.showToast).toHaveBeenCalledWith("Added Coins", "+1000 Coins", "💰");
+        expect(mockScene.nadagotchi.save).toHaveBeenCalled();
     });
 
     test('should use showToast for addAllItems', () => {
