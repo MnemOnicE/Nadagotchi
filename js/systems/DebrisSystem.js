@@ -33,10 +33,7 @@ export class DebrisSystem {
 
         const type = this.pet.rng.choice(types);
 
-        // Generate Position (Will be refined by MainScene relative to screen)
-        // We store normalized 0-1 coords to be safe across resolutions?
-        // Or just generic "Garden" coords (0-800, 300-600)
-        // Let's store generic relative coords (x: 0.1-0.9, y: 0.6-0.9)
+        // Generate Position
         const x = this.pet.rng.range(10, 90) / 100;
         const y = this.pet.rng.range(60, 90) / 100;
 
@@ -56,8 +53,7 @@ export class DebrisSystem {
     }
 
     /**
-     * Spawns a poop item. Called when hunger is processed?
-     * Or simpler: Daily check.
+     * Spawns a poop item.
      */
     spawnPoop() {
         // Limit
@@ -77,20 +73,22 @@ export class DebrisSystem {
 
             // Check overlap with existing debris in same location
             const location = this.pet.location || 'GARDEN';
-            valid = !Object.values(this.pet.debris).some(d => {
-                // Ignore debris in other locations
+            let isOverlapping = false;
+            for (const id of Object.keys(this.pet.debris)) {
+                const d = this.pet.debris[id];
                 const dLoc = d.location || 'GARDEN';
-                if (dLoc !== location) return false;
+                if (dLoc !== location) continue;
 
                 const dist = Math.hypot(d.x - x, d.y - y);
-                return dist < overlapThreshold;
-            });
+                if (dist < overlapThreshold) {
+                    isOverlapping = true;
+                    break;
+                }
+            }
+            valid = !isOverlapping;
         }
 
-        if (!valid) {
-             // Failed to find spot, skip spawn to avoid clutter
-             return;
-        }
+        if (!valid) return;
 
         const debris = {
             id: this.pet.generateUUID(),
@@ -118,8 +116,12 @@ export class DebrisSystem {
      * @returns {object} Result { success, message, reward }
      */
     clean(id) {
+        // Security: Ensure it's an own property to prevent prototype injection
+        if (!Object.prototype.hasOwnProperty.call(this.pet.debris, id)) {
+            return { success: false, message: "Item not found." };
+        }
+
         const item = this.pet.debris[id];
-        if (!item) return { success: false, message: "Item not found." };
 
         // Cost
         if (this.pet.stats.energy < Config.DEBRIS.CLEAN_ENERGY_COST) {

@@ -19,7 +19,7 @@ jest.mock('../js/utils/SoundSynthesizer', () => ({
 
 const { MainScene } = require('../js/MainScene.js');
 const { Nadagotchi } = require('../js/Nadagotchi.js');
-const { PersistenceManager } = require('../js/PersistenceManager');
+const { PersistenceManager } = require('../js/PersistenceManager.js');
 const { EventKeys } = require('../js/EventKeys');
 
 describe('MainScene Duplication Bug', () => {
