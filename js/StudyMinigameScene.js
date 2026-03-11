@@ -1,3 +1,4 @@
+import { BaseMinigameScene } from './BaseMinigameScene.js';
 import { EventKeys } from './EventKeys.js';
 import { SceneUIUtils } from './utils/SceneUIUtils.js';
 import { ButtonFactory } from './ButtonFactory.js';
@@ -5,7 +6,7 @@ import { SoundSynthesizer } from './utils/SoundSynthesizer.js';
 
 /**
  * @class StudyMinigameScene
- * @extends Phaser.Scene
+ * @extends BaseMinigameScene
  * @classdesc
  * A Word Grid game ("Bookworm" style) for the 'Study' action.
  * Grid of letters, connect adjacent letters to form words.

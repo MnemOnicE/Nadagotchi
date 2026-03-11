@@ -479,47 +479,47 @@ export class UIScene extends Phaser.Scene {
     handleAchievementUnlocked(achievement) { SoundSynthesizer.instance.playChime(); this.showToast("Achievement Unlocked!", achievement.name, achievement.icon); }
     showToast(title, message, icon = '') { this.toastManager.show({ title, message, icon, style: 'GOLD' }); }
     createSettingsModal() {
-    const modal = this.createModal("Settings");
-    const h = 400;
+        const modal = this.createModal("Settings");
+        const h = 400;
 
-    // Shared setting updater
-    const updateSetting = (key, value, displayElement, formatFn) => {
+        // Shared setting updater
+        const updateSetting = (key, value, displayElement, formatFn) => {
         this.game.events.emit(EventKeys.UPDATE_SETTINGS, { [key]: value });
         displayElement.setText(formatFn(value));
         if (!this.settingsData) this.settingsData = {};
         this.settingsData[key] = value;
-    };
+        };
 
-    // Volume Controls
-    const volLabel = this.add.text(0, -110, "Volume", { fontSize: '24px', fontFamily: 'VT323', monospace: true }).setOrigin(0.5);
-    const volDisplay = this.add.text(0, -70, "50%", { fontSize: '24px', fontFamily: 'VT323' }).setOrigin(0.5);
-    const volDown = ButtonFactory.createButton(this, -80, -70, "-", () => {
+        // Volume Controls
+        const volLabel = this.add.text(0, -110, "Volume", { fontSize: '24px', fontFamily: 'VT323', monospace: true }).setOrigin(0.5);
+        const volDisplay = this.add.text(0, -70, "50%", { fontSize: '24px', fontFamily: 'VT323' }).setOrigin(0.5);
+        const volDown = ButtonFactory.createButton(this, -80, -70, "-", () => {
         const newVol = Math.max(0, (this.settingsData?.volume ?? 0.5) - 0.1);
         updateSetting('volume', newVol, volDisplay, v => `${Math.round(v * 100)}%`);
-    }, { width: 40, height: 40, color: 0x808080 });
-    const volUp = ButtonFactory.createButton(this, 80, -70, "+", () => {
+        }, { width: 40, height: 40, color: 0x808080 });
+        const volUp = ButtonFactory.createButton(this, 80, -70, "+", () => {
         const newVol = Math.min(1, (this.settingsData?.volume ?? 0.5) + 0.1);
         updateSetting('volume', newVol, volDisplay, v => `${Math.round(v * 100)}%`);
-    }, { width: 40, height: 40, color: 0x808080 });
+        }, { width: 40, height: 40, color: 0x808080 });
 
-    // Safe Area Padding Controls
-    const safeLabel = this.add.text(0, -10, "Safe Area Border", { fontSize: '24px', fontFamily: 'VT323', monospace: true }).setOrigin(0.5);
-    const safeDisplay = this.add.text(0, 20, "0px", { fontSize: '24px', fontFamily: 'VT323' }).setOrigin(0.5);
-    const safeDown = ButtonFactory.createButton(this, -80, 20, "-", () => {
+        // Safe Area Padding Controls
+        const safeLabel = this.add.text(0, -10, "Safe Area Border", { fontSize: '24px', fontFamily: 'VT323', monospace: true }).setOrigin(0.5);
+        const safeDisplay = this.add.text(0, 20, "0px", { fontSize: '24px', fontFamily: 'VT323' }).setOrigin(0.5);
+        const safeDown = ButtonFactory.createButton(this, -80, 20, "-", () => {
         const newPad = Math.max(0, (this.settingsData?.safeAreaPadding ?? 0) - 10);
         updateSetting('safeAreaPadding', newPad, safeDisplay, v => `${v}px`);
-    }, { width: 40, height: 40, color: 0x808080 });
-    const safeUp = ButtonFactory.createButton(this, 80, 20, "+", () => {
+        }, { width: 40, height: 40, color: 0x808080 });
+        const safeUp = ButtonFactory.createButton(this, 80, 20, "+", () => {
         const newPad = Math.min(100, (this.settingsData?.safeAreaPadding ?? 0) + 10);
         updateSetting('safeAreaPadding', newPad, safeDisplay, v => `${v}px`);
-    }, { width: 40, height: 40, color: 0x808080 });
+        }, { width: 40, height: 40, color: 0x808080 });
 
-    // Game Speed Controls
-    const speedLabel = this.add.text(0, 80, "Game Speed", { fontSize: '24px', fontFamily: 'VT323' }).setOrigin(0.5);
-    const speedButtons = [];
-    const speeds = [{ l: "1x", v: Config.SETTINGS.SPEED_MULTIPLIERS.NORMAL }, { l: "2x", v: Config.SETTINGS.SPEED_MULTIPLIERS.FAST }, { l: "5x", v: Config.SETTINGS.SPEED_MULTIPLIERS.HYPER }];
-    let startX = -80;
-    speeds.forEach(s => {
+        // Game Speed Controls
+        const speedLabel = this.add.text(0, 80, "Game Speed", { fontSize: '24px', fontFamily: 'VT323' }).setOrigin(0.5);
+        const speedButtons = [];
+        const speeds = [{ l: "1x", v: Config.SETTINGS.SPEED_MULTIPLIERS.NORMAL }, { l: "2x", v: Config.SETTINGS.SPEED_MULTIPLIERS.FAST }, { l: "5x", v: Config.SETTINGS.SPEED_MULTIPLIERS.HYPER }];
+        let startX = -80;
+        speeds.forEach(s => {
         const btn = ButtonFactory.createButton(this, startX, 120, s.l, () => {
             this.game.events.emit(EventKeys.UPDATE_SETTINGS, { gameSpeed: s.v });
             this.updateSpeedButtons(s.v);
@@ -529,27 +529,27 @@ export class UIScene extends Phaser.Scene {
         btn.speedVal = s.v;
         speedButtons.push(btn);
         startX += 80;
-    });
+        });
 
-    modal.add([volLabel, volDown, volUp, volDisplay, safeLabel, safeDown, safeUp, safeDisplay, speedLabel, ...speedButtons]);
-    modal.volDisplay = volDisplay;
-    modal.safeDisplay = safeDisplay;
-    modal.speedButtons = speedButtons;
-    return modal;
-}
+        modal.add([volLabel, volDown, volUp, volDisplay, safeLabel, safeDown, safeUp, safeDisplay, speedLabel, ...speedButtons]);
+        modal.volDisplay = volDisplay;
+        modal.safeDisplay = safeDisplay;
+        modal.speedButtons = speedButtons;
+        return modal;
+        }
 
     updateSpeedButtons(speed) { this.settingsModal.speedButtons.forEach(btn => { if (Math.abs(btn.speedVal - speed) < 0.01) { btn.setAlpha(1); btn.setScale(1.1); } else { btn.setAlpha(0.6); btn.setScale(1.0); } }); }
-    openSettingsMenu() {
-    this.closeAllModals();
-    if (!this.settingsData) this.settingsData = { volume: Config.SETTINGS.DEFAULT_VOLUME, gameSpeed: Config.SETTINGS.DEFAULT_SPEED, safeAreaPadding: Config.SETTINGS.DEFAULT_SAFE_AREA_PADDING };
-    const vol = Math.round((this.settingsData.volume ?? 0.5) * 100);
-    const pad = this.settingsData.safeAreaPadding ?? 0;
-    this.settingsModal.volDisplay.setText(`${vol}%`);
-    this.settingsModal.safeDisplay.setText(`${pad}px`);
-    this.updateSpeedButtons(this.settingsData.gameSpeed || 1.0);
-    this.settingsModal.setVisible(true);
-    this.scene.pause('MainScene');
-}
+        openSettingsMenu() {
+        this.closeAllModals();
+        if (!this.settingsData) this.settingsData = { volume: Config.SETTINGS.DEFAULT_VOLUME, gameSpeed: Config.SETTINGS.DEFAULT_SPEED, safeAreaPadding: Config.SETTINGS.DEFAULT_SAFE_AREA_PADDING };
+        const vol = Math.round((this.settingsData.volume ?? 0.5) * 100);
+        const pad = this.settingsData.safeAreaPadding ?? 0;
+        this.settingsModal.volDisplay.setText(`${vol}%`);
+        this.settingsModal.safeDisplay.setText(`${pad}px`);
+        this.updateSpeedButtons(this.settingsData.gameSpeed || 1.0);
+        this.settingsModal.setVisible(true);
+        this.scene.pause('MainScene');
+        }
 
     createShowcaseModal() { const modal = this.createModal("Pet Passport"); const passportContainer = this.add.container(this.cameras.main.width / 2, this.cameras.main.height / 2); modal.add(passportContainer); modal.passportContainer = passportContainer; return modal; }
     openShowcase() { this.closeAllModals(); if (!this.nadagotchiData) return; const container = this.showcaseModal.passportContainer; container.removeAll(true); const width = 400; const height = 250; const cardBg = this.add.rectangle(0, 0, width, height, 0xFFF8E7).setStrokeStyle(4, 0xD4AF37); const frame = Config.MOOD_VISUALS.FRAMES[this.nadagotchiData.mood] ?? Config.MOOD_VISUALS.DEFAULT_FRAME; const sprite = this.add.image(-120, 0, 'pet', frame).setScale(8); const name = `Archetype: ${this.nadagotchiData.dominantArchetype}`; const gen = `Generation: ${this.nadagotchiData.generation || 1}`; const career = `Career: ${this.nadagotchiData.currentCareer || 'Unemployed'}`; const age = `Age: ${Math.floor(this.nadagotchiData.age || 0)} Days`; const infoText = this.add.text(0, -60, `${name}\n${gen}\n${career}\n${age}`, { fontFamily: 'VT323, monospace', fontSize: '24px', color: '#000000', lineSpacing: 10 }).setOrigin(0, 0); const footer = this.add.text(0, 80, "OFFICIAL NADAGOTCHI PASSPORT", { fontFamily: 'Arial', fontSize: '12px', color: '#888888', fontStyle: 'italic' }).setOrigin(0.5); container.add([cardBg, sprite, infoText, footer]); this.showcaseModal.setVisible(true); this.scene.pause('MainScene'); }

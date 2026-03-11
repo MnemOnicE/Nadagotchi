@@ -1,3 +1,4 @@
+import { BaseMinigameScene } from './BaseMinigameScene.js';
 import { EventKeys } from './EventKeys.js';
 import { SceneUIUtils } from './utils/SceneUIUtils.js';
 
@@ -8,7 +9,7 @@ import { SceneUIUtils } from './utils/SceneUIUtils.js';
 
 /**
  * @class ArtisanMinigameScene
- * @extends Phaser.Scene
+ * @extends BaseMinigameScene
  * @classdesc
  * A mini-game for the 'Artisan' career path.
  * The player must memorize and replicate a pattern shown on a grid.

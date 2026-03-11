@@ -1,3 +1,4 @@
+import { BaseMinigameScene } from './BaseMinigameScene.js';
 import { EventKeys } from './EventKeys.js';
 import { SceneUIUtils } from './utils/SceneUIUtils.js';
 
@@ -8,7 +9,7 @@ import { SceneUIUtils } from './utils/SceneUIUtils.js';
 
 /**
  * @class ScoutMinigameScene
- * @extends Phaser.Scene
+ * @extends BaseMinigameScene
  * @classdesc
  * A memory matching mini-game for the 'Scout' career path.
  * The player must find and match pairs of icons on a grid within a time limit.

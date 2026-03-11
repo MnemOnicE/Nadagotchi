@@ -1,3 +1,4 @@
+import { BaseMinigameScene } from './BaseMinigameScene.js';
 import { EventKeys } from './EventKeys.js';
 import { SceneUIUtils } from './utils/SceneUIUtils.js';
 import { ButtonFactory } from './ButtonFactory.js';
@@ -10,7 +11,7 @@ import { SoundSynthesizer } from './utils/SoundSynthesizer.js';
 
 /**
  * @class HealerMinigameScene
- * @extends Phaser.Scene
+ * @extends BaseMinigameScene
  * @classdesc
  * A mini-game for the 'Healer' career path.
  * The player must diagnose a patient's symptom and select the correct remedy from a list of options.

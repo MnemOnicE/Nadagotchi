@@ -1,3 +1,4 @@
+import { BaseMinigameScene } from './BaseMinigameScene.js';
 import { ButtonFactory } from './ButtonFactory.js';
 import { ExpeditionSystem } from './systems/ExpeditionSystem.js';
 import { EventKeys } from './EventKeys.js';
@@ -6,7 +7,7 @@ import { SoundSynthesizer } from './utils/SoundSynthesizer.js';
 
 /**
  * @class ExpeditionScene
- * @extends Phaser.Scene
+ * @extends BaseMinigameScene
  * @classdesc
  * Handles the visual presentation and interaction of the "Expedition" minigame.
  * Now features a Visual Node Map and Quick Time Events (QTEs).
