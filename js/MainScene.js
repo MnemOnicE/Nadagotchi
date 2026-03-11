@@ -693,8 +693,8 @@ export class MainScene extends Phaser.Scene {
         const height = this.cameras.main.height;
         const currentLocation = (this.location === 'INDOOR') ? this.currentRoom : 'GARDEN';
 
-        for (const debrisId of Object.keys(this.nadagotchi.debris)) {
-            const d = this.nadagotchi.debris[debrisId];
+        // Optimized iteration over debris object values
+        for (const d of Object.values(this.nadagotchi.debris)) {
             const dLocation = d.location || 'GARDEN';
             if (dLocation !== currentLocation) continue;
 

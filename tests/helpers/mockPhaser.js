@@ -187,3 +187,35 @@ export const createMockAdd = () => ({
         destroy: jest.fn()
     })
 });
+
+export const createMockNadagotchi = () => ({
+    coins: 0,
+    save: jest.fn(),
+    stats: { hunger: 100, energy: 100, happiness: 100 },
+    inventory: {},
+    inventorySystem: {
+        addItem: jest.fn(),
+        removeItem: jest.fn(),
+        consumeItem: jest.fn(),
+        placeItem: jest.fn(),
+        canAddItem: jest.fn(() => true),
+        discoverRecipe: jest.fn()
+    },
+    skills: { resilience: 0, logic: 0, navigation: 0, empathy: 0, focus: 0, crafting: 0 },
+    discoveredRecipes: [],
+    recipes: {},
+    debris: {},
+    debrisCount: 0,
+    recalculateCleanlinessPenalty: jest.fn(),
+    generateUUID: jest.fn(() => 'test-uuid'),
+    addJournalEntry: jest.fn(),
+    unlockAllCareers: jest.fn(),
+    getMoodMultiplier: jest.fn(() => 1),
+    live: jest.fn(),
+    location: 'GARDEN',
+    rng: {
+        random: jest.fn(() => 0.5),
+        choice: jest.fn(arr => arr[0]),
+        range: jest.fn((min, max) => min)
+    }
+});

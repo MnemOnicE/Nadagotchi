@@ -6,8 +6,8 @@ import { setupPhaserMock, createMockAdd, mockGameObject } from './helpers/mockPh
 setupPhaserMock();
 
 // 2. Mock Dependencies
-jest.mock('../js/Nadagotchi.js');
-jest.mock('../js/PersistenceManager.js');
+jest.mock('../js/Nadagotchi');
+jest.mock('../js/PersistenceManager');
 jest.mock('../js/Calendar');
 jest.mock('../js/EventManager');
 jest.mock('../js/WorldClock');
@@ -44,7 +44,7 @@ describe('Performance: Update Stats Throttling', () => {
              stats: { happiness: 50, hunger: 50, energy: 50 },
              maxStats: { happiness: 100, hunger: 100, energy: 100 },
              inventory: {},
-             debris: {},
+             debris: {}, debrisCount: 0,
              questSystem: {
                  generateDailyQuest: jest.fn(),
                  hasNewQuest: jest.fn().mockReturnValue(false)
@@ -157,7 +157,6 @@ describe('Performance: Update Stats Throttling', () => {
         if (!scene.nadagotchi.relationshipSystem) scene.nadagotchi.relationshipSystem = { dailyUpdate: jest.fn() };
         if (!scene.nadagotchi.questSystem) scene.nadagotchi.questSystem = { generateDailyQuest: jest.fn(), hasNewQuest: jest.fn() };
         if (!scene.nadagotchi.debrisSystem) scene.nadagotchi.debrisSystem = { spawnDaily: jest.fn(), spawnPoop: jest.fn() };
-        scene.nadagotchi.debris = {};
         if (!scene.nadagotchi.live) scene.nadagotchi.live = jest.fn();
         if (!scene.nadagotchi.init) scene.nadagotchi.init = jest.fn();
         scene.thoughtBubble = { visible: false, setVisible: jest.fn() }; scene.exploreBubble = { visible: false, setVisible: jest.fn() }; scene.sprite = { setFrame: jest.fn(), setPosition: jest.fn(), setScale: jest.fn(), setAngle: jest.fn(), setAlpha: jest.fn(), setTint: jest.fn(), clearTint: jest.fn() };

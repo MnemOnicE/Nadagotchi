@@ -1,7 +1,7 @@
 
 import { jest } from '@jest/globals';
 import { DebugConsole } from '../js/DebugConsole.js';
-import { setupPhaserMock } from './helpers/mockPhaser.js';
+import { setupPhaserMock, createMockNadagotchi } from './helpers/mockPhaser.js';
 
 describe('DebugConsole', () => {
     let debugConsole;
@@ -18,8 +18,6 @@ describe('DebugConsole', () => {
         };
 
         mockScene = {
-        nadagotchi: { coins: 0, save: jest.fn() },
-        nadagotchi: { coins: 0, save: jest.fn() },
             events: { on: jest.fn(), emit: jest.fn() },
             game: { events: { emit: jest.fn(), on: jest.fn() }, loop: { actualFps: 60 } },
             scene: {
@@ -29,13 +27,8 @@ describe('DebugConsole', () => {
             calendar: { advanceDay: jest.fn(), season: 'Spring', getDate: jest.fn().mockReturnValue({day: 1, year: 1}) },
             weatherSystem: { setWeather: jest.fn(), getCurrentWeather: jest.fn().mockReturnValue('Sunny') },
             eventManager: { getActiveEvent: jest.fn().mockReturnValue(null) },
-            nadagotchi: {
-                stats: {},
-                inventorySystem: { addItem: jest.fn() },
-                unlockAllCareers: jest.fn(),
-                inventory: {}
-            },
-            gameSettings: {},
+            nadagotchi: createMockNadagotchi(),
+            gameSettings: { gameSpeed: 1.0 },
             add: {
                 graphics: jest.fn().mockReturnValue({
                     clear: jest.fn(),
@@ -70,10 +63,10 @@ describe('DebugConsole', () => {
         // Execute click
         coinButton.click();
 
-        // Verify alert was NOT called (it is currently called, so this test fails initially)
-        // And verify showToast WAS called
+        // Verify alert was NOT called
         expect(window.alert).not.toHaveBeenCalled();
         expect(mockUIScene.showToast).toHaveBeenCalledWith("Added Coins", "+1000 Coins", "💰");
+        expect(mockScene.nadagotchi.save).toHaveBeenCalled();
     });
 
     test('should use showToast for addAllItems', () => {

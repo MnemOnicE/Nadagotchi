@@ -33,22 +33,34 @@ export class DebrisSystem {
 
         const type = this.pet.rng.choice(types);
 
+        // Generate Position
         const x = this.pet.rng.range(10, 90) / 100;
         const y = this.pet.rng.range(60, 90) / 100;
 
+        this._addDebris(type, x, y, 'GARDEN');
+        this.pet.addJournalEntry(`Something appeared in the garden: ${type}`);
+    }
+
+    /**
+     * Internal helper to add a debris item to the pet's map and update state.
+     * @param {string} type
+     * @param {number} x
+     * @param {number} y
+     * @param {string} location
+     * @private
+     */
+    _addDebris(type, x, y, location) {
         const debris = {
             id: this.pet.generateUUID(),
             type: type,
-            location: 'GARDEN',
+            location: location,
             x: x,
             y: y,
             created: Date.now()
         };
-
         this.pet.debris[debris.id] = debris;
         this.pet.debrisCount++;
         this.pet.recalculateCleanlinessPenalty();
-        this.pet.addJournalEntry(`Something appeared in the garden: ${type}`);
     }
 
     /**
@@ -64,15 +76,15 @@ export class DebrisSystem {
         const maxAttempts = 10;
         const overlapThreshold = 0.05;
 
+        // Try to find a spot that doesn't overlap existing debris
         while (!valid && attempts < maxAttempts) {
             attempts++;
             x = this.pet.rng.range(10, 90) / 100;
             y = this.pet.rng.range(60, 90) / 100;
 
+            // Check overlap with existing debris in same location
             const location = this.pet.location || 'GARDEN';
             let isOverlapping = false;
-
-            // Optimized overlap check using safe iteration
             for (const id of Object.keys(this.pet.debris)) {
                 const d = this.pet.debris[id];
                 const dLoc = d.location || 'GARDEN';
@@ -89,18 +101,9 @@ export class DebrisSystem {
 
         if (!valid) return;
 
-        const debris = {
-            id: this.pet.generateUUID(),
-            type: 'poop',
-            location: this.pet.location || 'GARDEN',
-            x: x,
-            y: y,
-            created: Date.now()
-        };
-        this.pet.debris[debris.id] = debris;
-        this.pet.debrisCount++;
-        this.pet.recalculateCleanlinessPenalty();
+        this._addDebris('poop', x, y, this.pet.location || 'GARDEN');
 
+        // Chance for a funny journal entry (10%)
         if (this.pet.rng.random() < 0.1) {
              this.pet.addJournalEntry("The garden has received a... natural gift.");
         } else {
@@ -121,34 +124,34 @@ export class DebrisSystem {
 
         const item = this.pet.debris[id];
 
+        // Cost
         if (this.pet.stats.energy < Config.DEBRIS.CLEAN_ENERGY_COST) {
             return { success: false, message: "Too tired to clean." };
         }
         this.pet.stats.energy -= Config.DEBRIS.CLEAN_ENERGY_COST;
 
+        // Remove
         delete this.pet.debris[id];
         this.pet.debrisCount--;
         this.pet.recalculateCleanlinessPenalty();
 
-        let message = "";
-        if (item.type === 'weed') {
-            message = "You pulled a weed.";
-            this.pet.skills.resilience += Config.DEBRIS.CLEAN_SKILL_GAIN;
-        } else if (item.type === 'poop') {
-            message = "Yuck! You cleaned it up.";
-            this.pet.skills.resilience += (Config.DEBRIS.CLEAN_SKILL_GAIN * 2);
-            this.pet.stats.happiness += 5;
-        } else if (item.type === 'rock_small') {
-            message = "You found a Shiny Stone!";
-            this.pet.inventorySystem.addItem('Shiny Stone', 1);
-        } else if (item.type === 'Berries') {
-            message = "You found some wild Berries.";
-            this.pet.inventorySystem.addItem('Berries', 1);
-        } else if (item.type === 'Sticks') {
-            message = "You gathered some Sticks.";
-            this.pet.inventorySystem.addItem('Sticks', 1);
+        // Optimized reward lookup to reduce code duplication
+        const rewardConfig = {
+            'weed': { msg: "You pulled a weed.", res: Config.DEBRIS.CLEAN_SKILL_GAIN },
+            'poop': { msg: "Yuck! You cleaned it up.", res: Config.DEBRIS.CLEAN_SKILL_GAIN * 2, hap: 5 },
+            'rock_small': { msg: "You found a Shiny Stone!", inv: 'Shiny Stone' },
+            'Berries': { msg: "You found some wild Berries.", inv: 'Berries' },
+            'Sticks': { msg: "You gathered some Sticks.", inv: 'Sticks' }
+        };
+
+        const reward = rewardConfig[item.type];
+        if (reward) {
+            if (reward.res) this.pet.skills.resilience += reward.res;
+            if (reward.hap) this.pet.stats.happiness += reward.hap;
+            if (reward.inv) this.pet.inventorySystem.addItem(reward.inv, 1);
+            return { success: true, message: reward.msg };
         }
 
-        return { success: true, message: message };
+        return { success: true, message: "Item removed." };
     }
 }
