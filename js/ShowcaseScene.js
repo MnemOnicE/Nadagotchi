@@ -123,13 +123,12 @@ export class ShowcaseScene extends Phaser.Scene {
      */
     copyToClipboard(text) {
         if (navigator && navigator.clipboard) {
-            navigator.clipboard.writeText(text).then(() => {
+            return navigator.clipboard.writeText(text).then(() => {
                 this.showToast("Copied!", "DNA copied to clipboard.");
             }).catch(err => {
                 console.error("Clipboard failed", err);
                 this.showToast("Error", "Could not copy DNA.");
                 // Fallback: Log to console
-
             });
         } else {
 
