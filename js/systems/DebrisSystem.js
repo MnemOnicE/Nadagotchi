@@ -135,27 +135,23 @@ export class DebrisSystem {
         this.pet.debrisCount--;
         this.pet.recalculateCleanlinessPenalty();
 
-        let message = "";
+        // Optimized reward lookup to reduce code duplication
+        const rewardConfig = {
+            'weed': { msg: "You pulled a weed.", res: Config.DEBRIS.CLEAN_SKILL_GAIN },
+            'poop': { msg: "Yuck! You cleaned it up.", res: Config.DEBRIS.CLEAN_SKILL_GAIN * 2, hap: 5 },
+            'rock_small': { msg: "You found a Shiny Stone!", inv: 'Shiny Stone' },
+            'Berries': { msg: "You found some wild Berries.", inv: 'Berries' },
+            'Sticks': { msg: "You gathered some Sticks.", inv: 'Sticks' }
+        };
 
-        // Logic based on Type
-        if (item.type === 'weed') {
-            message = "You pulled a weed.";
-            this.pet.skills.resilience += Config.DEBRIS.CLEAN_SKILL_GAIN;
-        } else if (item.type === 'poop') {
-            message = "Yuck! You cleaned it up.";
-            this.pet.skills.resilience += (Config.DEBRIS.CLEAN_SKILL_GAIN * 2);
-            this.pet.stats.happiness += 5; // Relief
-        } else if (item.type === 'rock_small') {
-            message = "You found a Shiny Stone!";
-            this.pet.inventorySystem.addItem('Shiny Stone', 1);
-        } else if (item.type === 'Berries') {
-            message = "You found some wild Berries.";
-            this.pet.inventorySystem.addItem('Berries', 1);
-        } else if (item.type === 'Sticks') {
-            message = "You gathered some Sticks.";
-            this.pet.inventorySystem.addItem('Sticks', 1);
+        const reward = rewardConfig[item.type];
+        if (reward) {
+            if (reward.res) this.pet.skills.resilience += reward.res;
+            if (reward.hap) this.pet.stats.happiness += reward.hap;
+            if (reward.inv) this.pet.inventorySystem.addItem(reward.inv, 1);
+            return { success: true, message: reward.msg };
         }
 
-        return { success: true, message: message };
+        return { success: true, message: "Item removed." };
     }
 }

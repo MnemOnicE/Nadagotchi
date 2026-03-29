@@ -1,7 +1,7 @@
 
 import { jest } from '@jest/globals';
 import { DebugConsole } from '../js/DebugConsole.js';
-import { setupPhaserMock } from './helpers/mockPhaser.js';
+import { setupPhaserMock, createMockNadagotchi } from './helpers/mockPhaser.js';
 
 describe('DebugConsole', () => {
     let debugConsole;
@@ -27,6 +27,7 @@ describe('DebugConsole', () => {
             calendar: { advanceDay: jest.fn(), season: 'Spring', getDate: jest.fn().mockReturnValue({day: 1, year: 1}) },
             weatherSystem: { setWeather: jest.fn(), getCurrentWeather: jest.fn().mockReturnValue('Sunny') },
             eventManager: { getActiveEvent: jest.fn().mockReturnValue(null) },
+            nadagotchi: createMockNadagotchi(),
             nadagotchi: {
                 coins: 0,
                 save: jest.fn(),
