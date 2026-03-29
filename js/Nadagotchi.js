@@ -5,6 +5,7 @@ import { Config } from './Config.js';
 import { Recipes } from './ItemData.js';
 import { CareerDefinitions } from './CareerDefinitions.js';
 import { RoomDefinitions } from './RoomDefinitions.js';
+import { CryptoUtils } from './utils/CryptoUtils.js';
 import { SeededRandom } from './utils/SeededRandom.js';
 import { RelationshipSystem } from './systems/RelationshipSystem.js';
 import { InventorySystem } from './systems/InventorySystem.js';
@@ -383,12 +384,12 @@ export class Nadagotchi {
 
     /**
      * Generates a random seed for the universe.
-     * Uses Math.random() as the bootstrap entropy source.
+     * Uses CryptoUtils.getRandomSafeInt() as the bootstrap entropy source.
      * @returns {number} A large random integer.
      * @private
      */
     _generateSeed() {
-        return Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+        return CryptoUtils.getRandomSafeInt();
     }
 
     /**
@@ -1405,7 +1406,7 @@ export class Nadagotchi {
             location: 'Home',
             genome: { genotype: genome.genotype, phenotype: phenotype },
             homeConfig: initialHomeConfig,
-            universeSeed: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
+            universeSeed: CryptoUtils.getRandomSafeInt()
         };
     }
 }
