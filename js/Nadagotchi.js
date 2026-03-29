@@ -1101,7 +1101,7 @@ export class Nadagotchi {
         // Use for...in iteration to avoid intermediate array allocation from Object.keys()
         // and reduce Garbage Collection pressure in the live loop.
         for (const id in this.debris) {
-            if (!Object.prototype.hasOwnProperty.call(this.debris, id)) continue;
+            if (!Object.hasOwn(this.debris, id)) continue;
             const d = this.debris[id];
             let penalty = 0;
             if (d.type === 'weed') penalty = Config.DEBRIS.HAPPINESS_PENALTY_PER_WEED;
