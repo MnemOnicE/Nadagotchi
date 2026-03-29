@@ -1098,9 +1098,10 @@ export class Nadagotchi {
         this._cachedGlobalPenalty = 0;
         this._cachedLocalPenalties = {};
 
-        // Use Object.keys for iteration to avoid intermediate array allocation from Object.values()
+        // Use for...in iteration to avoid intermediate array allocation from Object.keys()
         // and reduce Garbage Collection pressure in the live loop.
-        for (const id of Object.keys(this.debris)) {
+        for (const id in this.debris) {
+            if (!Object.prototype.hasOwnProperty.call(this.debris, id)) continue;
             const d = this.debris[id];
             let penalty = 0;
             if (d.type === 'weed') penalty = Config.DEBRIS.HAPPINESS_PENALTY_PER_WEED;
