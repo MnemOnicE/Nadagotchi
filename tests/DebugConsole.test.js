@@ -28,6 +28,14 @@ describe('DebugConsole', () => {
             weatherSystem: { setWeather: jest.fn(), getCurrentWeather: jest.fn().mockReturnValue('Sunny') },
             eventManager: { getActiveEvent: jest.fn().mockReturnValue(null) },
             nadagotchi: createMockNadagotchi(),
+            nadagotchi: {
+                coins: 0,
+                save: jest.fn(),
+                stats: { hunger: 100, energy: 100, happiness: 100 },
+                inventorySystem: { addItem: jest.fn() },
+                unlockAllCareers: jest.fn(),
+                inventory: {}
+            },
             gameSettings: { gameSpeed: 1.0 },
             add: {
                 graphics: jest.fn().mockReturnValue({

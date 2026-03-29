@@ -261,12 +261,21 @@ export class Nadagotchi {
         /** @type {Object.<string, object>} Debris items in the world (weeds, rocks, etc.). */
         this.debris = {};
         if (loadedData && loadedData.debris) {
-            const items = Array.isArray(loadedData.debris) ? loadedData.debris : Object.values(loadedData.debris);
-            items.forEach(d => {
-                if (d && d.id && d.id !== '__proto__' && d.id !== 'constructor') {
-                    this.debris[d.id] = d;
+            if (Array.isArray(loadedData.debris)) {
+                // Migration logic for legacy array-based saves
+                loadedData.debris.forEach(d => {
+                    if (d.id && d.id !== '__proto__' && d.id !== 'constructor') {
+                        this.debris[d.id] = d;
+                    }
+                });
+            } else {
+                // Own property check for security
+                for (const key of Object.keys(loadedData.debris)) {
+                    if (key !== '__proto__' && key !== 'constructor') {
+                        this.debris[key] = loadedData.debris[key];
+                    }
                 }
-            });
+            }
         }
         /** @type {number} Cached count for O(1) size checks. */
         this.debrisCount = Object.keys(this.debris).length;
