@@ -88,7 +88,7 @@ export class DebrisSystem {
             // Check overlap with existing debris in same location
             let isOverlapping = false;
             for (const id in debris) {
-                if (!Object.prototype.hasOwnProperty.call(debris, id)) continue;
+                if (!Object.hasOwn(debris, id)) continue;
                 const d = debris[id];
                 const dLoc = d.location || 'GARDEN';
                 if (dLoc !== location) continue;
