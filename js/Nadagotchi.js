@@ -1098,11 +1098,9 @@ export class Nadagotchi {
         this._cachedGlobalPenalty = 0;
         this._cachedLocalPenalties = {};
 
-        // Use for...in iteration to avoid intermediate array allocation from Object.keys()
-        // and reduce Garbage Collection pressure in the live loop.
-        for (const id in this.debris) {
-            if (!Object.hasOwn(this.debris, id)) continue;
-            const d = this.debris[id];
+        // Optimization: Use for...of over values to balance performance and readability,
+        // avoiding index-based lookups and satisfying linter preferences.
+        for (const d of Object.values(this.debris)) {
             let penalty = 0;
             if (d.type === 'weed') penalty = Config.DEBRIS.HAPPINESS_PENALTY_PER_WEED;
             else if (d.type === 'poop') penalty = Config.DEBRIS.HAPPINESS_PENALTY_PER_POOP;
