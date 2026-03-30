@@ -29,7 +29,6 @@ export const mockGameObject = () => {
         setScale: jest.fn().mockReturnThis(),
         setAngle: jest.fn().mockReturnThis(),
         setFrame: jest.fn().mockReturnThis(),
-        setColor: jest.fn().mockReturnThis(),
         clear: jest.fn(),
         fillStyle: jest.fn().mockReturnThis(),
         fillRect: jest.fn().mockReturnThis(),
@@ -169,7 +168,6 @@ export const createMockAdd = () => ({
     text: jest.fn(() => new Phaser.GameObjects.Text()),
     tileSprite: jest.fn(() => new Phaser.GameObjects.TileSprite()),
     rectangle: jest.fn(() => mockGameObject()),
-    circle: jest.fn(() => mockGameObject()),
     zone: jest.fn(() => mockGameObject()),
     renderTexture: jest.fn(() => new Phaser.GameObjects.RenderTexture()),
     container: jest.fn(() => ({ ...mockGameObject(), add: jest.fn(), removeAll: jest.fn() })),
@@ -220,4 +218,29 @@ export const createMockNadagotchi = () => ({
         choice: jest.fn(arr => arr[0]),
         range: jest.fn((min, max) => min)
     }
+});
+
+export const createMockScene = () => ({
+    events: { on: jest.fn(), off: jest.fn(), emit: jest.fn(), once: jest.fn() },
+    game: { events: { emit: jest.fn(), on: jest.fn(), off: jest.fn() }, loop: { actualFps: 60 } },
+    scene: {
+        get: jest.fn(),
+        stop: jest.fn(),
+        resume: jest.fn(),
+        launch: jest.fn(),
+        start: jest.fn()
+    },
+    worldClock: { update: jest.fn(), getCurrentPeriod: jest.fn().mockReturnValue('Day'), getDaylightFactor: jest.fn().mockReturnValue(1) },
+    calendar: { advanceDay: jest.fn(), season: 'Spring', getDate: jest.fn().mockReturnValue({ day: 1, year: 1 }) },
+    weatherSystem: { setWeather: jest.fn(), getCurrentWeather: jest.fn().mockReturnValue('Sunny') },
+    eventManager: { getActiveEvent: jest.fn().mockReturnValue(null) },
+    nadagotchi: createMockNadagotchi(),
+    textures: { exists: jest.fn().mockReturnValue(true), createCanvas: jest.fn(() => mockGameObject()), get: jest.fn().mockReturnValue({ key: 'light_soft' }) },
+    make: { image: jest.fn(() => mockGameObject()), graphics: jest.fn(() => mockGameObject()) },
+    gameSettings: { gameSpeed: 1.0 },
+    add: createMockAdd(),
+    cameras: { main: { width: 800, height: 600, setBackgroundColor: jest.fn() } },
+    scale: { width: 800, height: 600 },
+    placedFurniture: {},
+    currentRoom: 'Entryway'
 });
