@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed recurring interaction logic in `RelationshipSystem.js`.
 
 ### Changed
-- **Performance Optimization:** Optimized `DebrisSystem.spawnPoop` and `Nadagotchi.recalculateCleanlinessPenalty` by replacing `Object.keys()` with `for...in` loops and optimizing distance checks. This reduces garbage collection pressure and improves efficiency in tight loops.
+- **Performance Optimization:** Optimized `DebrisSystem.spawnPoop` and `Nadagotchi.recalculateCleanlinessPenalty` by lifting `Object.values()` out of tight loops and implementing squared distance comparisons. This significantly reduces garbage collection pressure and CPU overhead during debris spawning and penalty calculations.
 - **Performance Optimization:** Optimized `SkyManager` update loop by throttling expensive canvas repaints. Redraws now only occur when the `daylightFactor` changes by more than 0.01 or at least 3 seconds have passed.
 - Refactored test suite to use a centralized `mockPhaser` helper, reducing code duplication.
 - Hardened test environment with robust mocks for Phaser Events, Zones, and Particles.
