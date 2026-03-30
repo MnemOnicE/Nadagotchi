@@ -23,13 +23,6 @@ import { DebrisSystem } from './systems/DebrisSystem.js';
  * @class Nadagotchi
  */
 export class Nadagotchi {
-    unlockAllCareers() {
-        const allCareerIds = Object.keys(Config.CAREER.CAREERS || {});
-        const unlockedSet = new Set(this.unlockedCareers || []);
-        allCareerIds.forEach(id => unlockedSet.add(id));
-        this.unlockedCareers = Array.from(unlockedSet);
-        this.save();
-    }
     /**
      * Creates a new Nadagotchi instance.
      * @param {string} initialArchetype - The initial archetype of the Nadagotchi (e.g., 'Adventurer').
@@ -1315,6 +1308,18 @@ export class Nadagotchi {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Unlocks all possible career paths for this pet.
+     * Used primarily for debugging or special events.
+     */
+    unlockAllCareers() {
+        const allCareerIds = Object.keys(Config.CAREER.CAREERS || {});
+        const unlockedSet = new Set(this.unlockedCareers || []);
+        allCareerIds.forEach(id => unlockedSet.add(id));
+        this.unlockedCareers = Array.from(unlockedSet);
+        this.save();
     }
 
     /**
