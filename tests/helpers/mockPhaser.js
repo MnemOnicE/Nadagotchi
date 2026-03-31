@@ -187,3 +187,60 @@ export const createMockAdd = () => ({
         destroy: jest.fn()
     })
 });
+
+export const createMockNadagotchi = () => ({
+    coins: 0,
+    save: jest.fn(),
+    stats: { hunger: 100, energy: 100, happiness: 100 },
+    inventory: {},
+    inventorySystem: {
+        addItem: jest.fn(),
+        removeItem: jest.fn(),
+        consumeItem: jest.fn(),
+        placeItem: jest.fn(),
+        canAddItem: jest.fn(() => true),
+        discoverRecipe: jest.fn()
+    },
+    skills: { resilience: 0, logic: 0, navigation: 0, empathy: 0, focus: 0, crafting: 0 },
+    discoveredRecipes: [],
+    recipes: {},
+    debris: {},
+    debrisCount: 0,
+    recalculateCleanlinessPenalty: jest.fn(),
+    generateUUID: jest.fn(() => 'test-uuid'),
+    addJournalEntry: jest.fn(),
+    unlockAllCareers: jest.fn(),
+    getMoodMultiplier: jest.fn(() => 1),
+    live: jest.fn(),
+    location: 'GARDEN',
+    rng: {
+        random: jest.fn(() => 0.5),
+        choice: jest.fn(arr => arr[0]),
+        range: jest.fn((min, max) => min)
+    }
+});
+
+export const createMockScene = () => ({
+    events: { on: jest.fn(), off: jest.fn(), emit: jest.fn(), once: jest.fn() },
+    game: { events: { emit: jest.fn(), on: jest.fn(), off: jest.fn() }, loop: { actualFps: 60 } },
+    scene: {
+        get: jest.fn(),
+        stop: jest.fn(),
+        resume: jest.fn(),
+        launch: jest.fn(),
+        start: jest.fn()
+    },
+    worldClock: { update: jest.fn(), getCurrentPeriod: jest.fn().mockReturnValue('Day'), getDaylightFactor: jest.fn().mockReturnValue(1) },
+    calendar: { advanceDay: jest.fn(), season: 'Spring', getDate: jest.fn().mockReturnValue({ day: 1, year: 1 }) },
+    weatherSystem: { setWeather: jest.fn(), getCurrentWeather: jest.fn().mockReturnValue('Sunny') },
+    eventManager: { getActiveEvent: jest.fn().mockReturnValue(null) },
+    nadagotchi: createMockNadagotchi(),
+    textures: { exists: jest.fn().mockReturnValue(true), createCanvas: jest.fn(() => mockGameObject()), get: jest.fn().mockReturnValue({ key: 'light_soft' }) },
+    make: { image: jest.fn(() => mockGameObject()), graphics: jest.fn(() => mockGameObject()) },
+    gameSettings: { gameSpeed: 1.0 },
+    add: createMockAdd(),
+    cameras: { main: { width: 800, height: 600, setBackgroundColor: jest.fn() } },
+    scale: { width: 800, height: 600 },
+    placedFurniture: {},
+    currentRoom: 'Entryway'
+});
