@@ -29,15 +29,14 @@ export class CryptoUtils {
         }
 
         // Node.js Environment (Jest/Test)
-        // We check for 'process' to avoid bundling issues in some build tools, though 'require' check is usually enough.
-        if (typeof process !== 'undefined' && typeof require !== 'undefined') {
+        if (typeof require === 'function') {
             try {
-                // Dynamic require to prevent bundlers from trying to bundle 'crypto' for the browser
-                // (though Vite usually handles this gracefully or ignores it)
-                const crypto = require('crypto');
-                return crypto.createHash('sha256').update(data).digest('hex');
-            } catch (e) {
-                console.warn("Crypto module not found in Node environment.", e);
+                const nodeCrypto = require('crypto');
+                if (nodeCrypto && typeof nodeCrypto.createHash === 'function') {
+                    return nodeCrypto.createHash('sha256').update(data).digest('hex');
+                }
+            } catch (err) {
+                console.warn("Crypto module not found in Node environment.", err);
             }
         }
 
@@ -53,19 +52,19 @@ export class CryptoUtils {
      */
     static getRandomValues(typedArray) {
         // Browser Environment
-        if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+        if (typeof window !== 'undefined' && window.crypto && typeof window.crypto.getRandomValues === 'function') {
             return window.crypto.getRandomValues(typedArray);
         }
 
         // Node.js Environment (Jest/Test)
-        if (typeof process !== 'undefined' && typeof require !== 'undefined') {
+        if (typeof require === 'function') {
             try {
-                const crypto = require('crypto');
-                if (crypto.randomFillSync) {
-                    return crypto.randomFillSync(typedArray);
+                const nodeCrypto = require('crypto');
+                if (nodeCrypto && typeof nodeCrypto.randomFillSync === 'function') {
+                    return nodeCrypto.randomFillSync(typedArray);
                 }
-            } catch (e) {
-                // Handled by final throw
+            } catch (err) {
+                // Fallback to error below
             }
         }
 
