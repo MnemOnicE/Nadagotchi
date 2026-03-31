@@ -118,7 +118,7 @@ export class DebrisSystem {
      */
     clean(id) {
         // Security: Ensure it's an own property to prevent prototype injection
-        if (!Object.prototype.hasOwnProperty.call(this.pet.debris, id)) {
+        if (!Object.hasOwn(this.pet.debris, id)) {
             return { success: false, message: "Item not found." };
         }
 

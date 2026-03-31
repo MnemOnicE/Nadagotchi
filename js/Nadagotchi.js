@@ -1,4 +1,5 @@
 import { PersistenceManager } from './PersistenceManager.js';
+import { CryptoUtils } from './utils/CryptoUtils.js';
 import { Genome, GeneticsSystem } from './GeneticsSystem.js';
 import { NarrativeSystem } from './NarrativeSystem.js';
 import { Config } from './Config.js';
@@ -39,247 +40,227 @@ export class Nadagotchi {
         /** @type {boolean} Indicates if the asynchronous initialization is complete. */
         this.isInitialized = false;
 
-        // --- RNG Initialization ---
+        this._initRNG(loadedData);
+
         if (loadedData) {
-             // Load the universe seed (The "Big Bang")
-             this.universeSeed = loadedData.universeSeed || this._generateSeed(); // Migration for old saves
+            this._loadPetState(loadedData);
+            this._initGenomeFromSave(loadedData);
+            this._initHomeConfigFromSave(loadedData);
+        } else {
+            this._initNewPet(initialArchetype);
+        }
+
+        this._initSystems(loadedData);
+        this._initRuntimeState(loadedData);
+    }
+
+    /**
+     * Initializes the SeededRandom instance.
+     * @param {object} [loadedData]
+     * @private
+     */
+    _initRNG(loadedData) {
+        if (loadedData) {
+             this.universeSeed = loadedData.universeSeed || this._generateSeed();
              this.rng = new SeededRandom(this.universeSeed);
-             // Restore RNG state if available to ensure continuity
              if (loadedData.rng && loadedData.rng.state) {
                  this.rng.state = loadedData.rng.state;
              }
         } else {
-             // New Game: Generate a new universe seed
              this.universeSeed = this._generateSeed();
              this.rng = new SeededRandom(this.universeSeed);
         }
+    }
 
-        if (loadedData) {
-            // This is a loaded pet. Populate all properties from the save file.
-            /** @type {string} Unique identifier for this pet instance (Salt). */
-            this.uuid = loadedData.uuid || this.generateUUID(); // Migration for old saves
+    /**
+     * Loads pet status and basic data from a save file.
+     * @param {object} data
+     * @private
+     */
+    _loadPetState(data) {
+        this.uuid = data.uuid || this.generateUUID();
+        this.name = data.name || "Nadagotchi";
+        this.mood = data.mood;
+        this.dominantArchetype = data.dominantArchetype;
+        this.personalityPoints = data.personalityPoints;
+        this.stats = data.stats;
+        this.skills = data.skills;
+        if (this.skills.research === undefined) this.skills.research = 0;
 
-            /** @type {string} The name of the pet. */
-            this.name = loadedData.name || "Nadagotchi";
+        this.currentCareer = data.currentCareer;
+        this.unlockedCareers = data.unlockedCareers || (this.currentCareer ? [this.currentCareer] : []);
+        this.careerLevels = data.careerLevels || {};
+        this.careerXP = data.careerXP || {};
 
-            /** @type {string} The pet's current mood (e.g., 'happy', 'sad'). */
-            this.mood = loadedData.mood;
-            /** @type {string} The dominant personality trait. */
-            this.dominantArchetype = loadedData.dominantArchetype;
-            /** @type {Object.<string, number>} A map of personality points for each archetype. */
-            this.personalityPoints = loadedData.personalityPoints;
-            /** @type {{hunger: number, energy: number, happiness: number}} The pet's core stats. */
-            this.stats = loadedData.stats;
-            /** @type {Object.<string, number>} A map of the pet's skills and their levels. */
-            this.skills = loadedData.skills;
-            // Legacy migration for Research skill
-            if (this.skills.research === undefined) {
-                this.skills.research = 0;
-            }
-
-            /** @type {?string} The pet's current career, if any. */
-            this.currentCareer = loadedData.currentCareer;
-            /** @type {Array<string>} List of careers the pet has unlocked. */
-            this.unlockedCareers = loadedData.unlockedCareers || (this.currentCareer ? [this.currentCareer] : []);
-            /** @type {Object.<string, number>} Current level in each career. */
-            this.careerLevels = loadedData.careerLevels || {};
-            /** @type {Object.<string, number>} Current XP in each career. */
-            this.careerXP = loadedData.careerXP || {};
-
-            // Migration: Ensure active career has level data
-            if (this.currentCareer && !this.careerLevels[this.currentCareer]) {
-                this.careerLevels[this.currentCareer] = 1;
-                this.careerXP[this.currentCareer] = 0;
-            }
-
-            /** @type {?object} The active daily quest. */
-            this.dailyQuest = loadedData.dailyQuest || null;
-
-            /** @type {Object.<string, number>} The items the pet is currently holding. */
-            this.inventory = loadedData.inventory || {};
-            /** @type {number} The pet's age. */
-            this.age = loadedData.age;
-            /** @type {number} The generation number of the pet. */
-            this.generation = loadedData.generation || 1;
-            /** @type {boolean} Whether the pet is ready for the legacy/breeding system. */
-            this.isLegacyReady = loadedData.isLegacyReady || false;
-            /** @type {Array<string>} Special traits inherited from ancestors. */
-            this.legacyTraits = loadedData.legacyTraits || [];
-             /** @type {number} A 1-10 scale affecting mood swing intensity. */
-            this.moodSensitivity = loadedData.moodSensitivity || Config.INITIAL_STATE.MOOD_SENSITIVITY_DEFAULT;
-            /** @type {Array<object>} Environmental factors affecting the pet. */
-            this.environmentalFactors = loadedData.environmentalFactors || [];
-
-            // Initialize Genome
-            if (loadedData.genome) {
-                if (loadedData.genome.genotype) {
-                     // New Genome format
-                     // Pass loaded phenotype if available to avoid random recalculation
-                     const phenotype = loadedData.genome.phenotype || null;
-                     this.genome = new Genome(loadedData.genome.genotype, phenotype, this.rng);
-                } else {
-                    // Legacy migration: Create homozygous genotype from old data
-                    const migratedGenotype = {};
-                    // Personality
-                    ['Adventurer', 'Nurturer', 'Mischievous', 'Intellectual', 'Recluse'].forEach(trait => {
-                         const val = loadedData.genome.personalityGenes ? (loadedData.genome.personalityGenes[trait] || 0) : 0;
-                         migratedGenotype[trait] = [val, val];
-                    });
-                    // Physio
-                    const moodSens = loadedData.genome.moodSensitivity || Config.INITIAL_STATE.MOOD_SENSITIVITY_DEFAULT;
-                    migratedGenotype.moodSensitivity = [moodSens, moodSens];
-                    migratedGenotype.metabolism = [Config.GENETICS.METABOLISM_NORMALIZER, Config.GENETICS.METABOLISM_NORMALIZER]; // Default 5
-                    migratedGenotype.specialAbility = [null, null];
-
-                    // Attempt to preserve legacy trait
-                    if (loadedData.genome.legacyTraits && loadedData.genome.legacyTraits.length > 0) {
-                        const trait = loadedData.genome.legacyTraits[0];
-                        migratedGenotype.specialAbility = [trait, trait];
-                    }
-
-                    this.genome = new Genome(migratedGenotype, null, this.rng);
-                }
-            } else {
-                // Should not happen for valid saves, but fallback
-                this.genome = new Genome(null, null, this.rng);
-            }
-
-            // --- Home Config Migration ---
-            if (loadedData.homeConfig && loadedData.homeConfig.rooms) {
-                 this.homeConfig = loadedData.homeConfig;
-            } else if (loadedData.homeConfig) {
-                 // Partially migrated or legacy flat structure
-                 this.homeConfig = this._migrateHomeConfig(loadedData.homeConfig);
-            } else {
-                 // Load default or try Persistence (for very old saves where it was separate)
-                 // NOTE: Ideally PersistenceManager should have passed it in `loadedData`.
-                 // If not, we initialize defaults.
-                 this.homeConfig = this._migrateHomeConfig({});
-            }
-
-
-        } else {
-            // This is a brand new game. Start from defaults.
-            this.uuid = this.generateUUID();
-            this.name = "Nadagotchi"; // Default, can be overridden immediately after
-            this.mood = 'neutral';
-            this.dominantArchetype = initialArchetype;
-            this.personalityPoints = {
-                Adventurer: 0, Nurturer: 0, Mischievous: 0,
-                Intellectual: 0, Recluse: 0
-            };
-            this.personalityPoints[initialArchetype] = Config.INITIAL_STATE.PERSONALITY_POINTS_STARTER;
-
-            // Clone initial stats from Config to avoid reference issues
-            this.stats = { ...Config.INITIAL_STATE.STATS };
-            this.skills = { ...Config.INITIAL_STATE.SKILLS };
-
-            this.currentCareer = null;
-            this.unlockedCareers = [];
-            this.careerLevels = {};
-            this.careerXP = {};
-            this.dailyQuest = null;
-            this.inventory = {};
-        this.coins = 0;
-            this.age = 0;
-            this.generation = 1;
-            this.isLegacyReady = false;
-            this.legacyTraits = [];
-            this.moodSensitivity = Config.INITIAL_STATE.MOOD_SENSITIVITY_DEFAULT;
-            this.environmentalFactors = [];
-
-            // Initialize Genome for new game
-            // Start with random defaults (using RNG), then bias towards the chosen starter
-            this.genome = new Genome(null, null, this.rng);
-            // Boost the dominant archetype to ensure it wins against the wild traits (10-30)
-            if (this.genome.genotype[initialArchetype]) {
-                const val = Config.INITIAL_STATE.GENOME_STARTER_VAL;
-                this.genome.genotype[initialArchetype] = [val, val];
-            }
-            // Recalculate phenotype after manual genotype modification
-            this.genome.phenotype = this.genome.calculatePhenotype(this.rng);
-
-            // Initialize Home Config
-            this.homeConfig = {
-                rooms: {
-                    "Entryway": {
-                        wallpaper: 'wallpaper_default',
-                        flooring: 'flooring_default',
-                        wallpaperItem: 'Default',
-                        flooringItem: 'Default'
-                    }
-                }
-            };
+        if (this.currentCareer && !this.careerLevels[this.currentCareer]) {
+            this.careerLevels[this.currentCareer] = 1;
+            this.careerXP[this.currentCareer] = 0;
         }
 
-        /** @type {{hunger: number, energy: number, happiness: number}} Maximum values for stats. */
+        this.dailyQuest = data.dailyQuest || null;
+        this.coins = data.coins || 0;
+        this.inventory = data.inventory || {};
+        this.age = data.age;
+        this.generation = data.generation || 1;
+        this.isLegacyReady = data.isLegacyReady || false;
+        this.legacyTraits = data.legacyTraits || [];
+        this.moodSensitivity = data.moodSensitivity || Config.INITIAL_STATE.MOOD_SENSITIVITY_DEFAULT;
+        this.environmentalFactors = data.environmentalFactors || [];
+    }
+
+    /**
+     * Initializes the genome from saved data.
+     * @param {object} data
+     * @private
+     */
+    _initGenomeFromSave(data) {
+        if (data.genome) {
+            if (data.genome.genotype) {
+                 const phenotype = data.genome.phenotype || null;
+                 this.genome = new Genome(data.genome.genotype, phenotype, this.rng);
+            } else {
+                const migratedGenotype = {};
+                ['Adventurer', 'Nurturer', 'Mischievous', 'Intellectual', 'Recluse'].forEach(trait => {
+                     const val = data.genome.personalityGenes ? (data.genome.personalityGenes[trait] || 0) : 0;
+                     migratedGenotype[trait] = [val, val];
+                });
+                const moodSens = data.genome.moodSensitivity || Config.INITIAL_STATE.MOOD_SENSITIVITY_DEFAULT;
+                migratedGenotype.moodSensitivity = [moodSens, moodSens];
+                migratedGenotype.metabolism = [Config.GENETICS.METABOLISM_NORMALIZER, Config.GENETICS.METABOLISM_NORMALIZER];
+                migratedGenotype.specialAbility = [null, null];
+
+                if (data.genome.legacyTraits && data.genome.legacyTraits.length > 0) {
+                    const trait = data.genome.legacyTraits[0];
+                    migratedGenotype.specialAbility = [trait, trait];
+                }
+                this.genome = new Genome(migratedGenotype, null, this.rng);
+            }
+        } else {
+            this.genome = new Genome(null, null, this.rng);
+        }
+    }
+
+    /**
+     * Initializes home configuration from saved data.
+     * @param {object} data
+     * @private
+     */
+    _initHomeConfigFromSave(data) {
+        if (data.homeConfig && data.homeConfig.rooms) {
+             this.homeConfig = data.homeConfig;
+        } else if (data.homeConfig) {
+             this.homeConfig = this._migrateHomeConfig(data.homeConfig);
+        } else {
+             this.homeConfig = this._migrateHomeConfig({});
+        }
+    }
+
+    /**
+     * Initializes a brand new pet from defaults.
+     * @param {string} initialArchetype
+     * @private
+     */
+    _initNewPet(initialArchetype) {
+        this.uuid = this.generateUUID();
+        this.name = "Nadagotchi";
+        this.mood = 'neutral';
+        this.dominantArchetype = initialArchetype;
+        this.personalityPoints = {
+            Adventurer: 0, Nurturer: 0, Mischievous: 0,
+            Intellectual: 0, Recluse: 0
+        };
+        this.personalityPoints[initialArchetype] = Config.INITIAL_STATE.PERSONALITY_POINTS_STARTER;
+
+        this.stats = { ...Config.INITIAL_STATE.STATS };
+        this.skills = { ...Config.INITIAL_STATE.SKILLS };
+
+        this.currentCareer = null;
+        this.unlockedCareers = [];
+        this.careerLevels = {};
+        this.careerXP = {};
+        this.dailyQuest = null;
+        this.inventory = {};
+        this.coins = 0;
+        this.age = 0;
+        this.generation = 1;
+        this.isLegacyReady = false;
+        this.legacyTraits = [];
+        this.moodSensitivity = Config.INITIAL_STATE.MOOD_SENSITIVITY_DEFAULT;
+        this.environmentalFactors = [];
+
+        this.genome = new Genome(null, null, this.rng);
+        if (this.genome.genotype[initialArchetype]) {
+            const val = Config.INITIAL_STATE.GENOME_STARTER_VAL;
+            this.genome.genotype[initialArchetype] = [val, val];
+        }
+        this.genome.phenotype = this.genome.calculatePhenotype(this.rng);
+
+        this.homeConfig = {
+            rooms: {
+                "Entryway": {
+                    wallpaper: 'wallpaper_default',
+                    flooring: 'flooring_default',
+                    wallpaperItem: 'Default',
+                    flooringItem: 'Default'
+                }
+            }
+        };
+    }
+
+    /**
+     * Initializes non-persisted runtime state and systems.
+     * @param {object} [loadedData]
+     * @private
+     */
+    _initSystems(loadedData) {
         this.maxStats = { hunger: Config.LIMITS.MAX_STATS, energy: Config.LIMITS.MAX_STATS, happiness: Config.LIMITS.MAX_STATS };
         if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousMetabolism) {
             this.maxStats.energy += Config.GENETICS.HOMOZYGOUS_ENERGY_BONUS;
         }
 
-        /** @type {?string} A flag used by the UI to show a one-time notification when a career is unlocked. */
         this.newCareerUnlocked = null;
-
-        /** @type {PersistenceManager} Manages saving and loading game data. */
         this.persistence = new PersistenceManager();
 
-        // --- Async Data Holders (Initialized in init()) ---
-        /** @type {Array<{date: string, text: string}>} A log of significant events. */
         this.journal = [];
-        /** @type {Array<string>} A list of crafting recipes the pet has discovered. */
         this.discoveredRecipes = [];
-
-        /** @type {Object.<string, {materials: Object.<string, number>, description: string}>} */
         this.recipes = Recipes;
 
-        /** @type {{painting: number, music: number}} A map of hobby levels. */
         this.hobbies = loadedData ? loadedData.hobbies : { painting: 0, music: 0 };
-        /** @type {Object.<string, {level: number}>} A map of relationships with NPCs. */
         this.relationships = loadedData ? loadedData.relationships : {
             'Grizzled Scout': { level: 0 },
             'Master Artisan': { level: 0 },
             'Sickly Villager': { level: 0 }
         };
 
-        // Initialize Relationship System (Logic Extracted)
-        // We make it non-enumerable so it is not saved to JSON automatically
         Object.defineProperty(this, 'relationshipSystem', {
             value: new RelationshipSystem(this),
             enumerable: false,
             writable: true
         });
 
-        // Initialize Inventory System (Logic Extracted)
         Object.defineProperty(this, 'inventorySystem', {
             value: new InventorySystem(this),
             enumerable: false,
             writable: true
         });
 
-        /** @type {Object.<string, object>} A map of active quests. */
         this.quests = (loadedData && loadedData.quests) ? loadedData.quests : {};
 
-        // Initialize Quest System (Logic Extracted)
         Object.defineProperty(this, 'questSystem', {
             value: new QuestSystem(this),
             enumerable: false,
             writable: true
         });
 
-        // --- Optimized Debris Map Implementation ---
-        /** @type {Object.<string, object>} Debris items in the world (weeds, rocks, etc.). */
         this.debris = {};
         if (loadedData && loadedData.debris) {
             if (Array.isArray(loadedData.debris)) {
-                // Migration logic for legacy array-based saves
                 loadedData.debris.forEach(d => {
                     if (d.id && d.id !== '__proto__' && d.id !== 'constructor') {
                         this.debris[d.id] = d;
                     }
                 });
             } else {
-                // Own property check for security
                 for (const key of Object.keys(loadedData.debris)) {
                     if (key !== '__proto__' && key !== 'constructor') {
                         this.debris[key] = loadedData.debris[key];
@@ -287,39 +268,33 @@ export class Nadagotchi {
                 }
             }
         }
-        /** @type {number} Cached count for O(1) size checks. */
         this.debrisCount = Object.keys(this.debris).length;
 
-        // Initialize Debris System
         Object.defineProperty(this, 'debrisSystem', {
             value: new DebrisSystem(this),
             enumerable: false,
             writable: true
         });
 
-        // Optimization: Cleanliness Penalty Caching
         this.recalculateCleanlinessPenalty();
+    }
 
-
-        /** @type {string} The pet's current location. */
+    /**
+     * Initializes runtime state tracking variables.
+     * @param {object} [loadedData]
+     * @private
+     */
+    _initRuntimeState(loadedData) {
         this.location = loadedData ? loadedData.location : 'GARDEN';
-        // Migration: Treat 'Home' as 'GARDEN'
         if (this.location === 'Home') this.location = 'GARDEN';
 
-        // --- Runtime State Tracking (Not persisted) ---
-        /** @type {?string} Tracks the last known weather to detect changes. */
         this.lastWeather = null;
-        /** @type {number} Tracks the integer age to detect milestones. */
         this.previousAge = Math.floor(this.age);
-        /** @type {string} Tracks the current season for seasonal logic. */
         this.currentSeason = 'Spring';
 
-        /** @type {?string} Temporarily overrides the calculated mood (e.g., 'happy' after playing). */
         this.moodOverride = null;
-        /** @type {number} Time in ms remaining for the mood override. */
         this.moodOverrideTimer = 0;
 
-        /** @type {boolean} Internal flag to batch journal saves. */
         this._journalSavePending = false;
     }
 
@@ -391,7 +366,7 @@ export class Nadagotchi {
      * @private
      */
     _generateSeed() {
-        return Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+        return CryptoUtils.getRandomSafeInt(0, Number.MAX_SAFE_INTEGER);
     }
 
     /**
@@ -423,7 +398,7 @@ export class Nadagotchi {
      * @param {Object} environment - Current environmental conditions.
      */
     applyEnvironment(environment) {
-        if (!environment) return;
+        if (!environment) return 0;
         let tempAdjustment = 0;
 
         // Security Fix: Filter environmental factors to ensure they are present in inventory.
@@ -548,110 +523,134 @@ export class Nadagotchi {
      * @param {?object} worldState.activeEvent - The currently active world event, if any.
      */
     live(dt, worldState = { weather: "Sunny", time: "Day", activeEvent: null }) {
-        // Fallback for legacy calls or tests omitting dt
+        const simulationData = this._prepareSimulation(dt, worldState);
+        const { ticksPassed, oldMood, metabolismMult, traitModifier } = simulationData;
+
+        // Calculate decays based on environment
+        const decays = this._calculateEnvironmentalDecays(ticksPassed, worldState);
+        let { hungerDecay, energyDecay, happinessChange } = decays;
+
+        // Apply final decays to stats
+        this._applyDecays(ticksPassed, hungerDecay, energyDecay, happinessChange, metabolismMult, traitModifier);
+
+        // Update mood and aging
+        this._updateMood(dt);
+        this._updateAging(ticksPassed);
+
+        // Automated Journal Logging
+        this._processJournalLogging(oldMood, worldState);
+    }
+
+    /**
+     * Prepares initial values for simulation tick.
+     * @private
+     */
+    _prepareSimulation(dt, worldState) {
         if (typeof dt === 'object') {
-             worldState = dt;
+             Object.assign(worldState, dt);
              dt = Config.GAME_LOOP.MS_PER_FRAME;
         } else if (dt === undefined) {
              dt = Config.GAME_LOOP.MS_PER_FRAME;
         }
 
+        if (worldState.season) this.currentSeason = worldState.season;
+
         const ticksPassed = dt / Config.GAME_LOOP.MS_PER_FRAME;
         const oldMood = this.mood;
 
-        if (worldState.season) {
-            this.currentSeason = worldState.season;
+        let metabolismMult = 1.0;
+        if (this.genome?.phenotype?.metabolism) {
+            metabolismMult = (this.genome.phenotype.metabolism / Config.GENETICS.METABOLISM_NORMALIZER);
         }
 
-        // 1. Setup Base Decay Rates
+        let traitModifier = 1.0;
+        const activeTrait = this.genome?.phenotype?.specialAbility;
+        if (activeTrait === "Photosynthetic" && worldState.time === "Day") {
+            traitModifier = Config.TRAITS.PHOTOSYNTHETIC_MULT;
+        } else if (activeTrait === "Night Owl" && worldState.time === "Night") {
+            traitModifier = Config.TRAITS.NIGHT_OWL_MULT;
+        }
+
+        return { ticksPassed, oldMood, metabolismMult, traitModifier };
+    }
+
+    /**
+     * Calculates decay factors based on environment.
+     * @private
+     */
+    _calculateEnvironmentalDecays(ticksPassed, worldState) {
         let hungerDecay = Config.DECAY.HUNGER * ticksPassed;
         let energyDecay = Config.DECAY.ENERGY * ticksPassed;
         let happinessChange = 0;
 
-        // 2. Get Metabolism Factor from Genome (Phenotype)
-        // Range 1 (Slow) to 10 (Fast). Normalize to 0.2x - 2.0x multiplier.
-        let metabolismMult = 1.0;
-        if (this.genome && this.genome.phenotype && this.genome.phenotype.metabolism) {
-            metabolismMult = (this.genome.phenotype.metabolism / Config.GENETICS.METABOLISM_NORMALIZER);
-        }
+        // Apply temperature-based environmental adjustments
+        const tempAdjustment = this.applyEnvironment(worldState);
+        happinessChange += (tempAdjustment * ticksPassed);
 
-        // 3. Check Passive Traits
-        let traitModifier = 1.0;
-        const activeTrait = this.genome && this.genome.phenotype ? this.genome.phenotype.specialAbility : null;
-
-        if (activeTrait === "Photosynthetic" && worldState.time === "Day") {
-            traitModifier = Config.TRAITS.PHOTOSYNTHETIC_MULT; // 50% less energy drain
-        } else if (activeTrait === "Night Owl" && worldState.time === "Night") {
-            traitModifier = Config.TRAITS.NIGHT_OWL_MULT; // 20% less energy drain
-        }
-
-        if (worldState.activeEvent && worldState.activeEvent.name.includes('Festival')) {
+        if (worldState.activeEvent?.name.includes('Festival')) {
             this.stats.happiness += Config.ENV_MODIFIERS.FESTIVAL_HAPPINESS * ticksPassed;
         }
 
-        switch (worldState.weather) {
-            case "Rainy":
-                if (this.dominantArchetype === "Adventurer") happinessChange += Config.ENV_MODIFIERS.RAINY.ADVENTURER_HAPPINESS * ticksPassed;
-                if (this.dominantArchetype === "Nurturer") energyDecay *= Config.ENV_MODIFIERS.RAINY.NURTURER_ENERGY_MULT;
-                break;
-            case "Stormy":
-                if (this.dominantArchetype === "Adventurer") happinessChange += Config.ENV_MODIFIERS.STORMY.ADVENTURER_HAPPINESS * ticksPassed;
-                if (this.dominantArchetype === "Recluse") happinessChange += Config.ENV_MODIFIERS.STORMY.RECLUSE_HAPPINESS * ticksPassed;
-                energyDecay *= Config.ENV_MODIFIERS.STORMY.ENERGY_MULT;
-                break;
-            case "Cloudy":
-                energyDecay *= Config.ENV_MODIFIERS.CLOUDY.ENERGY_MULT;
-                break;
-            case "Sunny":
-                if (this.dominantArchetype === "Adventurer") happinessChange += Config.ENV_MODIFIERS.SUNNY.ADVENTURER_HAPPINESS * ticksPassed;
-                energyDecay *= Config.ENV_MODIFIERS.SUNNY.ENERGY_MULT;
-                break;
+        const weatherMods = Config.ENV_MODIFIERS[worldState.weather.toUpperCase()];
+        if (weatherMods) {
+            if (this.dominantArchetype === "Adventurer" && weatherMods.ADVENTURER_HAPPINESS) {
+                happinessChange += weatherMods.ADVENTURER_HAPPINESS * ticksPassed;
+            }
+            if (this.dominantArchetype === "Nurturer" && weatherMods.NURTURER_ENERGY_MULT) {
+                energyDecay *= weatherMods.NURTURER_ENERGY_MULT;
+            }
+            if (this.dominantArchetype === "Recluse" && weatherMods.RECLUSE_HAPPINESS) {
+                happinessChange += weatherMods.RECLUSE_HAPPINESS * ticksPassed;
+            }
+            if (weatherMods.ENERGY_MULT) energyDecay *= weatherMods.ENERGY_MULT;
         }
 
-        switch (worldState.time) {
-            case "Night":
-                hungerDecay *= Config.ENV_MODIFIERS.NIGHT.HUNGER_MULT;
-                if (this.dominantArchetype === "Recluse") happinessChange += Config.ENV_MODIFIERS.NIGHT.RECLUSE_HAPPINESS * ticksPassed;
-                if (this.dominantArchetype === "Adventurer") energyDecay *= Config.ENV_MODIFIERS.NIGHT.ADVENTURER_ENERGY_MULT;
-                break;
-            case "Dusk":
-            case "Dawn":
-                energyDecay *= Config.ENV_MODIFIERS.TWILIGHT.ENERGY_MULT;
-                break;
-            case "Day":
-                if (this.dominantArchetype === "Intellectual") energyDecay *= Config.ENV_MODIFIERS.DAY.INTELLECTUAL_ENERGY_MULT;
-                break;
+        const timeMods = Config.ENV_MODIFIERS[worldState.time.toUpperCase()];
+        if (timeMods) {
+            if (timeMods.HUNGER_MULT) hungerDecay *= timeMods.HUNGER_MULT;
+            if (this.dominantArchetype === "Recluse" && timeMods.RECLUSE_HAPPINESS) {
+                happinessChange += timeMods.RECLUSE_HAPPINESS * ticksPassed;
+            }
+            if (this.dominantArchetype === "Adventurer" && timeMods.ADVENTURER_ENERGY_MULT) {
+                energyDecay *= timeMods.ADVENTURER_ENERGY_MULT;
+            }
+            if (this.dominantArchetype === "Intellectual" && timeMods.INTELLECTUAL_ENERGY_MULT) {
+                energyDecay *= timeMods.INTELLECTUAL_ENERGY_MULT;
+            }
+            if (timeMods.ENERGY_MULT) energyDecay *= timeMods.ENERGY_MULT;
         }
 
-        // 4. Apply Final Decays
-        // Debris Penalties
-        // Debris Penalties
-        // Optimization: Use cached values. Local debris hurts twice as much (Global + Local).
-        let cleanlinessPenalty = this._cachedGlobalPenalty + (this._cachedLocalPenalties[this.location] || 0);
+        return { hungerDecay, energyDecay, happinessChange };
+    }
+
+    /**
+     * Applies calculated decays to the pet's stats.
+     * @private
+     */
+    _applyDecays(ticksPassed, hungerDecay, energyDecay, happinessChange, metabolismMult, traitModifier) {
+        const cleanlinessPenalty = this._cachedGlobalPenalty + (this._cachedLocalPenalties[this.location] || 0);
 
         this.stats.hunger -= (hungerDecay * metabolismMult);
         this.stats.energy -= (energyDecay * metabolismMult * traitModifier);
         this.stats.happiness += (happinessChange - (cleanlinessPenalty * ticksPassed));
 
-        if (this.stats.hunger < 0) this.stats.hunger = 0;
-        if (this.stats.energy < 0) this.stats.energy = 0;
-        if (this.stats.happiness < 0) this.stats.happiness = 0;
-        if (this.stats.happiness > this.maxStats.happiness) this.stats.happiness = this.maxStats.happiness;
+        this.stats.hunger = Math.max(0, this.stats.hunger);
+        this.stats.energy = Math.max(0, this.stats.energy);
+        this.stats.happiness = Math.max(0, Math.min(this.maxStats.happiness, this.stats.happiness));
+    }
 
-        // Mood Calculation with Override Logic
+    /**
+     * Updates the pet's mood based on current stats.
+     * @private
+     */
+    _updateMood(dt) {
         if (this.moodOverrideTimer > 0) {
             this.mood = this.moodOverride;
             this.moodOverrideTimer -= dt;
-            if (this.moodOverrideTimer <= 0) {
-                this.moodOverride = null;
-                // Mood will naturally recalculate next frame
-            }
+            if (this.moodOverrideTimer <= 0) this.moodOverride = null;
         } else {
-            // Standard Stat-based Mood Calculation
-            const sensitivity = (this.genome && this.genome.phenotype) ? this.genome.phenotype.moodSensitivity : Config.INITIAL_STATE.MOOD_SENSITIVITY_DEFAULT;
-            // Homozygous MoodSensitivity Bonus: Faster recovery (lower threshold for happiness)
             let happyThreshold = Config.THRESHOLDS.HAPPY_MOOD;
-            if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousMoodSensitivity) {
+            if (this.genome?.phenotype?.isHomozygousMoodSensitivity) {
                 happyThreshold = Config.THRESHOLDS.HAPPY_MOOD_HOMOZYGOUS;
             }
 
@@ -665,27 +664,32 @@ export class Nadagotchi {
                 this.mood = 'neutral';
             }
         }
+    }
 
+    /**
+     * Updates age and legacy readiness.
+     * @private
+     */
+    _updateAging(ticksPassed) {
         this.age += Config.DECAY.AGE_INCREMENT * ticksPassed;
         if (this.age > Config.THRESHOLDS.AGE_LEGACY && !this.isLegacyReady) {
             this.isLegacyReady = true;
         }
+    }
 
-        // --- Automated Journal Logging ---
-
-        // 1. Mood Change
+    /**
+     * Processes automated journal logging based on state changes.
+     * @private
+     */
+    _processJournalLogging(oldMood, worldState) {
         if (this.mood !== oldMood) {
             this._logAutoEntry('MOOD_CHANGE', { newMood: this.mood });
         }
-
-        // 2. Weather Change
-        // Only log if we have a previous weather state (prevents logging on game load)
         if (this.lastWeather !== null && this.lastWeather !== worldState.weather) {
             this._logAutoEntry('WEATHER_CHANGE', { weather: worldState.weather });
         }
         this.lastWeather = worldState.weather;
 
-        // 3. Age Milestone (Integer increments)
         if (Math.floor(this.age) > this.previousAge) {
             this._logAutoEntry('AGE_MILESTONE', { age: Math.floor(this.age) });
             this.previousAge = Math.floor(this.age);
@@ -711,191 +715,20 @@ export class Nadagotchi {
      * @param {*} [item=null] - An optional item or data used in the action.
      */
     handleAction(actionType, item = null) {
-        let moodMultiplier;
-        let actionSetMood = null; // Track if we set a mood to trigger override
+        let actionSetMood = null;
+        const normalizedAction = actionType.toUpperCase();
 
-        switch (actionType.toUpperCase()) {
-            case 'FEED':
-                this.stats.hunger = Math.min(this.maxStats.hunger, this.stats.hunger + Config.ACTIONS.FEED.HUNGER_RESTORE);
-                this.stats.happiness = Math.min(this.maxStats.happiness, this.stats.happiness + Config.ACTIONS.FEED.HAPPINESS_RESTORE);
-                if (this.dominantArchetype === 'Nurturer') this.personalityPoints.Nurturer++;
-                actionSetMood = 'happy'; // Food makes you happy!
-                break;
+        if (normalizedAction === 'FEED') actionSetMood = this._handleFeedAction();
+        else if (normalizedAction === 'PLAY') actionSetMood = this._handlePlayAction();
+        else if (normalizedAction === 'STUDY') actionSetMood = this._handleStudyAction();
+        else if (normalizedAction.startsWith('INTERACT_')) actionSetMood = this._handleInteractAction(normalizedAction);
+        else if (normalizedAction === 'EXPLORE') actionSetMood = this._handleExploreAction();
+        else if (normalizedAction === 'MEDITATE') actionSetMood = this._handleMeditateAction();
+        else if (normalizedAction === 'CRAFT_ITEM') { this.craftItem(item); actionSetMood = 'happy'; }
+        else if (normalizedAction === 'CONSUME_ITEM') this.consumeItem(item);
+        else if (normalizedAction === 'PRACTICE_HOBBY') { this.practiceHobby(item); actionSetMood = 'happy'; }
+        else if (normalizedAction === 'FORAGE') { this.forage(); actionSetMood = 'happy'; }
 
-            case 'PLAY':
-                if (this.stats.energy < Config.ACTIONS.PLAY.ENERGY_COST) return;
-                this.stats.energy = Math.max(0, this.stats.energy - Config.ACTIONS.PLAY.ENERGY_COST);
-                this.stats.happiness = Math.min(this.maxStats.happiness, this.stats.happiness + Config.ACTIONS.PLAY.HAPPINESS_RESTORE);
-
-                // Homozygous Mischievous Bonus: "Energy Recovery" (Refund half energy)
-                if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousMischievous) {
-                     this.stats.energy = Math.min(this.maxStats.energy, this.stats.energy + 5);
-                }
-
-                if (['Adventurer', 'Mischievous'].includes(this.dominantArchetype)) {
-                    actionSetMood = 'happy';
-                    this.personalityPoints[this.dominantArchetype]++;
-                } else if (this.dominantArchetype === 'Recluse') {
-                    actionSetMood = 'sad';
-                    this.stats.happiness -= Config.ACTIONS.PLAY.RECLUSE_HAPPINESS_PENALTY;
-                } else {
-                    actionSetMood = 'happy'; // General play is happy for most
-                }
-                break;
-
-            case 'STUDY':
-                if (this.stats.energy < Config.ACTIONS.STUDY.ENERGY_COST) return;
-                if (this.stats.happiness < Config.ACTIONS.STUDY.HAPPINESS_COST) return;
-
-                this.stats.energy = Math.max(0, this.stats.energy - Config.ACTIONS.STUDY.ENERGY_COST);
-                this.stats.happiness = Math.max(0, this.stats.happiness - Config.ACTIONS.STUDY.HAPPINESS_COST);
-                moodMultiplier = this.getMoodMultiplier();
-                this.skills.logic += (Config.ACTIONS.STUDY.SKILL_GAIN * moodMultiplier);
-                this.skills.research += (Config.ACTIONS.STUDY.SKILL_GAIN * moodMultiplier);
-
-                // Homozygous Intellectual Bonus: Slight boost to mood recovery (Happiness)
-                if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousIntellectual) {
-                    this.stats.happiness += 5;
-                }
-
-                if (this.dominantArchetype === 'Intellectual') {
-                    actionSetMood = 'happy';
-                    this.personalityPoints.Intellectual++;
-                    this.stats.happiness += Config.ACTIONS.STUDY.HAPPINESS_RESTORE_INTELLECTUAL;
-                } else {
-                    this.personalityPoints.Intellectual++;
-                }
-
-                if (this.dominantArchetype === 'Adventurer') {
-                    this.skills.navigation += (Config.ACTIONS.STUDY.NAVIGATION_GAIN_ADVENTURER * moodMultiplier);
-                }
-
-                // Use RNG for recipe discovery
-                if (this.rng.random() < 0.05) this.discoverRecipe("Logic-Boosting Snack");
-                break;
-
-            case 'INTERACT_BOOKSHELF':
-                if (this.stats.energy < Config.ACTIONS.INTERACT_BOOKSHELF.ENERGY_COST) return;
-                if (this.stats.happiness < Config.ACTIONS.INTERACT_BOOKSHELF.HAPPINESS_COST) return;
-
-                this.stats.energy -= Config.ACTIONS.INTERACT_BOOKSHELF.ENERGY_COST;
-                this.stats.happiness -= Config.ACTIONS.INTERACT_BOOKSHELF.HAPPINESS_COST;
-                if (this.dominantArchetype === 'Intellectual') {
-                    this.stats.happiness += Config.ACTIONS.INTERACT_BOOKSHELF.HAPPINESS_RESTORE_INTELLECTUAL;
-                    actionSetMood = 'happy';
-                }
-                moodMultiplier = this.getMoodMultiplier();
-                this.skills.logic += (Config.ACTIONS.INTERACT_BOOKSHELF.SKILL_GAIN * moodMultiplier);
-                this.skills.research += (Config.ACTIONS.INTERACT_BOOKSHELF.SKILL_GAIN * moodMultiplier);
-                this.personalityPoints.Intellectual++;
-                break;
-
-            case 'INTERACT_PLANT':
-                if (this.stats.energy < Config.ACTIONS.INTERACT_PLANT.ENERGY_COST) return;
-
-                this.stats.energy -= Config.ACTIONS.INTERACT_PLANT.ENERGY_COST;
-                this.stats.happiness += Config.ACTIONS.INTERACT_PLANT.HAPPINESS_RESTORE;
-                if (this.dominantArchetype === 'Nurturer') {
-                    this.stats.happiness += Config.ACTIONS.INTERACT_PLANT.HAPPINESS_RESTORE_NURTURER;
-                    actionSetMood = 'happy';
-                } else {
-                    actionSetMood = 'happy'; // Plants are nice
-                }
-                // Apply mood immediately for calculation if this action makes us happy
-                if (actionSetMood) this.mood = actionSetMood;
-
-                moodMultiplier = this.getMoodMultiplier();
-                this.skills.empathy += (Config.ACTIONS.INTERACT_PLANT.SKILL_GAIN * moodMultiplier);
-
-                // Homozygous Nurturer Bonus: Boost Empathy Gain
-                if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousNurturer) {
-                    this.skills.empathy += 0.2;
-                }
-
-                this.personalityPoints.Nurturer++;
-                break;
-
-            case 'INTERACT_FANCY_BOOKSHELF':
-                if (this.stats.energy < Config.ACTIONS.INTERACT_FANCY_BOOKSHELF.ENERGY_COST) return;
-
-                this.stats.energy -= Config.ACTIONS.INTERACT_FANCY_BOOKSHELF.ENERGY_COST;
-                this.stats.happiness += Config.ACTIONS.INTERACT_FANCY_BOOKSHELF.HAPPINESS_RESTORE; // It's a nice bookshelf!
-                if (this.dominantArchetype === 'Intellectual') {
-                    this.stats.happiness += Config.ACTIONS.INTERACT_FANCY_BOOKSHELF.HAPPINESS_RESTORE_INTELLECTUAL; // Even better for intellectuals
-                    actionSetMood = 'happy';
-                }
-                moodMultiplier = this.getMoodMultiplier();
-                this.skills.logic += (Config.ACTIONS.INTERACT_FANCY_BOOKSHELF.SKILL_GAIN * moodMultiplier); // Higher buff
-                this.skills.research += (Config.ACTIONS.INTERACT_FANCY_BOOKSHELF.SKILL_GAIN * moodMultiplier);
-                this.personalityPoints.Intellectual += Config.ACTIONS.INTERACT_FANCY_BOOKSHELF.PERSONALITY_GAIN;
-                this.addJournalEntry("I spent some time studying at my beautiful new bookshelf. I feel so smart!");
-                break;
-
-            case 'EXPLORE':
-                if (this.stats.energy < Config.ACTIONS.EXPLORE.ENERGY_COST) return;
-
-                this.stats.energy = Math.max(0, this.stats.energy - Config.ACTIONS.EXPLORE.ENERGY_COST);
-
-                // Homozygous Adventurer Bonus: Boost Happiness Gain
-                if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousAdventurer) {
-                    this.stats.happiness += 10;
-                }
-
-                if (this.dominantArchetype === 'Adventurer') {
-                    actionSetMood = 'happy';
-                    this.stats.happiness += Config.ACTIONS.EXPLORE.HAPPINESS_RESTORE_ADVENTURER;
-                    this.personalityPoints.Adventurer += 2;
-                    this.skills.navigation += Config.ACTIONS.EXPLORE.SKILL_GAIN;
-                    // Use RNG for recipe discovery
-                    if (this.rng.random() < 0.1) this.discoverRecipe("Stamina-Up Tea");
-                } else if (this.dominantArchetype === 'Recluse') {
-                    actionSetMood = 'sad';
-                    this.stats.happiness -= Config.ACTIONS.EXPLORE.HAPPINESS_PENALTY_RECLUSE;
-                } else {
-                    this.stats.happiness += Config.ACTIONS.EXPLORE.HAPPINESS_RESTORE_DEFAULT;
-                    actionSetMood = 'happy';
-                }
-                break;
-
-            case "MEDITATE":
-                this.stats.energy = Math.min(this.maxStats.energy, this.stats.energy + Config.ACTIONS.MEDITATE.ENERGY_RESTORE);
-                this.stats.happiness += Config.ACTIONS.MEDITATE.HAPPINESS_RESTORE;
-                moodMultiplier = this.getMoodMultiplier();
-                this.skills.focus += (Config.ACTIONS.MEDITATE.SKILL_GAIN * moodMultiplier);
-                if (this.dominantArchetype === "Recluse") {
-                    this.personalityPoints.Recluse += Config.ACTIONS.MEDITATE.PERSONALITY_GAIN_RECLUSE;
-                    actionSetMood = 'happy';
-                }
-
-                // Homozygous Recluse Bonus: Boost Focus Gain
-                if (this.genome && this.genome.phenotype && this.genome.phenotype.isHomozygousRecluse) {
-                    this.skills.focus += 0.2;
-                }
-
-                if (this.dominantArchetype === "Recluse") this.personalityPoints.Recluse += 2;
-                break;
-
-            case "CRAFT_ITEM":
-                this.craftItem(item);
-                actionSetMood = 'happy';
-                break;
-
-            case "CONSUME_ITEM":
-                this.consumeItem(item);
-                break;
-
-            case 'PRACTICE_HOBBY':
-                this.practiceHobby(item);
-                actionSetMood = 'happy';
-                break;
-
-            case 'FORAGE':
-                this.forage();
-                actionSetMood = 'happy';
-                break;
-        }
-
-        // Apply Mood Override
         if (actionSetMood) {
             this.mood = actionSetMood;
             this.moodOverride = actionSetMood;
@@ -905,6 +738,154 @@ export class Nadagotchi {
         this.stats.happiness = Math.max(0, Math.min(this.maxStats.happiness, this.stats.happiness));
         this.updateDominantArchetype();
         this.updateCareer();
+    }
+
+    /**
+     * @private
+     */
+    _handleFeedAction() {
+        this.stats.hunger = Math.min(this.maxStats.hunger, this.stats.hunger + Config.ACTIONS.FEED.HUNGER_RESTORE);
+        this.stats.happiness = Math.min(this.maxStats.happiness, this.stats.happiness + Config.ACTIONS.FEED.HAPPINESS_RESTORE);
+        if (this.dominantArchetype === 'Nurturer') this.personalityPoints.Nurturer++;
+        return 'happy';
+    }
+
+    /**
+     * @private
+     */
+    _handlePlayAction() {
+        if (this.stats.energy < Config.ACTIONS.PLAY.ENERGY_COST) return null;
+        this.stats.energy = Math.max(0, this.stats.energy - Config.ACTIONS.PLAY.ENERGY_COST);
+        this.stats.happiness = Math.min(this.maxStats.happiness, this.stats.happiness + Config.ACTIONS.PLAY.HAPPINESS_RESTORE);
+
+        if (this.genome?.phenotype?.isHomozygousMischievous) {
+             this.stats.energy = Math.min(this.maxStats.energy, this.stats.energy + 5);
+        }
+
+        if (['Adventurer', 'Mischievous'].includes(this.dominantArchetype)) {
+            this.personalityPoints[this.dominantArchetype]++;
+            return 'happy';
+        } else if (this.dominantArchetype === 'Recluse') {
+            this.stats.happiness -= Config.ACTIONS.PLAY.RECLUSE_HAPPINESS_PENALTY;
+            return 'sad';
+        }
+        return 'happy';
+    }
+
+    /**
+     * @private
+     */
+    _handleStudyAction() {
+        if (this.stats.energy < Config.ACTIONS.STUDY.ENERGY_COST) return null;
+        if (this.stats.happiness < Config.ACTIONS.STUDY.HAPPINESS_COST) return null;
+
+        this.stats.energy = Math.max(0, this.stats.energy - Config.ACTIONS.STUDY.ENERGY_COST);
+        this.stats.happiness = Math.max(0, this.stats.happiness - Config.ACTIONS.STUDY.HAPPINESS_COST);
+        const multiplier = this.getMoodMultiplier();
+        this.skills.logic += (Config.ACTIONS.STUDY.SKILL_GAIN * multiplier);
+        this.skills.research += (Config.ACTIONS.STUDY.SKILL_GAIN * multiplier);
+
+        if (this.genome?.phenotype?.isHomozygousIntellectual) this.stats.happiness += 5;
+
+        if (this.dominantArchetype === 'Intellectual') {
+            this.personalityPoints.Intellectual++;
+            this.stats.happiness += Config.ACTIONS.STUDY.HAPPINESS_RESTORE_INTELLECTUAL;
+            if (this.rng.random() < 0.05) this.discoverRecipe("Logic-Boosting Snack");
+            return 'happy';
+        }
+
+        this.personalityPoints.Intellectual++;
+        if (this.dominantArchetype === 'Adventurer') {
+            this.skills.navigation += (Config.ACTIONS.STUDY.NAVIGATION_GAIN_ADVENTURER * multiplier);
+        }
+        if (this.rng.random() < 0.05) this.discoverRecipe("Logic-Boosting Snack");
+        return null;
+    }
+
+    /**
+     * @private
+     */
+    _handleInteractAction(action) {
+        const config = Config.ACTIONS[action];
+        if (!config || this.stats.energy < config.ENERGY_COST) return null;
+        if (config.HAPPINESS_COST && this.stats.happiness < config.HAPPINESS_COST) return null;
+
+        this.stats.energy -= config.ENERGY_COST;
+        if (config.HAPPINESS_COST) this.stats.happiness -= config.HAPPINESS_COST;
+        this.stats.happiness += config.HAPPINESS_RESTORE || 0;
+
+        let resMood = null;
+        if (this.dominantArchetype === 'Intellectual' && config.HAPPINESS_RESTORE_INTELLECTUAL) {
+            this.stats.happiness += config.HAPPINESS_RESTORE_INTELLECTUAL;
+            resMood = 'happy';
+        } else if (this.dominantArchetype === 'Nurturer' && config.HAPPINESS_RESTORE_NURTURER) {
+            this.stats.happiness += config.HAPPINESS_RESTORE_NURTURER;
+            resMood = 'happy';
+        } else if (action === 'INTERACT_PLANT') {
+            resMood = 'happy';
+        }
+
+        if (resMood) this.mood = resMood;
+
+        const multiplier = this.getMoodMultiplier();
+        if (config.SKILL_GAIN) {
+            if (action.includes('BOOKSHELF')) {
+                this.skills.logic += (config.SKILL_GAIN * multiplier);
+                this.skills.research += (config.SKILL_GAIN * multiplier);
+                this.personalityPoints.Intellectual += (config.PERSONALITY_GAIN || 1);
+            } else if (action === 'INTERACT_PLANT') {
+                this.skills.empathy += (config.SKILL_GAIN * multiplier);
+                if (this.genome?.phenotype?.isHomozygousNurturer) this.skills.empathy += 0.2;
+                this.personalityPoints.Nurturer++;
+            }
+        }
+
+        if (action === 'INTERACT_FANCY_BOOKSHELF') {
+            this.addJournalEntry("I spent some time studying at my beautiful new bookshelf. I feel so smart!");
+        }
+
+        return resMood;
+    }
+
+    /**
+     * @private
+     */
+    _handleExploreAction() {
+        if (this.stats.energy < Config.ACTIONS.EXPLORE.ENERGY_COST) return null;
+        this.stats.energy = Math.max(0, this.stats.energy - Config.ACTIONS.EXPLORE.ENERGY_COST);
+
+        if (this.genome?.phenotype?.isHomozygousAdventurer) this.stats.happiness += 10;
+
+        if (this.dominantArchetype === 'Adventurer') {
+            this.stats.happiness += Config.ACTIONS.EXPLORE.HAPPINESS_RESTORE_ADVENTURER;
+            this.personalityPoints.Adventurer += 2;
+            this.skills.navigation += Config.ACTIONS.EXPLORE.SKILL_GAIN;
+            if (this.rng.random() < 0.1) this.discoverRecipe("Stamina-Up Tea");
+            return 'happy';
+        } else if (this.dominantArchetype === 'Recluse') {
+            this.stats.happiness -= Config.ACTIONS.EXPLORE.HAPPINESS_PENALTY_RECLUSE;
+            return 'sad';
+        }
+        this.stats.happiness += Config.ACTIONS.EXPLORE.HAPPINESS_RESTORE_DEFAULT;
+        return 'happy';
+    }
+
+    /**
+     * @private
+     */
+    _handleMeditateAction() {
+        this.stats.energy = Math.min(this.maxStats.energy, this.stats.energy + Config.ACTIONS.MEDITATE.ENERGY_RESTORE);
+        this.stats.happiness += Config.ACTIONS.MEDITATE.HAPPINESS_RESTORE;
+        const multiplier = this.getMoodMultiplier();
+        this.skills.focus += (Config.ACTIONS.MEDITATE.SKILL_GAIN * multiplier);
+
+        if (this.genome?.phenotype?.isHomozygousRecluse) this.skills.focus += 0.2;
+
+        if (this.dominantArchetype === "Recluse") {
+            this.personalityPoints.Recluse += (Config.ACTIONS.MEDITATE.PERSONALITY_GAIN_RECLUSE || 2);
+            return 'happy';
+        }
+        return null;
     }
 
     /**
@@ -1190,10 +1171,29 @@ export class Nadagotchi {
      * @private
      */
     updateDominantArchetype() {
+        const candidates = this._findTopPersonalityCandidates();
+        if (candidates.length === 0) return;
+
+        if (candidates.length === 1) {
+            this.dominantArchetype = candidates[0];
+            return;
+        }
+
+        const { skillWinners, incumbentInCandidates } = this._resolvePersonalityTie(candidates);
+
+        if (incumbentInCandidates && skillWinners.includes(this.dominantArchetype)) return;
+
+        if (skillWinners.length > 0) {
+            this.dominantArchetype = this.rng.choice(skillWinners);
+        }
+    }
+
+    /**
+     * @private
+     */
+    _findTopPersonalityCandidates() {
         let maxPoints = -1;
         let candidates = [];
-
-        // Single pass to find candidates with maximum points
         for (const archetype in this.personalityPoints) {
             const points = this.personalityPoints[archetype];
             if (points > maxPoints) {
@@ -1203,47 +1203,21 @@ export class Nadagotchi {
                 candidates.push(archetype);
             }
         }
+        return candidates;
+    }
 
-        if (candidates.length === 0) return;
-
-        // Optimization: If only one candidate, update and return immediately
-        if (candidates.length === 1) {
-            this.dominantArchetype = candidates[0];
-            return;
-        }
-
-        // Handle ties based on skills
-        // If tied on points, the one with the highest relevant skill score wins.
-        // If tied on skill score, pick randomly (unless incumbent is one of them).
-
+    /**
+     * @private
+     */
+    _resolvePersonalityTie(candidates) {
         let maxSkillScore = -1;
         let skillWinners = [];
         let incumbentInCandidates = false;
 
         for (const archetype of candidates) {
-            if (archetype === this.dominantArchetype) {
-                incumbentInCandidates = true;
-            }
+            if (archetype === this.dominantArchetype) incumbentInCandidates = true;
 
-            let score = 0;
-            switch (archetype) {
-                case 'Adventurer':
-                    score = this.skills.navigation;
-                    break;
-                case 'Nurturer':
-                    score = this.skills.empathy;
-                    break;
-                case 'Intellectual':
-                    score = this.skills.logic + this.skills.research;
-                    break;
-                case 'Recluse':
-                    score = this.skills.focus + this.skills.crafting;
-                    break;
-                case 'Mischievous':
-                    score = this.skills.communication;
-                    break;
-            }
-
+            const score = this._getArchetypeSkillScore(archetype);
             if (score > maxSkillScore) {
                 maxSkillScore = score;
                 skillWinners = [archetype];
@@ -1251,19 +1225,20 @@ export class Nadagotchi {
                 skillWinners.push(archetype);
             }
         }
+        return { skillWinners, incumbentInCandidates };
+    }
 
-        // Apply Incumbent Rule:
-        // If incumbent is a candidate (tied for points) AND has the highest skill score (tied or unique), it wins.
-        // Note: If incumbent is tied for max skill score, it wins tie-break against challengers.
-        if (incumbentInCandidates && skillWinners.includes(this.dominantArchetype)) {
-            return; // Keep current
-        }
-
-        // Otherwise, pick a winner from the skill winners.
-        // If there's a tie in skill scores, pick randomly.
-        if (skillWinners.length > 0) {
-            // Use RNG for deterministic tie-breaking
-            this.dominantArchetype = this.rng.choice(skillWinners);
+    /**
+     * @private
+     */
+    _getArchetypeSkillScore(archetype) {
+        switch (archetype) {
+            case 'Adventurer': return this.skills.navigation;
+            case 'Nurturer': return this.skills.empathy;
+            case 'Intellectual': return this.skills.logic + this.skills.research;
+            case 'Recluse': return this.skills.focus + this.skills.crafting;
+            case 'Mischievous': return this.skills.communication;
+            default: return 0;
         }
     }
 
@@ -1436,7 +1411,7 @@ export class Nadagotchi {
             location: 'Home',
             genome: { genotype: genome.genotype, phenotype: phenotype },
             homeConfig: initialHomeConfig,
-            universeSeed: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
+            universeSeed: CryptoUtils.getRandomSafeInt(0, Number.MAX_SAFE_INTEGER)
         };
     }
 }
