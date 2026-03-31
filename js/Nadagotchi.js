@@ -430,7 +430,7 @@ export class Nadagotchi {
         // Apply effects from active factors
         activeFactors.forEach(factor => {
             if (factor.effect === 'warm') tempAdjustment += 5;
-            if (factor.effect === 'cold') tempAdjustment -= 5;
+            else if (factor.effect === 'cold') tempAdjustment -= 5;
         });
 
         // Note: Further logic using tempAdjustment can be added here as the environment system evolves.
