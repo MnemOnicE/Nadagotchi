@@ -415,7 +415,7 @@ export class Nadagotchi {
      * @param {Object} environment - Current environmental conditions.
      */
     applyEnvironment(environment) {
-        if (!environment) return;
+        if (!environment) return 0;
         let tempAdjustment = 0;
 
         // Security Fix: Filter environmental factors to ensure they are present in inventory.
