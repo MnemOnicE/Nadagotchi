@@ -1093,6 +1093,9 @@ export class Nadagotchi {
         // and reduce Garbage Collection pressure in the live loop.
         for (const id in this.debris) {
             const d = this.debris[id];
+        // Optimization: Use for...of over values to balance performance and readability,
+        // avoiding index-based lookups and satisfying linter preferences.
+        for (const d of Object.values(this.debris)) {
             let penalty = 0;
             if (d.type === 'weed') penalty = Config.DEBRIS.HAPPINESS_PENALTY_PER_WEED;
             else if (d.type === 'poop') penalty = Config.DEBRIS.HAPPINESS_PENALTY_PER_POOP;
@@ -1307,6 +1310,18 @@ export class Nadagotchi {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Unlocks all possible career paths for this pet.
+     * Used primarily for debugging or special events.
+     */
+    unlockAllCareers() {
+        const allCareerIds = Object.keys(Config.CAREER.CAREERS || {});
+        const unlockedSet = new Set(this.unlockedCareers || []);
+        allCareerIds.forEach(id => unlockedSet.add(id));
+        this.unlockedCareers = Array.from(unlockedSet);
+        this.save();
     }
 
     /**

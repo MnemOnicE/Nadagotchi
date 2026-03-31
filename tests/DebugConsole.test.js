@@ -1,6 +1,7 @@
 import { jest } from '@jest/globals';
 import { DebugConsole } from '../js/DebugConsole.js';
 import { setupPhaserMock, createMockScene } from './helpers/mockPhaser.js';
+import { setupPhaserMock, createMockNadagotchi } from './helpers/mockPhaser.js';
 
 describe('DebugConsole', () => {
     let debugConsole;
@@ -15,6 +16,42 @@ describe('DebugConsole', () => {
         mockUIScene = { showToast: jest.fn() };
         mockScene = createMockScene();
         mockScene.scene.get.mockReturnValue(mockUIScene);
+        mockUIScene = {
+            showToast: jest.fn()
+        };
+
+        mockScene = {
+            events: { on: jest.fn(), emit: jest.fn() },
+            game: { events: { emit: jest.fn(), on: jest.fn() }, loop: { actualFps: 60 } },
+            scene: {
+                get: jest.fn().mockReturnValue(mockUIScene)
+            },
+            worldClock: { update: jest.fn(), getCurrentPeriod: jest.fn().mockReturnValue('Day') },
+            calendar: { advanceDay: jest.fn(), season: 'Spring', getDate: jest.fn().mockReturnValue({day: 1, year: 1}) },
+            weatherSystem: { setWeather: jest.fn(), getCurrentWeather: jest.fn().mockReturnValue('Sunny') },
+            eventManager: { getActiveEvent: jest.fn().mockReturnValue(null) },
+            nadagotchi: createMockNadagotchi(),
+            nadagotchi: {
+                coins: 0,
+                save: jest.fn(),
+                stats: { hunger: 100, energy: 100, happiness: 100 },
+                inventorySystem: { addItem: jest.fn() },
+                unlockAllCareers: jest.fn(),
+                inventory: {}
+            },
+            gameSettings: { gameSpeed: 1.0 },
+            add: {
+                graphics: jest.fn().mockReturnValue({
+                    clear: jest.fn(),
+                    destroy: jest.fn(),
+                    lineStyle: jest.fn(),
+                    strokeRect: jest.fn(),
+                    setDepth: jest.fn().mockReturnThis()
+                })
+            },
+            placedFurniture: {},
+            currentRoom: 'Entryway'
+        };
 
         // Mock window.alert
         window.alert = jest.fn();

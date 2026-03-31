@@ -65,6 +65,30 @@ export class DebrisSystem {
     }
 
     /**
+     * Helper to check if a spot is already occupied by debris.
+     * @param {number} x
+     * @param {number} y
+     * @param {string} location
+     * @param {object[]} debrisList
+     * @returns {boolean}
+     * @private
+     */
+    _isSpotOccupied(x, y, location, debrisList) {
+        const overlapThresholdSq = 0.05 * 0.05;
+        for (const d of debrisList) {
+            const dLoc = d.location || 'GARDEN';
+            if (dLoc !== location) continue;
+
+            const dx = d.x - x;
+            const dy = d.y - y;
+            if (dx * dx + dy * dy < overlapThresholdSq) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Spawns a poop item.
      */
     spawnPoop() {
@@ -72,7 +96,9 @@ export class DebrisSystem {
         let valid = false;
         let attempts = 0;
         const maxAttempts = 10;
-        const overlapThreshold = 0.05;
+        const location = this.pet.location || 'GARDEN';
+        // Optimization: Get values once to reduce array allocations inside the search loop
+        const debrisList = Object.values(this.pet.debris);
 
         // Try to find a spot that doesn't overlap existing debris
         while (!valid && attempts < maxAttempts) {
@@ -80,21 +106,7 @@ export class DebrisSystem {
             x = this.pet.rng.range(10, 90) / 100;
             y = this.pet.rng.range(60, 90) / 100;
 
-            // Check overlap with existing debris in same location
-            const location = this.pet.location || 'GARDEN';
-            let isOverlapping = false;
-            for (const id of Object.keys(this.pet.debris)) {
-                const d = this.pet.debris[id];
-                const dLoc = d.location || 'GARDEN';
-                if (dLoc !== location) continue;
-
-                const dist = Math.hypot(d.x - x, d.y - y);
-                if (dist < overlapThreshold) {
-                    isOverlapping = true;
-                    break;
-                }
-            }
-            valid = !isOverlapping;
+            valid = !this._isSpotOccupied(x, y, location, debrisList);
         }
 
         if (!valid) return;
@@ -106,6 +118,13 @@ export class DebrisSystem {
             } else {
                  this.pet.addJournalEntry("Something smells funny in the garden.");
             }
+        this._addDebris('poop', x, y, location);
+
+        // Chance for a funny journal entry (10%)
+        if (this.pet.rng.random() < 0.1) {
+             this.pet.addJournalEntry("The garden has received a... natural gift.");
+        } else {
+             this.pet.addJournalEntry("Something smells funny in the garden.");
         }
     }
 
@@ -133,6 +152,13 @@ export class DebrisSystem {
             rock_small: { msg: "You found a Shiny Stone!", inv: 'Shiny Stone' },
             Berries: { msg: "You found some wild Berries.", inv: 'Berries' },
             Sticks: { msg: "You gathered some Sticks.", inv: 'Sticks' }
+        // Optimized reward lookup to reduce code duplication
+        const rewardConfig = {
+            'weed': { msg: "You pulled a weed.", res: Config.DEBRIS.CLEAN_SKILL_GAIN },
+            'poop': { msg: "Yuck! You cleaned it up.", res: Config.DEBRIS.CLEAN_SKILL_GAIN * 2, hap: 5 },
+            'rock_small': { msg: "You found a Shiny Stone!", inv: 'Shiny Stone' },
+            'Berries': { msg: "You found some wild Berries.", inv: 'Berries' },
+            'Sticks': { msg: "You gathered some Sticks.", inv: 'Sticks' }
         };
 
         const reward = rewardConfig[item.type];
