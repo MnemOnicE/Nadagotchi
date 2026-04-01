@@ -57,10 +57,13 @@ export class CryptoUtils {
 
         const maxUint32 = 4294967295;
 
-        // If range is larger than 32-bit integer, fallback to Math.random to avoid infinite loops
-        // or complex 64-bit rejection sampling, as game seeds don't require high-grade crypto.
+        // For extremely large ranges, we combine two 32-bit random values
         if (range > maxUint32) {
-            return Math.floor(Math.random() * (max - min + 1)) + min;
+            const high = this._get32BitRandom();
+            const low = this._get32BitRandom();
+            const combined = (BigInt(high) << 32n) | BigInt(low);
+            const bigRange = BigInt(max) - BigInt(min) + 1n;
+            return Number((combined % bigRange) + BigInt(min));
         }
 
         const limit = maxUint32 - (maxUint32 % range);
@@ -77,6 +80,7 @@ export class CryptoUtils {
      * Internal helper to get a random 32-bit unsigned integer.
      * @returns {number}
      * @private
+     * @throws {Error} If no secure random source is available.
      */
     static _get32BitRandom() {
         // Browser Environment
@@ -91,9 +95,9 @@ export class CryptoUtils {
                 const crypto = require('crypto');
                 return crypto.randomBytes(4).readUInt32BE(0);
             } catch (e) {
-                return Math.floor(Math.random() * 4294967296);
+                // Ignore and proceed to error
             }
         }
-        return Math.floor(Math.random() * 4294967296);
+        throw new Error("No cryptographically secure random number generator available.");
     }
 }

@@ -86,6 +86,7 @@ export class DebrisSystem {
             const location = this.pet.location || 'GARDEN';
             let isOverlapping = false;
             for (const id of Object.keys(this.pet.debris)) {
+                if (!Object.hasOwn(this.pet.debris, id)) continue;
                 const d = this.pet.debris[id];
                 const dLoc = d.location || 'GARDEN';
                 if (dLoc !== location) continue;
