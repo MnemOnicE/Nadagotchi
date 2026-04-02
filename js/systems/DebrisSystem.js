@@ -90,8 +90,9 @@ export class DebrisSystem {
                 const dLoc = d.location || 'GARDEN';
                 if (dLoc !== location) continue;
 
-                const dist = Math.hypot(d.x - x, d.y - y);
-                if (dist < overlapThreshold) {
+                const dx = d.x - x;
+                const dy = d.y - y;
+                if (dx * dx + dy * dy < overlapThreshold * overlapThreshold) {
                     isOverlapping = true;
                     break;
                 }
