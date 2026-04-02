@@ -24,10 +24,6 @@ import { DebrisSystem } from './systems/DebrisSystem.js';
  * @class Nadagotchi
  */
 export class Nadagotchi {
-    /**
-     * Unlocks all possible career paths for this pet.
-     * Used primarily for debugging or special events.
-     */
     unlockAllCareers() {
         const allCareerIds = Object.keys(Config.CAREER.CAREERS || {});
         const unlockedSet = new Set(this.unlockedCareers || []);
@@ -35,7 +31,6 @@ export class Nadagotchi {
         this.unlockedCareers = Array.from(unlockedSet);
         this.save();
     }
-
     /**
      * Creates a new Nadagotchi instance.
      * @param {string} initialArchetype - The initial archetype of the Nadagotchi (e.g., 'Adventurer').
@@ -274,12 +269,26 @@ export class Nadagotchi {
         });
 
         // --- Optimized Debris Map Implementation ---
+        /** @type {Object.<string, object>} Debris items in the world (weeds, rocks, etc.). */
         this.debris = Object.create(null);
-        const savedDebris = loadedData?.debris;
-        if (savedDebris) {
-            const list = Array.isArray(savedDebris) ? savedDebris : Object.values(savedDebris);
-            for (const d of list) if (d?.id) this.debris[d.id] = d;
+        if (loadedData && loadedData.debris) {
+            if (Array.isArray(loadedData.debris)) {
+                // Migration logic for legacy array-based saves
+                loadedData.debris.forEach(d => {
+                    if (d.id && d.id !== '__proto__' && d.id !== 'constructor') {
+                        this.debris[d.id] = d;
+                    }
+                });
+            } else {
+                // Own property check for security
+                for (const key of Object.keys(loadedData.debris)) {
+                    if (key !== '__proto__' && key !== 'constructor') {
+                        this.debris[key] = loadedData.debris[key];
+                    }
+                }
+            }
         }
+        /** @type {number} Cached count for O(1) size checks. */
         this.debrisCount = Object.keys(this.debris).length;
 
         // Initialize Debris System
@@ -1111,6 +1120,13 @@ export class Nadagotchi {
      * @param {string} roomId
      * @returns {boolean}
      */
+    isRoomUnlocked(roomId) {
+        if (this.homeConfig.rooms[roomId] && this.homeConfig.rooms[roomId].unlocked !== undefined) {
+            return this.homeConfig.rooms[roomId].unlocked;
+        }
+        return RoomDefinitions[roomId] ? RoomDefinitions[roomId].unlocked : false;
+    }
+
     /**
      * Recalculates the cached cleanliness penalty values.
      * Optimization to avoid iterating debris every frame.
@@ -1120,13 +1136,10 @@ export class Nadagotchi {
         this._cachedGlobalPenalty = 0;
         this._cachedLocalPenalties = {};
 
-        // Use for...in for iteration to avoid intermediate array allocations (like Object.keys)
+        // Use Object.keys for iteration to avoid intermediate array allocation from Object.values()
         // and reduce Garbage Collection pressure in the live loop.
-        for (const id in this.debris) {
+        for (const id of Object.keys(this.debris)) {
             const d = this.debris[id];
-        // Optimization: Use for...of over values to balance performance and readability,
-        // avoiding index-based lookups and satisfying linter preferences.
-        for (const d of Object.values(this.debris)) {
             let penalty = 0;
             if (d.type === 'weed') penalty = Config.DEBRIS.HAPPINESS_PENALTY_PER_WEED;
             else if (d.type === 'poop') penalty = Config.DEBRIS.HAPPINESS_PENALTY_PER_POOP;
@@ -1138,13 +1151,6 @@ export class Nadagotchi {
             }
         }
     }
-    isRoomUnlocked(roomId) {
-        if (this.homeConfig.rooms[roomId] && this.homeConfig.rooms[roomId].unlocked !== undefined) {
-            return this.homeConfig.rooms[roomId].unlocked;
-        }
-        return RoomDefinitions[roomId] ? RoomDefinitions[roomId].unlocked : false;
-    }
-
     /**
      * Cleans up a specific debris item.
      * @param {string} id
@@ -1341,18 +1347,6 @@ export class Nadagotchi {
             return true;
         }
         return false;
-    }
-
-    /**
-     * Unlocks all possible career paths for this pet.
-     * Used primarily for debugging or special events.
-     */
-    unlockAllCareers() {
-        const allCareerIds = Object.keys(Config.CAREER.CAREERS || {});
-        const unlockedSet = new Set(this.unlockedCareers || []);
-        allCareerIds.forEach(id => unlockedSet.add(id));
-        this.unlockedCareers = Array.from(unlockedSet);
-        this.save();
     }
 
     /**
