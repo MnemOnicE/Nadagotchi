@@ -85,14 +85,18 @@ export class DebrisSystem {
             // Check overlap with existing debris in same location
             const location = this.pet.location || 'GARDEN';
             let isOverlapping = false;
-            for (const id of Object.keys(this.pet.debris)) {
+            const thresholdSq = overlapThreshold * overlapThreshold;
+
+            for (const id in this.pet.debris) {
+                if (!Object.prototype.hasOwnProperty.call(this.pet.debris, id)) continue;
+
                 const d = this.pet.debris[id];
                 const dLoc = d.location || 'GARDEN';
                 if (dLoc !== location) continue;
 
                 const dx = d.x - x;
                 const dy = d.y - y;
-                if (dx * dx + dy * dy < overlapThreshold * overlapThreshold) {
+                if (dx * dx + dy * dy < thresholdSq) {
                     isOverlapping = true;
                     break;
                 }
@@ -136,27 +140,39 @@ export class DebrisSystem {
         this.pet.debrisCount--;
         this.pet.recalculateCleanlinessPenalty();
 
-        let message = "";
+        // Type-based rewards and messages using a lookup table
+        const rewardConfig = {
+            weed: {
+                message: "You pulled a weed.",
+                apply: () => { this.pet.skills.resilience += Config.DEBRIS.CLEAN_SKILL_GAIN; }
+            },
+            poop: {
+                message: "Yuck! You cleaned it up.",
+                apply: () => {
+                    this.pet.skills.resilience += (Config.DEBRIS.CLEAN_SKILL_GAIN * 2);
+                    this.pet.stats.happiness += 5;
+                }
+            },
+            rock_small: {
+                message: "You found a Shiny Stone!",
+                apply: () => { this.pet.inventorySystem.addItem('Shiny Stone', 1); }
+            },
+            Berries: {
+                message: "You found some wild Berries.",
+                apply: () => { this.pet.inventorySystem.addItem('Berries', 1); }
+            },
+            Sticks: {
+                message: "You gathered some Sticks.",
+                apply: () => { this.pet.inventorySystem.addItem('Sticks', 1); }
+            }
+        };
 
-        // Logic based on Type
-        if (item.type === 'weed') {
-            message = "You pulled a weed.";
-            this.pet.skills.resilience += Config.DEBRIS.CLEAN_SKILL_GAIN;
-        } else if (item.type === 'poop') {
-            message = "Yuck! You cleaned it up.";
-            this.pet.skills.resilience += (Config.DEBRIS.CLEAN_SKILL_GAIN * 2);
-            this.pet.stats.happiness += 5; // Relief
-        } else if (item.type === 'rock_small') {
-            message = "You found a Shiny Stone!";
-            this.pet.inventorySystem.addItem('Shiny Stone', 1);
-        } else if (item.type === 'Berries') {
-            message = "You found some wild Berries.";
-            this.pet.inventorySystem.addItem('Berries', 1);
-        } else if (item.type === 'Sticks') {
-            message = "You gathered some Sticks.";
-            this.pet.inventorySystem.addItem('Sticks', 1);
+        const config = rewardConfig[item.type];
+        if (config) {
+            config.apply();
+            return { success: true, message: config.message };
         }
 
-        return { success: true, message: message };
+        return { success: true, message: `You cleaned up ${item.type}.` };
     }
 }

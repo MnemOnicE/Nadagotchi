@@ -108,8 +108,6 @@ export class Nadagotchi {
             this.legacyTraits = loadedData.legacyTraits || [];
              /** @type {number} A 1-10 scale affecting mood swing intensity. */
             this.moodSensitivity = loadedData.moodSensitivity || Config.INITIAL_STATE.MOOD_SENSITIVITY_DEFAULT;
-            /** @type {Array<object>} Environmental factors affecting the pet. */
-            this.environmentalFactors = loadedData.environmentalFactors || [];
 
             // Initialize Genome
             if (loadedData.genome) {
@@ -187,7 +185,6 @@ export class Nadagotchi {
             this.isLegacyReady = false;
             this.legacyTraits = [];
             this.moodSensitivity = Config.INITIAL_STATE.MOOD_SENSITIVITY_DEFAULT;
-            this.environmentalFactors = [];
 
             // Initialize Genome for new game
             // Start with random defaults (using RNG), then bias towards the chosen starter
@@ -270,7 +267,7 @@ export class Nadagotchi {
 
         // --- Optimized Debris Map Implementation ---
         /** @type {Object.<string, object>} Debris items in the world (weeds, rocks, etc.). */
-        this.debris = Object.create(null);
+        this.debris = {};
         if (loadedData && loadedData.debris) {
             if (Array.isArray(loadedData.debris)) {
                 // Migration logic for legacy array-based saves
@@ -417,33 +414,6 @@ export class Nadagotchi {
             }
         }
         return uuid;
-    }
-
-    /**
-     * Applies environmental effects to stats based on equipped items and world state.
-     * @param {Object} environment - Current environmental conditions.
-     */
-    applyEnvironment(environment) {
-        if (!environment) return 0;
-        let tempAdjustment = 0;
-
-        // Security Fix: Filter environmental factors to ensure they are present in inventory.
-        const activeFactors = this.environmentalFactors.filter(factor => {
-            if (factor.type === 'item') {
-                // Adapt to object map inventory structure
-                return this.inventory[factor.id] && this.inventory[factor.id] > 0;
-            }
-            return true; // Non-item factors (like room temp) are always active if set.
-        });
-
-        // Apply effects from active factors
-        activeFactors.forEach(factor => {
-            if (factor.effect === 'warm') tempAdjustment += 5;
-            else if (factor.effect === 'cold') tempAdjustment -= 5;
-        });
-
-        // Note: Further logic using tempAdjustment can be added here as the environment system evolves.
-        return tempAdjustment;
     }
 
     /**
@@ -1136,9 +1106,11 @@ export class Nadagotchi {
         this._cachedGlobalPenalty = 0;
         this._cachedLocalPenalties = {};
 
-        // Use Object.keys for iteration to avoid intermediate array allocation from Object.values()
+        // Use for...in for iteration to avoid intermediate array allocation from Object.keys()
         // and reduce Garbage Collection pressure in the live loop.
-        for (const id of Object.keys(this.debris)) {
+        for (const id in this.debris) {
+            if (!Object.prototype.hasOwnProperty.call(this.debris, id)) continue;
+
             const d = this.debris[id];
             let penalty = 0;
             if (d.type === 'weed') penalty = Config.DEBRIS.HAPPINESS_PENALTY_PER_WEED;
