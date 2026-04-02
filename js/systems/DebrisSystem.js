@@ -153,6 +153,6 @@ export class DebrisSystem {
             return { success: true, message: reward.msg };
         }
 
-        return { success: true, message: "Item removed." };
+        return { success: true, message: message };
     }
 }

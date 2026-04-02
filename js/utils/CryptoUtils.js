@@ -29,15 +29,14 @@ export class CryptoUtils {
         }
 
         // Node.js Environment (Jest/Test)
-        // We check for 'process' to avoid bundling issues in some build tools, though 'require' check is usually enough.
-        if (typeof process !== 'undefined' && typeof require !== 'undefined') {
+        if (typeof require === 'function') {
             try {
-                // Dynamic require to prevent bundlers from trying to bundle 'crypto' for the browser
-                // (though Vite usually handles this gracefully or ignores it)
-                const crypto = require('crypto');
-                return crypto.createHash('sha256').update(data).digest('hex');
-            } catch (e) {
-                console.warn("Crypto module not found in Node environment.", e);
+                const nodeCrypto = require('crypto');
+                if (nodeCrypto && typeof nodeCrypto.createHash === 'function') {
+                    return nodeCrypto.createHash('sha256').update(data).digest('hex');
+                }
+            } catch (err) {
+                console.warn("Crypto module not found in Node environment.", err);
             }
         }
 

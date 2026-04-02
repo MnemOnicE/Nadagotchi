@@ -271,14 +271,27 @@ export class Nadagotchi {
         });
     }
 
-    /**
-     * @private
-     */
-    _initDebrisSystem(loadedData) {
-        this.debris = {};
-        if (loadedData?.debris) {
-            this._loadDebrisData(loadedData.debris);
+        // --- Optimized Debris Map Implementation ---
+        /** @type {Object.<string, object>} Debris items in the world (weeds, rocks, etc.). */
+        this.debris = Object.create(null);
+        if (loadedData && loadedData.debris) {
+            if (Array.isArray(loadedData.debris)) {
+                // Migration logic for legacy array-based saves
+                loadedData.debris.forEach(d => {
+                    if (d.id && d.id !== '__proto__' && d.id !== 'constructor') {
+                        this.debris[d.id] = d;
+                    }
+                });
+            } else {
+                // Own property check for security
+                for (const key of Object.keys(loadedData.debris)) {
+                    if (key !== '__proto__' && key !== 'constructor') {
+                        this.debris[key] = loadedData.debris[key];
+                    }
+                }
+            }
         }
+        /** @type {number} Cached count for O(1) size checks. */
         this.debrisCount = Object.keys(this.debris).length;
 
         Object.defineProperty(this, 'debrisSystem', {
@@ -1161,6 +1174,19 @@ export class Nadagotchi {
     }
 
     /**
+     * Checks if a room is unlocked.
+     * Falls back to RoomDefinitions defaults if not found in persistent config.
+     * @param {string} roomId
+     * @returns {boolean}
+     */
+    isRoomUnlocked(roomId) {
+        if (this.homeConfig.rooms[roomId] && this.homeConfig.rooms[roomId].unlocked !== undefined) {
+            return this.homeConfig.rooms[roomId].unlocked;
+        }
+        return RoomDefinitions[roomId] ? RoomDefinitions[roomId].unlocked : false;
+    }
+
+    /**
      * Recalculates the cached cleanliness penalty values.
      * Optimization to avoid iterating debris every frame.
      * Iterates over the debris map to calculate aggregate penalties.
@@ -1169,9 +1195,10 @@ export class Nadagotchi {
         this._cachedGlobalPenalty = 0;
         this._cachedLocalPenalties = {};
 
-        // Use Object.values for iteration to balance performance and readability,
-        // avoiding index-based lookups.
-        for (const d of Object.values(this.debris)) {
+        // Use Object.keys for iteration to avoid intermediate array allocation from Object.values()
+        // and reduce Garbage Collection pressure in the live loop.
+        for (const id of Object.keys(this.debris)) {
+            const d = this.debris[id];
             let penalty = 0;
             if (d.type === 'weed') penalty = Config.DEBRIS.HAPPINESS_PENALTY_PER_WEED;
             else if (d.type === 'poop') penalty = Config.DEBRIS.HAPPINESS_PENALTY_PER_POOP;
