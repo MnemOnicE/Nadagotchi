@@ -108,6 +108,8 @@ export class Nadagotchi {
             this.legacyTraits = loadedData.legacyTraits || [];
              /** @type {number} A 1-10 scale affecting mood swing intensity. */
             this.moodSensitivity = loadedData.moodSensitivity || Config.INITIAL_STATE.MOOD_SENSITIVITY_DEFAULT;
+            /** @type {Array<object>} Environmental factors affecting the pet. */
+            this.environmentalFactors = loadedData.environmentalFactors || [];
 
             // Initialize Genome
             if (loadedData.genome) {
@@ -185,6 +187,7 @@ export class Nadagotchi {
             this.isLegacyReady = false;
             this.legacyTraits = [];
             this.moodSensitivity = Config.INITIAL_STATE.MOOD_SENSITIVITY_DEFAULT;
+            this.environmentalFactors = [];
 
             // Initialize Genome for new game
             // Start with random defaults (using RNG), then bias towards the chosen starter
@@ -414,6 +417,33 @@ export class Nadagotchi {
             }
         }
         return uuid;
+    }
+
+    /**
+     * Applies environmental effects to stats based on equipped items and world state.
+     * @param {Object} environment - Current environmental conditions.
+     */
+    applyEnvironment(environment) {
+        if (!environment) return 0;
+        let tempAdjustment = 0;
+
+        // Security Fix: Filter environmental factors to ensure they are present in inventory.
+        const activeFactors = this.environmentalFactors.filter(factor => {
+            if (factor.type === 'item') {
+                // Adapt to object map inventory structure
+                return this.inventory[factor.id] && this.inventory[factor.id] > 0;
+            }
+            return true; // Non-item factors (like room temp) are always active if set.
+        });
+
+        // Apply effects from active factors
+        activeFactors.forEach(factor => {
+            if (factor.effect === 'warm') tempAdjustment += 5;
+            else if (factor.effect === 'cold') tempAdjustment -= 5;
+        });
+
+        // Note: Further logic using tempAdjustment can be added here as the environment system evolves.
+        return tempAdjustment;
     }
 
     /**
