@@ -267,7 +267,7 @@ export class Nadagotchi {
 
         // --- Optimized Debris Map Implementation ---
         /** @type {Object.<string, object>} Debris items in the world (weeds, rocks, etc.). */
-        this.debris = {};
+        this.debris = Object.create(null);
         if (loadedData && loadedData.debris) {
             if (Array.isArray(loadedData.debris)) {
                 // Migration logic for legacy array-based saves
