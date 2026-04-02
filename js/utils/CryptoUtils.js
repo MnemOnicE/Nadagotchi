@@ -29,15 +29,14 @@ export class CryptoUtils {
         }
 
         // Node.js Environment (Jest/Test)
-        // We check for 'process' to avoid bundling issues in some build tools, though 'require' check is usually enough.
-        if (typeof process !== 'undefined' && typeof require !== 'undefined') {
+        if (typeof require === 'function') {
             try {
-                // Dynamic require to prevent bundlers from trying to bundle 'crypto' for the browser
-                // (though Vite usually handles this gracefully or ignores it)
-                const crypto = require('crypto');
-                return crypto.createHash('sha256').update(data).digest('hex');
-            } catch (e) {
-                console.warn("Crypto module not found in Node environment.", e);
+                const nodeCrypto = require('crypto');
+                if (nodeCrypto && typeof nodeCrypto.createHash === 'function') {
+                    return nodeCrypto.createHash('sha256').update(data).digest('hex');
+                }
+            } catch (err) {
+                console.warn("Crypto module not found in Node environment.", err);
             }
         }
 
@@ -46,44 +45,58 @@ export class CryptoUtils {
     }
 
     /**
-     * Fills a typed array with cryptographically strong random values.
-     * Works in both Browser and Node.js environments.
-     * @param {Int8Array|Uint8Array|Int16Array|Uint16Array|Int32Array|Uint32Array|BigInt64Array|BigUint64Array} typedArray
-     * @returns {TypedArray} The same array filled with random values.
+     * Generates a cryptographically secure random integer between min and max (inclusive).
+     * @param {number} min - Minimum value.
+     * @param {number} max - Maximum value.
+     * @returns {number} The random integer.
      */
-    static getRandomValues(typedArray) {
-        // Browser Environment
-        if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
-            return window.crypto.getRandomValues(typedArray);
+    static getRandomSafeInt(min, max) {
+        const range = max - min + 1;
+        if (range <= 0) return min;
+
+        const maxUint32 = 4294967295;
+
+        // For extremely large ranges, we combine two 32-bit random values
+        if (range > maxUint32) {
+            const high = this._get32BitRandom();
+            const low = this._get32BitRandom();
+            const combined = (BigInt(high) << 32n) | BigInt(low);
+            const bigRange = BigInt(max) - BigInt(min) + 1n;
+            return Number((combined % bigRange) + BigInt(min));
         }
 
-        // Node.js Environment (Jest/Test)
-        if (typeof process !== 'undefined' && typeof require !== 'undefined') {
-            try {
-                const crypto = require('crypto');
-                if (crypto.randomFillSync) {
-                    return crypto.randomFillSync(typedArray);
-                }
-            } catch (e) {
-                // Handled by final throw
-            }
-        }
+        const limit = maxUint32 - (maxUint32 % range);
+        let randomValue;
 
-        throw new Error("Secure random generation (getRandomValues) not available in this environment.");
+        do {
+            randomValue = this._get32BitRandom();
+        } while (randomValue >= limit);
+
+        return (randomValue % range) + min;
     }
 
     /**
-     * Generates a cryptographically secure random integer between 0 and Number.MAX_SAFE_INTEGER.
-     * Useful for seeds and unique IDs.
-     * @returns {number} A random integer [0, 2^53 - 1].
+     * Internal helper to get a random 32-bit unsigned integer.
+     * @returns {number}
+     * @private
+     * @throws {Error} If no secure random source is available.
      */
-    static getRandomSafeInt() {
-        const arr = new Uint32Array(2);
-        this.getRandomValues(arr);
-        // Combine 32 bits from arr[0] and 21 bits from arr[1] for 53 bits of entropy.
-        // (2^53 - 1 is Number.MAX_SAFE_INTEGER)
-        const low = arr[0];
-        const high = arr[1] & 0x1FFFFF;
-        return (high * 0x100000000) + low;
+    static _get32BitRandom() {
+        // Browser Environment
+        if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+            const array = new Uint32Array(1);
+            window.crypto.getRandomValues(array);
+            return array[0];
+        }
+        // Node.js Environment
+        if (typeof process !== 'undefined' && typeof require !== 'undefined') {
+            try {
+                const crypto = require('crypto');
+                return crypto.randomBytes(4).readUInt32BE(0);
+            } catch (e) {
+                // Ignore and proceed to error
+            }
+        }
+        throw new Error("No cryptographically secure random number generator available.");
     }
 }
