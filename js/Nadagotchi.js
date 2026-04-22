@@ -271,6 +271,10 @@ export class Nadagotchi {
         });
     }
 
+    /**
+     * @private
+     */
+    _initDebrisSystem(loadedData) {
         // --- Optimized Debris Map Implementation ---
         /** @type {Object.<string, object>} Debris items in the world (weeds, rocks, etc.). */
         this.debris = Object.create(null);
