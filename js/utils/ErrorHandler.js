@@ -1,3 +1,13 @@
+/**
+ * Global error handler to catch unhandled exceptions and display them securely in the DOM.
+ * Mitigates DOM XSS by using textContent instead of innerHTML.
+ * @param {string} msg - The error message.
+ * @param {string} url - The URL where the error occurred.
+ * @param {number} lineNo - The line number of the error.
+ * @param {number} columnNo - The column number of the error.
+ * @param {Error} error - The Error object.
+ * @returns {boolean} Returns false to allow the default browser handler to also run.
+ */
 export function globalErrorHandler(msg, url, lineNo, columnNo, error) {
     const errorBox = document.createElement('div');
     errorBox.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(100,0,0,0.9); color:white; z-index:9999; padding:20px; overflow:scroll; font-family:monospace; box-sizing: border-box;';
