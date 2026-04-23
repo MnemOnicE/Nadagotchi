@@ -33,12 +33,18 @@ export function globalErrorHandler(msg, url, lineNo, columnNo, error) {
     copyBtn.innerText = "COPY ERROR";
     copyBtn.style.cssText = "margin-top: 10px; padding: 10px; background: #fff; color: #000; border: none; cursor: pointer;";
     copyBtn.onclick = () => {
-        navigator.clipboard.writeText(errorBox.innerText).then(() => {
-            copyBtn.innerText = "COPIED!";
-        }).catch(err => {
-            console.error('Failed to copy: ', err);
+        const textToCopy = `${title.textContent}\n${message.textContent}\n${location.textContent}\n${stackTrace.textContent}`;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                copyBtn.innerText = "COPIED!";
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                copyBtn.innerText = "COPY FAILED";
+            });
+        } else {
+            console.error('Clipboard API not available');
             copyBtn.innerText = "COPY FAILED";
-        });
+        }
     };
     errorBox.appendChild(copyBtn);
 
