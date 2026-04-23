@@ -16,14 +16,15 @@ describe('Config System', () => {
     });
 
     test('INITIAL_STATE should have required sub-keys and correct types', () => {
-        expect(Config.INITIAL_STATE).toHaveProperty('STATS');
-        expect(Config.INITIAL_STATE.STATS).toHaveProperty('hunger');
-        expect(Config.INITIAL_STATE.STATS).toHaveProperty('energy');
-        expect(Config.INITIAL_STATE.STATS).toHaveProperty('happiness');
-        expect(typeof Config.INITIAL_STATE.STATS.hunger).toBe('number');
+        ['hunger', 'energy', 'happiness'].forEach(stat => {
+            expect(Config.INITIAL_STATE.STATS).toHaveProperty(stat);
+            expect(typeof Config.INITIAL_STATE.STATS[stat]).toBe('number');
+        });
 
-        expect(Config.INITIAL_STATE).toHaveProperty('SKILLS');
-        expect(Config.INITIAL_STATE.SKILLS).toHaveProperty('communication');
+        ['communication', 'resilience', 'navigation', 'empathy', 'logic', 'focus', 'crafting', 'research'].forEach(skill => {
+            expect(Config.INITIAL_STATE.SKILLS).toHaveProperty(skill);
+            expect(typeof Config.INITIAL_STATE.SKILLS[skill]).toBe('number');
+        });
     });
 
     test('DECAY rates should be numbers', () => {
