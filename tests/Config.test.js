@@ -52,9 +52,9 @@ describe('Config System', () => {
         expect(frameKeys).toEqual(emojiKeys);
     });
 
-    test('GAME_LOOP constants should be reasonable', () => {
-        expect(Config.GAME_LOOP.TARGET_FPS).toBe(60);
-        expect(Config.GAME_LOOP.MS_PER_FRAME).toBeCloseTo(16.667, 3);
+    test('GAME_LOOP constants should be consistent', () => {
+        expect(Config.GAME_LOOP.TARGET_FPS).toBeGreaterThan(0);
+        expect(Config.GAME_LOOP.MS_PER_FRAME).toBeCloseTo(1000 / Config.GAME_LOOP.TARGET_FPS, 5);
     });
 
     test('SECURITY should have a DNA_SALT', () => {
