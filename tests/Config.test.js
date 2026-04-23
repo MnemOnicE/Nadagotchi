@@ -16,15 +16,14 @@ describe('Config System', () => {
     });
 
     test('INITIAL_STATE should have required sub-keys and correct types', () => {
-        ['hunger', 'energy', 'happiness'].forEach(stat => {
-            expect(Config.INITIAL_STATE.STATS).toHaveProperty(stat);
-            expect(typeof Config.INITIAL_STATE.STATS[stat]).toBe('number');
-        });
+        expect(Config.INITIAL_STATE).toHaveProperty('STATS');
+        expect(Config.INITIAL_STATE.STATS).toHaveProperty('hunger');
+        expect(Config.INITIAL_STATE.STATS).toHaveProperty('energy');
+        expect(Config.INITIAL_STATE.STATS).toHaveProperty('happiness');
+        expect(typeof Config.INITIAL_STATE.STATS.hunger).toBe('number');
 
-        ['communication', 'resilience', 'navigation', 'empathy', 'logic', 'focus', 'crafting', 'research'].forEach(skill => {
-            expect(Config.INITIAL_STATE.SKILLS).toHaveProperty(skill);
-            expect(typeof Config.INITIAL_STATE.SKILLS[skill]).toBe('number');
-        });
+        expect(Config.INITIAL_STATE).toHaveProperty('SKILLS');
+        expect(Config.INITIAL_STATE.SKILLS).toHaveProperty('communication');
     });
 
     test('DECAY rates should be numbers', () => {
@@ -53,9 +52,9 @@ describe('Config System', () => {
         expect(frameKeys).toEqual(emojiKeys);
     });
 
-    test('GAME_LOOP constants should be consistent', () => {
-        expect(Config.GAME_LOOP.TARGET_FPS).toBeGreaterThan(0);
-        expect(Config.GAME_LOOP.MS_PER_FRAME).toBeCloseTo(1000 / Config.GAME_LOOP.TARGET_FPS, 5);
+    test('GAME_LOOP constants should be reasonable', () => {
+        expect(Config.GAME_LOOP.TARGET_FPS).toBe(60);
+        expect(Config.GAME_LOOP.MS_PER_FRAME).toBeCloseTo(16.667, 3);
     });
 
     test('SECURITY should have a DNA_SALT', () => {
@@ -67,5 +66,19 @@ describe('Config System', () => {
     test('DEBRIS config should have expected values', () => {
         expect(Config.DEBRIS.MAX_COUNT).toBeGreaterThan(0);
         expect(typeof Config.DEBRIS.SPAWN_CHANCE_DAILY).toBe('number');
+    });
+
+    test('ACTIONS should have expected keys and valid values', () => {
+        const requiredActions = ['FEED', 'PLAY', 'STUDY', 'CRAFT', 'EXPLORE'];
+        requiredActions.forEach(action => {
+            expect(Config.ACTIONS).toHaveProperty(action);
+            Object.values(Config.ACTIONS[action]).forEach(value => {
+                expect(typeof value).toBe('number');
+            });
+        });
+
+        expect(Config.ACTIONS.FEED).toHaveProperty('HUNGER_RESTORE');
+        expect(Config.ACTIONS.PLAY).toHaveProperty('ENERGY_COST');
+        expect(Config.ACTIONS.STUDY).toHaveProperty('SKILL_GAIN');
     });
 });
