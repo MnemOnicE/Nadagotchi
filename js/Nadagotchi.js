@@ -271,6 +271,11 @@ export class Nadagotchi {
         });
     }
 
+    /**
+     * @private
+     * @param {object} [loadedData]
+     */
+    _initDebrisSystem(loadedData) {
         // --- Optimized Debris Map Implementation ---
         /** @type {Object.<string, object>} Debris items in the world (weeds, rocks, etc.). */
         this.debris = Object.create(null);
@@ -1212,15 +1217,6 @@ export class Nadagotchi {
     }
 
     /**
-     * Checks if a room is unlocked.
-     * Falls back to RoomDefinitions defaults if not found in persistent config.
-     * @param {string} roomId
-     * @returns {boolean}
-     */
-    isRoomUnlocked(roomId) {
-        if (this.homeConfig.rooms[roomId] && this.homeConfig.rooms[roomId].unlocked !== undefined) {
-            return this.homeConfig.rooms[roomId].unlocked;
-        }
         return RoomDefinitions[roomId] ? RoomDefinitions[roomId].unlocked : false;
     }
 
