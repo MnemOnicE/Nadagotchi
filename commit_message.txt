@@ -1,0 +1,6 @@
+Fix syntax error and mitigate DOM XSS vulnerability
+
+- Fixed a syntax error in js/Nadagotchi.js by adding the missing _initDebrisSystem method signature, allowing the test suite and game to load.
+- Refactored the global error handler out of index.html into js/utils/ErrorHandler.js.
+- Mitigated a DOM XSS vulnerability in the error handler by replacing innerHTML with textContent.
+- Added tests/repro_xss.test.js to verify XSS payload sanitization.
