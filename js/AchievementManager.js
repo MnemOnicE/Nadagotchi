@@ -109,6 +109,7 @@ export class AchievementManager {
      */
     unlock(achievement) {
         this.state.unlocked.push(achievement.id);
+        this.unlockedSet.add(achievement.id);
         // Emit event for UI to pick up
         this.game.events.emit(EventKeys.ACHIEVEMENT_UNLOCKED, achievement);
         this.persistence.saveAchievements(this.state);
