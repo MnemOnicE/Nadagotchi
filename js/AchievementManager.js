@@ -95,7 +95,7 @@ export class AchievementManager {
      */
     checkAchievements() {
         Achievements.forEach(achievement => {
-            if (!this.state.unlocked.includes(achievement.id)) {
+            if (!this.unlockedSet.has(achievement.id)) {
                 if (achievement.condition(this.state.progress)) {
                     this.unlock(achievement);
                 }
