@@ -26,6 +26,7 @@ describe('SoundSynthesizer', () => {
     afterEach(() => {
         warnSpy.mockRestore();
         jest.restoreAllMocks();
+        jest.useRealTimers();
     });
 
     describe('Constructor Error Path', () => {
