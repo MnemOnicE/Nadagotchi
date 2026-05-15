@@ -10,7 +10,7 @@ jest.mock('../js/Config.js', () => ({
         MAX_INVENTORY_SIZE: 20,
         STARTING_STATS: { ENERGY: 100, HUNGER: 0, HAPPINESS: 100 },
         DECAY_RATES: { ENERGY: 0, HUNGER: 0, HAPPINESS: 0 },
-        DEBRIS: { HAPPINESS_PENALTY_PER_WEED: 0.005, HAPPINESS_PENALTY_PER_POOP: 0.01 }, INITIAL_STATE: {
+        INITIAL_STATE: {
             STATS: { ENERGY: 100, HUNGER: 0, HAPPINESS: 100 },
             PERSONALITY_POINTS_STARTER: 10,
             SKILLS: { logic: 0, research: 0, empathy: 0, crafting: 0, navigation: 0, focus: 0, communication: 0 },
@@ -20,7 +20,11 @@ jest.mock('../js/Config.js', () => ({
         LIMITS: { MAX_STATS: 100 },
         MAX_STATS: { ENERGY: 100, HUNGER: 100, HAPPINESS: 100 },
         SECURITY: { DNA_SALT: 'test_salt' },
-        GENETICS: { METABOLISM_NORMALIZER: 5, HOMOZYGOUS_ENERGY_BONUS: 10 }
+        GENETICS: { METABOLISM_NORMALIZER: 5, HOMOZYGOUS_ENERGY_BONUS: 10 },
+        DEBRIS: {
+            HAPPINESS_PENALTY_PER_WEED: 0.005,
+            HAPPINESS_PENALTY_PER_POOP: 0.02
+        }
     }
 }));
 
