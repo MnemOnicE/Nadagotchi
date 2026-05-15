@@ -70,6 +70,7 @@ export class RelationshipSystem {
         if (npcName === 'Master Artisan') {
              // Start Quest Check
              if (!this.pet.quests['masterwork_crafting'] && this.pet.relationships['Master Artisan'].level >= 5) {
+                 const qDef = this.pet.questSystem.getStageDefinition('masterwork_crafting'); // N/A yet
                  resultText = "Master Artisan: 'You show promise. Prove your dedication.'";
                  options.push({
                      label: "Accept Quest",
@@ -144,12 +145,21 @@ export class RelationshipSystem {
                          recurringText = stageDef.recurringInteraction.journalEntry;
                          // Apply specific recurring rewards if defined
                          if (stageDef.recurringInteraction.rewards) {
+                             // Note: _applyRewards is in QuestSystem, maybe we should duplicate simple logic or expose it?
+                             // For now, simpler to just apply skill manually as per definition (crafting: 0.2)
+                             // Or leave standard chat skill gain?
+                             // The definition says: rewards: { skills: { crafting: 0.2 } }
+                             // Standard chat gives ARTISAN_SKILL_GAIN (0.15).
+                             // Let's add the bonus.
                              if (stageDef.recurringInteraction.rewards.skills) {
                                  for (const [skill, val] of Object.entries(stageDef.recurringInteraction.rewards.skills)) {
                                      this.pet.skills[skill] += (val * moodMultiplier);
                                  }
                              }
                          }
+                     } else if (!stageDef.isComplete) {
+                         // Active quest flag for NarrativeSystem
+                         // hasQuest = true; // Use variable below
                      }
                  }
             }
