@@ -121,7 +121,7 @@ describe('WikiSystem', () => {
 
         expect(wikiSystem.hasEntry("items", "Shield")).toBe(false);
         // Also check if category is somehow missing completely
-        expect(wikiSystem.hasEntry("nonexistent", "Item")).toBeFalsy();
+        expect(wikiSystem.hasEntry("nonexistent", "Item")).toBe(false);
     });
 
     test('getEntries should return array of entries for category', async () => {
