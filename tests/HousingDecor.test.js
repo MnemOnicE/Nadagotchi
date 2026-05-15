@@ -30,7 +30,7 @@ jest.mock('../js/Config.js', () => {
                 CRAFT: { ENERGY_COST: 10, HAPPINESS_PENALTY_MISSING_MATS: 5, HAPPINESS_RESTORE: 5, SKILL_GAIN: 1 },
                 FORAGE: { ENERGY_COST: 10, SKILL_GAIN: 1 }
             },
-            SECURITY: { DNA_SALT: '' },
+            SECURITY: { DNA_SALT: '' }, DEBRIS: { HAPPINESS_PENALTY_PER_WEED: 0.005, HAPPINESS_PENALTY_PER_POOP: 0.02 },
             LIMITS: { MAX_STATS: 100, MAX_STATS_BONUS: 105 }
         }
     }
