@@ -13,7 +13,7 @@ const { EventKeys } = require('../js/EventKeys');
 // Mock Config
 jest.mock('../js/Config.js', () => ({
     Config: {
-        INITIAL_STATE: {
+        DEBRIS: { HAPPINESS_PENALTY_PER_WEED: 0.005, HAPPINESS_PENALTY_PER_POOP: 0.01 }, INITIAL_STATE: {
             PERSONALITY_POINTS_STARTER: 10,
             STATS: { hunger: 100, energy: 100, happiness: 100 },
             SKILLS: { logic: 0, research: 0, empathy: 0, navigation: 0, crafting: 0, focus: 0, communication: 0 },
@@ -21,7 +21,7 @@ jest.mock('../js/Config.js', () => ({
             GENOME_STARTER_VAL: 10
         },
         LIMITS: { MAX_STATS: 100 },
-        SECURITY: { DNA_SALT: '' },
+        SECURITY: { DNA_SALT: '' }, DEBRIS: { HAPPINESS_PENALTY_PER_WEED: 0.005, HAPPINESS_PENALTY_PER_POOP: 0.02 },
         GAME_LOOP: { MS_PER_FRAME: 16 },
         DECAY: { HUNGER: 0.1, ENERGY: 0.1, AGE_INCREMENT: 0.001 },
         THRESHOLDS: { HUNGER_ANGRY: 20, HUNGER_SAD: 50, ENERGY_SAD: 30, HAPPY_MOOD: 80, HAPPY_MOOD_HOMOZYGOUS: 60, AGE_LEGACY: 10 },

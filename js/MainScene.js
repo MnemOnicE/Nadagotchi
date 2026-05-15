@@ -1421,8 +1421,17 @@ export class MainScene extends Phaser.Scene {
      */
     async saveFurniture() {
         const serializable = {};
-        for (const [roomId, items] of Object.entries(this.placedFurniture)) {
-            serializable[roomId] = items.map(f => ({ key: f.key, x: f.x, y: f.y }));
+        for (const roomId in this.placedFurniture) {
+            if (Object.hasOwn(this.placedFurniture, roomId)) {
+                const items = this.placedFurniture[roomId];
+                const itemsLen = items.length;
+                const serializedItems = new Array(itemsLen);
+                for (let i = 0; i < itemsLen; i++) {
+                    const f = items[i];
+                    serializedItems[i] = { key: f.key, x: f.x, y: f.y };
+                }
+                serializable[roomId] = serializedItems;
+            }
         }
         await this.persistence.saveFurniture(serializable);
     }

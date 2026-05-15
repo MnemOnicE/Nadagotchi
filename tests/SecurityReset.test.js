@@ -21,6 +21,7 @@ describe('Security Reset Fix', () => {
             clear: jest.fn(),
             key: jest.fn(),
             length: 0
+            clear: jest.fn()
         };
         Object.defineProperty(global, 'localStorage', {
             value: localStorageMock,
@@ -31,6 +32,7 @@ describe('Security Reset Fix', () => {
         global.confirm = jest.fn(() => true);
 
         mockPersistence = new PersistenceManager();
+        jest.spyOn(mockPersistence, 'clearAllData');
 
         mockScene = {
             events: { on: jest.fn(), emit: jest.fn() },
@@ -114,5 +116,46 @@ describe('Security Reset Fix', () => {
 
         // Verify cache cleared
         expect(mockPersistence.lastSavedJson).toEqual({});
+        const sections = [];
+        const originalAddSection = DebugConsole.prototype.addSection;
+        DebugConsole.prototype.addSection = function(title, buttons) {
+            sections.push({ title, buttons });
+            return originalAddSection.apply(this, arguments);
+        };
+
+        const consoleInstance = new DebugConsole(mockScene);
+        const debugTools = sections.find(s => s.title === "Debug Tools");
+        const hardReset = debugTools.buttons.find(b => b.label === "Hard Reset (Wipe Save)");
+
+        expect(hardReset).toBeDefined();
+
+        const actionStr = hardReset.action.toString();
+        expect(actionStr).toContain('this.scene.persistence.clearAllData()');
+        expect(actionStr).not.toContain('localStorage.clear()');
+
+        DebugConsole.prototype.addSection = originalAddSection;
+    });
+
+    test('PersistenceManager.clearAllData should remove all game-specific keys', () => {
+        mockPersistence.clearAllData();
+
+        const expectedKeys = [
+            "nadagotchi_save",
+            "nadagotchi_journal",
+            "nadagotchi_recipes",
+            "nadagotchi_calendar",
+            "nadagotchi_furniture",
+            "nadagotchi_home_config",
+            "nadagotchi_settings",
+            "nadagotchi_achievements",
+            "nadagotchi_wiki",
+            "nadagotchi_dna_salt",
+            "hall_of_fame",
+            "nadagotchi_pet_v1"
+        ];
+
+        expectedKeys.forEach(key => {
+            expect(localStorage.removeItem).toHaveBeenCalledWith(key);
+        });
     });
 });

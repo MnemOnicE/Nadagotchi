@@ -143,6 +143,24 @@ export class PersistenceManager {
 
         keysToRemove.forEach(key => localStorage.removeItem(key));
         this.lastSavedJson = {};
+        const keysToClear = [
+            "nadagotchi_save",
+            "nadagotchi_journal",
+            "nadagotchi_recipes",
+            "nadagotchi_calendar",
+            "nadagotchi_furniture",
+            "nadagotchi_home_config",
+            "nadagotchi_settings",
+            "nadagotchi_achievements",
+            "nadagotchi_wiki",
+            "nadagotchi_dna_salt",
+            "hall_of_fame",
+            "nadagotchi_pet_v1"
+        ];
+        keysToClear.forEach(key => {
+            localStorage.removeItem(key);
+            delete this.lastSavedJson[key];
+        });
     }
 
     /**

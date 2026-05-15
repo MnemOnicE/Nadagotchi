@@ -195,7 +195,7 @@ export class ExpeditionScene extends Phaser.Scene {
 
         this.loot[item] = (this.loot[item] || 0) + qty;
 
-        const btn = ButtonFactory.createButton(this, 400, 400, "Continue", () => {
+        const btn = ButtonFactory.createButton(this, 475, 425, "Continue", () => {
             this.returnToMap();
         }, { width: 150, height: 50 });
 
@@ -310,7 +310,7 @@ export class ExpeditionScene extends Phaser.Scene {
         // this.input.on('pointerdown', handleInput); // Pointer mash is annoying on click
 
         // Add a visual button for mash
-        const mashBtn = ButtonFactory.createButton(this, 400, 400, "MASH!", handleInput, { width: 100, height: 60, color: 0xFF0000 });
+        const mashBtn = ButtonFactory.createButton(this, 450, 430, "MASH!", handleInput, { width: 100, height: 60, color: 0xFF0000 });
         this.encounterContainer.add(mashBtn);
     }
 
@@ -331,7 +331,7 @@ export class ExpeditionScene extends Phaser.Scene {
             this.pet.stats.energy -= 10;
         }
 
-        const btn = ButtonFactory.createButton(this, 400, 450, "Continue", () => {
+        const btn = ButtonFactory.createButton(this, 475, 475, "Continue", () => {
             this.returnToMap();
         }, { width: 150, height: 50 });
         this.encounterContainer.add(btn);
@@ -369,7 +369,7 @@ export class ExpeditionScene extends Phaser.Scene {
 
         const text = this.add.text(400, 250, summary, { fontSize: '24px', fontFamily: 'VT323', align: 'center' }).setOrigin(0.5);
 
-        const btn = ButtonFactory.createButton(this, 400, 450, "Return Home", () => {
+        const btn = ButtonFactory.createButton(this, 450, 470, "Return Home", () => {
              this.game.events.emit(EventKeys.SCENE_COMPLETE, { type: 'EXPEDITION' });
              this.scene.resume('MainScene');
              this.scene.stop();

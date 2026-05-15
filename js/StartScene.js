@@ -61,15 +61,14 @@ export class StartScene extends Phaser.Scene {
             let buttonY = height * 0.5;
 
             if (existingPet) {
-                // Fix: ButtonFactory creates container at x. To center button of width 250, we need x = width/2 - 125.
-                const resumeBtn = ButtonFactory.createButton(this, (width / 2) - 125, buttonY, 'ENTER WORLD', () => {
+                const resumeBtn = ButtonFactory.createButton(this, width / 2, buttonY, 'ENTER WORLD', () => {
                     this.scene.start('MainScene');
                 }, { width: 250, height: 60, fontSize: '32px', color: 0x4CAF50 });
                 this.menuContainer.add(resumeBtn);
                 buttonY += 80;
             }
 
-            const newGameBtn = ButtonFactory.createButton(this, (width / 2) - 125, buttonY, 'ARRIVE (New Game)', () => {
+            const newGameBtn = ButtonFactory.createButton(this, width / 2, buttonY, 'ARRIVE (New Game)', () => {
                 this.showArchetypeSelection();
             }, { width: 250, height: 60, fontSize: '32px', color: 0x2196F3 });
             this.menuContainer.add(newGameBtn);
@@ -213,13 +212,13 @@ export class StartScene extends Phaser.Scene {
         };
 
         // Confirm Button
-        const confirmBtn = ButtonFactory.createButton(this, (width / 2) - 100, height * 0.75, 'Begin Journey', () => {
+        const confirmBtn = ButtonFactory.createButton(this, width / 2, height * 0.75, 'Begin Journey', () => {
             tryStartGame();
         }, { width: 200, height: 50, color: 0x4CAF50, fontSize: '28px' });
         this.nameInputContainer.add(confirmBtn);
 
         // Back Button
-        const backBtn = ButtonFactory.createButton(this, (width / 2) - 50, height - 80, 'Back', () => {
+        const backBtn = ButtonFactory.createButton(this, width / 2, height - 80, 'Back', () => {
             domElement.destroy(); // Cleanup DOM
             this.nameInputContainer.setVisible(false);
             this.selectionContainer.setVisible(true);
