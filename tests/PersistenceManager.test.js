@@ -95,4 +95,27 @@ describe('PersistenceManager', () => {
         const loadedRecipes = await persistenceManager.loadRecipes();
         expect(loadedRecipes).toEqual([]);
     });
+
+    test('should handle save error when localStorage.setItem throws', async () => {
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+        const mockError = new Error('QuotaExceededError');
+        jest.spyOn(Object.getPrototypeOf(localStorage), 'setItem').mockImplementation(() => {
+            throw mockError;
+        });
+
+        const petData = { name: 'ErrorPet', type: 'Slime' };
+
+        // Use an internal method directly if needed, or savePet and wait
+        await persistenceManager._save('nadagotchi_test_error', petData);
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+            expect.stringContaining('Failed to save data for key nadagotchi_test_error:'),
+            mockError
+        );
+
+        expect(persistenceManager.lastSavedJson['nadagotchi_test_error']).toBeUndefined();
+
+        consoleErrorSpy.mockRestore();
+    });
+
 });
