@@ -1202,12 +1202,15 @@ export class Nadagotchi {
 
         // Use for...in for iteration to avoid intermediate array allocation from Object.keys()
         // and further reduce Garbage Collection pressure in the live loop.
+        const penaltyMap = {
+            weed: Config.DEBRIS.HAPPINESS_PENALTY_PER_WEED,
+            poop: Config.DEBRIS.HAPPINESS_PENALTY_PER_POOP
+        };
+
         for (const id in this.debris) {
             if (Object.hasOwn(this.debris, id)) {
                 const d = this.debris[id];
-                let penalty = 0;
-                if (d.type === 'weed') penalty = Config.DEBRIS.HAPPINESS_PENALTY_PER_WEED;
-                else if (d.type === 'poop') penalty = Config.DEBRIS.HAPPINESS_PENALTY_PER_POOP;
+                const penalty = penaltyMap[d.type] || 0;
 
                 if (penalty > 0) {
                     this._cachedGlobalPenalty += penalty;
