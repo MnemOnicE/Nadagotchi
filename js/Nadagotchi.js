@@ -1205,8 +1205,8 @@ export class Nadagotchi {
         for (const id of Object.keys(this.debris)) {
             const d = this.debris[id];
             let penalty = 0;
-            if (d.type === 'weed') penalty = Config.DEBRIS.HAPPINESS_PENALTY_PER_WEED;
-            else if (d.type === 'poop') penalty = Config.DEBRIS.HAPPINESS_PENALTY_PER_POOP;
+            if (d.type === 'weed') penalty = Config.DEBRIS?.HAPPINESS_PENALTY_PER_WEED ?? 0.005;
+            else if (d.type === 'poop') penalty = Config.DEBRIS?.HAPPINESS_PENALTY_PER_POOP ?? 0.02;
 
             if (penalty > 0) {
                 this._cachedGlobalPenalty += penalty;
