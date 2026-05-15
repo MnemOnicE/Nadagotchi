@@ -119,8 +119,8 @@ export class PersistenceManager {
     }
 
     /**
-     * Clears all game-related data from localStorage (except settings and hall of fame).
-     * Used for starting a completely new game.
+     * Clears all game-related data from localStorage.
+     * Used for a complete hard reset of the game state.
      */
     clearAllData() {
         // Cancel any pending save
@@ -133,15 +133,34 @@ export class PersistenceManager {
              this._saveTimer = null;
         }
 
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && (key.startsWith('nadagotchi_') || key === 'hall_of_fame')) {
+                keysToRemove.push(key);
+            }
+        }
+
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+        this.lastSavedJson = {};
         const keysToClear = [
             "nadagotchi_save",
             "nadagotchi_journal",
             "nadagotchi_recipes",
             "nadagotchi_calendar",
             "nadagotchi_furniture",
-            "nadagotchi_home_config"
+            "nadagotchi_home_config",
+            "nadagotchi_settings",
+            "nadagotchi_achievements",
+            "nadagotchi_wiki",
+            "nadagotchi_dna_salt",
+            "hall_of_fame",
+            "nadagotchi_pet_v1"
         ];
-        keysToClear.forEach(key => localStorage.removeItem(key));
+        keysToClear.forEach(key => {
+            localStorage.removeItem(key);
+            delete this.lastSavedJson[key];
+        });
     }
 
     /**
