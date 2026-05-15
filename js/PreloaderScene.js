@@ -149,41 +149,47 @@ export class PreloaderScene extends Phaser.Scene {
             graphics.fillRect(0, 0, 64, 64);
 
             graphics.fillStyle(color2);
-            if (type === 'stripes') {
-                // Optimized: Unrolled loop
-                graphics.fillRect(0, 0, 8, 64);
-                graphics.fillRect(16, 0, 8, 64);
-                graphics.fillRect(32, 0, 8, 64);
-                graphics.fillRect(48, 0, 8, 64);
-            } else if (type === 'bricks') {
-                // Optimized: Unrolled nested loops
-                graphics.fillRect(0, 0, 30, 14);
-                graphics.fillRect(32, 0, 30, 14);
-                graphics.fillRect(16, 16, 30, 14);
-                graphics.fillRect(48, 16, 30, 14);
-                graphics.fillRect(0, 32, 30, 14);
-                graphics.fillRect(32, 32, 30, 14);
-                graphics.fillRect(16, 48, 30, 14);
-                graphics.fillRect(48, 48, 30, 14);
-            } else if (type === 'planks') {
-                // Optimized: Unrolled loop
-                graphics.fillRect(0, 0, 64, 2);
-                graphics.fillRect(0, 8, 64, 2);
-                graphics.fillRect(0, 16, 64, 2);
-                graphics.fillRect(0, 24, 64, 2);
-                graphics.fillRect(0, 32, 64, 2);
-                graphics.fillRect(0, 40, 64, 2);
-                graphics.fillRect(0, 48, 64, 2);
-                graphics.fillRect(0, 56, 64, 2);
-            } else if (type === 'tiles') {
-                // Optimized: Unrolled nested loops
-                graphics.fillRect(2, 2, 28, 28);
-                graphics.fillRect(34, 2, 28, 28);
-                graphics.fillRect(2, 34, 28, 28);
-                graphics.fillRect(34, 34, 28, 28);
-            } else {
-                 // Solid default
+
+            // Strategy pattern for drawing different textures
+            const drawActions = {
+                stripes: () => {
+                    graphics.fillRect(0, 0, 8, 64);
+                    graphics.fillRect(16, 0, 8, 64);
+                    graphics.fillRect(32, 0, 8, 64);
+                    graphics.fillRect(48, 0, 8, 64);
+                },
+                bricks: () => {
+                    graphics.fillRect(0, 0, 30, 14);
+                    graphics.fillRect(32, 0, 30, 14);
+                    graphics.fillRect(16, 16, 30, 14);
+                    graphics.fillRect(48, 16, 30, 14);
+                    graphics.fillRect(0, 32, 30, 14);
+                    graphics.fillRect(32, 32, 30, 14);
+                    graphics.fillRect(16, 48, 30, 14);
+                    graphics.fillRect(48, 48, 30, 14);
+                },
+                planks: () => {
+                    graphics.fillRect(0, 0, 64, 2);
+                    graphics.fillRect(0, 8, 64, 2);
+                    graphics.fillRect(0, 16, 64, 2);
+                    graphics.fillRect(0, 24, 64, 2);
+                    graphics.fillRect(0, 32, 64, 2);
+                    graphics.fillRect(0, 40, 64, 2);
+                    graphics.fillRect(0, 48, 64, 2);
+                    graphics.fillRect(0, 56, 64, 2);
+                },
+                tiles: () => {
+                    graphics.fillRect(2, 2, 28, 28);
+                    graphics.fillRect(34, 2, 28, 28);
+                    graphics.fillRect(2, 34, 28, 28);
+                    graphics.fillRect(34, 34, 28, 28);
+                }
+            };
+
+            if (Object.hasOwn(drawActions, type)) {
+                drawActions[type]();
             }
+
             graphics.generateTexture(key, 64, 64);
         };
 
@@ -204,7 +210,7 @@ export class PreloaderScene extends Phaser.Scene {
         createDetailedBox('masterwork_chair', 0xFFD700, 64, 'chair'); // Gold color for Masterwork
 
         // Housing Items (Procedural Textures)
-        this._generateHousingTextures();
+        this._generateHousingTextures(graphics);
 
         // NPCs
         createDetailedBox('npc_scout', 0x704214, 48, 'npc');
@@ -250,9 +256,9 @@ export class PreloaderScene extends Phaser.Scene {
 
     /**
      * Generates textures for housing items (Wallpapers, Flooring).
+     * @param {Phaser.GameObjects.Graphics} graphics - Reused graphics object.
      */
-    _generateHousingTextures() {
-        const graphics = this.make.graphics({ x: 0, y: 0, add: false });
+    _generateHousingTextures(graphics) {
 
         // 1. Cozy Wallpaper (Striped)
         if (!this.textures.exists('cozy_wallpaper')) {
@@ -294,19 +300,11 @@ export class PreloaderScene extends Phaser.Scene {
             graphics.clear();
             graphics.fillStyle(0x228B22, 1); // Forest Green
             graphics.fillRect(0, 0, 64, 64);
-            // Texture details
+            // Texture details (Restore procedural variety per reviewer request)
             graphics.fillStyle(0x32CD32, 1);
-            // Optimized: Unrolled loop with fixed coordinates (replaces Phaser.Math.Between)
-            graphics.fillCircle(12, 45, 2);
-            graphics.fillCircle(54, 12, 2);
-            graphics.fillCircle(30, 30, 2);
-            graphics.fillCircle(8, 8, 2);
-            graphics.fillCircle(42, 58, 2);
-            graphics.fillCircle(20, 15, 2);
-            graphics.fillCircle(50, 40, 2);
-            graphics.fillCircle(15, 60, 2);
-            graphics.fillCircle(60, 25, 2);
-            graphics.fillCircle(35, 5, 2);
+            for (let k = 0; k < 10; k++) {
+                graphics.fillCircle(Phaser.Math.Between(0, 64), Phaser.Math.Between(0, 64), 2);
+            }
             graphics.generateTexture('grass_flooring', 64, 64);
         }
 
@@ -403,7 +401,6 @@ export class PreloaderScene extends Phaser.Scene {
              graphics.generateTexture('leaf', 6, 6);
         }
 
-        graphics.destroy();
     }
 
     /**
