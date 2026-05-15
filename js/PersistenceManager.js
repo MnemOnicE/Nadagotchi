@@ -133,6 +133,16 @@ export class PersistenceManager {
              this._saveTimer = null;
         }
 
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && (key.startsWith('nadagotchi_') || key === 'hall_of_fame')) {
+                keysToRemove.push(key);
+            }
+        }
+
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+        this.lastSavedJson = {};
         const keysToClear = [
             "nadagotchi_save",
             "nadagotchi_journal",

@@ -18,6 +18,9 @@ describe('Security Reset Fix', () => {
             getItem: jest.fn(),
             setItem: jest.fn(),
             removeItem: jest.fn(),
+            clear: jest.fn(),
+            key: jest.fn(),
+            length: 0
             clear: jest.fn()
         };
         Object.defineProperty(global, 'localStorage', {
@@ -70,6 +73,49 @@ describe('Security Reset Fix', () => {
     });
 
     test('Hard Reset should call PersistenceManager.clearAllData and not localStorage.clear', () => {
+        const buttons = Array.from(document.querySelectorAll('button'));
+        const hardResetBtn = buttons.find(btn => btn.innerText.includes("Hard Reset (Wipe Save)"));
+
+        expect(hardResetBtn).toBeDefined();
+
+        // Spy on clearAllData
+        const clearAllDataSpy = jest.spyOn(mockPersistence, 'clearAllData');
+
+        // Execute action - catch expected JSDOM reload error
+        try {
+            hardResetBtn.click();
+        } catch (e) {
+            // Ignore 'Not implemented: navigation' error from JSDOM
+        }
+
+        // Verify targeted clear was called
+        expect(clearAllDataSpy).toHaveBeenCalled();
+
+        // Verify broad clear was NOT called
+        expect(localStorage.clear).not.toHaveBeenCalled();
+    });
+
+    test('PersistenceManager.clearAllData should remove game-specific keys and ignore others', () => {
+        // Setup localStorage with some keys
+        const keys = [
+            'nadagotchi_save',
+            'nadagotchi_settings',
+            'hall_of_fame',
+            'other_app_data'
+        ];
+
+        localStorage.length = keys.length;
+        localStorage.key.mockImplementation((i) => keys[i]);
+
+        mockPersistence.clearAllData();
+
+        expect(localStorage.removeItem).toHaveBeenCalledWith('nadagotchi_save');
+        expect(localStorage.removeItem).toHaveBeenCalledWith('nadagotchi_settings');
+        expect(localStorage.removeItem).toHaveBeenCalledWith('hall_of_fame');
+        expect(localStorage.removeItem).not.toHaveBeenCalledWith('other_app_data');
+
+        // Verify cache cleared
+        expect(mockPersistence.lastSavedJson).toEqual({});
         const sections = [];
         const originalAddSection = DebugConsole.prototype.addSection;
         DebugConsole.prototype.addSection = function(title, buttons) {
