@@ -95,4 +95,22 @@ describe('PersistenceManager', () => {
         const loadedRecipes = await persistenceManager.loadRecipes();
         expect(loadedRecipes).toEqual([]);
     });
+
+    test('should return null and log error when loaded JSON is invalid', async () => {
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+        // Base64 encode an invalid JSON string: "{"invalid":}" -> "eyJpbnZhbGlkIjp9"
+        // Also add a dummy hash
+        localStorage.setItem('nadagotchi_settings', 'eyJpbnZhbGlkIjp9|dummyhash');
+
+        const loadedData = await persistenceManager.loadSettings();
+
+        expect(loadedData).toBeNull();
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+            expect.stringContaining('Failed to parse JSON for key nadagotchi_settings'),
+            expect.any(Error)
+        );
+
+        consoleErrorSpy.mockRestore();
+    });
 });

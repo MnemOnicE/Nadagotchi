@@ -1159,8 +1159,14 @@ export class UIScene extends Phaser.Scene {
       .setOrigin(0)
       .setInteractive();
     overlay.add(dim);
+  }
 
-    handleAchievementUnlocked(achievement) { SoundSynthesizer.instance.playChime(); this.showToast("Achievement Unlocked!", achievement.name, achievement.icon); }
+
+    handleAchievementUnlocked(achievement) {
+        SoundSynthesizer.instance.playChime();
+        this.showToast("Achievement Unlocked!", achievement.name, achievement.icon);
+    }
+
     showToast(title, message, icon = '') { this.toastManager.show({ title, message, icon, style: 'GOLD' }); }
     createSettingsModal() { const modal = this.createModal("Settings"); const h = 400; const volLabel = this.add.text(0, -80, "Volume", { fontSize: '24px', fontFamily: 'VT323', monospace: true }).setOrigin(0.5); const volDown = ButtonFactory.createButton(this, -60, -20, "-", () => { const newVol = Math.max(0, (this.settingsData?.volume ?? 0.5) - 0.1); this.game.events.emit(EventKeys.UPDATE_SETTINGS, { volume: newVol }); this.settingsModal.volDisplay.setText(`${Math.round(newVol * 100)}%`); if (!this.settingsData) this.settingsData = {}; this.settingsData.volume = newVol; }, { width: 40, height: 40, color: 0x808080 }); const volUp = ButtonFactory.createButton(this, 100, -20, "+", () => { const newVol = Math.min(1, (this.settingsData?.volume ?? 0.5) + 0.1); this.game.events.emit(EventKeys.UPDATE_SETTINGS, { volume: newVol }); this.settingsModal.volDisplay.setText(`${Math.round(newVol * 100)}%`); if (!this.settingsData) this.settingsData = {}; this.settingsData.volume = newVol; }, { width: 40, height: 40, color: 0x808080 }); const volDisplay = this.add.text(0, -40, "50%", { fontSize: '24px', fontFamily: 'VT323' }).setOrigin(0.5); const speedLabel = this.add.text(0, 20, "Game Speed", { fontSize: '24px', fontFamily: 'VT323' }).setOrigin(0.5); const speedButtons = []; const speeds = [{ l: "1x", v: Config.SETTINGS.SPEED_MULTIPLIERS.NORMAL }, { l: "2x", v: Config.SETTINGS.SPEED_MULTIPLIERS.FAST }, { l: "5x", v: Config.SETTINGS.SPEED_MULTIPLIERS.HYPER }]; let startX = -80; speeds.forEach(s => { const btn = ButtonFactory.createButton(this, startX + 30, 80, s.l, () => { this.game.events.emit(EventKeys.UPDATE_SETTINGS, { gameSpeed: s.v }); this.updateSpeedButtons(s.v); if (!this.settingsData) this.settingsData = {}; this.settingsData.gameSpeed = s.v; }, { width: 60, height: 40, fontSize: '20px', color: 0x008080 }); btn.speedVal = s.v; speedButtons.push(btn); startX += 80; }); modal.add([volLabel, volDown, volUp, volDisplay, speedLabel, ...speedButtons]); modal.volDisplay = volDisplay; modal.speedButtons = speedButtons; return modal; }
     updateSpeedButtons(speed) { this.settingsModal.speedButtons.forEach(btn => { if (Math.abs(btn.speedVal - speed) < 0.01) { btn.setAlpha(1); btn.setScale(1.1); } else { btn.setAlpha(0.6); btn.setScale(1.0); } }); }
