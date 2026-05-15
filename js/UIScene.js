@@ -422,6 +422,7 @@ export class UIScene extends Phaser.Scene {
       this.nadagotchiData = data;
     }
     if (worldState) this.updateCalendarDropdown(worldState);
+    if (!this.nadagotchiData) return;
     const {
       stats,
       skills,
