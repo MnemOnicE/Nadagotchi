@@ -4,7 +4,7 @@ import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 // Mock Config first
 jest.mock('../js/Config.js', () => ({
     Config: {
-        DEBRIS: { HAPPINESS_PENALTY_PER_WEED: 0.005, HAPPINESS_PENALTY_PER_POOP: 0.01 }, INITIAL_STATE: {
+        INITIAL_STATE: {
             STATS: { hunger: 100, energy: 100, happiness: 100 },
             SKILLS: { logic: 0, navigation: 0 },
             PERSONALITY_POINTS_STARTER: 10,
@@ -21,7 +21,11 @@ jest.mock('../js/Config.js', () => ({
             CRAFT: { ENERGY_COST: 10, HAPPINESS_RESTORE: 5, HAPPINESS_PENALTY_MISSING_MATS: 5, SKILL_GAIN: 0.1 }
         },
         MOOD_MULTIPLIERS: { HAPPY: 1.5, SAD: 0.5, ANGRY: 0.2, NEUTRAL: 1.0 },
-        CAREER: { XP_PER_WORK: 20 }
+        CAREER: { XP_PER_WORK: 20 },
+        DEBRIS: {
+            HAPPINESS_PENALTY_PER_WEED: 0.005,
+            HAPPINESS_PENALTY_PER_POOP: 0.02
+        }
     }
 }));
 

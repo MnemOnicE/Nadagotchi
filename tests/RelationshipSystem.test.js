@@ -20,6 +20,10 @@ jest.mock('../js/Config.js', () => ({
                 ARTISAN_SKILL_GAIN: 0.15,
                 VILLAGER_SKILL_GAIN: 0.15
             }
+        },
+        DEBRIS: {
+            HAPPINESS_PENALTY_PER_WEED: 0.005,
+            HAPPINESS_PENALTY_PER_POOP: 0.02
         }
     }
 }));
