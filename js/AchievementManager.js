@@ -20,8 +20,6 @@ export class AchievementManager {
         if (!this.state.unlocked) this.state.unlocked = [];
         if (!this.state.progress) this.state.progress = {};
 
-        this.unlockedSet = new Set(this.state.unlocked);
-
         this.init();
     }
 
@@ -97,7 +95,7 @@ export class AchievementManager {
      */
     checkAchievements() {
         Achievements.forEach(achievement => {
-            if (!this.unlockedSet.has(achievement.id)) {
+            if (!this.state.unlocked.includes(achievement.id)) {
                 if (achievement.condition(this.state.progress)) {
                     this.unlock(achievement);
                 }
@@ -111,7 +109,6 @@ export class AchievementManager {
      */
     unlock(achievement) {
         this.state.unlocked.push(achievement.id);
-        this.unlockedSet.add(achievement.id);
         // Emit event for UI to pick up
         this.game.events.emit(EventKeys.ACHIEVEMENT_UNLOCKED, achievement);
         this.persistence.saveAchievements(this.state);

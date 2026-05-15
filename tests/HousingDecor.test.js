@@ -11,7 +11,7 @@ jest.mock('../js/Config.js', () => {
     // especially INITIAL_STATE
     return {
         Config: {
-            DEBRIS: { HAPPINESS_PENALTY_PER_WEED: 0.005, HAPPINESS_PENALTY_PER_POOP: 0.01 }, INITIAL_STATE: {
+            INITIAL_STATE: {
                 STATS: { hunger: 100, energy: 100, happiness: 70 },
                 SKILLS: {
                     communication: 1, resilience: 1, navigation: 0,
@@ -31,7 +31,8 @@ jest.mock('../js/Config.js', () => {
                 FORAGE: { ENERGY_COST: 10, SKILL_GAIN: 1 }
             },
             SECURITY: { DNA_SALT: '' },
-            LIMITS: { MAX_STATS: 100, MAX_STATS_BONUS: 105 }
+            LIMITS: { MAX_STATS: 100, MAX_STATS_BONUS: 105 },
+            DEBRIS: { HAPPINESS_PENALTY_PER_WEED: 0.005, HAPPINESS_PENALTY_PER_POOP: 0.02 }
         }
     }
 });

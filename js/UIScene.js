@@ -422,7 +422,6 @@ export class UIScene extends Phaser.Scene {
       this.nadagotchiData = data;
     }
     if (worldState) this.updateCalendarDropdown(worldState);
-    if (!this.nadagotchiData) return;
     const {
       stats,
       skills,
@@ -445,7 +444,7 @@ export class UIScene extends Phaser.Scene {
     this.retireButton.setVisible(isLegacyReady);
     if (newCareerUnlocked) {
       this.showCareerNotification(newCareerUnlocked);
-      this.nadagotchiData.newCareerUnlocked = null;
+      this.mainScene.nadagotchi.newCareerUnlocked = null;
     }
   }
   getMoodEmoji(mood) {

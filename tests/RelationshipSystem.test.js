@@ -5,6 +5,7 @@ import { Config } from '../js/Config.js';
 // Mock Config to ensure stable values for testing
 jest.mock('../js/Config.js', () => ({
     Config: {
+        DEBRIS: { HAPPINESS_PENALTY_PER_WEED: 0.005, HAPPINESS_PENALTY_PER_POOP: 0.02 },
         SECURITY: { DNA_SALT: '' },
         ACTIONS: {
             INTERACT_NPC: {
