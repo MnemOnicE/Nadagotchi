@@ -445,7 +445,7 @@ export class UIScene extends Phaser.Scene {
     this.retireButton.setVisible(isLegacyReady);
     if (newCareerUnlocked) {
       this.showCareerNotification(newCareerUnlocked);
-      this.mainScene.nadagotchi.newCareerUnlocked = null;
+      this.nadagotchiData.newCareerUnlocked = null;
     }
   }
   getMoodEmoji(mood) {
