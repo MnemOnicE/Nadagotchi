@@ -12,7 +12,7 @@ const { MainScene } = require('../js/MainScene.js');
 // Mock Config
 jest.mock('../js/Config.js', () => ({
     Config: {
-        INITIAL_STATE: {
+        DEBRIS: { HAPPINESS_PENALTY_PER_WEED: 0.005, HAPPINESS_PENALTY_PER_POOP: 0.01 }, INITIAL_STATE: {
             PERSONALITY_POINTS_STARTER: 10,
             STATS: { hunger: 100, energy: 100, happiness: 100 },
             SKILLS: { logic: 0, research: 0, empathy: 0, navigation: 0, crafting: 0, focus: 0, communication: 0 },
