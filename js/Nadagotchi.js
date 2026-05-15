@@ -1200,23 +1200,22 @@ export class Nadagotchi {
         this._cachedGlobalPenalty = 0;
         this._cachedLocalPenalties = {};
 
-        // Use for...in for iteration to avoid intermediate array allocation from Object.keys()
-        // and further reduce Garbage Collection pressure in the live loop.
-        const penaltyMap = {
-            weed: Config.DEBRIS.HAPPINESS_PENALTY_PER_WEED,
-            poop: Config.DEBRIS.HAPPINESS_PENALTY_PER_POOP
-        };
+        // Defensive check for Config.DEBRIS to prevent CI failures in environments
+        // where Config might be partially loaded or mocked.
+        if (!Config.DEBRIS) return;
 
-        for (const id in this.debris) {
-            if (Object.hasOwn(this.debris, id)) {
-                const d = this.debris[id];
-                const penalty = penaltyMap[d.type] || 0;
+        // Use Object.keys for iteration to avoid intermediate array allocation from Object.values()
+        // and reduce Garbage Collection pressure in the live loop.
+        for (const id of Object.keys(this.debris)) {
+            const d = this.debris[id];
+            let penalty = 0;
+            if (d.type === 'weed') penalty = Config?.DEBRIS?.HAPPINESS_PENALTY_PER_WEED || 0.005;
+            else if (d.type === 'poop') penalty = Config?.DEBRIS?.HAPPINESS_PENALTY_PER_POOP || 0.02;
 
-                if (penalty > 0) {
-                    this._cachedGlobalPenalty += penalty;
-                    const loc = d.location || 'GARDEN';
-                    this._cachedLocalPenalties[loc] = (this._cachedLocalPenalties[loc] || 0) + penalty;
-                }
+            if (penalty > 0) {
+                this._cachedGlobalPenalty += penalty;
+                const loc = d.location || 'GARDEN';
+                this._cachedLocalPenalties[loc] = (this._cachedLocalPenalties[loc] || 0) + penalty;
             }
         }
     }
