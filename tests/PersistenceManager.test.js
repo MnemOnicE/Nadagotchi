@@ -96,26 +96,25 @@ describe('PersistenceManager', () => {
         expect(loadedRecipes).toEqual([]);
     });
 
-    test('should handle save error when localStorage.setItem throws', async () => {
-        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-        const mockError = new Error('QuotaExceededError');
-        jest.spyOn(Object.getPrototypeOf(localStorage), 'setItem').mockImplementation(() => {
-            throw mockError;
+    describe('_save error handling', () => {
+        it('should catch and log errors when localStorage.setItem throws', async () => {
+            const data = { test: 123 };
+            const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+            const originalSetItem = Object.getPrototypeOf(localStorage).setItem;
+            Object.getPrototypeOf(localStorage).setItem = () => { throw new Error('QuotaExceededError'); };
+
+            const manager = new PersistenceManager();
+            await manager._save('nadagotchi_save', data);
+
+            expect(consoleErrorSpy).toHaveBeenCalledWith(
+                'Failed to save data for key nadagotchi_save:',
+                expect.any(Error)
+            );
+            expect(manager.lastSavedJson['nadagotchi_save']).toBeUndefined();
+
+            consoleErrorSpy.mockRestore();
+            Object.getPrototypeOf(localStorage).setItem = originalSetItem;
         });
-
-        const petData = { name: 'ErrorPet', type: 'Slime' };
-
-        // Use an internal method directly if needed, or savePet and wait
-        await persistenceManager._save('nadagotchi_test_error', petData);
-
-        expect(consoleErrorSpy).toHaveBeenCalledWith(
-            expect.stringContaining('Failed to save data for key nadagotchi_test_error:'),
-            mockError
-        );
-
-        expect(persistenceManager.lastSavedJson['nadagotchi_test_error']).toBeUndefined();
-
-        consoleErrorSpy.mockRestore();
     });
-
 });
