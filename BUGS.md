@@ -128,3 +128,31 @@ Swapped the order of operations in the "Return Home" button callback to ensure `
 **Line:** 13 (GeneticsSystem), 315 (PersistenceManager)
 **Description:** Syntax errors caused by duplicate variable declarations (`toBase64`, `fromBase64`, `encoded`) using `const`. This prevented the files from being parsed and blocked the entire test suite from running.
 **Fix:** Removed the redundant local declarations and standardized on the imported utility functions from `js/utils/Encoding.js`.
+
+---
+
+**File:** `js/AchievementManager.js`
+**Line:** 20
+**Description:** `this.unlockedSet` was undefined due to missing initialization, causing a `TypeError: Cannot read properties of undefined (reading 'has')` when checking achievements.
+**Fix:** Initialized `this.unlockedSet` in the constructor based on `this.state.unlocked`.
+
+---
+
+**File:** `tests/HousingDecor.test.js`
+**Line:** 39
+**Description:** Syntax error (`Unexpected token, expected ","`) caused by malformed JSON structure in mock config data.
+**Fix:** Removed the duplicated `SECURITY` and `DEBRIS` attributes and fixed trailing comma inside the Jest mock configuration.
+
+---
+
+**File:** `tests/SecurityReset.test.js`
+**Line:** 24
+**Description:** Syntax error (`Unexpected token, expected ","`) caused by a missing comma in object properties.
+**Fix:** Added the missing comma after `length: 0`.
+
+---
+
+**File:** `js/UIScene.js`
+**Line:** 794
+**Description:** Major syntax errors breaking parsing in multiple test suites. The `runTutorialSequence` method was improperly merged, duplicating variable declarations and swallowing subsequent methods (`handleAchievementUnlocked`, `showToast`, `createSettingsModal`, etc.).
+**Fix:** Completely extracted and properly separated the logic of `runTutorialSequence` and the other swallowed UI methods to guarantee valid JavaScript structure.
