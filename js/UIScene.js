@@ -938,7 +938,7 @@ export class UIScene extends Phaser.Scene {
         } else {
             unlocked.forEach(c => {
                 const isCurrent = c === career;
-                const lvl = this.nadagotchiData.careerLevels[c] || 1;
+                const lvl = this.nadagotchiData.careerLevels?.[c] || 1;
                 const label = `${c} (Lvl ${lvl})`;
                 const rowText = this.add.text(-mw/2 + 60, yPos + 10, label, { fontFamily: 'VT323', fontSize: '24px', color: isCurrent ? '#00FF00' : '#FFF' });
                 container.add(rowText);
