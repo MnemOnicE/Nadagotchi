@@ -845,8 +845,8 @@ export class UIScene extends Phaser.Scene {
         const modal = this.createModal("Settings");
         const h = 400;
         const volLabel = this.add.text(0, -80, "Volume", { fontSize: '24px', fontFamily: 'VT323', monospace: true }).setOrigin(0.5);
-        const volDown = ButtonFactory.createButton(this, -60, -40, "-", () => { const newVol = Math.max(0, (this.settingsData?.volume ?? 0.5) - 0.1); this.game.events.emit(EventKeys.UPDATE_SETTINGS, { volume: newVol }); modal.volDisplay.setText(Math.round(newVol * 100) + "%"); if (!this.settingsData) this.settingsData = {}; this.settingsData.volume = newVol; }, { width: 40, height: 40, color: 0x808080 });
-        const volUp = ButtonFactory.createButton(this, 60, -40, "+", () => { const newVol = Math.min(1, (this.settingsData?.volume ?? 0.5) + 0.1); this.game.events.emit(EventKeys.UPDATE_SETTINGS, { volume: newVol }); modal.volDisplay.setText(Math.round(newVol * 100) + "%"); if (!this.settingsData) this.settingsData = {}; this.settingsData.volume = newVol; }, { width: 40, height: 40, color: 0x808080 });
+        const volDown = ButtonFactory.createButton(this, -60, -40, "-", () => { const newVol = Math.max(0, (this.settingsData?.volume ?? 0.5) - 0.1); this.game.events.emit(EventKeys.UPDATE_SETTINGS, { volume: newVol }); this.settingsModal.volDisplay.setText(`${Math.round(newVol * 100)}%`); if (!this.settingsData) this.settingsData = {}; this.settingsData.volume = newVol; }, { width: 40, height: 40, color: 0x808080 });
+        const volUp = ButtonFactory.createButton(this, 60, -40, "+", () => { const newVol = Math.min(1, (this.settingsData?.volume ?? 0.5) + 0.1); this.game.events.emit(EventKeys.UPDATE_SETTINGS, { volume: newVol }); this.settingsModal.volDisplay.setText(`${Math.round(newVol * 100)}%`); if (!this.settingsData) this.settingsData = {}; this.settingsData.volume = newVol; }, { width: 40, height: 40, color: 0x808080 });
         const volDisplay = this.add.text(0, -40, "50%", { fontSize: '24px', fontFamily: 'VT323' }).setOrigin(0.5);
         const speedLabel = this.add.text(0, 20, "Game Speed", { fontSize: '24px', fontFamily: 'VT323' }).setOrigin(0.5);
         const speedButtons = [];
@@ -913,8 +913,8 @@ export class UIScene extends Phaser.Scene {
         const career = this.nadagotchiData.currentCareer;
         let infoText = "";
         if (career) {
-            const level = this.nadagotchiData.careerLevels?.[career] || 1;
-            const xp = this.nadagotchiData.careerXP?.[career] || 0;
+            const level = this.nadagotchiData.careerLevels[career] || 1;
+            const xp = this.nadagotchiData.careerXP[career] || 0;
             const title = CareerDefinitions.TITLES[career] ? CareerDefinitions.TITLES[career][level] : 'Employee';
             const nextThreshold = CareerDefinitions.XP_THRESHOLDS[level + 1] || 'MAX';
             const payBonus = (Config.CAREER.LEVEL_MULTIPLIERS[level] - 1) * 100;
@@ -938,7 +938,7 @@ export class UIScene extends Phaser.Scene {
         } else {
             unlocked.forEach(c => {
                 const isCurrent = c === career;
-                const lvl = this.nadagotchiData.careerLevels?.[c] || 1;
+                const lvl = this.nadagotchiData.careerLevels[c] || 1;
                 const label = `${c} (Lvl ${lvl})`;
                 const rowText = this.add.text(-mw/2 + 60, yPos + 10, label, { fontFamily: 'VT323', fontSize: '24px', color: isCurrent ? '#00FF00' : '#FFF' });
                 container.add(rowText);
@@ -976,7 +976,7 @@ export class UIScene extends Phaser.Scene {
         container.add(infoText);
         this.jobBoardDynamicItems.push(infoText);
         const startBtn = ButtonFactory.createButton(this, 80, 55, "Start Shift", () => { if (career) { this.game.events.emit(EventKeys.UI_ACTION, EventKeys.WORK); container.setVisible(false); } else { this.showToast("No Job", "Select a career first!", "🚫"); } }, { width: 160, height: 50, color: career ? 0x6A0DAD : 0x555555, fontSize: '24px' });
-        container.add(startBtn);
+        if (!career) startBtn.setDisabled(true);
         container.add(startBtn);
         this.jobBoardDynamicItems.push(startBtn);
         const careerBtn = ButtonFactory.createButton(this, 80, 120, "Career Profiles", () => { this.openCareerMenu(); }, { width: 160, height: 40, color: 0xD8A373, fontSize: '20px' });
