@@ -17,11 +17,18 @@ export class AchievementManager {
         this.state = this.persistence.loadAchievements();
 
         // Ensure default structure
-        if (!this.state.unlocked) this.state.unlocked = [];
-        if (!this.state.progress) this.state.progress = {};
+        this.state = { unlocked: [], progress: {} };
+        this.unlockedSet = new Set();
 
-        this.unlockedSet = new Set(this.state.unlocked);
-        this.init();
+        this.persistence.loadAchievements().then(loadedState => {
+            if (loadedState) {
+                this.state = loadedState;
+            }
+            if (!this.state.unlocked) this.state.unlocked = [];
+            if (!this.state.progress) this.state.progress = {};
+            this.unlockedSet = new Set(this.state.unlocked);
+            this.init();
+        });
     }
 
     /**
