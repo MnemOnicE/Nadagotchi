@@ -976,7 +976,7 @@ export class UIScene extends Phaser.Scene {
         container.add(infoText);
         this.jobBoardDynamicItems.push(infoText);
         const startBtn = ButtonFactory.createButton(this, 80, 55, "Start Shift", () => { if (career) { this.game.events.emit(EventKeys.UI_ACTION, EventKeys.WORK); container.setVisible(false); } else { this.showToast("No Job", "Select a career first!", "🚫"); } }, { width: 160, height: 50, color: career ? 0x6A0DAD : 0x555555, fontSize: '24px' });
-        if (!career) startBtn.setDisabled(true);
+        container.add(startBtn);
         container.add(startBtn);
         this.jobBoardDynamicItems.push(startBtn);
         const careerBtn = ButtonFactory.createButton(this, 80, 120, "Career Profiles", () => { this.openCareerMenu(); }, { width: 160, height: 40, color: 0xD8A373, fontSize: '20px' });
