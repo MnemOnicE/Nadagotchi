@@ -913,8 +913,8 @@ export class UIScene extends Phaser.Scene {
         const career = this.nadagotchiData.currentCareer;
         let infoText = "";
         if (career) {
-            const level = this.nadagotchiData.careerLevels[career] || 1;
-            const xp = this.nadagotchiData.careerXP[career] || 0;
+            const level = this.nadagotchiData.careerLevels?.[career] || 1;
+            const xp = this.nadagotchiData.careerXP?.[career] || 0;
             const title = CareerDefinitions.TITLES[career] ? CareerDefinitions.TITLES[career][level] : 'Employee';
             const nextThreshold = CareerDefinitions.XP_THRESHOLDS[level + 1] || 'MAX';
             const payBonus = (Config.CAREER.LEVEL_MULTIPLIERS[level] - 1) * 100;
