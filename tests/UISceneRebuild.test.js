@@ -116,7 +116,7 @@ jest.mock('../js/PersistenceManager', () => {
                 loadJournal: jest.fn().mockReturnValue([]),
                 loadRecipes: jest.fn().mockReturnValue([]),
                 loadHallOfFame: jest.fn().mockReturnValue([]),
-                loadAchievements: jest.fn().mockReturnValue({ unlocked: [] })
+                loadAchievements: jest.fn().mockResolvedValue({ unlocked: [] })
             };
         })
     };
