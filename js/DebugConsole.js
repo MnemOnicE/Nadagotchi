@@ -61,11 +61,14 @@ export class DebugConsole {
             { label: "Starve (Hunger 0)", action: () => this.modifyStats(0, null, null) },
             { label: "Exhaust (Energy 0)", action: () => this.modifyStats(null, 0, null) },
             { label: "Depress (Happy 0)", action: () => this.modifyStats(null, null, 0) },
+            { label: "Max Age (Legacy Ready)", action: () => { if (this.scene.nadagotchi) { this.scene.nadagotchi.age = 51; this.scene.nadagotchi.previousAge = 51; this.scene.nadagotchi.isLegacyReady = true; this.refreshGame(); } } },
+            { label: "Reset Age", action: () => { if (this.scene.nadagotchi) { this.scene.nadagotchi.age = 0; this.scene.nadagotchi.previousAge = 0; this.scene.nadagotchi.isLegacyReady = false; this.refreshGame(); } } },
         ]);
 
         this.addSection("World Time", [
             { label: "+1 Hour", action: () => { this.scene.worldClock.update(3600 * 1000); this.refreshGame(); } },
             { label: "Next Day", action: () => { this.scene.calendar.advanceDay(); this.refreshGame(); } },
+            { label: "Advance Season", action: () => { this.scene.calendar.advanceSeason(); this.refreshGame(); } },
             { label: "Speed: 1x", action: () => this.setSpeed(1.0) },
             { label: "Speed: 10x", action: () => this.setSpeed(10.0) },
             { label: "Speed: 50x", action: () => this.setSpeed(50.0) },
@@ -78,14 +81,16 @@ export class DebugConsole {
             { label: "Spawn Merchant", action: () => this.forceEvent('TravelingMerchant') },
         ]);
 
-        this.addSection("Inventory God Mode", [
+        this.addSection("God Mode & Cheats", [
             { label: "+10 All Items", action: () => this.addAllItems() },
             { label: "Clear Inventory", action: () => this.clearInventory() },
             { label: "Unlock All Careers", action: () => { this.scene.nadagotchi.unlockAllCareers(); this.refreshGame(); } },
-            { label: "+1000 Coins", action: () => { this.scene.nadagotchi.coins += 1000; this.scene.nadagotchi.save(); this.showToast("Added Coins", "+1000 Coins", "💰"); this.refreshGame(); } }
+            { label: "+1000 Coins", action: () => { this.scene.nadagotchi.coins += 1000; this.scene.nadagotchi.save(); this.showToast("Added Coins", "+1000 Coins", "💰"); this.refreshGame(); } },
+            { label: "Max All Skills", action: () => this.maxAllSkills() }
         ]);
 
         this.addSection("Debug Tools", [
+            { label: "Force Clean House", action: () => this.forceCleanHouse() },
             { label: "Toggle Hitbox Bounds", action: () => this.toggleBounds() },
             { label: "Simulate Background Resume (8hr)", action: () => this.simulateBackgroundResume() },
             { label: "Export Save (Clipboard)", action: () => this.exportSave() },
@@ -153,6 +158,28 @@ export class DebugConsole {
         });
         this.refreshGame();
         this.showToast("Added Items", "Added 10 of every item.", "🎒");
+    }
+
+
+    maxAllSkills() {
+        if (!this.scene.nadagotchi || !this.scene.nadagotchi.skills) return;
+        const maxStats = Config.LIMITS ? Config.LIMITS.MAX_STATS : 100;
+        Object.keys(this.scene.nadagotchi.skills).forEach(key => {
+            this.scene.nadagotchi.skills[key] = maxStats;
+        });
+        this.refreshGame();
+        this.showToast("Max Skills", "All skills set to max.", "🧠");
+    }
+
+    forceCleanHouse() {
+        if (!this.scene.nadagotchi) return;
+        this.scene.nadagotchi.debris = {};
+        this.scene.nadagotchi.debrisCount = 0;
+        if (typeof this.scene.nadagotchi.recalculateCleanlinessPenalty === 'function') {
+            this.scene.nadagotchi.recalculateCleanlinessPenalty();
+        }
+        this.refreshGame();
+        this.showToast("Cleaned House", "All debris removed.", "🧹");
     }
 
     clearInventory() {
