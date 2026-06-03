@@ -337,11 +337,13 @@ export class MainScene extends Phaser.Scene {
             }
 
             this.eventManager.update();
-            this.checkMerchantVisibility();
         }
 
-        if (daysPassed > 0 && this.nadagotchi.debrisSystem) {
-            this.renderDebris();
+        if (daysPassed > 0) {
+            this.checkMerchantVisibility();
+            if (this.nadagotchi.debrisSystem) {
+                this.renderDebris();
+            }
         }
 
         // UPDATE properties, DO NOT reassign object
