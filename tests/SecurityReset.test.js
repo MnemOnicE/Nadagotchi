@@ -21,7 +21,7 @@ describe('Security Reset Fix', () => {
             clear: jest.fn(),
             key: jest.fn(),
             length: 0
-            clear: jest.fn()
+
         };
         Object.defineProperty(global, 'localStorage', {
             value: localStorageMock,

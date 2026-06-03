@@ -61,8 +61,8 @@ export class DebugConsole {
             { label: "Starve (Hunger 0)", action: () => this.modifyStats(0, null, null) },
             { label: "Exhaust (Energy 0)", action: () => this.modifyStats(null, 0, null) },
             { label: "Depress (Happy 0)", action: () => this.modifyStats(null, null, 0) },
-            { label: "Max Age (Legacy Ready)", action: () => { if (this.scene.nadagotchi) { this.scene.nadagotchi.age = 51; this.scene.nadagotchi.previousAge = 51; this.scene.nadagotchi.isLegacyReady = true; this.refreshGame(); } } },
-            { label: "Reset Age", action: () => { if (this.scene.nadagotchi) { this.scene.nadagotchi.age = 0; this.scene.nadagotchi.previousAge = 0; this.scene.nadagotchi.isLegacyReady = false; this.refreshGame(); } } },
+            { label: "Max Age (Legacy Ready)", action: () => { this.scene.nadagotchi.age = 51; this.scene.nadagotchi.isLegacyReady = true; this.refreshGame(); } },
+            { label: "Reset Age", action: () => { this.scene.nadagotchi.age = 0; this.refreshGame(); } },
         ]);
 
         this.addSection("World Time", [
