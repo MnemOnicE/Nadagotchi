@@ -287,8 +287,10 @@ export class Nadagotchi {
                 // Migration logic for legacy array-based saves
                 loadedData.debris.forEach(d => {
                     if (d.id && d.id !== '__proto__' && d.id !== 'constructor') {
+                        if (!(d.id in this.debris)) {
+                            this.debrisCount++;
+                        }
                         this.debris[d.id] = d;
-                        this.debrisCount++;
                     }
                 });
             } else {
