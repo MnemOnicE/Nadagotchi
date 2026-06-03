@@ -56,8 +56,8 @@ describe('GhostScene', () => {
         // Return button
         expect(ButtonFactory.createButton).toHaveBeenCalledWith(
             scene,
-            400,
-            500, // 600 - 100
+            450,
+            520,
             "Return to Life",
             expect.any(Function)
         );

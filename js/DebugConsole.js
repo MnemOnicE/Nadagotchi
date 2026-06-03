@@ -89,7 +89,7 @@ export class DebugConsole {
             { label: "Toggle Hitbox Bounds", action: () => this.toggleBounds() },
             { label: "Simulate Background Resume (8hr)", action: () => this.simulateBackgroundResume() },
             { label: "Export Save (Clipboard)", action: () => this.exportSave() },
-            { label: "Hard Reset (Wipe Save)", action: () => { if(confirm("Delete all data?")) { localStorage.clear(); location.reload(); } } }
+            { label: "Hard Reset (Wipe Save)", action: () => { if(confirm("Delete all data?")) { this.scene.persistence.clearAllData(); location.reload(); } } }
         ]);
 
         document.body.appendChild(this.container);
