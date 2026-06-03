@@ -5,7 +5,7 @@ import { Config } from '../js/Config.js';
 // Mock Config to ensure stable values for testing
 jest.mock('../js/Config.js', () => ({
     Config: {
-        SECURITY: { DNA_SALT: '' },
+        SECURITY: { DNA_SALT: '' }, DEBRIS: { HAPPINESS_PENALTY_PER_WEED: 0.005, HAPPINESS_PENALTY_PER_POOP: 0.02 },
         ACTIONS: {
             INTERACT_NPC: {
                 ENERGY_COST: 5,
@@ -20,6 +20,10 @@ jest.mock('../js/Config.js', () => ({
                 ARTISAN_SKILL_GAIN: 0.15,
                 VILLAGER_SKILL_GAIN: 0.15
             }
+        },
+        DEBRIS: {
+            HAPPINESS_PENALTY_PER_WEED: 0.005,
+            HAPPINESS_PENALTY_PER_POOP: 0.02
         }
     }
 }));

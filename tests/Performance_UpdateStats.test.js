@@ -58,7 +58,7 @@ describe('Performance: Update Stats Throttling', () => {
             loadFurniture: jest.fn().mockReturnValue([]),
             saveFurniture: jest.fn(),
             loadSettings: jest.fn().mockReturnValue({}),
-            loadAchievements: jest.fn().mockReturnValue({ unlocked: [], progress: {} }),
+            loadAchievements: jest.fn().mockResolvedValue({ unlocked: [], progress: {} }),
             loadHomeConfig: jest.fn().mockReturnValue({ rooms: { "Entryway": { wallpaperItem: 'Default', flooringItem: 'Default' } } })
         }));
 

@@ -23,7 +23,7 @@ export class GhostScene extends Phaser.Scene {
         }).setOrigin(0.5);
 
         // Return Button
-        ButtonFactory.createButton(this, width / 2, height - 100, "Return to Life", () => {
+        ButtonFactory.createButton(this, (width / 2) + 50, (height - 100) + 20, "Return to Life", () => {
             this.scene.start('MainScene');
         });
     }

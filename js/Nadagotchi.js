@@ -279,11 +279,17 @@ export class Nadagotchi {
         // --- Optimized Debris Map Implementation ---
         /** @type {Object.<string, object>} Debris items in the world (weeds, rocks, etc.). */
         this.debris = Object.create(null);
+        /** @type {number} Cached count for O(1) size checks. */
+        this.debrisCount = 0;
+
         if (loadedData && loadedData.debris) {
             if (Array.isArray(loadedData.debris)) {
                 // Migration logic for legacy array-based saves
                 loadedData.debris.forEach(d => {
                     if (d.id && d.id !== '__proto__' && d.id !== 'constructor') {
+                        if (!(d.id in this.debris)) {
+                            this.debrisCount++;
+                        }
                         this.debris[d.id] = d;
                     }
                 });
@@ -292,12 +298,11 @@ export class Nadagotchi {
                 for (const key of Object.keys(loadedData.debris)) {
                     if (key !== '__proto__' && key !== 'constructor') {
                         this.debris[key] = loadedData.debris[key];
+                        this.debrisCount++;
                     }
                 }
             }
         }
-        /** @type {number} Cached count for O(1) size checks. */
-        this.debrisCount = Object.keys(this.debris).length;
 
         Object.defineProperty(this, 'debrisSystem', {
             value: new DebrisSystem(this),
@@ -1205,8 +1210,12 @@ export class Nadagotchi {
         for (const id of Object.keys(this.debris)) {
             const d = this.debris[id];
             let penalty = 0;
-            if (d.type === 'weed') penalty = Config.DEBRIS.HAPPINESS_PENALTY_PER_WEED;
-            else if (d.type === 'poop') penalty = Config.DEBRIS.HAPPINESS_PENALTY_PER_POOP;
+            const penalties = { weed: Config?.DEBRIS?.HAPPINESS_PENALTY_PER_WEED || 0.005, poop: Config?.DEBRIS?.HAPPINESS_PENALTY_PER_POOP || 0.02 };
+            penalty = penalties[d.type] || 0;
+            if (d.type === 'weed') penalty = Config.DEBRIS?.HAPPINESS_PENALTY_PER_WEED ?? 0.005;
+            else if (d.type === 'poop') penalty = Config.DEBRIS?.HAPPINESS_PENALTY_PER_POOP ?? 0.02;
+            if (d.type === 'weed') penalty = Config?.DEBRIS?.HAPPINESS_PENALTY_PER_WEED || 0.005;
+            else if (d.type === 'poop') penalty = Config?.DEBRIS?.HAPPINESS_PENALTY_PER_POOP || 0.02;
 
             if (penalty > 0) {
                 this._cachedGlobalPenalty += penalty;

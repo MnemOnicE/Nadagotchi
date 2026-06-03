@@ -99,7 +99,7 @@ export class ShowcaseScene extends Phaser.Scene {
             dnaText.setColor('#00ff00');
 
             // "Copy" Button (Simulated)
-            ButtonFactory.createButton(this, width / 2, dnaY + 90, "COPY TO CLIPBOARD", () => {
+            ButtonFactory.createButton(this, (width / 2) + 100, (dnaY + 90) + 20, "COPY TO CLIPBOARD", () => {
                  this.copyToClipboard(dnaString);
             }, { width: 200, height: 40, color: 0x00695c, fontSize: '20px' });
         }).catch(err => {
@@ -109,7 +109,7 @@ export class ShowcaseScene extends Phaser.Scene {
         });
 
         // 6. Back Button
-        ButtonFactory.createButton(this, 60, 40, "<- BACK", () => {
+        ButtonFactory.createButton(this, 110, 60, "<- BACK", () => {
              this.close();
         }, { width: 100, height: 40, color: 0xb71c1c });
 

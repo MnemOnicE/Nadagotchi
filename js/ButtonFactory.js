@@ -39,31 +39,31 @@ export class ButtonFactory {
         const container = scene.add.container(x, y);
 
         // Shadow (Simulates height, renders behind the button)
-        const shadow = scene.add.rectangle(4, 4, width, height, 0x000000, 0.3).setOrigin(0);
+        const shadow = scene.add.rectangle(-width / 2 + 4, -height / 2 + 4, width, height, 0x000000, 0.3).setOrigin(0);
 
         // Base Background
-        const bg = scene.add.rectangle(0, 0, width, height, baseColor).setOrigin(0);
+        const bg = scene.add.rectangle(-width / 2, -height / 2, width, height, baseColor).setOrigin(0);
 
         // Hover Overlay (White, invisible by default) - Palette UX
-        const hoverOverlay = scene.add.rectangle(0, 0, width, height, 0xFFFFFF, 0).setOrigin(0);
+        const hoverOverlay = scene.add.rectangle(-width / 2, -height / 2, width, height, 0xFFFFFF, 0).setOrigin(0);
 
         // Bevel Highlights (Top/Left)
-        const highlightTop = scene.add.rectangle(0, 0, width, 3, 0xFFFFFF, 0.5).setOrigin(0);
-        const highlightLeft = scene.add.rectangle(0, 0, 3, height, 0xFFFFFF, 0.5).setOrigin(0);
+        const highlightTop = scene.add.rectangle(-width / 2, -height / 2, width, 3, 0xFFFFFF, 0.5).setOrigin(0);
+        const highlightLeft = scene.add.rectangle(-width / 2, -height / 2, 3, height, 0xFFFFFF, 0.5).setOrigin(0);
 
         // Bevel Shadows (Bottom/Right)
-        const shadeBottom = scene.add.rectangle(0, height - 3, width, 3, 0x000000, 0.2).setOrigin(0);
-        const shadeRight = scene.add.rectangle(width - 3, 0, 3, height, 0x000000, 0.2).setOrigin(0);
+        const shadeBottom = scene.add.rectangle(-width / 2, -height / 2 + height - 3, width, 3, 0x000000, 0.2).setOrigin(0);
+        const shadeRight = scene.add.rectangle(-width / 2 + width - 3, -height / 2, 3, height, 0x000000, 0.2).setOrigin(0);
 
         // Text
-        const btnText = scene.add.text(width / 2, height / 2, text, {
+        const btnText = scene.add.text(0, 0, text, {
             fontFamily: fontFamily,
             fontSize: fontSize,
             color: textColor
         }).setOrigin(0.5);
 
         // Interactive Zone (Transparent)
-        const hitZone = scene.add.zone(width / 2, height / 2, width, height)
+        const hitZone = scene.add.zone(0, 0, width, height)
             .setOrigin(0.5)
             .setInteractive({ useHandCursor: true });
 

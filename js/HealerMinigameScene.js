@@ -115,7 +115,7 @@ export class HealerMinigameScene extends Phaser.Scene {
         });
 
         // Cure Button
-        ButtonFactory.createButton(this, this.cameras.main.width / 2, 530, "ADMINISTER CURE", () => {
+        ButtonFactory.createButton(this, (this.cameras.main.width / 2) + 150, 560, "ADMINISTER CURE", () => {
             this.checkSolution(requiredRemedies);
         }, { width: 300, height: 60, color: 0x4CAF50, fontSize: '32px' });
 

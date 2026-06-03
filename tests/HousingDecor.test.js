@@ -31,6 +31,11 @@ jest.mock('../js/Config.js', () => {
                 FORAGE: { ENERGY_COST: 10, SKILL_GAIN: 1 }
             },
             SECURITY: { DNA_SALT: '' },
+            LIMITS: { MAX_STATS: 100, MAX_STATS_BONUS: 105 },
+            DEBRIS: {
+                HAPPINESS_PENALTY_PER_WEED: 0.005,
+                HAPPINESS_PENALTY_PER_POOP: 0.02
+            },
             LIMITS: { MAX_STATS: 100, MAX_STATS_BONUS: 105 }
         }
     }

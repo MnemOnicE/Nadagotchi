@@ -20,7 +20,11 @@ jest.mock('../js/Config.js', () => ({
         LIMITS: { MAX_STATS: 100 },
         MAX_STATS: { ENERGY: 100, HUNGER: 100, HAPPINESS: 100 },
         SECURITY: { DNA_SALT: 'test_salt' },
-        GENETICS: { METABOLISM_NORMALIZER: 5, HOMOZYGOUS_ENERGY_BONUS: 10 }
+        GENETICS: { METABOLISM_NORMALIZER: 5, HOMOZYGOUS_ENERGY_BONUS: 10 },
+        DEBRIS: {
+            HAPPINESS_PENALTY_PER_WEED: 0.005,
+            HAPPINESS_PENALTY_PER_POOP: 0.02
+        }
     }
 }));
 

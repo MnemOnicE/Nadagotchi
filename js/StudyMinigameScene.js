@@ -42,13 +42,13 @@ export class StudyMinigameScene extends Phaser.Scene {
         this.renderGrid();
 
         // Submit Button
-        ButtonFactory.createButton(this, 650, 500, "SUBMIT", () => this.submitWord(), { width: 120, height: 50, color: 0x4CAF50 });
+        ButtonFactory.createButton(this, 710, 525, "SUBMIT", () => this.submitWord(), { width: 120, height: 50, color: 0x4CAF50 });
 
         // Clear Button
-        ButtonFactory.createButton(this, 150, 500, "CLEAR", () => this.clearSelection(), { width: 120, height: 50, color: 0xF44336 });
+        ButtonFactory.createButton(this, 210, 525, "CLEAR", () => this.clearSelection(), { width: 120, height: 50, color: 0xF44336 });
 
         // Exit Button
-        ButtonFactory.createButton(this, 400, 550, "Finish Studying", () => this.endGame(), { width: 200, height: 40, color: 0x555555 });
+        ButtonFactory.createButton(this, 500, 570, "Finish Studying", () => this.endGame(), { width: 200, height: 40, color: 0x555555 });
     }
 
     generateGrid() {
