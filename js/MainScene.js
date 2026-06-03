@@ -310,8 +310,12 @@ export class MainScene extends Phaser.Scene {
     update(time, delta) {
         if (!this.isReady) return;
 
-        const dayPassed = this.worldClock.update(delta);
-        if (dayPassed) {
+        // FIX: Cap delta to prevent "Death Loop" on background resume
+        const maxDelta = Config.GAME_LOOP.MAX_DELTA || 3600000;
+        const cappedDelta = Math.min(delta, maxDelta);
+
+        const daysPassed = this.worldClock.update(cappedDelta);
+        for (let i = 0; i < daysPassed; i++) {
             this.calendar.advanceDay();
             // Apply daily friendship decay
             if (this.nadagotchi.relationshipSystem) {
@@ -321,7 +325,7 @@ export class MainScene extends Phaser.Scene {
             // Generate Daily Quest
             if (this.nadagotchi.questSystem) {
                 const newQuest = this.nadagotchi.questSystem.generateDailyQuest(this.calendar.season, this.weatherSystem.getCurrentWeather());
-                if (newQuest) {
+                if (newQuest && i === daysPassed - 1) { // Only notify for the last day passed
                     this.showNotification("New Daily Quest Available!", '#00FFFF');
                 }
             }
@@ -330,11 +334,16 @@ export class MainScene extends Phaser.Scene {
             if (this.nadagotchi.debrisSystem) {
                 this.nadagotchi.debrisSystem.spawnDaily(this.calendar.season, this.weatherSystem.getCurrentWeather());
                 if (this.nadagotchi.stats.hunger < 50) this.nadagotchi.debrisSystem.spawnPoop(); // Simple rule
-                this.renderDebris();
             }
 
             this.eventManager.update();
+        }
+
+        if (daysPassed > 0) {
             this.checkMerchantVisibility();
+            if (this.nadagotchi.debrisSystem) {
+                this.renderDebris();
+            }
         }
 
         // UPDATE properties, DO NOT reassign object
@@ -348,9 +357,6 @@ export class MainScene extends Phaser.Scene {
         this.weatherParticles.update(this.worldState.weather, this.worldState.season);
 
         // Apply game speed multiplier to delta time
-        // FIX: Cap delta to prevent "Death Loop" on background resume
-        const maxDelta = Config.GAME_LOOP.MAX_DELTA || 3600000;
-        const cappedDelta = Math.min(delta, maxDelta);
         const simDelta = cappedDelta * (this.gameSettings.gameSpeed || 1.0);
 
         this.nadagotchi.live(simDelta, this.worldState);
