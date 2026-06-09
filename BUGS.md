@@ -156,3 +156,10 @@ Swapped the order of operations in the "Return Home" button callback to ensure `
 **Line:** 794
 **Description:** Major syntax errors breaking parsing in multiple test suites. The `runTutorialSequence` method was improperly merged, duplicating variable declarations and swallowing subsequent methods (`handleAchievementUnlocked`, `showToast`, `createSettingsModal`, etc.).
 **Fix:** Completely extracted and properly separated the logic of `runTutorialSequence` and the other swallowed UI methods to guarantee valid JavaScript structure.
+
+---
+
+**File:** `package.json`, `.github/workflows/codeql.yml`, `eslint.config.js`
+**Line:** N/A
+**Description:** No static or semantic analysis tools were integrated into the project to help catch logical errors and formatting issues before execution or deployment.
+**Fix:** Added ESLint as a development dependency with a configuration file (`eslint.config.js`) supporting ES modules to handle syntactic checking locally, and a GitHub Actions workflow (`codeql.yml`) to perform semantic analysis.
