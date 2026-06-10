@@ -1173,7 +1173,9 @@ export class MainScene extends Phaser.Scene {
 
     /**
      * Commands the pet to walk to a specific X coordinate.
-     * @param {number} targetX - The target X coordinate.
+     * @param {number} targetX - target X coordinate.
+     * @param {?Object} [targetItem=null] - optional item to interact with or null.
+     * @returns {void}
      */
     walkTo(targetX, targetItem = null) {
         this.isMoving = true;

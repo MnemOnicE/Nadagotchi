@@ -723,10 +723,10 @@ export class Nadagotchi {
         if (this.desireTimer <= 0) {
             if (!this.currentDesire) {
                 this.currentDesire = this.rng.choice(Config.DESIRES.TYPES);
-                this.desireTimer = Config.DESIRES.DURATION_MS;
+                this.desireTimer += Config.DESIRES.DURATION_MS;
             } else {
                 this.currentDesire = null;
-                this.desireTimer = Config.DESIRES.DURATION_MS;
+                this.desireTimer += Config.DESIRES.DURATION_MS;
             }
         }
         if (this.moodOverrideTimer > 0) {
@@ -806,7 +806,7 @@ export class Nadagotchi {
             for (let key in this.skills) this.skills[key] += Config.DESIRES.REWARD_SKILL;
             this.addJournalEntry(`Fulfilling my craving to ${this.currentDesire} felt great!`);
             this.currentDesire = null;
-            this.desireTimer = Config.DESIRES.DURATION_MS;
+            this.desireTimer += Config.DESIRES.DURATION_MS;
             this.mood = 'happy';
             this.moodOverride = 'happy';
             this.moodOverrideTimer = Config.TIMING.MOOD_OVERRIDE_MS;
@@ -821,6 +821,7 @@ export class Nadagotchi {
 
         if (this.lastAction === 'PLAY' && normalizedAction === 'EXPLORE') {
             this.comboBuffs.exploreDiscount = Config.COMBOS.EXPLORE_DISCOUNT;
+            this.addJournalEntry("Feeling energized! Exploring costs less energy!");
         } else {
             this.comboBuffs.exploreDiscount = 1.0;
         }
@@ -975,10 +976,18 @@ export class Nadagotchi {
     }
 
     /**
+     * Gets the current energy cost for exploring, factoring in active combo discounts.
+     * @returns {number}
+     */
+    getExploreEnergyCost() {
+        return Config.ACTIONS.EXPLORE.ENERGY_COST * this.comboBuffs.exploreDiscount;
+    }
+
+    /**
      * @private
      */
     _handleExploreAction() {
-        const energyCost = Config.ACTIONS.EXPLORE.ENERGY_COST * this.comboBuffs.exploreDiscount;
+        const energyCost = this.getExploreEnergyCost();
         if (this.stats.energy < energyCost) return null;
         this.stats.energy = Math.max(0, this.stats.energy - energyCost);
 
