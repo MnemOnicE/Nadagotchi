@@ -347,6 +347,10 @@ export class Nadagotchi {
 
         this.moodOverride = null;
         this.moodOverrideTimer = 0;
+        this.currentDesire = null;
+        this.desireTimer = 0;
+        this.lastAction = null;
+        this.comboBuffs = { studyMult: 1.0, exploreDiscount: 1.0 };
 
         this._journalSavePending = false;
     }
@@ -715,6 +719,16 @@ export class Nadagotchi {
      * @private
      */
     _updateMood(dt) {
+        this.desireTimer -= dt;
+        if (this.desireTimer <= 0) {
+            if (!this.currentDesire) {
+                this.currentDesire = this.rng.choice(Config.DESIRES.TYPES);
+                this.desireTimer = Config.DESIRES.DURATION_MS;
+            } else {
+                this.currentDesire = null;
+                this.desireTimer = Config.DESIRES.DURATION_MS;
+            }
+        }
         if (this.moodOverrideTimer > 0) {
             this.mood = this.moodOverride;
             this.moodOverrideTimer -= dt;
@@ -787,6 +801,30 @@ export class Nadagotchi {
      */
     handleAction(actionType, item = null) {
         const normalizedAction = actionType.toUpperCase();
+        if (this.currentDesire && normalizedAction === this.currentDesire) {
+            this.stats.happiness = Math.min(this.maxStats.happiness, this.stats.happiness + Config.DESIRES.REWARD_HAPPINESS);
+            for (let key in this.skills) this.skills[key] += Config.DESIRES.REWARD_SKILL;
+            this.addJournalEntry(`Fulfilling my craving to ${this.currentDesire} felt great!`);
+            this.currentDesire = null;
+            this.desireTimer = Config.DESIRES.DURATION_MS;
+            this.mood = 'happy';
+            this.moodOverride = 'happy';
+            this.moodOverrideTimer = Config.TIMING.MOOD_OVERRIDE_MS;
+        }
+
+        if (this.lastAction === 'MEDITATE' && normalizedAction === 'STUDY') {
+            this.comboBuffs.studyMult = Config.COMBOS.STUDY_MULT;
+            this.addJournalEntry("My mind is clear! Studying is twice as effective!");
+        } else {
+            this.comboBuffs.studyMult = 1.0;
+        }
+
+        if (this.lastAction === 'PLAY' && normalizedAction === 'EXPLORE') {
+            this.comboBuffs.exploreDiscount = Config.COMBOS.EXPLORE_DISCOUNT;
+        } else {
+            this.comboBuffs.exploreDiscount = 1.0;
+        }
+        this.lastAction = normalizedAction;
         const actionHandlers = {
             'FEED': () => this._handleFeedAction(),
             'PLAY': () => this._handlePlayAction(),
@@ -859,8 +897,8 @@ export class Nadagotchi {
         this.stats.energy = Math.max(0, this.stats.energy - Config.ACTIONS.STUDY.ENERGY_COST);
         this.stats.happiness = Math.max(0, this.stats.happiness - Config.ACTIONS.STUDY.HAPPINESS_COST);
         const multiplier = this.getMoodMultiplier();
-        this.skills.logic += (Config.ACTIONS.STUDY.SKILL_GAIN * multiplier);
-        this.skills.research += (Config.ACTIONS.STUDY.SKILL_GAIN * multiplier);
+        this.skills.logic += (Config.ACTIONS.STUDY.SKILL_GAIN * multiplier * this.comboBuffs.studyMult);
+        this.skills.research += (Config.ACTIONS.STUDY.SKILL_GAIN * multiplier * this.comboBuffs.studyMult);
 
         if (this.genome?.phenotype?.isHomozygousIntellectual) this.stats.happiness += 5;
 
@@ -873,7 +911,7 @@ export class Nadagotchi {
 
         this.personalityPoints.Intellectual++;
         if (this.dominantArchetype === 'Adventurer') {
-            this.skills.navigation += (Config.ACTIONS.STUDY.NAVIGATION_GAIN_ADVENTURER * multiplier);
+            this.skills.navigation += (Config.ACTIONS.STUDY.NAVIGATION_GAIN_ADVENTURER * multiplier * this.comboBuffs.studyMult);
         }
         if (this.rng.random() < 0.05) this.discoverRecipe("Logic-Boosting Snack");
         return null;
@@ -940,8 +978,9 @@ export class Nadagotchi {
      * @private
      */
     _handleExploreAction() {
-        if (this.stats.energy < Config.ACTIONS.EXPLORE.ENERGY_COST) return null;
-        this.stats.energy = Math.max(0, this.stats.energy - Config.ACTIONS.EXPLORE.ENERGY_COST);
+        const energyCost = Config.ACTIONS.EXPLORE.ENERGY_COST * this.comboBuffs.exploreDiscount;
+        if (this.stats.energy < energyCost) return null;
+        this.stats.energy = Math.max(0, this.stats.energy - energyCost);
 
         if (this.genome?.phenotype?.isHomozygousAdventurer) this.stats.happiness += 10;
 
