@@ -528,7 +528,7 @@ export class MainScene extends Phaser.Scene {
                 break;
             case EventKeys.EXPLORE:
                 // Check if affordable first
-                if (this.nadagotchi.stats.energy >= Config.ACTIONS.EXPEDITION.ENERGY_COST) {
+                if (this.nadagotchi.stats.energy >= this.nadagotchi.getExploreEnergyCost()) {
                     // Perform action logic (Energy deduction, Archetype bonuses, Recipes)
                     // We must call this to trigger "Expectations" (Archetype behaviors)
                     this.nadagotchi.handleAction(EventKeys.EXPLORE);
@@ -1174,7 +1174,7 @@ export class MainScene extends Phaser.Scene {
     /**
      * Commands the pet to walk to a specific X coordinate.
      * @param {number} targetX - target X coordinate.
-     * @param {?Object} [targetItem=null] - optional item to interact with or null.
+     * @param {?string} [targetItem=null] - optional item to interact with or null.
      * @returns {void}
      */
     walkTo(targetX, targetItem = null) {
