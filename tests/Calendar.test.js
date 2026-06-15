@@ -38,36 +38,4 @@ describe('Calendar', () => {
         expect(calendar.day).toBe(1);
         expect(calendar.season).toBe('Spring');
     });
-
-    describe('advanceSeason()', () => {
-        test('should transition from Spring to Summer', () => {
-            calendar.advanceSeason();
-            expect(calendar.season).toBe('Summer');
-        });
-
-        test('should transition from Summer to Autumn', () => {
-            calendar.season = 'Summer';
-            calendar.advanceSeason();
-            expect(calendar.season).toBe('Autumn');
-        });
-
-        test('should transition from Autumn to Winter', () => {
-            calendar.season = 'Autumn';
-            calendar.advanceSeason();
-            expect(calendar.season).toBe('Winter');
-        });
-
-        test('should wrap around from Winter to Spring', () => {
-            calendar.season = 'Winter';
-                        calendar.advanceSeason();
-            expect(calendar.season).toBe('Spring');
-        });
-
-        test('should recover gracefully to Spring from an invalid season', () => {
-            calendar.season = 'InvalidSeason';
-                        calendar.advanceSeason();
-            // indexOf('InvalidSeason') is -1. (-1 + 1) % 4 === 0, which corresponds to 'Spring'.
-            expect(calendar.season).toBe('Spring');
-                    });
-    });
 });

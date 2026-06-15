@@ -310,8 +310,12 @@ export class MainScene extends Phaser.Scene {
     update(time, delta) {
         if (!this.isReady) return;
 
-        const dayPassed = this.worldClock.update(delta);
-        if (dayPassed) {
+        // FIX: Cap delta to prevent "Death Loop" on background resume
+        const maxDelta = Config.GAME_LOOP.MAX_DELTA || 3600000;
+        const cappedDelta = Math.min(delta, maxDelta);
+
+        const daysPassed = this.worldClock.update(cappedDelta);
+        for (let i = 0; i < daysPassed; i++) {
             this.calendar.advanceDay();
             // Apply daily friendship decay
             if (this.nadagotchi.relationshipSystem) {
@@ -321,7 +325,7 @@ export class MainScene extends Phaser.Scene {
             // Generate Daily Quest
             if (this.nadagotchi.questSystem) {
                 const newQuest = this.nadagotchi.questSystem.generateDailyQuest(this.calendar.season, this.weatherSystem.getCurrentWeather());
-                if (newQuest) {
+                if (newQuest && i === daysPassed - 1) { // Only notify for the last day passed
                     this.showNotification("New Daily Quest Available!", '#00FFFF');
                 }
             }
@@ -330,11 +334,16 @@ export class MainScene extends Phaser.Scene {
             if (this.nadagotchi.debrisSystem) {
                 this.nadagotchi.debrisSystem.spawnDaily(this.calendar.season, this.weatherSystem.getCurrentWeather());
                 if (this.nadagotchi.stats.hunger < 50) this.nadagotchi.debrisSystem.spawnPoop(); // Simple rule
-                this.renderDebris();
             }
 
             this.eventManager.update();
+        }
+
+        if (daysPassed > 0) {
             this.checkMerchantVisibility();
+            if (this.nadagotchi.debrisSystem) {
+                this.renderDebris();
+            }
         }
 
         // UPDATE properties, DO NOT reassign object
@@ -348,9 +357,6 @@ export class MainScene extends Phaser.Scene {
         this.weatherParticles.update(this.worldState.weather, this.worldState.season);
 
         // Apply game speed multiplier to delta time
-        // FIX: Cap delta to prevent "Death Loop" on background resume
-        const maxDelta = Config.GAME_LOOP.MAX_DELTA || 3600000;
-        const cappedDelta = Math.min(delta, maxDelta);
         const simDelta = cappedDelta * (this.gameSettings.gameSpeed || 1.0);
 
         this.nadagotchi.live(simDelta, this.worldState);
@@ -385,6 +391,12 @@ export class MainScene extends Phaser.Scene {
         this.updatePetMovement(time);
 
         this.lightingManager.update();
+        if (this.nadagotchi.currentDesire && this.nadagotchi.currentDesire !== this.lastDesire) {
+            this.showNotification(`Craving: ${this.nadagotchi.currentDesire}!`, "#FFD700");
+            this.lastDesire = this.nadagotchi.currentDesire;
+        } else if (!this.nadagotchi.currentDesire) {
+            this.lastDesire = null;
+        }
     }
 
     updateQuestIndicators() {
@@ -1148,17 +1160,24 @@ export class MainScene extends Phaser.Scene {
 
         if (Phaser.Math.Between(1, chance) === 1) {
             const width = this.cameras.main.width;
-            // Pick a random spot within room bounds (leaving 50px buffer)
-            const targetX = Phaser.Math.Between(50, width - 50);
-            this.walkTo(targetX);
+            const roomFurniture = this.placedFurniture[this.currentRoom] || [];
+            if (roomFurniture.length > 0 && Phaser.Math.Between(1, 3) === 1) {
+                const targetFurniture = roomFurniture[Phaser.Math.Between(0, roomFurniture.length - 1)];
+                this.walkTo(targetFurniture.x, targetFurniture.key);
+            } else {
+                const targetX = Phaser.Math.Between(50, width - 50);
+                this.walkTo(targetX);
+            }
         }
     }
 
     /**
      * Commands the pet to walk to a specific X coordinate.
-     * @param {number} targetX - The target X coordinate.
+     * @param {number} targetX - target X coordinate.
+     * @param {?Object} [targetItem=null] - optional item to interact with or null.
+     * @returns {void}
      */
-    walkTo(targetX) {
+    walkTo(targetX, targetItem = null) {
         this.isMoving = true;
 
         // Kill idle animations
@@ -1207,6 +1226,11 @@ export class MainScene extends Phaser.Scene {
                 bobTween.stop();
                 this.sprite.y = centerY; // Reset Y
                 this.nextMoveTime = this.time.now + Phaser.Math.Between(2000, 5000); // Wait 2-5s before next move
+
+                if (targetItem) {
+                    const actionName = `INTERACT_${targetItem.toUpperCase().replace(/ /g, '_')}`;
+                    this.game.events.emit(EventKeys.UI_ACTION, actionName);
+                }
 
                 // Resume idle with updated position
                 if (this.currentMood) this.startIdleAnimation(this.currentMood);
@@ -1421,17 +1445,8 @@ export class MainScene extends Phaser.Scene {
      */
     async saveFurniture() {
         const serializable = {};
-        for (const roomId in this.placedFurniture) {
-            if (Object.hasOwn(this.placedFurniture, roomId)) {
-                const items = this.placedFurniture[roomId];
-                const itemsLen = items.length;
-                const serializedItems = new Array(itemsLen);
-                for (let i = 0; i < itemsLen; i++) {
-                    const f = items[i];
-                    serializedItems[i] = { key: f.key, x: f.x, y: f.y };
-                }
-                serializable[roomId] = serializedItems;
-            }
+        for (const [roomId, items] of Object.entries(this.placedFurniture)) {
+            serializable[roomId] = items.map(f => ({ key: f.key, x: f.x, y: f.y }));
         }
         await this.persistence.saveFurniture(serializable);
     }
