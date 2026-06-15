@@ -20,7 +20,7 @@ describe('Security Reset Fix', () => {
             removeItem: jest.fn(),
             clear: jest.fn(),
             key: jest.fn(),
-            length: 0
+            length: 0,
             clear: jest.fn()
         };
         Object.defineProperty(global, 'localStorage', {
