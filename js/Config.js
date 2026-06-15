@@ -18,6 +18,17 @@ export const Config = {
         GENOME_STARTER_VAL: 40 // To ensure dominance over wild (10-30)
     },
 
+    DESIRES: {
+        TYPES: ['FEED', 'PLAY', 'STUDY', 'EXPLORE', 'MEDITATE'],
+        REWARD_HAPPINESS: 10,
+        REWARD_SKILL: 0.1,
+        DURATION_MS: 60000
+    },
+    COMBOS: {
+        STUDY_MULT: 2.0,
+        EXPLORE_DISCOUNT: 0.5
+    },
+
     GENETICS: {
         METABOLISM_NORMALIZER: 5,
         HOMOZYGOUS_ENERGY_BONUS: 5

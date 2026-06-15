@@ -119,7 +119,7 @@ const mockPersistence = {
     saveSettings: jest.fn(),
     loadJournal: jest.fn().mockReturnValue([]),
     loadRecipes: jest.fn().mockReturnValue([]),
-    loadAchievements: jest.fn().mockReturnValue({ unlocked: [], progress: {} })
+    loadAchievements: jest.fn().mockResolvedValue({ unlocked: [], progress: {} })
 };
 
 // MainScene Mocks

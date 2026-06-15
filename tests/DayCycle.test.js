@@ -70,7 +70,7 @@ describe('Day Cycle Integration', () => {
             saveFurniture: jest.fn(),
             loadSettings: jest.fn().mockReturnValue({ volume: 0.5, gameSpeed: 1.0 }),
             saveSettings: jest.fn(),
-            loadAchievements: jest.fn().mockReturnValue({ unlocked: [], progress: {} })
+            loadAchievements: jest.fn().mockResolvedValue({ unlocked: [], progress: {} })
         }));
 
         mockCalendar = {
