@@ -43,18 +43,21 @@ export class WorldClock {
      * Updates the in-game time.
      * This should be called from the main scene's update loop.
      * @param {number} delta - The time elapsed since the last frame in milliseconds.
-     * @returns {boolean} True if a new day has started (midnight crossed), false otherwise.
+     * @returns {number} The number of full days that have passed (midnight crossings).
      */
     update(delta) {
         // Increment the time based on the real-world time that has passed
         this.time += delta / this.dayDurationInMs;
 
-        // Wrap around at the end of the day
-        if (this.time >= 1) {
-            this.time -= 1;
-            return true;
+        // Calculate how many full days have passed
+        const daysPassed = Math.floor(this.time);
+
+        // Wrap around at the end of the day to keep time between 0 and 1
+        if (daysPassed >= 1) {
+            this.time %= 1;
         }
-        return false;
+
+        return daysPassed;
     }
 
     /**

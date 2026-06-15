@@ -9,3 +9,5 @@
 
 ### DevOps
 - **Dependencies:** Moved `playwright` to `devDependencies` in `package.json` to reduce production bundle size/dependencies.
+- Added ESLint to local setup for syntax and bug hunting.
+- Added GitHub CodeQL Actions for automated semantic analysis and vulnerability detection.

@@ -64,7 +64,7 @@ describe('Performance Repro: Event Emission', () => {
             saveFurniture: jest.fn(),
             loadSettings: jest.fn().mockReturnValue({ volume: 0.5, gameSpeed: 1.0 }),
             saveSettings: jest.fn(),
-            loadAchievements: jest.fn().mockReturnValue({ unlocked: [], progress: {} }),
+            loadAchievements: jest.fn().mockResolvedValue({ unlocked: [], progress: {} }),
             loadHomeConfig: jest.fn().mockReturnValue({ rooms: { "Entryway": { wallpaperItem: 'Default', flooringItem: 'Default' } } })
         }));
 
