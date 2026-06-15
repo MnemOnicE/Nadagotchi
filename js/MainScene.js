@@ -391,6 +391,12 @@ export class MainScene extends Phaser.Scene {
         this.updatePetMovement(time);
 
         this.lightingManager.update();
+        if (this.nadagotchi.currentDesire && this.nadagotchi.currentDesire !== this.lastDesire) {
+            this.showNotification(`Craving: ${this.nadagotchi.currentDesire}!`, "#FFD700");
+            this.lastDesire = this.nadagotchi.currentDesire;
+        } else if (!this.nadagotchi.currentDesire) {
+            this.lastDesire = null;
+        }
     }
 
     updateQuestIndicators() {
@@ -1154,17 +1160,24 @@ export class MainScene extends Phaser.Scene {
 
         if (Phaser.Math.Between(1, chance) === 1) {
             const width = this.cameras.main.width;
-            // Pick a random spot within room bounds (leaving 50px buffer)
-            const targetX = Phaser.Math.Between(50, width - 50);
-            this.walkTo(targetX);
+            const roomFurniture = this.placedFurniture[this.currentRoom] || [];
+            if (roomFurniture.length > 0 && Phaser.Math.Between(1, 3) === 1) {
+                const targetFurniture = roomFurniture[Phaser.Math.Between(0, roomFurniture.length - 1)];
+                this.walkTo(targetFurniture.x, targetFurniture.key);
+            } else {
+                const targetX = Phaser.Math.Between(50, width - 50);
+                this.walkTo(targetX);
+            }
         }
     }
 
     /**
      * Commands the pet to walk to a specific X coordinate.
-     * @param {number} targetX - The target X coordinate.
+     * @param {number} targetX - target X coordinate.
+     * @param {?Object} [targetItem=null] - optional item to interact with or null.
+     * @returns {void}
      */
-    walkTo(targetX) {
+    walkTo(targetX, targetItem = null) {
         this.isMoving = true;
 
         // Kill idle animations
@@ -1213,6 +1226,11 @@ export class MainScene extends Phaser.Scene {
                 bobTween.stop();
                 this.sprite.y = centerY; // Reset Y
                 this.nextMoveTime = this.time.now + Phaser.Math.Between(2000, 5000); // Wait 2-5s before next move
+
+                if (targetItem) {
+                    const actionName = `INTERACT_${targetItem.toUpperCase().replace(/ /g, '_')}`;
+                    this.game.events.emit(EventKeys.UI_ACTION, actionName);
+                }
 
                 // Resume idle with updated position
                 if (this.currentMood) this.startIdleAnimation(this.currentMood);
