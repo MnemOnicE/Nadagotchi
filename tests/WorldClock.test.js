@@ -33,9 +33,29 @@ describe('WorldClock', () => {
         clock.time = 0.999;
         // A delta that would push it over 1
         const deltaTimeMs = 5000; // 5 seconds
-        clock.update(deltaTimeMs);
+        const days = clock.update(deltaTimeMs);
+        expect(days).toBe(1);
         expect(clock.time).toBeLessThan(1);
         expect(clock.time).toBeGreaterThan(0);
+    });
+
+    test('should handle multi-day deltas correctly', () => {
+        clock.time = 0.5;
+        // 2 full days + 0.1 day
+        const deltaTimeMs = MS_PER_DAY * 2.1;
+        const days = clock.update(deltaTimeMs);
+
+        expect(days).toBe(2);
+        expect(clock.time).toBeCloseTo(0.6); // 0.5 + 0.1
+    });
+
+    test('should handle exactly multiple days', () => {
+        clock.time = 0;
+        const deltaTimeMs = MS_PER_DAY * 3;
+        const days = clock.update(deltaTimeMs);
+
+        expect(days).toBe(3);
+        expect(clock.time).toBe(0);
     });
 
     describe('getCurrentPeriod', () => {
