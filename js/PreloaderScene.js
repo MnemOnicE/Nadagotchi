@@ -149,47 +149,25 @@ export class PreloaderScene extends Phaser.Scene {
             graphics.fillRect(0, 0, 64, 64);
 
             graphics.fillStyle(color2);
-
-            // Strategy pattern for drawing different textures
-            const drawActions = {
-                stripes: () => {
-                    graphics.fillRect(0, 0, 8, 64);
-                    graphics.fillRect(16, 0, 8, 64);
-                    graphics.fillRect(32, 0, 8, 64);
-                    graphics.fillRect(48, 0, 8, 64);
-                },
-                bricks: () => {
-                    graphics.fillRect(0, 0, 30, 14);
-                    graphics.fillRect(32, 0, 30, 14);
-                    graphics.fillRect(16, 16, 30, 14);
-                    graphics.fillRect(48, 16, 30, 14);
-                    graphics.fillRect(0, 32, 30, 14);
-                    graphics.fillRect(32, 32, 30, 14);
-                    graphics.fillRect(16, 48, 30, 14);
-                    graphics.fillRect(48, 48, 30, 14);
-                },
-                planks: () => {
-                    graphics.fillRect(0, 0, 64, 2);
-                    graphics.fillRect(0, 8, 64, 2);
-                    graphics.fillRect(0, 16, 64, 2);
-                    graphics.fillRect(0, 24, 64, 2);
-                    graphics.fillRect(0, 32, 64, 2);
-                    graphics.fillRect(0, 40, 64, 2);
-                    graphics.fillRect(0, 48, 64, 2);
-                    graphics.fillRect(0, 56, 64, 2);
-                },
-                tiles: () => {
-                    graphics.fillRect(2, 2, 28, 28);
-                    graphics.fillRect(34, 2, 28, 28);
-                    graphics.fillRect(2, 34, 28, 28);
-                    graphics.fillRect(34, 34, 28, 28);
+            if (type === 'stripes') {
+                for(let i=0; i<64; i+=16) graphics.fillRect(i, 0, 8, 64);
+            } else if (type === 'bricks') {
+                 for(let y=0; y<64; y+=16) {
+                     for(let x=(y%32===0?0:16); x<64; x+=32) {
+                         graphics.fillRect(x, y, 30, 14);
+                     }
+                 }
+            } else if (type === 'planks') {
+                for(let i=0; i<64; i+=8) graphics.fillRect(0, i, 64, 2);
+            } else if (type === 'tiles') {
+                for(let y=0; y<64; y+=32) {
+                    for(let x=0; x<64; x+=32) {
+                        graphics.fillRect(x+2, y+2, 28, 28);
+                    }
                 }
-            };
-
-            if (Object.hasOwn(drawActions, type)) {
-                drawActions[type]();
+            } else {
+                 // Solid default
             }
-
             graphics.generateTexture(key, 64, 64);
         };
 
@@ -210,7 +188,7 @@ export class PreloaderScene extends Phaser.Scene {
         createDetailedBox('masterwork_chair', 0xFFD700, 64, 'chair'); // Gold color for Masterwork
 
         // Housing Items (Procedural Textures)
-        this._generateHousingTextures(graphics);
+        this._generateHousingTextures();
 
         // NPCs
         createDetailedBox('npc_scout', 0x704214, 48, 'npc');
@@ -256,61 +234,57 @@ export class PreloaderScene extends Phaser.Scene {
 
     /**
      * Generates textures for housing items (Wallpapers, Flooring).
-     * @param {Phaser.GameObjects.Graphics} graphics - Reused graphics object.
      */
-    _generateHousingTextures(graphics) {
-
+    _generateHousingTextures() {
         // 1. Cozy Wallpaper (Striped)
         if (!this.textures.exists('cozy_wallpaper')) {
-            graphics.clear();
+            const graphics = this.make.graphics();
             // Background (Cream)
             graphics.fillStyle(0xFDF5E6, 1);
             graphics.fillRect(0, 0, 64, 64);
             // Stripes (Pale Pink)
             graphics.fillStyle(0xFFC0CB, 0.5);
-            // Optimized: Unrolled loop
-            graphics.fillRect(0, 0, 8, 64);
-            graphics.fillRect(16, 0, 8, 64);
-            graphics.fillRect(32, 0, 8, 64);
-            graphics.fillRect(48, 0, 8, 64);
+            for (let i = 0; i < 64; i += 16) {
+                graphics.fillRect(i, 0, 8, 64);
+            }
             graphics.generateTexture('cozy_wallpaper', 64, 64);
+            graphics.destroy();
         }
 
         // 2. Wood Flooring (Planks)
         if (!this.textures.exists('wood_flooring')) {
-            graphics.clear();
+            const graphics = this.make.graphics();
             // Base Color (Wood)
             graphics.fillStyle(0xDEB887, 1); // Burlywood
             graphics.fillRect(0, 0, 64, 64);
             // Plank Lines
             graphics.lineStyle(2, 0x8B4513, 1); // Saddle Brown
-            // Optimized: Unrolled loop and logic
-            graphics.strokeRect(0, 0, 16, 64);
-            graphics.lineBetween(0, 32, 16, 32);
-            graphics.strokeRect(16, 0, 16, 64);
-            graphics.strokeRect(32, 0, 16, 64);
-            graphics.lineBetween(32, 32, 48, 32);
-            graphics.strokeRect(48, 0, 16, 64);
-
+            for (let i = 0; i < 64; i += 16) {
+                graphics.strokeRect(i, 0, 16, 64);
+                // Random cross lines for plank ends
+                if (i % 32 === 0) graphics.lineBetween(i, 32, i + 16, 32);
+            }
             graphics.generateTexture('wood_flooring', 64, 64);
+            graphics.destroy();
         }
 
         // 3. Grass Flooring (Already exists effectively as logic, but useful for icons)
         if (!this.textures.exists('grass_flooring')) {
-            graphics.clear();
+            const graphics = this.make.graphics();
             graphics.fillStyle(0x228B22, 1); // Forest Green
             graphics.fillRect(0, 0, 64, 64);
-            // Texture details (Restore procedural variety per reviewer request)
+            // Texture details
             graphics.fillStyle(0x32CD32, 1);
             for (let k = 0; k < 10; k++) {
                 graphics.fillCircle(Phaser.Math.Between(0, 64), Phaser.Math.Between(0, 64), 2);
             }
             graphics.generateTexture('grass_flooring', 64, 64);
+            graphics.destroy();
         }
 
         // 4. Door (For Transitions)
         if (!this.textures.exists('door_icon')) {
-            graphics.clear();
+            const graphics = this.make.graphics();
             // Door Frame
             graphics.fillStyle(0x8B4513, 1);
             graphics.fillRect(16, 8, 32, 56);
@@ -321,11 +295,12 @@ export class PreloaderScene extends Phaser.Scene {
             graphics.fillStyle(0xFFD700, 1);
             graphics.fillCircle(40, 36, 3);
             graphics.generateTexture('door_icon', 64, 64);
+            graphics.destroy();
         }
 
         // 5. House (For Garden -> Indoor Transition)
         if (!this.textures.exists('house_icon')) {
-            graphics.clear();
+            const graphics = this.make.graphics();
             // Walls
             graphics.fillStyle(0xF5DEB3, 1); // Wheat
             graphics.fillRect(12, 24, 40, 40);
@@ -340,67 +315,74 @@ export class PreloaderScene extends Phaser.Scene {
             graphics.fillStyle(0x8B4513, 1);
             graphics.fillRect(28, 44, 16, 20);
             graphics.generateTexture('house_icon', 64, 64);
+            graphics.destroy();
         }
 
         // --- NEW ASSETS FOR LIVING GARDEN ---
         // Weed
         if (!this.textures.exists('weed')) {
-             graphics.clear();
-             graphics.fillStyle(0x228B22); // Green
-             graphics.beginPath();
-             graphics.moveTo(16, 32); graphics.lineTo(8, 16); graphics.lineTo(20, 28); graphics.lineTo(24, 10); graphics.lineTo(28, 28); graphics.lineTo(40, 16); graphics.lineTo(32, 32);
-             graphics.fill();
-             graphics.generateTexture('weed', 32, 32);
+             const g = this.make.graphics();
+             g.fillStyle(0x228B22); // Green
+             g.beginPath();
+             g.moveTo(16, 32); g.lineTo(8, 16); g.lineTo(20, 28); g.lineTo(24, 10); g.lineTo(28, 28); g.lineTo(40, 16); g.lineTo(32, 32);
+             g.fill();
+             g.generateTexture('weed', 32, 32);
+             g.destroy();
         }
         // Small Rock
         if (!this.textures.exists('rock_small')) {
-             graphics.clear();
-             graphics.fillStyle(0x808080); graphics.fillCircle(16, 16, 10);
-             graphics.fillStyle(0x555555); graphics.fillCircle(12, 12, 3);
-             graphics.generateTexture('rock_small', 32, 32);
+             const g = this.make.graphics();
+             g.fillStyle(0x808080); g.fillCircle(16, 16, 10);
+             g.fillStyle(0x555555); g.fillCircle(12, 12, 3);
+             g.generateTexture('rock_small', 32, 32);
+             g.destroy();
         }
         // Poop (Classic Coil)
         if (!this.textures.exists('poop')) {
-             graphics.clear();
-             graphics.fillStyle(0x8B4513);
-             graphics.fillCircle(16, 24, 10); // Base
-             graphics.fillCircle(16, 16, 7);  // Mid
-             graphics.fillCircle(16, 8, 4);   // Top
+             const g = this.make.graphics();
+             g.fillStyle(0x8B4513);
+             g.fillCircle(16, 24, 10); // Base
+             g.fillCircle(16, 16, 7);  // Mid
+             g.fillCircle(16, 8, 4);   // Top
              // Flies?
-             graphics.fillStyle(0x000000); graphics.fillRect(4, 4, 2, 2); graphics.fillRect(28, 10, 2, 2);
-             graphics.generateTexture('poop', 32, 32);
+             g.fillStyle(0x000000); g.fillRect(4, 4, 2, 2); g.fillRect(28, 10, 2, 2);
+             g.generateTexture('poop', 32, 32);
+             g.destroy();
         }
         // Merchant NPC
         if (!this.textures.exists('npc_merchant')) {
-             graphics.clear();
+             const g = this.make.graphics();
              // Robe
-             graphics.fillStyle(0x800080); // Purple
-             graphics.fillRect(12, 12, 24, 36);
+             g.fillStyle(0x800080); // Purple
+             g.fillRect(12, 12, 24, 36);
              // Hood
-             graphics.fillStyle(0x4B0082); // Indigo
-             graphics.fillRect(10, 4, 28, 16);
+             g.fillStyle(0x4B0082); // Indigo
+             g.fillRect(10, 4, 28, 16);
              // Pack
-             graphics.fillStyle(0x8B4513); graphics.fillRect(4, 16, 8, 20);
-             graphics.generateTexture('npc_merchant', 48, 48);
+             g.fillStyle(0x8B4513); g.fillRect(4, 16, 8, 20);
+             g.generateTexture('npc_merchant', 48, 48);
+             g.destroy();
         }
         // Particles
         if (!this.textures.exists('rain_drop')) {
-             graphics.clear();
-             graphics.fillStyle(0x00BFFF); graphics.fillRect(0,0,2,6);
-             graphics.generateTexture('rain_drop', 2, 6);
+             const g = this.make.graphics();
+             g.fillStyle(0x00BFFF); g.fillRect(0,0,2,6);
+             g.generateTexture('rain_drop', 2, 6);
+             g.destroy();
         }
         if (!this.textures.exists('snow_flake')) {
-             graphics.clear();
-             graphics.fillStyle(0xFFFFFF); graphics.fillRect(0,0,3,3);
-             graphics.generateTexture('snow_flake', 3, 3);
+             const g = this.make.graphics();
+             g.fillStyle(0xFFFFFF); g.fillRect(0,0,3,3);
+             g.generateTexture('snow_flake', 3, 3);
+             g.destroy();
         }
         if (!this.textures.exists('leaf')) {
-             graphics.clear();
-             graphics.fillStyle(0xD2691E);
-             graphics.fillCircle(3,3,3);
-             graphics.generateTexture('leaf', 6, 6);
+             const g = this.make.graphics();
+             g.fillStyle(0xD2691E);
+             g.fillCircle(3,3,3);
+             g.generateTexture('leaf', 6, 6);
+             g.destroy();
         }
-
     }
 
     /**

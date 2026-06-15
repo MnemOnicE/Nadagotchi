@@ -21,7 +21,6 @@ export class AchievementManager {
         if (!this.state.progress) this.state.progress = {};
 
         this.unlockedSet = new Set(this.state.unlocked);
-
         this.init();
     }
 

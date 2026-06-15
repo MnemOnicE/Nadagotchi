@@ -279,11 +279,17 @@ export class Nadagotchi {
         // --- Optimized Debris Map Implementation ---
         /** @type {Object.<string, object>} Debris items in the world (weeds, rocks, etc.). */
         this.debris = Object.create(null);
+        /** @type {number} Cached count for O(1) size checks. */
+        this.debrisCount = 0;
+
         if (loadedData && loadedData.debris) {
             if (Array.isArray(loadedData.debris)) {
                 // Migration logic for legacy array-based saves
                 loadedData.debris.forEach(d => {
                     if (d.id && d.id !== '__proto__' && d.id !== 'constructor') {
+                        if (!(d.id in this.debris)) {
+                            this.debrisCount++;
+                        }
                         this.debris[d.id] = d;
                     }
                 });
@@ -292,12 +298,11 @@ export class Nadagotchi {
                 for (const key of Object.keys(loadedData.debris)) {
                     if (key !== '__proto__' && key !== 'constructor') {
                         this.debris[key] = loadedData.debris[key];
+                        this.debrisCount++;
                     }
                 }
             }
         }
-        /** @type {number} Cached count for O(1) size checks. */
-        this.debrisCount = Object.keys(this.debris).length;
 
         Object.defineProperty(this, 'debrisSystem', {
             value: new DebrisSystem(this),
@@ -342,6 +347,10 @@ export class Nadagotchi {
 
         this.moodOverride = null;
         this.moodOverrideTimer = 0;
+        this.currentDesire = null;
+        this.desireTimer = 0;
+        this.lastAction = null;
+        this.comboBuffs = { studyMult: 1.0, exploreDiscount: 1.0 };
 
         this._journalSavePending = false;
     }
@@ -710,6 +719,16 @@ export class Nadagotchi {
      * @private
      */
     _updateMood(dt) {
+        this.desireTimer -= dt;
+        if (this.desireTimer <= 0) {
+            if (!this.currentDesire) {
+                this.currentDesire = this.rng.choice(Config.DESIRES.TYPES);
+                this.desireTimer += Config.DESIRES.DURATION_MS;
+            } else {
+                this.currentDesire = null;
+                this.desireTimer += Config.DESIRES.DURATION_MS;
+            }
+        }
         if (this.moodOverrideTimer > 0) {
             this.mood = this.moodOverride;
             this.moodOverrideTimer -= dt;
@@ -782,6 +801,31 @@ export class Nadagotchi {
      */
     handleAction(actionType, item = null) {
         const normalizedAction = actionType.toUpperCase();
+        if (this.currentDesire && normalizedAction === this.currentDesire) {
+            this.stats.happiness = Math.min(this.maxStats.happiness, this.stats.happiness + Config.DESIRES.REWARD_HAPPINESS);
+            for (let key in this.skills) this.skills[key] += Config.DESIRES.REWARD_SKILL;
+            this.addJournalEntry(`Fulfilling my craving to ${this.currentDesire} felt great!`);
+            this.currentDesire = null;
+            this.desireTimer += Config.DESIRES.DURATION_MS;
+            this.mood = 'happy';
+            this.moodOverride = 'happy';
+            this.moodOverrideTimer = Config.TIMING.MOOD_OVERRIDE_MS;
+        }
+
+        if (this.lastAction === 'MEDITATE' && normalizedAction === 'STUDY') {
+            this.comboBuffs.studyMult = Config.COMBOS.STUDY_MULT;
+            this.addJournalEntry("My mind is clear! Studying is twice as effective!");
+        } else {
+            this.comboBuffs.studyMult = 1.0;
+        }
+
+        if (this.lastAction === 'PLAY' && normalizedAction === 'EXPLORE') {
+            this.comboBuffs.exploreDiscount = Config.COMBOS.EXPLORE_DISCOUNT;
+            this.addJournalEntry("Feeling energized! Exploring costs less energy!");
+        } else {
+            this.comboBuffs.exploreDiscount = 1.0;
+        }
+        this.lastAction = normalizedAction;
         const actionHandlers = {
             'FEED': () => this._handleFeedAction(),
             'PLAY': () => this._handlePlayAction(),
@@ -854,8 +898,8 @@ export class Nadagotchi {
         this.stats.energy = Math.max(0, this.stats.energy - Config.ACTIONS.STUDY.ENERGY_COST);
         this.stats.happiness = Math.max(0, this.stats.happiness - Config.ACTIONS.STUDY.HAPPINESS_COST);
         const multiplier = this.getMoodMultiplier();
-        this.skills.logic += (Config.ACTIONS.STUDY.SKILL_GAIN * multiplier);
-        this.skills.research += (Config.ACTIONS.STUDY.SKILL_GAIN * multiplier);
+        this.skills.logic += (Config.ACTIONS.STUDY.SKILL_GAIN * multiplier * this.comboBuffs.studyMult);
+        this.skills.research += (Config.ACTIONS.STUDY.SKILL_GAIN * multiplier * this.comboBuffs.studyMult);
 
         if (this.genome?.phenotype?.isHomozygousIntellectual) this.stats.happiness += 5;
 
@@ -868,7 +912,7 @@ export class Nadagotchi {
 
         this.personalityPoints.Intellectual++;
         if (this.dominantArchetype === 'Adventurer') {
-            this.skills.navigation += (Config.ACTIONS.STUDY.NAVIGATION_GAIN_ADVENTURER * multiplier);
+            this.skills.navigation += (Config.ACTIONS.STUDY.NAVIGATION_GAIN_ADVENTURER * multiplier * this.comboBuffs.studyMult);
         }
         if (this.rng.random() < 0.05) this.discoverRecipe("Logic-Boosting Snack");
         return null;
@@ -932,11 +976,20 @@ export class Nadagotchi {
     }
 
     /**
+     * Gets the current energy cost for exploring, factoring in active combo discounts.
+     * @returns {number}
+     */
+    getExploreEnergyCost() {
+        return Config.ACTIONS.EXPLORE.ENERGY_COST * this.comboBuffs.exploreDiscount;
+    }
+
+    /**
      * @private
      */
     _handleExploreAction() {
-        if (this.stats.energy < Config.ACTIONS.EXPLORE.ENERGY_COST) return null;
-        this.stats.energy = Math.max(0, this.stats.energy - Config.ACTIONS.EXPLORE.ENERGY_COST);
+        const energyCost = this.getExploreEnergyCost();
+        if (this.stats.energy < energyCost) return null;
+        this.stats.energy = Math.max(0, this.stats.energy - energyCost);
 
         if (this.genome?.phenotype?.isHomozygousAdventurer) this.stats.happiness += 10;
 
@@ -1200,15 +1253,13 @@ export class Nadagotchi {
         this._cachedGlobalPenalty = 0;
         this._cachedLocalPenalties = {};
 
-        // Defensive check for Config.DEBRIS to prevent CI failures in environments
-        // where Config might be partially loaded or mocked.
-        if (!Config.DEBRIS) return;
-
         // Use Object.keys for iteration to avoid intermediate array allocation from Object.values()
         // and reduce Garbage Collection pressure in the live loop.
         for (const id of Object.keys(this.debris)) {
             const d = this.debris[id];
             let penalty = 0;
+            const penalties = { weed: Config?.DEBRIS?.HAPPINESS_PENALTY_PER_WEED || 0.005, poop: Config?.DEBRIS?.HAPPINESS_PENALTY_PER_POOP || 0.02 };
+            penalty = penalties[d.type] || 0;
             if (d.type === 'weed') penalty = Config.DEBRIS?.HAPPINESS_PENALTY_PER_WEED ?? 0.005;
             else if (d.type === 'poop') penalty = Config.DEBRIS?.HAPPINESS_PENALTY_PER_POOP ?? 0.02;
             if (d.type === 'weed') penalty = Config?.DEBRIS?.HAPPINESS_PENALTY_PER_WEED || 0.005;

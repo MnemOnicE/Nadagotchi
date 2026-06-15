@@ -1,142 +1,175 @@
 import { WikiSystem } from '../js/WikiSystem.js';
 
 describe('WikiSystem', () => {
-    let mockPersistence;
     let wikiSystem;
+    let mockPersistenceManager;
 
     beforeEach(() => {
-        mockPersistence = {
+        mockPersistenceManager = {
             _load: jest.fn(),
             _save: jest.fn()
         };
-        wikiSystem = new WikiSystem(mockPersistence);
+        wikiSystem = new WikiSystem(mockPersistenceManager);
+
+        // Suppress console.warn for cleaner test output
+        jest.spyOn(console, 'warn').mockImplementation(() => {});
     });
 
-    test('should initialize correctly', () => {
-        expect(wikiSystem.isReady).toBe(false);
-        expect(wikiSystem.categories).toEqual(["pets", "items", "careers", "locations", "mechanics"]);
-        expect(wikiSystem.entries).toEqual({});
+    afterEach(() => {
+        jest.restoreAllMocks();
     });
 
-    test('should load existing data from persistence', async () => {
-        const mockData = {
-            entries: {
+    describe('constructor', () => {
+        it('should initialize with default state', () => {
+            expect(wikiSystem.persistence).toBe(mockPersistenceManager);
+            expect(wikiSystem.entries).toEqual({});
+            expect(wikiSystem.categories).toEqual(["pets", "items", "careers", "locations", "mechanics"]);
+            expect(wikiSystem.isReady).toBe(false);
+        });
+    });
+
+    describe('init', () => {
+        it('should call load and set isReady to true', async () => {
+            const loadSpy = jest.spyOn(wikiSystem, 'load').mockResolvedValue();
+            await wikiSystem.init();
+            expect(loadSpy).toHaveBeenCalled();
+            expect(wikiSystem.isReady).toBe(true);
+        });
+    });
+
+    describe('load', () => {
+        it('should load data from persistence and ensure all categories exist', async () => {
+            const savedData = {
+                entries: {
+                    pets: ["Slime"],
+                    items: ["Apple"]
+                }
+            };
+            mockPersistenceManager._load.mockResolvedValue(savedData);
+
+            await wikiSystem.load();
+
+            expect(mockPersistenceManager._load).toHaveBeenCalledWith('nadagotchi_wiki');
+            expect(wikiSystem.entries.pets).toEqual(["Slime"]);
+            expect(wikiSystem.entries.items).toEqual(["Apple"]);
+            expect(wikiSystem.entries.careers).toEqual([]); // ensured
+            expect(wikiSystem.entries.locations).toEqual([]); // ensured
+            expect(wikiSystem.entries.mechanics).toEqual([]); // ensured
+        });
+
+        it('should initialize empty categories and save if no data exists', async () => {
+            mockPersistenceManager._load.mockResolvedValue(null);
+            const saveSpy = jest.spyOn(wikiSystem, 'save').mockResolvedValue();
+
+            await wikiSystem.load();
+
+            expect(mockPersistenceManager._load).toHaveBeenCalledWith('nadagotchi_wiki');
+            expect(wikiSystem.entries.pets).toEqual([]);
+            expect(wikiSystem.entries.items).toEqual([]);
+            expect(wikiSystem.entries.careers).toEqual([]);
+            expect(wikiSystem.entries.locations).toEqual([]);
+            expect(wikiSystem.entries.mechanics).toEqual([]);
+            expect(saveSpy).toHaveBeenCalled();
+        });
+
+        it('should handle missing persistence gracefully', async () => {
+            wikiSystem = new WikiSystem(null);
+            const saveSpy = jest.spyOn(wikiSystem, 'save').mockResolvedValue();
+
+            await wikiSystem.load();
+
+            expect(wikiSystem.entries.pets).toEqual([]);
+            expect(saveSpy).toHaveBeenCalled();
+        });
+    });
+
+    describe('save', () => {
+        it('should save data via persistence', async () => {
+            wikiSystem.entries = { pets: ["Slime"] };
+            await wikiSystem.save();
+            expect(mockPersistenceManager._save).toHaveBeenCalledWith('nadagotchi_wiki', { entries: { pets: ["Slime"] } });
+        });
+
+        it('should not throw if persistence is missing', async () => {
+            wikiSystem = new WikiSystem(null);
+            await expect(wikiSystem.save()).resolves.toBeUndefined();
+        });
+
+        it('should not throw if persistence._save is missing', async () => {
+            wikiSystem = new WikiSystem({});
+            await expect(wikiSystem.save()).resolves.toBeUndefined();
+        });
+    });
+
+    describe('unlockEntry', () => {
+        beforeEach(() => {
+            wikiSystem.entries = {
                 pets: ["Slime"],
-                items: ["Apple"],
-                careers: ["Chef"]
-            }
-        };
-        mockPersistence._load.mockResolvedValue(mockData);
+                items: []
+            };
+        });
 
-        await wikiSystem.init();
+        it('should return false and warn for invalid category', async () => {
+            const result = await wikiSystem.unlockEntry('invalid_category', 'entry1');
+            expect(result).toBe(false);
+            expect(console.warn).toHaveBeenCalledWith('Invalid wiki category: invalid_category');
+        });
 
-        expect(mockPersistence._load).toHaveBeenCalledWith("nadagotchi_wiki");
-        expect(wikiSystem.entries.pets).toEqual(["Slime"]);
-        expect(wikiSystem.entries.items).toEqual(["Apple"]);
-        expect(wikiSystem.entries.careers).toEqual(["Chef"]);
+        it('should add entry, save, and return true for new entry', async () => {
+            const saveSpy = jest.spyOn(wikiSystem, 'save').mockResolvedValue();
+            const result = await wikiSystem.unlockEntry('pets', 'Robot');
 
-        // Ensure all categories exist even if not in loaded data
-        expect(wikiSystem.entries.locations).toEqual([]);
-        expect(wikiSystem.entries.mechanics).toEqual([]);
-        expect(wikiSystem.isReady).toBe(true);
+            expect(result).toBe(true);
+            expect(wikiSystem.entries.pets).toContain('Robot');
+            expect(saveSpy).toHaveBeenCalled();
+        });
+
+        it('should return false for already unlocked entry', async () => {
+            const saveSpy = jest.spyOn(wikiSystem, 'save').mockResolvedValue();
+            const result = await wikiSystem.unlockEntry('pets', 'Slime');
+
+            expect(result).toBe(false);
+            expect(saveSpy).not.toHaveBeenCalled();
+            expect(wikiSystem.entries.pets.length).toBe(1); // Still only 1 Slime
+        });
     });
 
-    test('should initialize empty entries if no data exists', async () => {
-        mockPersistence._load.mockResolvedValue(null);
+    describe('hasEntry', () => {
+        beforeEach(() => {
+            wikiSystem.entries = {
+                pets: ["Slime"],
+                items: []
+            };
+        });
 
-        await wikiSystem.init();
+        it('should return true if entry exists in category', () => {
+            expect(wikiSystem.hasEntry('pets', 'Slime')).toBe(true);
+        });
 
-        expect(mockPersistence._load).toHaveBeenCalledWith("nadagotchi_wiki");
-        expect(wikiSystem.entries.pets).toEqual([]);
-        expect(wikiSystem.entries.items).toEqual([]);
-        expect(mockPersistence._save).toHaveBeenCalledWith("nadagotchi_wiki", { entries: wikiSystem.entries });
-        expect(wikiSystem.isReady).toBe(true);
+        it('should return false if entry does not exist in category', () => {
+            expect(wikiSystem.hasEntry('pets', 'Robot')).toBe(false);
+        });
+
+        it('should return falsy if category does not exist', () => {
+            expect(wikiSystem.hasEntry('invalid_category', 'Slime')).toBeFalsy();
+        });
     });
 
-    test('should handle missing entries object in loaded data', async () => {
-        mockPersistence._load.mockResolvedValue({}); // Data object returned but no entries property
+    describe('getEntries', () => {
+        beforeEach(() => {
+            wikiSystem.entries = {
+                pets: ["Slime"],
+                items: []
+            };
+        });
 
-        await wikiSystem.init();
+        it('should return entries for category', () => {
+            expect(wikiSystem.getEntries('pets')).toEqual(["Slime"]);
+            expect(wikiSystem.getEntries('items')).toEqual([]);
+        });
 
-        expect(wikiSystem.entries.pets).toEqual([]);
-        expect(wikiSystem.entries.items).toEqual([]);
-        expect(wikiSystem.isReady).toBe(true);
-    });
-
-    test('init without persistence should not throw and initialize empty', async () => {
-        wikiSystem = new WikiSystem(null);
-        await wikiSystem.init();
-        expect(wikiSystem.entries.pets).toEqual([]);
-        expect(wikiSystem.isReady).toBe(true);
-    });
-
-    test('unlockEntry should add new entry and save', async () => {
-        await wikiSystem.init(); // Initialize empty
-
-        const unlocked = await wikiSystem.unlockEntry("pets", "Dragon");
-
-        expect(unlocked).toBe(true);
-        expect(wikiSystem.entries.pets).toContain("Dragon");
-        expect(mockPersistence._save).toHaveBeenCalledWith("nadagotchi_wiki", { entries: wikiSystem.entries });
-    });
-
-    test('unlockEntry should not add duplicate entry', async () => {
-        await wikiSystem.init();
-        await wikiSystem.unlockEntry("pets", "Dragon");
-
-        // Reset save mock to check if it's called again
-        mockPersistence._save.mockClear();
-
-        const unlocked = await wikiSystem.unlockEntry("pets", "Dragon");
-
-        expect(unlocked).toBe(false);
-        expect(wikiSystem.entries.pets).toEqual(["Dragon"]); // Still only one
-        expect(mockPersistence._save).not.toHaveBeenCalled();
-    });
-
-    test('unlockEntry should reject invalid category', async () => {
-        const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-
-        await wikiSystem.init();
-        mockPersistence._save.mockClear(); // Clear save from init()
-
-        const unlocked = await wikiSystem.unlockEntry("invalid_cat", "ItemX");
-
-        expect(unlocked).toBe(false);
-        expect(consoleWarnSpy).toHaveBeenCalledWith("Invalid wiki category: invalid_cat");
-        expect(mockPersistence._save).not.toHaveBeenCalled();
-
-        consoleWarnSpy.mockRestore();
-    });
-
-    test('hasEntry should return true if entry exists', async () => {
-        await wikiSystem.init();
-        await wikiSystem.unlockEntry("items", "Sword");
-
-        expect(wikiSystem.hasEntry("items", "Sword")).toBe(true);
-    });
-
-    test('hasEntry should return false if entry does not exist', async () => {
-        await wikiSystem.init();
-
-        expect(wikiSystem.hasEntry("items", "Shield")).toBe(false);
-        // Also check if category is somehow missing completely
-        expect(wikiSystem.hasEntry("nonexistent", "Item")).toBeFalsy();
-    });
-
-    test('getEntries should return array of entries for category', async () => {
-        await wikiSystem.init();
-        await wikiSystem.unlockEntry("locations", "Cave");
-        await wikiSystem.unlockEntry("locations", "Forest");
-
-        const locations = wikiSystem.getEntries("locations");
-        expect(locations).toEqual(["Cave", "Forest"]);
-    });
-
-    test('getEntries should return empty array for non-existent category', async () => {
-        await wikiSystem.init();
-
-        const result = wikiSystem.getEntries("invalid");
-        expect(result).toEqual([]);
+        it('should return empty array for invalid/missing category', () => {
+            expect(wikiSystem.getEntries('invalid_category')).toEqual([]);
+        });
     });
 });
