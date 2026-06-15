@@ -36,3 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release of Nadagotchi.
 - Core systems: Genetics, Career, Housing, Minigames.
+
+### Added (Unreleased Gameplay Loop Improvements)
+- **Dynamic Desire System:** Pets now periodically crave specific actions based on their archetype, granting bonus happiness and skills when fulfilled.
+- **Action Combos:** Performing specific sequences of actions (e.g., Meditate -> Study, Play -> Explore) now applies temporary multipliers or discounts.
+- **Autonomous Furniture Interactions:** When indoors, pets will now occasionally seek out and interact with placed furniture autonomously, triggering the appropriate events.
