@@ -418,7 +418,7 @@ export class Nadagotchi {
 
     /**
      * Generates a random seed for the universe.
-     * Uses Math.random() as the bootstrap entropy source.
+     * Uses cryptographically secure randomness as the bootstrap entropy source.
      * @returns {number} A large random integer.
      * @private
      */
