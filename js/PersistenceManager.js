@@ -44,12 +44,14 @@ export class PersistenceManager {
      */
     _cancelPendingSave() {
         if (this._saveTimer) {
-             if (this._isIdleCallback && typeof cancelIdleCallback !== 'undefined') {
-                  cancelIdleCallback(this._saveTimer);
-             } else {
-                  clearTimeout(this._saveTimer);
-             }
-             this._saveTimer = null;
+            const cancelMethods = {
+                idle: typeof cancelIdleCallback !== 'undefined' ? cancelIdleCallback : () => {},
+                timeout: clearTimeout
+            };
+            const cancelType = this._isIdleCallback ? 'idle' : 'timeout';
+            cancelMethods[cancelType](this._saveTimer);
+            this._saveTimer = null;
+            this._isIdleCallback = false;
         }
     }
 
