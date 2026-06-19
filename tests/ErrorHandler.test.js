@@ -47,7 +47,7 @@ describe('Global Error Handler', () => {
         copyBtn.click();
 
         // Wait for the promise to resolve
-        await new Promise(process.nextTick);
+        await Promise.resolve();
 
         expect(navigator.clipboard.writeText).toHaveBeenCalledWith(errorBox.innerText);
         expect(copyBtn.innerText).toBe('COPIED!');
