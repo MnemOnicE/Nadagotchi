@@ -46,8 +46,8 @@ describe('Global Error Handler', () => {
 
         copyBtn.click();
 
-        // Wait for the promise to resolve
-        await Promise.resolve();
+        // Use setTimeout to ensure all microtasks (promises) are resolved
+        await new Promise(resolve => setTimeout(resolve, 0));
 
         expect(navigator.clipboard.writeText).toHaveBeenCalledWith(errorBox.innerText);
         expect(copyBtn.innerText).toBe('COPIED!');
@@ -64,8 +64,8 @@ describe('Global Error Handler', () => {
 
         copyBtn.click();
 
-        // Wait for the promise to reject
-        await Promise.resolve();
+        // Use setTimeout to ensure all microtasks (promises) are resolved
+        await new Promise(resolve => setTimeout(resolve, 0));
 
         expect(consoleSpy).toHaveBeenCalledWith('Failed to copy: ', expect.any(Error));
         expect(copyBtn.innerText).toBe('COPY FAILED');
