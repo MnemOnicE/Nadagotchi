@@ -65,7 +65,7 @@ describe('Global Error Handler', () => {
         copyBtn.click();
 
         // Wait for the promise to reject
-        await new Promise(process.nextTick);
+        await Promise.resolve();
 
         expect(consoleSpy).toHaveBeenCalledWith('Failed to copy: ', expect.any(Error));
         expect(copyBtn.innerText).toBe('COPY FAILED');
