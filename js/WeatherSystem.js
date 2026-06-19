@@ -35,6 +35,9 @@ export class WeatherSystem {
      */
     changeWeather() {
         const availableWeather = this.weatherTypes.filter(w => w !== this.currentWeather);
+        if (availableWeather.length === 0) {
+            return;
+        }
         const newWeather = Phaser.Utils.Array.GetRandom(availableWeather);
 
         this.currentWeather = newWeather;
