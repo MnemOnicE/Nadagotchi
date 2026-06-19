@@ -32,8 +32,13 @@ export class InventorySystem {
             return;
         }
 
+        // Cache the keys to avoid repeated iterations and object property lookups
+        const materialKeys = Object.keys(recipe.materials);
+        const numMaterials = materialKeys.length;
+
         // Check if pet has all required materials
-        for (const material in recipe.materials) {
+        for (let i = 0; i < numMaterials; i++) {
+            const material = materialKeys[i];
             const requiredAmount = recipe.materials[material];
             const hasAmount = this.pet.inventory[material] || 0;
             if (hasAmount < requiredAmount) {
@@ -44,7 +49,8 @@ export class InventorySystem {
         }
 
         // Consume materials
-        for (const material in recipe.materials) {
+        for (let i = 0; i < numMaterials; i++) {
+            const material = materialKeys[i];
             this.removeItem(material, recipe.materials[material]);
         }
 
