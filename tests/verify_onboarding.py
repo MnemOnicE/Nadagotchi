@@ -8,7 +8,8 @@ def verify_onboarding():
         page = context.new_page()
 
         # 1. Clear Local Storage & Load
-        page.goto("http://localhost:5173")
+        import os
+        page.goto(os.getenv("TEST_BASE_URL", "http://127.0.0.1:4173"))
         page.evaluate("window.localStorage.clear()")
         page.reload()
 
