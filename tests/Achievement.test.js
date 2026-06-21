@@ -6,7 +6,7 @@ jest.mock('../js/PersistenceManager.js', () => {
     return {
         PersistenceManager: jest.fn().mockImplementation(() => {
             return {
-                loadAchievements: () => Promise.resolve({ unlocked: [], progress: {} }),
+                loadAchievements: () => ({ unlocked: [], progress: {} }),
                 saveAchievements: jest.fn(),
                 loadJournal: () => [],
                 loadRecipes: () => [],
@@ -110,6 +110,144 @@ describe('AchievementManager', () => {
                 EventKeys.ACHIEVEMENT_UNLOCKED,
                 expect.objectContaining({ id: 'socialite' })
             );
+        });
+    });
+
+    describe('Action Events', () => {
+        it('should increment explore count and unlock Novice Explorer', () => {
+            const handler = manager.handleUIAction.bind(manager);
+
+            for (let i = 0; i < 4; i++) {
+                handler(EventKeys.EXPLORE, {});
+            }
+            expect(manager.state.progress.exploreCount).toBe(4);
+            expect(manager.state.unlocked).not.toContain('novice_explorer');
+
+            handler(EventKeys.EXPLORE, {});
+            expect(manager.state.progress.exploreCount).toBe(5);
+            expect(manager.state.unlocked).toContain('novice_explorer');
+            expect(gameMock.events.emit).toHaveBeenCalledWith(
+                EventKeys.ACHIEVEMENT_UNLOCKED,
+                expect.objectContaining({ id: 'novice_explorer' })
+            );
+        });
+
+        it('should increment study count and unlock Scholar', () => {
+            const handler = manager.handleUIAction.bind(manager);
+
+            for (let i = 0; i < 4; i++) {
+                handler(EventKeys.STUDY, {});
+            }
+            expect(manager.state.progress.studyCount).toBe(4);
+            expect(manager.state.unlocked).not.toContain('scholar');
+
+            handler(EventKeys.STUDY, {});
+            expect(manager.state.progress.studyCount).toBe(5);
+            expect(manager.state.unlocked).toContain('scholar');
+            expect(gameMock.events.emit).toHaveBeenCalledWith(
+                EventKeys.ACHIEVEMENT_UNLOCKED,
+                expect.objectContaining({ id: 'scholar' })
+            );
+        });
+
+        it('should do nothing on unknown string action type', () => {
+            const handler = manager.handleUIAction.bind(manager);
+            handler('SOME_RANDOM_ACTION', {});
+            expect(manager.persistence.saveAchievements).not.toHaveBeenCalled();
+        });
+
+        it('should not throw error or change when actionType is not a string', () => {
+            const handler = manager.handleUIAction.bind(manager);
+
+            handler(123, {});
+            expect(manager.persistence.saveAchievements).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('Work Results', () => {
+        it('should increment craft count on successful crafting work result', () => {
+            manager.handleWorkResult({ success: true, craftedItem: 'Sword' });
+            expect(manager.state.progress.craftCount).toBe(1);
+            expect(manager.state.unlocked).toContain('first_craft');
+            expect(manager.persistence.saveAchievements).toHaveBeenCalled();
+        });
+
+        it('should not increment craft count on unsuccessful crafting work result', () => {
+            manager.handleWorkResult({ success: false, craftedItem: 'Sword' });
+            expect(manager.state.progress.craftCount).toBeUndefined();
+        });
+
+        it('should not increment craft count on work result missing craftedItem', () => {
+            manager.handleWorkResult({ success: true });
+            expect(manager.state.progress.craftCount).toBeUndefined();
+        });
+    });
+
+    describe('Initialization Edge Cases', () => {
+        it('should initialize missing state.unlocked property when undefined', () => {
+            const originalLoad = manager.persistence.loadAchievements;
+            manager.persistence.loadAchievements = () => {
+                return { unlocked: undefined, progress: {} };
+            };
+            const newManager = new AchievementManager(gameMock);
+            expect(newManager.state.unlocked).toEqual([]);
+            expect(newManager.state.progress).toEqual({});
+            manager.persistence.loadAchievements = originalLoad;
+        });
+
+        it('should initialize missing state.progress property when undefined', () => {
+            const originalLoad = manager.persistence.loadAchievements;
+            manager.persistence.loadAchievements = () => {
+                return { unlocked: [], progress: undefined };
+            };
+            const newManager = new AchievementManager(gameMock);
+            expect(newManager.state.unlocked).toEqual([]);
+            expect(newManager.state.progress).toEqual({});
+            manager.persistence.loadAchievements = originalLoad;
+        });
+
+        it('should handle false properties', () => {
+            const originalLoad = manager.persistence.loadAchievements;
+            manager.persistence.loadAchievements = () => ({ unlocked: false, progress: false });
+            const newManager = new AchievementManager(gameMock);
+            expect(newManager.state.unlocked).toEqual([]);
+            expect(newManager.state.progress).toEqual({});
+            manager.persistence.loadAchievements = originalLoad;
+        });
+
+        it('should initialize completely null state properties explicitly', () => {
+            const originalLoad = manager.persistence.loadAchievements;
+            manager.persistence.loadAchievements = () => ({ unlocked: null, progress: null });
+            const newManager = new AchievementManager(gameMock);
+            expect(newManager.state.unlocked).toEqual([]);
+            expect(newManager.state.progress).toEqual({});
+            manager.persistence.loadAchievements = originalLoad;
+        });
+
+        it('should initialize missing state properties (empty object)', () => {
+            const originalLoad = manager.persistence.loadAchievements;
+            manager.persistence.loadAchievements = () => ({});
+            const newManager = new AchievementManager(gameMock);
+            expect(newManager.state.unlocked).toEqual([]);
+            expect(newManager.state.progress).toEqual({});
+            manager.persistence.loadAchievements = originalLoad;
+        });
+    });
+
+    describe('checkAchievements', () => {
+        it('should skip already unlocked achievements', () => {
+            // Force craftCount to 1 so the condition would be met
+            manager.state.progress.craftCount = 1;
+
+            // Add to unlockedSet directly
+            manager.unlockedSet.add('first_craft');
+            manager.state.unlocked.push('first_craft');
+
+            // Should not emit or save again
+            manager.checkAchievements();
+
+            expect(gameMock.events.emit).not.toHaveBeenCalled();
+            expect(manager.persistence.saveAchievements).not.toHaveBeenCalled();
         });
     });
 });

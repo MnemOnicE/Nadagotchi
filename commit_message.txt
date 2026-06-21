@@ -1,7 +1,0 @@
-chore: Add ESLint and GitHub CodeQL for static and semantic analysis
-
-This commit introduces automated tools for bug hunting:
-1. ESLint is configured with an `eslint.config.js` to catch stylistic
-   and syntactic issues locally. The `lint` script is added to `package.json`.
-2. A `.github/workflows/codeql.yml` workflow is added to run GitHub
-   CodeQL semantic analysis on push, pull requests, and on a schedule.
