@@ -12,10 +12,10 @@ import { toBase64, fromBase64 } from './utils/Encoding.js';
 /**
  * Constants for the Genetics System.
  */
-export const MUTATION_RATE = 0.05;
-export const MAX_PERSONALITY = 100;
-export const MAX_PHYSIO = 10;
-export const POSSIBLE_TRAITS = ['Night Owl', 'Photosynthetic'];
+const MUTATION_RATE = 0.05;
+const MAX_PERSONALITY = 100;
+const MAX_PHYSIO = 10;
+const POSSIBLE_TRAITS = ['Night Owl', 'Photosynthetic'];
 
 /**
  * Represents the genetic makeup of a Nadagotchi.
