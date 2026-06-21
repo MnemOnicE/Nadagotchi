@@ -1,6 +1,4 @@
 import { ButtonFactory } from './ButtonFactory.js';
-import { GhostSystem } from './systems/GhostSystem.js';
-import { EventKeys } from './EventKeys.js';
 
 export class GhostScene extends Phaser.Scene {
     constructor() {
