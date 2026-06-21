@@ -1,13 +1,2 @@
-## [1.36.0] - 2025-12-24
-
-### Performance
-- **Main Loop Optimization:** Refactored `MainScene.update` to reuse the `worldState` object instead of recreating it every frame, reducing garbage collection pressure.
-
-### Changed
-- **Quest Safety:** Refactored `QuestSystem.advanceQuest` to validate rewards before consuming quest items, preventing potential item loss if reward application fails ("Transaction Safety").
-- **Personality Logic:** Updated `Nadagotchi.updateDominantArchetype` to use a random shuffle when breaking ties between archetypes, eliminating the previous alphabetical/index bias.
-
-### DevOps
-- **Dependencies:** Moved `playwright` to `devDependencies` in `package.json` to reduce production bundle size/dependencies.
-- Added ESLint to local setup for syntax and bug hunting.
-- Added GitHub CodeQL Actions for automated semantic analysis and vulnerability detection.
+### Security
+*   Fixed an issue where `Config.SECURITY.DNA_SALT` fell back to a hardcoded string `DEVELOPMENT_ONLY_SALT` when the `VITE_DNA_SALT` environment variable was not set. It now dynamically generates a secure local salt using `window.crypto.getRandomValues()` or `crypto.randomBytes()`, and persists it securely via `localStorage.getItem('nadagotchi_dna_salt')`.

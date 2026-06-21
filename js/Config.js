@@ -257,9 +257,41 @@ export const Config = {
 
     // Security & Hashing
     SECURITY: {
+        _dnaSalt: null,
         // Loaded via environment variables in Vite (defined in vite.config.js) or process.env in Jest.
-        // Falls back to a generic salt for development.
-        DNA_SALT: (typeof process !== 'undefined' && process.env && process.env.VITE_DNA_SALT) || "DEVELOPMENT_ONLY_SALT"
+        // Falls back to a dynamically generated local salt instead of a predictable string.
+        get DNA_SALT() {
+            if (this._dnaSalt !== null) return this._dnaSalt;
+            if (typeof process !== 'undefined' && process.env && process.env.VITE_DNA_SALT) {
+                return process.env.VITE_DNA_SALT;
+            }
+            if (typeof localStorage !== 'undefined') {
+                let salt = localStorage.getItem('nadagotchi_dna_salt');
+                if (!salt) {
+                    const array = new Uint32Array(4);
+                    if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+                        window.crypto.getRandomValues(array);
+                    } else if (typeof process !== 'undefined' && typeof require !== 'undefined') {
+                        try {
+                            const crypto = require('crypto');
+                            const bytes = crypto.randomBytes(16);
+                            for (let i = 0; i < 4; i++) array[i] = bytes.readUInt32BE(i * 4);
+                        } catch (e) {
+                            for(let i=0; i<4; i++) array[i] = Math.floor(Math.random() * 0xFFFFFFFF);
+                        }
+                    } else {
+                        for(let i=0; i<4; i++) array[i] = Math.floor(Math.random() * 0xFFFFFFFF);
+                    }
+                    salt = Array.from(array).map(b => b.toString(16).padStart(8, '0')).join('');
+                    localStorage.setItem('nadagotchi_dna_salt', salt);
+                }
+                return salt;
+            }
+            return "DEVELOPMENT_ONLY_SALT";
+        },
+        set DNA_SALT(val) {
+            this._dnaSalt = val;
+        }
     },
 
     // Debris & Environment
