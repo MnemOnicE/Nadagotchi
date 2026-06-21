@@ -99,8 +99,9 @@ export class QuestSystem {
         if (stageDef.requirements) {
             // Check Items
             if (stageDef.requirements.items) {
-                for (const [item, qty] of Object.entries(stageDef.requirements.items)) {
-                    if ((this.pet.inventory[item] || 0) < qty) return false;
+                const itemsReqs = stageDef.requirements.items;
+                for (const item in itemsReqs) {
+                    if ((this.pet.inventory[item] || 0) < itemsReqs[item]) return false;
                 }
             }
             // Check Flags
@@ -136,8 +137,9 @@ export class QuestSystem {
                 }
             }
             if (stageDef.rewards.items) {
-                for (const [item, qty] of Object.entries(stageDef.rewards.items)) {
-                    if (!this.pet.inventorySystem.canAddItem(item, qty)) {
+                const rewardItems = stageDef.rewards.items;
+                for (const item in rewardItems) {
+                    if (!this.pet.inventorySystem.canAddItem(item, rewardItems[item])) {
                         console.error(`Quest Transaction Aborted: Cannot add item '${item}' in quest '${questId}' (Inventory Full/Limit)`);
                         return false;
                     }
@@ -147,8 +149,9 @@ export class QuestSystem {
 
         // Consume Items if configured
         if (stageDef.consumeRequirements && stageDef.requirements && stageDef.requirements.items) {
-            for (const [item, qty] of Object.entries(stageDef.requirements.items)) {
-                this.pet.inventorySystem.removeItem(item, qty);
+            const itemsToConsume = stageDef.requirements.items;
+            for (const item in itemsToConsume) {
+                this.pet.inventorySystem.removeItem(item, itemsToConsume[item]);
             }
         }
 
@@ -182,9 +185,9 @@ export class QuestSystem {
             rewards.recipes.forEach(r => this.pet.inventorySystem.discoverRecipe(r));
         }
         if (rewards.skills) {
-            for (const [skill, val] of Object.entries(rewards.skills)) {
+            for (const skill in rewards.skills) {
                 if (this.pet.skills[skill] !== undefined) {
-                    this.pet.skills[skill] += (val * moodMultiplier);
+                    this.pet.skills[skill] += (rewards.skills[skill] * moodMultiplier);
                 }
             }
         }
@@ -192,8 +195,9 @@ export class QuestSystem {
             this.pet.stats.happiness += rewards.happiness;
         }
         if (rewards.items) {
-            for (const [item, qty] of Object.entries(rewards.items)) {
-                this.pet.inventorySystem.addItem(item, qty);
+            const rItems = rewards.items;
+            for (const item in rItems) {
+                this.pet.inventorySystem.addItem(item, rItems[item]);
             }
         }
     }

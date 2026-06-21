@@ -6,7 +6,7 @@ global.Phaser = {
     Utils: {
         Array: {
             // A mock that lets us control the "random" choice
-            GetRandom: jest.fn((arr) => arr[0]) // Always return first element initially
+            GetRandom: jest.fn((arr) => arr[1]) // Always return "Cloudy" initially
         }
     }
 };
@@ -65,18 +65,20 @@ describe('WeatherSystem', () => {
     });
 
     test('changeWeather should not switch to the same weather', () => {
-        // First, make the current weather "Cloudy"
+        // First, make the current weather "Cloudy" so the mock has something to match
         weatherSystem.currentWeather = 'Cloudy';
 
-        Phaser.Utils.Array.GetRandom.mockImplementationOnce((arr) => {
-            expect(arr).not.toContain('Cloudy');
-            return 'Rainy';
-        });
+        // Make the mock return "Cloudy" again, then "Rainy" on the next call
+        Phaser.Utils.Array.GetRandom
+            .mockReturnValueOnce('Cloudy')
+            .mockReturnValueOnce('Rainy');
 
         weatherSystem.changeWeather();
 
+        // It should have called itself again and settled on "Rainy"
         expect(weatherSystem.getCurrentWeather()).toBe('Rainy');
         expect(mockScene.game.events.emit).toHaveBeenCalledWith('weatherChanged', 'Rainy');
-        expect(Phaser.Utils.Array.GetRandom).toHaveBeenCalledTimes(1);
+        // GetRandom was called twice
+        expect(Phaser.Utils.Array.GetRandom).toHaveBeenCalledTimes(2);
     });
 });
