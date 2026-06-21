@@ -37,26 +37,50 @@ export class RelationshipSystem {
         // Mark interaction for the day to prevent friendship decay
         this.pet.relationships[npcName].interactedToday = true;
 
-        // --- Interaction Logic ---
-        let resultText = "";
         let options = [];
 
         // 1. Daily Quests
+        const dailyQuestResult = this._handleDailyQuest(npcName, options);
+        if (dailyQuestResult) return dailyQuestResult;
+
+        // 2. Main Quests (Master Artisan)
+        const masterQuestResult = this._handleMasterworkQuest(npcName, options);
+        if (masterQuestResult) return masterQuestResult;
+
+        // 3. Standard Interactions (Chat/Gift)
+        let resultText = "";
+        if (interactionType === 'GIFT' && this.pet.inventory['Berries'] > 0) {
+            resultText = this._handleGiftInteraction(npcName, options);
+        } else {
+            resultText = this._handleChatInteraction(npcName);
+        }
+
+        // Default Buttons
+        options.push({ label: "Gift (Berries)", action: 'GIFT_CALLBACK' }); // Special flag for UI to callback with GIFT type
+        options.push({ label: "Goodbye", action: null });
+
+        return { text: resultText, options: options };
+    }
+
+    /**
+     * Handles logic for daily quests during interaction.
+     * @private
+     * @param {string} npcName - The NPC name.
+     * @param {Array} options - The options array to populate.
+     * @returns {object|null} The dialogue object if handled, otherwise null.
+     */
+    _handleDailyQuest(npcName, options) {
         if (this.pet.dailyQuest && this.pet.dailyQuest.npc === npcName && !this.pet.dailyQuest.completed) {
-            // Check if can complete
             const q = this.pet.dailyQuest;
             const hasItems = (this.pet.inventory[q.item] || 0) >= q.qty;
+            let resultText = "";
 
             if (hasItems) {
-                // Offer completion
                 resultText = `${npcName}: "${q.text}"\n(You have the ${q.item}!)`;
                 options.push({
                     label: "Complete Quest",
                     action: () => {
                          this.pet.questSystem.completeDailyQuest();
-                         // UI will refresh on next interaction or we can trigger update
-                         // For now, simpler to just let the action happen.
-                         // Ideally we'd return a new state, but callback logic in UIScene handles closing/refreshing usually.
                     }
                 });
             } else {
@@ -65,12 +89,20 @@ export class RelationshipSystem {
             options.push({ label: "Leave", action: null });
             return { text: resultText, options: options };
         }
+        return null;
+    }
 
-        // 2. Main Quests (Master Artisan)
+    /**
+     * Handles logic for masterwork crafting quest.
+     * @private
+     * @param {string} npcName - The NPC name.
+     * @param {Array} options - The options array to populate.
+     * @returns {object|null} The dialogue object if handled, otherwise null.
+     */
+    _handleMasterworkQuest(npcName, options) {
         if (npcName === 'Master Artisan') {
-             // Start Quest Check
              if (!this.pet.quests['masterwork_crafting'] && this.pet.relationships['Master Artisan'].level >= 5) {
-                 resultText = "Master Artisan: 'You show promise. Prove your dedication.'";
+                 const resultText = "Master Artisan: 'You show promise. Prove your dedication.'";
                  options.push({
                      label: "Accept Quest",
                      action: () => {
@@ -81,13 +113,11 @@ export class RelationshipSystem {
                  return { text: resultText, options: options };
              }
 
-             // Continue Quest Check
              if (this.pet.quests['masterwork_crafting']) {
-                 const q = this.pet.quests['masterwork_crafting'];
                  const stageDef = this.pet.questSystem.getStageDefinition('masterwork_crafting');
-
                  if (!stageDef.isComplete) {
                       const canAdvance = this.pet.questSystem.checkRequirements('masterwork_crafting');
+                      let resultText = "";
                       if (canAdvance) {
                            resultText = `Master Artisan: "${stageDef.description}"\n(Requirements Met!)`;
                            options.push({
@@ -104,78 +134,78 @@ export class RelationshipSystem {
                  }
              }
         }
+        return null;
+    }
 
-        // 3. Standard Interactions (Chat/Gift)
-        if (interactionType === 'GIFT' && this.pet.inventory['Berries'] > 0) {
-            this.pet.inventorySystem.removeItem('Berries', 1);
-            this.pet.relationships[npcName].level += Config.ACTIONS.INTERACT_NPC.GIFT_RELATIONSHIP;
-            this.pet.stats.happiness += Config.ACTIONS.INTERACT_NPC.GIFT_HAPPINESS;
-            this.pet.skills.empathy += Config.ACTIONS.INTERACT_NPC.GIFT_SKILL_GAIN;
-            resultText = "Thanks for the gift!";
-            this.pet.addJournalEntry(`I gave Berries to ${npcName}. They seemed to like it!`);
-            options.push({ label: "Chat", action: () => { /* Trigger Chat Logic? Re-interact? */ }});
-        } else {
-            // CHAT
-            const moodMultiplier = this.pet.getMoodMultiplier();
-            this.pet.relationships[npcName].level += Config.ACTIONS.INTERACT_NPC.CHAT_RELATIONSHIP;
-            this.pet.stats.happiness += Config.ACTIONS.INTERACT_NPC.CHAT_HAPPINESS;
-            this.pet.skills.communication += Config.ACTIONS.INTERACT_NPC.CHAT_SKILL_GAIN;
+    /**
+     * Handles gifting interactions.
+     * @private
+     * @param {string} npcName - The NPC name.
+     * @param {Array} options - The options array to populate.
+     * @returns {string} The result dialogue text.
+     */
+    _handleGiftInteraction(npcName, options) {
+        this.pet.inventorySystem.removeItem('Berries', 1);
+        this.pet.relationships[npcName].level += Config.ACTIONS.INTERACT_NPC.GIFT_RELATIONSHIP;
+        this.pet.stats.happiness += Config.ACTIONS.INTERACT_NPC.GIFT_HAPPINESS;
+        this.pet.skills.empathy += Config.ACTIONS.INTERACT_NPC.GIFT_SKILL_GAIN;
+        this.pet.addJournalEntry(`I gave Berries to ${npcName}. They seemed to like it!`);
+        options.push({ label: "Chat", action: () => { /* Trigger Chat Logic? Re-interact? */ }});
+        return "Thanks for the gift!";
+    }
 
-            // Apply Skill Bonuses
-             switch (npcName) {
-                case 'Grizzled Scout':
-                    this.pet.skills.navigation += Config.ACTIONS.INTERACT_NPC.SCOUT_SKILL_GAIN * moodMultiplier;
-                    break;
-                case 'Master Artisan':
-                    this.pet.skills.crafting += Config.ACTIONS.INTERACT_NPC.ARTISAN_SKILL_GAIN * moodMultiplier;
-                    break;
-                case 'Sickly Villager':
-                    this.pet.skills.empathy += Config.ACTIONS.INTERACT_NPC.VILLAGER_SKILL_GAIN * moodMultiplier;
-                    break;
-            }
+    /**
+     * Handles standard chat interactions.
+     * @private
+     * @param {string} npcName - The NPC name.
+     * @returns {string} The result dialogue text.
+     */
+    _handleChatInteraction(npcName) {
+        const moodMultiplier = this.pet.getMoodMultiplier();
+        this.pet.relationships[npcName].level += Config.ACTIONS.INTERACT_NPC.CHAT_RELATIONSHIP;
+        this.pet.stats.happiness += Config.ACTIONS.INTERACT_NPC.CHAT_HAPPINESS;
+        this.pet.skills.communication += Config.ACTIONS.INTERACT_NPC.CHAT_SKILL_GAIN;
 
-            const relLevel = this.pet.relationships[npcName].level;
-            // Check for Recurring Interaction (Completed Quest)
-            let recurringText = null;
-            if (npcName === 'Master Artisan' && this.pet.quests['masterwork_crafting']) {
-                 const stageDef = this.pet.questSystem.getStageDefinition('masterwork_crafting');
-                 if (stageDef) {
-                     if (stageDef.isComplete && stageDef.recurringInteraction) {
-                         recurringText = stageDef.recurringInteraction.journalEntry;
-                         // Apply specific recurring rewards if defined
-                         if (stageDef.recurringInteraction.rewards) {
-                             if (stageDef.recurringInteraction.rewards.skills) {
-                                 for (const [skill, val] of Object.entries(stageDef.recurringInteraction.rewards.skills)) {
-                                     this.pet.skills[skill] += (val * moodMultiplier);
-                                 }
-                             }
-                         }
-                     }
-                 }
-            }
-
-            if (recurringText) {
-                this.pet.addJournalEntry(recurringText);
-                resultText = recurringText;
-            } else {
-                // Legacy/Standard Fallback
-                let hasQuest = false;
-                if (npcName === 'Master Artisan' && this.pet.quests['masterwork_crafting']) {
-                     const stageDef = this.pet.questSystem.getStageDefinition('masterwork_crafting');
-                     if (stageDef && !stageDef.isComplete) hasQuest = true;
-                }
-
-                const dialogueText = NarrativeSystem.getNPCDialogue(npcName, relLevel, hasQuest);
-                this.pet.addJournalEntry(`Chatted with ${npcName}: "${dialogueText}"`);
-                resultText = dialogueText;
-            }
+        switch (npcName) {
+            case 'Grizzled Scout':
+                this.pet.skills.navigation += Config.ACTIONS.INTERACT_NPC.SCOUT_SKILL_GAIN * moodMultiplier;
+                break;
+            case 'Master Artisan':
+                this.pet.skills.crafting += Config.ACTIONS.INTERACT_NPC.ARTISAN_SKILL_GAIN * moodMultiplier;
+                break;
+            case 'Sickly Villager':
+                this.pet.skills.empathy += Config.ACTIONS.INTERACT_NPC.VILLAGER_SKILL_GAIN * moodMultiplier;
+                break;
         }
 
-        // Default Buttons
-        options.push({ label: "Gift (Berries)", action: 'GIFT_CALLBACK' }); // Special flag for UI to callback with GIFT type
-        options.push({ label: "Goodbye", action: null });
+        const relLevel = this.pet.relationships[npcName].level;
+        let recurringText = null;
+        if (npcName === 'Master Artisan' && this.pet.quests['masterwork_crafting']) {
+             const stageDef = this.pet.questSystem.getStageDefinition('masterwork_crafting');
+             if (stageDef && stageDef.isComplete && stageDef.recurringInteraction) {
+                 recurringText = stageDef.recurringInteraction.journalEntry;
+                 if (stageDef.recurringInteraction.rewards && stageDef.recurringInteraction.rewards.skills) {
+                     for (const [skill, val] of Object.entries(stageDef.recurringInteraction.rewards.skills)) {
+                         this.pet.skills[skill] += (val * moodMultiplier);
+                     }
+                 }
+             }
+        }
 
-        return { text: resultText, options: options };
+        if (recurringText) {
+            this.pet.addJournalEntry(recurringText);
+            return recurringText;
+        } else {
+            let hasQuest = false;
+            if (npcName === 'Master Artisan' && this.pet.quests['masterwork_crafting']) {
+                 const stageDef = this.pet.questSystem.getStageDefinition('masterwork_crafting');
+                 if (stageDef && !stageDef.isComplete) hasQuest = true;
+            }
+
+            const dialogueText = NarrativeSystem.getNPCDialogue(npcName, relLevel, hasQuest);
+            this.pet.addJournalEntry(`Chatted with ${npcName}: "${dialogueText}"`);
+            return dialogueText;
+        }
     }
 
     /**

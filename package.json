@@ -28,8 +28,8 @@
   },
   "homepage": "https://github.com/MnemOnicE/Nadagotchi#readme",
   "devDependencies": {
-    "@babel/core": "^7.29.7",
-    "@babel/preset-env": "^7.29.7",
+    "@babel/core": "^8.0.1",
+    "@babel/preset-env": "^8.0.2",
     "@eslint/js": "^10.0.1",
     "babel-jest": "^30.4.1",
     "esbuild": "^0.28.1",
@@ -40,9 +40,9 @@
     "vite": "^8.0.16"
   },
   "dependencies": {
-    "@capacitor/android": "^6.2.1",
-    "@capacitor/cli": "^6.2.1",
-    "@capacitor/core": "^6.2.1"
+    "@capacitor/android": "^8.4.1",
+    "@capacitor/cli": "^8.4.0",
+    "@capacitor/core": "^8.4.1"
   },
   "type": "module"
 }
