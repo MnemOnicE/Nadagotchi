@@ -1,0 +1,9 @@
+--- tests/PersistenceManager.test.js
++++ tests/PersistenceManager.test.js
+@@ -135,5 +136,4 @@
+             Object.getPrototypeOf(localStorage).setItem = originalSetItem;
+         });
+     });
+-});
+-
++});
