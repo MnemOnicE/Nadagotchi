@@ -1,5 +1,0 @@
-🔒 Fix hardcoded DNA_SALT security vulnerability
-
-🎯 What: Removed the fallback to the predictable 'DEVELOPMENT_ONLY_SALT' from vite.config.js and Config.js. The Config.js now strictly throws an error if VITE_DNA_SALT is unset or is explicitly 'DEVELOPMENT_ONLY_SALT'.
-⚠️ Risk: If the environment variable was omitted in production, the application silently fell back to a hardcoded, predictable salt, severely weakening the hash integrity checks and enabling attacks against pet attributes and genetic traits.
-🛡️ Solution: Updated vite.config.js to fallback to an empty string, and Config.js to throw a descriptive Error when a secure salt is missing, enforcing secure environment configuration.
