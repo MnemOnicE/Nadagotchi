@@ -484,7 +484,7 @@ export class Nadagotchi {
      * @returns {object} The data object for the new Nadagotchi.
      */
     calculateOffspring(environmentalFactors) {
-        const validFactors = environmentalFactors.filter(item => Object.hasOwn(this.inventory, item) && this.inventory[item] > 0);
+        const validFactors = (environmentalFactors || []).filter(item => this.inventory && Object.hasOwn(this.inventory, item) && this.inventory[item] > 0);
         const childGenome = GeneticsSystem.breed(this.genome, validFactors, this.rng);
         const childPhenotype = childGenome.phenotype;
 
