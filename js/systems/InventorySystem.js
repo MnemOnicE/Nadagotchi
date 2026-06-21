@@ -51,7 +51,7 @@ export class InventorySystem {
         // Consume materials
         for (let i = 0; i < numMaterials; i++) {
             const material = materialKeys[i];
-            this.removeItem(material, recipe.materials[material]);
+            this.removeItem(material, materials[material]);
         }
 
         // Add crafted item to inventory
