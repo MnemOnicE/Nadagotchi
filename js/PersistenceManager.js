@@ -38,24 +38,6 @@ export class PersistenceManager {
         // Pass the UUID as salt to bind the save file to this specific pet instance
         this._scheduleSave("nadagotchi_save", payload, payload.uuid);
     }
-    /**
-     * Cancels any pending save operations.
-     * @private
-     */
-    _cancelPendingSave() {
-        if (this._saveTimer) {
-            const cancelMethods = {
-                idle: typeof cancelIdleCallback !== 'undefined' ? cancelIdleCallback : () => {},
-                timeout: clearTimeout
-            };
-            const cancelType = this._isIdleCallback ? 'idle' : 'timeout';
-            cancelMethods[cancelType](this._saveTimer);
-            this._saveTimer = null;
-            this._isIdleCallback = false;
-        }
-    }
-
-
 
     /**
      * Schedules a save operation to run during idle time or after a short delay.
@@ -66,7 +48,13 @@ export class PersistenceManager {
      * @private
      */
     _scheduleSave(key, data, salt) {
-        this._cancelPendingSave();
+        if (this._saveTimer) {
+            if (this._isIdleCallback && typeof cancelIdleCallback !== 'undefined') {
+                cancelIdleCallback(this._saveTimer);
+            } else {
+                clearTimeout(this._saveTimer);
+            }
+        }
 
         const task = async () => {
             this._saveTimer = null;
@@ -118,7 +106,14 @@ export class PersistenceManager {
      */
     clearActivePet() {
         // Cancel any pending save to prevent resurrection
-        this._cancelPendingSave();
+        if (this._saveTimer) {
+             if (this._isIdleCallback && typeof cancelIdleCallback !== 'undefined') {
+                  cancelIdleCallback(this._saveTimer);
+             } else {
+                  clearTimeout(this._saveTimer);
+             }
+             this._saveTimer = null;
+        }
         localStorage.removeItem("nadagotchi_save");
         delete this.lastSavedJson["nadagotchi_save"];
     }
@@ -129,8 +124,24 @@ export class PersistenceManager {
      */
     clearAllData() {
         // Cancel any pending save
-        this._cancelPendingSave();
+        if (this._saveTimer) {
+             if (this._isIdleCallback && typeof cancelIdleCallback !== 'undefined') {
+                  cancelIdleCallback(this._saveTimer);
+             } else {
+                  clearTimeout(this._saveTimer);
+             }
+             this._saveTimer = null;
+        }
 
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && (key.startsWith('nadagotchi_') || key === 'hall_of_fame')) {
+                keysToRemove.push(key);
+            }
+        }
+
+        keysToRemove.forEach(key => localStorage.removeItem(key));
         this.lastSavedJson = {};
         const keysToClear = [
             "nadagotchi_save",

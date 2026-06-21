@@ -34,11 +34,13 @@ export class WeatherSystem {
      * Ensures the new weather is different from the current one.
      */
     changeWeather() {
-        const availableWeather = this.weatherTypes.filter(w => w !== this.currentWeather);
-        if (availableWeather.length === 0) {
+        const newWeather = Phaser.Utils.Array.GetRandom(this.weatherTypes);
+
+        // Avoid instantly switching to the same weather
+        if (newWeather === this.currentWeather) {
+            this.changeWeather();
             return;
         }
-        const newWeather = Phaser.Utils.Array.GetRandom(availableWeather);
 
         this.currentWeather = newWeather;
 

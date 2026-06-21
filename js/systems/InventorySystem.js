@@ -33,13 +33,14 @@ export class InventorySystem {
         }
 
         // Cache the keys to avoid repeated iterations and object property lookups
-        const materialKeys = Object.keys(recipe.materials);
+        const materials = recipe.materials || {};
+        const materialKeys = Object.keys(materials);
         const numMaterials = materialKeys.length;
 
         // Check if pet has all required materials
         for (let i = 0; i < numMaterials; i++) {
             const material = materialKeys[i];
-            const requiredAmount = recipe.materials[material];
+            const requiredAmount = materials[material];
             const hasAmount = this.pet.inventory[material] || 0;
             if (hasAmount < requiredAmount) {
                 this.pet.addJournalEntry(`I don't have enough ${material} to craft a ${itemName}.`);

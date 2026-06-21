@@ -706,10 +706,7 @@ export class MainScene extends Phaser.Scene {
         const currentLocation = (this.location === 'INDOOR') ? this.currentRoom : 'GARDEN';
 
         // Optimized iteration over debris object values
-        if (!this.nadagotchi?.debris) return;
-        for (const key in this.nadagotchi.debris) {
-            if (!Object.hasOwn(this.nadagotchi.debris, key)) continue;
-            const d = this.nadagotchi.debris[key];
+        for (const d of Object.values(this.nadagotchi.debris)) {
             const dLocation = d.location || 'GARDEN';
             if (dLocation !== currentLocation) continue;
 
