@@ -713,6 +713,11 @@ export class UIScene extends Phaser.Scene {
         this.scene.pause('MainScene');
     }
 
+    runTutorialSequence() {
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
+        const dashboardHeight = Math.floor(height * Config.UI.DASHBOARD_HEIGHT_RATIO);
+        const dashboardY = height - dashboardHeight;
     const overlay = this.add.container(0, 0).setDepth(2000);
     const dim = this.add
       .rectangle(0, 0, width, height, 0x000000, 0.7)
@@ -735,6 +740,7 @@ export class UIScene extends Phaser.Scene {
     openShowcase() { this.closeAllModals(); if (!this.nadagotchiData) return; const container = this.showcaseModal.passportContainer; container.removeAll(true); const width = 400; const height = 250; const cardBg = this.add.rectangle(0, 0, width, height, 0xFFF8E7).setStrokeStyle(4, 0xD4AF37); const frame = Config.MOOD_VISUALS.FRAMES[this.nadagotchiData.mood] ?? Config.MOOD_VISUALS.DEFAULT_FRAME; const sprite = this.add.image(-120, 0, 'pet', frame).setScale(8); const name = `Archetype: ${this.nadagotchiData.dominantArchetype}`; const gen = `Generation: ${this.nadagotchiData.generation || 1}`; const career = `Career: ${this.nadagotchiData.currentCareer || 'Unemployed'}`; const age = `Age: ${Math.floor(this.nadagotchiData.age || 0)} Days`; const infoText = this.add.text(0, -60, `${name}\n${gen}\n${career}\n${age}`, { fontFamily: 'VT323, monospace', fontSize: '24px', color: '#000000', lineSpacing: 10 }).setOrigin(0, 0); const footer = this.add.text(0, 80, "OFFICIAL NADAGOTCHI PASSPORT", { fontFamily: 'Arial', fontSize: '12px', color: '#888888', fontStyle: 'italic' }).setOrigin(0.5); container.add([cardBg, sprite, infoText, footer]); this.showcaseModal.setVisible(true); this.scene.pause('MainScene'); }
     openCareerMenu() { this.closeAllModals(); if (!this.nadagotchiData) return; const container = this.careerModal; if (this.careerDynamicItems) { this.careerDynamicItems.forEach(i => i.destroy()); } this.careerDynamicItems = []; const mw = this.getModalWidth(); const mh = this.getModalHeight(); let yPos = -mh / 2 + 80; const career = this.nadagotchiData.currentCareer; let infoText = ""; if (career) { const level = this.nadagotchiData.careerLevels[career] || 1; const xp = this.nadagotchiData.careerXP[career] || 0; const title = CareerDefinitions.TITLES[career] ? CareerDefinitions.TITLES[career][level] : 'Employee'; const nextThreshold = CareerDefinitions.XP_THRESHOLDS[level + 1] || 'MAX'; const payBonus = (Config.CAREER.LEVEL_MULTIPLIERS[level] - 1) * 100; infoText = `Current Job: ${career}\nTitle: ${title} (Lvl ${level})\nXP: ${xp} / ${nextThreshold}\nBonuses: +${Math.round(payBonus)}% Efficiency`; } else { infoText = "No Active Career.\nStudy or Explore to unlock paths!"; } const statsText = this.add.text(0, yPos, infoText, { fontFamily: 'VT323, monospace', fontSize: '24px', color: '#ffffff', align: 'center', wordWrap: { width: mw - 60 } }).setOrigin(0.5, 0); container.add(statsText); this.careerDynamicItems.push(statsText); yPos += 140; const listTitle = this.add.text(0, yPos, "Unlocked Career Paths:", { fontFamily: 'VT323', fontSize: '20px', color: '#AAAAAA' }).setOrigin(0.5); container.add(listTitle); this.careerDynamicItems.push(listTitle); yPos += 30; const unlocked = this.nadagotchiData.unlockedCareers || []; if (unlocked.length === 0) { const noneText = this.add.text(0, yPos, "(None yet)", { fontFamily: 'VT323', fontSize: '18px', color: '#888' }).setOrigin(0.5); container.add(noneText); this.careerDynamicItems.push(noneText); } else { unlocked.forEach(c => { const isCurrent = c === career; const lvl = this.nadagotchiData.careerLevels[c] || 1; const label = `${c} (Lvl ${lvl})`; const rowText = this.add.text(-mw/2 + 60, yPos + 10, label, { fontFamily: 'VT323', fontSize: '24px', color: isCurrent ? '#00FF00' : '#FFF' }); container.add(rowText); this.careerDynamicItems.push(rowText); if (!isCurrent) { const switchBtn = ButtonFactory.createButton(this, (mw/2 - 80) + 40, (yPos + 20) + 15, "Switch", () => { this.game.events.emit(EventKeys.UI_ACTION, EventKeys.SWITCH_CAREER, c); container.setVisible(false); this.scene.resume('MainScene'); }, { width: 80, height: 30, color: 0x4CAF50, fontSize: '18px' }); container.add(switchBtn); this.careerDynamicItems.push(switchBtn); } else { const activeLbl = this.add.text(mw/2 - 80, yPos + 10, "[Active]", { fontFamily: 'VT323', fontSize: '18px', color: '#00FF00' }); container.add(activeLbl); this.careerDynamicItems.push(activeLbl); } yPos += 45; }); } container.setVisible(true); this.scene.pause('MainScene'); }
     openJobBoardMenu() { this.closeAllModals(); if (!this.nadagotchiData) return; const container = this.jobBoardModal; if (this.jobBoardDynamicItems) { this.jobBoardDynamicItems.forEach(i => i.destroy()); } this.jobBoardDynamicItems = []; const career = this.nadagotchiData.currentCareer; let text = ""; if (career) { text = `Active Assignment:\n${career}`; } else { text = "No Active Career Assignment."; } const infoText = this.add.text(0, -50, text, { fontFamily: 'VT323', fontSize: '32px', color: '#FFF', align: 'center' }).setOrigin(0.5); container.add(infoText); this.jobBoardDynamicItems.push(infoText); const startBtn = ButtonFactory.createButton(this, 80, 55, "Start Shift", () => { if (career) { this.game.events.emit(EventKeys.UI_ACTION, EventKeys.WORK); container.setVisible(false); } else { this.showToast("No Job", "Select a career first!", "🚫"); } }, { width: 160, height: 50, color: career ? 0x6A0DAD : 0x555555, fontSize: '24px' }); if (!career) startBtn.setDisabled(true); container.add(startBtn); this.jobBoardDynamicItems.push(startBtn); const careerBtn = ButtonFactory.createButton(this, 80, 120, "Career Profiles", () => { this.openCareerMenu(); }, { width: 160, height: 40, color: 0xD8A373, fontSize: '20px' }); container.add(careerBtn); this.jobBoardDynamicItems.push(careerBtn); container.setVisible(true); this.scene.pause('MainScene'); }
+    runTutorialSequence() {
     const steps = [
       {
         text: "These are your pet's STATS.\nKeep an eye on Hunger and Energy!",
@@ -754,6 +760,45 @@ export class UIScene extends Phaser.Scene {
         },
       },
     ];
+
+        let currentStep = 0;
+
+        const msgBox = this.add.container(width / 2, height / 2);
+        const msgBg = this.add.rectangle(0, 0, 500, 120, 0x333333, 0.9).setStrokeStyle(2, 0xffffff);
+        const msgText = this.add.text(0, -10, "", { fontFamily: 'VT323', fontSize: '24px', color: '#fff', align: 'center', wordWrap: { width: 450 } }).setOrigin(0.5);
+        const hintText = this.add.text(0, 40, "(Click anywhere to continue)", { fontFamily: 'VT323', fontSize: '18px', color: '#aaa' }).setOrigin(0.5);
+        msgBox.add([msgBg, msgText, hintText]);
+        overlay.add(msgBox);
+
+        const highlightGraphic = this.add.graphics();
+        overlay.add(highlightGraphic);
+
+        const showStep = (idx) => {
+            if (idx >= steps.length) {
+                overlay.destroy();
+                this.scene.resume('MainScene');
+                return;
+            }
+
+            const step = steps[idx];
+            msgText.setText(step.text);
+
+            highlightGraphic.clear();
+            highlightGraphic.lineStyle(4, 0xffff00, 1);
+            highlightGraphic.strokeRect(step.highlight.x, step.highlight.y, step.highlight.w, step.highlight.h);
+
+            if (idx === 0) msgBox.setPosition(width / 2, height * 0.7);
+            else msgBox.setPosition(width / 2, height * 0.3);
+        };
+
+        dim.on('pointerdown', () => {
+            currentStep++;
+            showStep(currentStep);
+        });
+
+        showStep(currentStep);
+    }
+
     showDialogue(npcName, dialogueData) {
         this.closeAllModals();
         let text = "";
