@@ -1,0 +1,21 @@
+#!/bin/bash
+cat << 'EOF2' > patch.diff
+--- tests/PersistenceManager.test.js
++++ tests/PersistenceManager.test.js
+@@ -112,6 +112,7 @@
+         );
+
+         consoleErrorSpy.mockRestore();
++    });
+     describe('_save error handling', () => {
+         it('should catch and log errors when localStorage.setItem throws', async () => {
+             const data = { test: 123 };
+@@ -134,5 +135,4 @@
+             Object.getPrototypeOf(localStorage).setItem = originalSetItem;
+         });
+     });
+-});
+-
++});
+EOF2
+patch -p0 < patch.diff
