@@ -712,6 +712,7 @@ export class UIScene extends Phaser.Scene {
         container.setVisible(true);
         this.scene.pause('MainScene');
 
+
         const overlay = this.add.container(0, 0).setDepth(2000);
         const dim = this.add
           .rectangle(0, 0, width, height, 0x000000, 0.7)
