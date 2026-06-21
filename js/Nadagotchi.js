@@ -462,7 +462,7 @@ export class Nadagotchi {
         const activeFactors = this.environmentalFactors.filter(factor => {
             if (factor.type === 'item') {
                 // Adapt to object map inventory structure
-                return this.inventory[factor.id] && this.inventory[factor.id] > 0;
+                return Object.hasOwn(this.inventory, factor.id) && this.inventory[factor.id] > 0;
             }
             return true; // Non-item factors (like room temp) are always active if set.
         });
@@ -484,7 +484,7 @@ export class Nadagotchi {
      * @returns {object} The data object for the new Nadagotchi.
      */
     calculateOffspring(environmentalFactors) {
-        const validFactors = environmentalFactors.filter(item => this.inventory[item] && this.inventory[item] > 0);
+        const validFactors = environmentalFactors.filter(item => Object.hasOwn(this.inventory, item) && this.inventory[item] > 0);
         const childGenome = GeneticsSystem.breed(this.genome, validFactors, this.rng);
         const childPhenotype = childGenome.phenotype;
 
