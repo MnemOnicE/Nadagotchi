@@ -112,6 +112,7 @@ describe('PersistenceManager', () => {
         );
 
         consoleErrorSpy.mockRestore();
+    });
     describe('_save error handling', () => {
         it('should catch and log errors when localStorage.setItem throws', async () => {
             const data = { test: 123 };
