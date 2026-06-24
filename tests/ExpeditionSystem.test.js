@@ -122,3 +122,25 @@ describe('ExpeditionSystem', () => {
         expect(result.outcome).toBe('failure');
     });
 });
+
+describe('ExpeditionSystem Additional Coverage', () => {
+    test('generatePath should use rng.range fallback when rng.random is not available', () => {
+        const fallbackRng = {
+            range: (min, max) => min + Math.floor(Math.random() * (max - min))
+        };
+        const system = new ExpeditionSystem(fallbackRng);
+        const path = system.generatePath('Spring', 'Sunny', 'Forest', 2);
+        expect(path).toHaveLength(2);
+    });
+
+    test('resolveChoice should return auto success if choice has no skill', () => {
+        const system = new ExpeditionSystem({ range: () => 5 });
+        const choice = {
+            success: { text: "Auto win" }
+        };
+        const pet = {};
+        const result = system.resolveChoice(choice, pet);
+        expect(result.outcome).toBe('success');
+        expect(result.details).toEqual({ text: "Auto win" });
+    });
+});
