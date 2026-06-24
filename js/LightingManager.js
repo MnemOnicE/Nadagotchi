@@ -114,8 +114,16 @@ export class LightingManager {
         // Check if redraw is needed (Hysteresis)
         if (this._needsRedraw(lights)) {
             this.drawLight(lights);
-            // Clone lights for next comparison
-            this.lastLights = lights.map(l => ({...l}));
+            // Clone lights for next comparison (Optimized: Re-use objects if possible)
+            if (this.lastLights.length !== lights.length) {
+                this.lastLights = lights.map(l => ({...l}));
+            } else {
+                for (let i = 0; i < lights.length; i++) {
+                    this.lastLights[i].x = lights[i].x;
+                    this.lastLights[i].y = lights[i].y;
+                    this.lastLights[i].r = lights[i].r;
+                }
+            }
         }
     }
 
