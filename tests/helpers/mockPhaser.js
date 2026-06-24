@@ -29,6 +29,7 @@ export const mockGameObject = () => {
         setScale: jest.fn().mockReturnThis(),
         setAngle: jest.fn().mockReturnThis(),
         setFrame: jest.fn().mockReturnThis(),
+        setColor: jest.fn().mockReturnThis(),
         clear: jest.fn(),
         fillStyle: jest.fn().mockReturnThis(),
         fillRect: jest.fn().mockReturnThis(),
@@ -67,7 +68,7 @@ export const setupPhaserMock = () => {
                 };
                 this.time = {
                     delayedCall: jest.fn((delay, callback) => { callback(); return { destroy: jest.fn() }; }),
-                    addEvent: jest.fn(() => ({ destroy: jest.fn(), remove: jest.fn() })),
+                    addEvent: jest.fn(() => ({ destroy: jest.fn(), remove: jest.fn(), getElapsedSeconds: jest.fn(() => 0) })),
                     now: 0
                 };
                 this.tweens = {
@@ -90,7 +91,7 @@ export const setupPhaserMock = () => {
                 this.game = { events: { emit: jest.fn(), on: jest.fn(), off: jest.fn() } };
                 this.events = { on: jest.fn(), off: jest.fn(), emit: jest.fn() };
                 this.input = {
-                    keyboard: { on: jest.fn(), off: jest.fn() },
+                    keyboard: { createCursorKeys: jest.fn(() => ({})), on: jest.fn(), off: jest.fn() },
                     on: jest.fn(),
                     off: jest.fn(),
                     setDefaultCursor: jest.fn(),
@@ -119,6 +120,7 @@ export const setupPhaserMock = () => {
             Text: class Text { constructor() { Object.assign(this, mockGameObject()); } },
             TileSprite: class TileSprite { constructor() { Object.assign(this, mockGameObject()); } },
             Container: class Container { constructor() { Object.assign(this, mockGameObject()); } },
+            Line: class Line { constructor() { Object.assign(this, mockGameObject()); } },
             RenderTexture: class RenderTexture {
                 constructor() {
                     Object.assign(this, mockGameObject());
@@ -152,7 +154,7 @@ export const setupPhaserMock = () => {
                 constructor(x, y, width, height) {
                     this.x = x; this.y = y; this.width = width; this.height = height;
                 }
-                contains(x, y) { return true; }
+                contains() { return true; }
             },
             Intersects: {
                 RectangleToRectangle: jest.fn().mockReturnValue(false)
@@ -168,6 +170,7 @@ export const createMockAdd = () => ({
     text: jest.fn(() => new Phaser.GameObjects.Text()),
     tileSprite: jest.fn(() => new Phaser.GameObjects.TileSprite()),
     rectangle: jest.fn(() => mockGameObject()),
+    line: jest.fn(() => mockGameObject()),
     zone: jest.fn(() => mockGameObject()),
     renderTexture: jest.fn(() => new Phaser.GameObjects.RenderTexture()),
     container: jest.fn(() => ({ ...mockGameObject(), add: jest.fn(), removeAll: jest.fn() })),
