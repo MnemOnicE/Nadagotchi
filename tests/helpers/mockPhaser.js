@@ -23,6 +23,7 @@ export const mockGameObject = () => {
         setScrollFactor: jest.fn().mockReturnThis(),
         setDepth: jest.fn().mockReturnThis(),
         setText: jest.fn().mockReturnThis(),
+        setColor: jest.fn().mockReturnThis(),
         setFillStyle: jest.fn().mockReturnThis(),
         setStrokeStyle: jest.fn().mockReturnThis(),
         setBlendMode: jest.fn().mockReturnThis(),
@@ -163,6 +164,7 @@ export const setupPhaserMock = () => {
 
 export const createMockAdd = () => ({
     sprite: jest.fn(() => new Phaser.GameObjects.Sprite()),
+    circle: jest.fn(() => mockGameObject()),
     image: jest.fn(() => new Phaser.GameObjects.Image()),
     graphics: jest.fn(() => new Phaser.GameObjects.Graphics()),
     text: jest.fn(() => new Phaser.GameObjects.Text()),
