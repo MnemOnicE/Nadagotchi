@@ -246,8 +246,9 @@ describe('MainScene Coverage', () => {
         scene.create();
         await scene._initPromise;
 
+        const { Config } = require('../js/Config.js');
         const veryLargeDelta = 1000 * 60 * 60 * 24; // 24 hours in ms
-        const maxDelta = 3600000; // 1 hour in ms (Config.GAME_LOOP.MAX_DELTA)
+        const maxDelta = Config.GAME_LOOP.MAX_DELTA;
 
         scene.update(2000, veryLargeDelta);
 
