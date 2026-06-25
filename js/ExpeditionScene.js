@@ -25,7 +25,7 @@ export class ExpeditionScene extends Phaser.Scene {
 
         // Generate Path (Nodes)
         // We'll generate a simple tree: Start -> [Choice A/B] -> [Choice C/D] -> Boss/End
-        this.nodeTree = this.generateNodeMap(3); // 3 layers
+        this.nodeTree = this.generateNodeMap(); // 3 layers
         this.currentNode = this.nodeTree[0][0]; // Start node
         this.currentLayer = 0;
 

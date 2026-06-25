@@ -1,5 +1,6 @@
 import { EventKeys } from './EventKeys.js';
 import { ButtonFactory } from './ButtonFactory.js';
+import { SoundSynthesizer } from './utils/SoundSynthesizer.js';
 
 /**
  * @fileoverview A mini-game for the Healer career.

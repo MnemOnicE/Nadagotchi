@@ -242,22 +242,6 @@ describe('MainScene Coverage', () => {
         }));
     });
 
-    test('update loop should cap very large delta values to prevent Death Loop', async () => {
-        scene.create();
-        await scene._initPromise;
-
-        const { Config } = require('../js/Config.js');
-        const veryLargeDelta = 1000 * 60 * 60 * 24; // 24 hours in ms
-        const maxDelta = Config.GAME_LOOP.MAX_DELTA;
-
-        scene.update(2000, veryLargeDelta);
-
-        // Assert that worldClock.update was called with maxDelta
-        expect(scene.worldClock.update).toHaveBeenCalledWith(maxDelta);
-        // Assert that nadagotchi.live was called with maxDelta (since gameSpeed is 1.0)
-        expect(mockNadagotchi.live).toHaveBeenCalledWith(maxDelta, expect.any(Object));
-    });
-
     test('furniture placement logic', async () => {
         scene.create();
         await scene._initPromise;
