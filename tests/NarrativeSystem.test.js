@@ -3,17 +3,13 @@ import { NarrativeSystem } from '../js/NarrativeSystem.js';
 import { DialogueDefinitions } from '../js/DialogueDefinitions.js';
 
 describe('NarrativeSystem', () => {
-    let originalRandom;
-
     beforeEach(() => {
         // Mock Math.random to always return 0 to reliably select the first item in an array
-        originalRandom = Math.random;
-        Math.random = jest.fn(() => 0);
+        jest.spyOn(Math, 'random').mockReturnValue(0);
     });
 
     afterEach(() => {
-        // Restore Math.random
-        Math.random = originalRandom;
+        jest.restoreAllMocks();
     });
 
     describe('getNPCDialogue', () => {
