@@ -14,7 +14,7 @@ import { toBase64, fromBase64 } from './utils/Encoding.js';
  */
 export const MUTATION_RATE = 0.05;
 export const MAX_PERSONALITY = 100;
-export const MAX_PHYSIO = 10;
+const MAX_PHYSIO = 10;
 export const POSSIBLE_TRAITS = ['Night Owl', 'Photosynthetic'];
 
 /**

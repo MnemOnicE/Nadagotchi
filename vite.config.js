@@ -23,7 +23,7 @@ export default defineConfig(({ mode }) => {
     define: {
       // Inject the secret salt from environment variables into the client-side code.
       // Falls back to a generic salt for development environments.
-      'process.env.VITE_DNA_SALT': JSON.stringify(env.VITE_DNA_SALT || 'DEVELOPMENT_ONLY_SALT')
+      'process.env.VITE_DNA_SALT': JSON.stringify(env.VITE_DNA_SALT || '')
     }
   };
 });
