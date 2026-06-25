@@ -28,9 +28,8 @@ jest.mock('../js/ButtonFactory.js', () => ({
 }));
 
 
-import { DanceMinigameScene } from '../js/DanceMinigameScene.js';
-import { SoundSynthesizer } from '../js/utils/SoundSynthesizer.js';
-import { ButtonFactory } from '../js/ButtonFactory.js';
+const { DanceMinigameScene } = require('../js/DanceMinigameScene.js');
+const { SoundSynthesizer } = require('../js/utils/SoundSynthesizer.js');
 
 describe('DanceMinigameScene Test Suite', () => {
     let scene;
@@ -204,6 +203,7 @@ describe('DanceMinigameScene Test Suite', () => {
 
     test('update() moves notes', () => {
         scene.create();
+        scene.gameTimer = { getElapsedSeconds: jest.fn(() => 0) };
         scene.spawnNote();
         const note = scene.notes[0];
         const initialY = note.y;
@@ -213,6 +213,7 @@ describe('DanceMinigameScene Test Suite', () => {
 
     test('update() ignores if not playing', () => {
         scene.create();
+        scene.gameTimer = { getElapsedSeconds: jest.fn(() => 0) };
         scene.isPlaying = false;
         scene.spawnNote();
         const note = scene.notes[0];
@@ -222,6 +223,7 @@ describe('DanceMinigameScene Test Suite', () => {
     });
     test('update() spawns new notes', () => {
         scene.create();
+        scene.gameTimer = { getElapsedSeconds: jest.fn(() => 0) };
         scene.nextSpawn = -1; // Force spawn
         global.Phaser.Math.Between = jest.fn().mockReturnValue(0);
 
@@ -233,6 +235,7 @@ describe('DanceMinigameScene Test Suite', () => {
 
     test('update() covers notes splice edge case with multiple notes', () => {
         scene.create();
+        scene.gameTimer = { getElapsedSeconds: jest.fn(() => 0) };
         scene.spawnNote();
         scene.spawnNote();
         scene.notes[0].y = scene.targetY - 100;
@@ -246,6 +249,7 @@ describe('DanceMinigameScene Test Suite', () => {
 
     test('update() covers notes splice edge case', () => {
         scene.create();
+        scene.gameTimer = { getElapsedSeconds: jest.fn(() => 0) };
         scene.spawnNote();
         scene.notes[0].y = scene.targetY - 100;
 
@@ -258,6 +262,7 @@ describe('DanceMinigameScene Test Suite', () => {
 
     test('update() misses note', () => {
         scene.create();
+        scene.gameTimer = { getElapsedSeconds: jest.fn(() => 0) };
         scene.breakCombo = jest.fn();
         scene.spawnNote();
         scene.notes[0].y = scene.targetY - 100; // Passed target
@@ -290,6 +295,7 @@ describe('DanceMinigameScene Test Suite', () => {
         expect(scene.getArrowChar('UNKNOWN')).toBeUndefined();
     });
     test('endGame() finish button triggers resume', () => {
+        const { ButtonFactory } = require('../js/ButtonFactory.js');
         scene.create();
         scene.score = 1000;
         scene.endGame();
@@ -307,6 +313,7 @@ describe('DanceMinigameScene Test Suite', () => {
 
     test('update() destroys missed notes', () => {
         scene.create();
+        scene.gameTimer = { getElapsedSeconds: jest.fn(() => 0) };
         scene.spawnNote();
         const note = scene.notes[0];
         note.y = scene.targetY - 100; // Past target

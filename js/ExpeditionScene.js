@@ -1,6 +1,7 @@
 import { ButtonFactory } from './ButtonFactory.js';
 import { ExpeditionSystem } from './systems/ExpeditionSystem.js';
 import { EventKeys } from './EventKeys.js';
+import { SoundSynthesizer } from './utils/SoundSynthesizer.js';
 
 /**
  * @class ExpeditionScene
@@ -25,7 +26,7 @@ export class ExpeditionScene extends Phaser.Scene {
 
         // Generate Path (Nodes)
         // We'll generate a simple tree: Start -> [Choice A/B] -> [Choice C/D] -> Boss/End
-        this.nodeTree = this.generateNodeMap(); // 3 layers
+        this.nodeTree = this.generateNodeMap(3); // 3 layers
         this.currentNode = this.nodeTree[0][0]; // Start node
         this.currentLayer = 0;
 
@@ -50,7 +51,7 @@ export class ExpeditionScene extends Phaser.Scene {
         this.renderMap();
     }
 
-    generateNodeMap() {
+    generateNodeMap(layers) {
         // Simplified generation:
         // Layer 0: 1 Node (Start)
         // Layer 1: 2 Nodes
@@ -93,7 +94,7 @@ export class ExpeditionScene extends Phaser.Scene {
 
         // Draw Nodes
         this.nodeTree.forEach((layer, layerIdx) => {
-            layer.forEach((node) => {
+            layer.forEach((node, nodeIdx) => {
                 // Connections (Forward)
                 if (node.connections) {
                     const nextLayer = this.nodeTree[layerIdx + 1];
@@ -202,8 +203,8 @@ export class ExpeditionScene extends Phaser.Scene {
     }
 
     showQTEEncounter(type) {
-        let instruction;
-        let qteType; // 'REFLEX' or 'MASH'
+        let instruction = "";
+        let qteType = ""; // 'REFLEX' or 'MASH'
 
         if (type === 'EVENT') {
             instruction = "Dodge the falling branch! (Stop in Green)";
