@@ -289,7 +289,6 @@ describe('DanceMinigameScene Test Suite', () => {
         expect(scene.getArrowChar('UNKNOWN')).toBeUndefined();
     });
     test('endGame() finish button triggers resume', () => {
-        const { ButtonFactory } = require('../js/ButtonFactory.js');
         scene.create();
         scene.score = 1000;
         scene.endGame();
