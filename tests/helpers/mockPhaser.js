@@ -78,7 +78,7 @@ export const setupPhaserMock = () => {
                     text: jest.fn(() => new Phaser.GameObjects.Text())
                 };
                 this.time = {
-                    delayedCall: jest.fn((delay, callback, args, scope) => { return { destroy: jest.fn() }; }),
+                    delayedCall: jest.fn((delay, callback, args) => { if (callback) callback(...(args || [])); return { destroy: jest.fn() }; }),
                     addEvent: jest.fn(() => ({ destroy: jest.fn(), remove: jest.fn() })),
                     now: 0
                 };
