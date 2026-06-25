@@ -9,3 +9,13 @@ A benchmark simulating the core loop on an object with 5 entries iterated 1,000,
 - **Improvement:** Roughly ~19x faster for the iteration logic itself.
 
 All tests (`npm test`) pass successfully, ensuring no regressions.
+💡 **What:** Removed `js/utils/ErrorHandler.js` and its corresponding test files (`tests/ErrorHandler.test.js`, `tests/repro_xss.test.js`).
+
+🎯 **Why:** To improve code health by removing an unused export (`globalErrorHandler`). The global error handler functionality is actually implemented inline directly within `index.html`. Removing this dead code and its test files reduces noise and maintains a cleaner codebase.
+
+✅ **Verification:** Verified the files were correctly removed. Ran the entire Jest test suite (`npm test`) which passed completely, confirming that no parts of the application or the remaining tests relied on the removed code.
+
+✨ **Result:** Cleaned up unused dead code, reducing bundle and source tree clutter, improving maintainability.
+🎯 **What:** Adding a test suite for `NarrativeSystem` (`tests/NarrativeSystem.test.js`) to ensure reliable and correct narrative text generation logic.
+📊 **Coverage:** The new tests cover `getNPCDialogue`, `generateEntry`, `getAdvice`, and `getTemplates`. Edge cases such as missing NPC data, low relationship levels, fallback mechanisms for archetypes and advice, and conditional quest dialogs are thoroughly tested.
+✨ **Result:** Provides 100% test coverage for the `NarrativeSystem.js` methods, improving system stability and preventing regression errors during future changes to text generation logic or dialogue additions.

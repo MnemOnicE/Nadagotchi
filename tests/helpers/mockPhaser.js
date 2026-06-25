@@ -2,8 +2,10 @@ import { jest } from '@jest/globals';
 
 export const mockGameObject = () => {
     const listeners = {};
+    const data = {};
     const obj = {
         listeners, // Expose listeners for direct access in tests if needed
+        dataStore: data, // expose
         on: jest.fn((event, fn) => {
             listeners[event] = fn;
             return obj;
@@ -40,6 +42,15 @@ export const mockGameObject = () => {
         clearTint: jest.fn().mockReturnThis(),
         setTexture: jest.fn().mockReturnThis(),
         setTilePosition: jest.fn().mockReturnThis(),
+        setData: jest.fn((key, value) => {
+            if (typeof key === 'object') {
+                Object.assign(data, key);
+            } else {
+                data[key] = value;
+            }
+            return obj;
+        }),
+        getData: jest.fn((key) => data[key]),
         context: {
              createLinearGradient: jest.fn(() => ({ addColorStop: jest.fn() })),
              createRadialGradient: jest.fn(() => ({ addColorStop: jest.fn() })),
@@ -59,6 +70,7 @@ export const setupPhaserMock = () => {
         Scene: class Scene {
             constructor(config) {
                 this.config = config;
+                this.sys = { config: config, events: { once: jest.fn(), on: jest.fn(), off: jest.fn() } };
                 this.cameras = { main: { width: 800, height: 600, setBackgroundColor: jest.fn(), setSize: jest.fn(), setViewport: jest.fn() } };
                 this.add = createMockAdd();
                 this.make = {
@@ -69,6 +81,8 @@ export const setupPhaserMock = () => {
                 this.time = {
                     delayedCall: jest.fn((delay, callback) => { callback(); return { destroy: jest.fn() }; }),
                     addEvent: jest.fn(() => ({ destroy: jest.fn(), remove: jest.fn(), getElapsedSeconds: jest.fn(() => 0) })),
+                    delayedCall: jest.fn((delay, callback, args) => { if (callback) callback(...(args || [])); return { destroy: jest.fn() }; }),
+                    addEvent: jest.fn(() => ({ destroy: jest.fn(), remove: jest.fn() })),
                     now: 0
                 };
                 this.tweens = {
@@ -78,7 +92,6 @@ export const setupPhaserMock = () => {
                     }),
                     killTweensOf: jest.fn()
                 };
-                this.sys = { events: { once: jest.fn(), on: jest.fn(), off: jest.fn() } };
                 this.textures = { exists: jest.fn().mockReturnValue(true), generate: jest.fn(), createCanvas: jest.fn() };
                 this.scene = {
                     textures: { exists: jest.fn().mockReturnValue(true), generate: jest.fn(), createCanvas: jest.fn() },
@@ -146,7 +159,8 @@ export const setupPhaserMock = () => {
         },
         Utils: {
             Array: {
-                GetRandom: (arr) => arr && arr.length > 0 ? arr[0] : null
+                GetRandom: (arr) => arr && arr.length > 0 ? arr[0] : null,
+                Shuffle: (arr) => [...arr].sort(() => Math.random() - 0.5)
             }
         },
         Geom: {

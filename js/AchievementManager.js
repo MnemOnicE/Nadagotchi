@@ -40,42 +40,62 @@ export class AchievementManager {
      * @param {*} data - Data associated with the action.
      */
     handleUIAction(actionType, data) {
-        let changed = false;
-
-        // Initialize counters if missing
-        this._ensureCounter('craftCount');
-        this._ensureCounter('exploreCount');
-        this._ensureCounter('chatCount');
-        this._ensureCounter('studyCount');
-
-        // Update progress based on action
-        switch (actionType) {
-            case EventKeys.CRAFT_ITEM:
-                this.state.progress.craftCount++;
-                changed = true;
-                break;
-            case EventKeys.EXPLORE:
-                this.state.progress.exploreCount++;
-                changed = true;
-                break;
-            case EventKeys.STUDY:
-                this.state.progress.studyCount++;
-                changed = true;
-                break;
-            default:
-                // Check for NPC interactions
-                if (typeof actionType === 'string' && actionType.startsWith('INTERACT_') &&
-                    !['INTERACT_BOOKSHELF', 'INTERACT_PLANT', 'INTERACT_FANCY_BOOKSHELF'].includes(actionType)) {
-                    this.state.progress.chatCount++;
-                    changed = true;
-                }
-                break;
-        }
+        this._ensureAllCounters();
+        const changed = this._updateProgressForAction(actionType);
 
         if (changed) {
             this.checkAchievements();
             this.persistence.saveAchievements(this.state);
         }
+    }
+
+    /**
+     * Ensures all progress counters exist.
+     * @private
+     */
+    _ensureAllCounters() {
+        this._ensureCounter('craftCount');
+        this._ensureCounter('exploreCount');
+        this._ensureCounter('chatCount');
+        this._ensureCounter('studyCount');
+    }
+
+    /**
+     * Updates progress counters based on action type.
+     * @param {string} actionType - The type of action.
+     * @returns {boolean} True if progress changed, false otherwise.
+     * @private
+     */
+    _updateProgressForAction(actionType) {
+        switch (actionType) {
+            case EventKeys.CRAFT_ITEM:
+                this.state.progress.craftCount++;
+                return true;
+            case EventKeys.EXPLORE:
+                this.state.progress.exploreCount++;
+                return true;
+            case EventKeys.STUDY:
+                this.state.progress.studyCount++;
+                return true;
+            default:
+                if (this._isNPCInteraction(actionType)) {
+                    this.state.progress.chatCount++;
+                    return true;
+                }
+                return false;
+        }
+    }
+
+    /**
+     * Checks if an action is a valid NPC interaction.
+     * @param {string} actionType - The type of action.
+     * @returns {boolean} True if it is an NPC interaction, false otherwise.
+     * @private
+     */
+    _isNPCInteraction(actionType) {
+        return typeof actionType === 'string' &&
+               actionType.startsWith('INTERACT_') &&
+               !['INTERACT_BOOKSHELF', 'INTERACT_PLANT', 'INTERACT_FANCY_BOOKSHELF'].includes(actionType);
     }
 
     /**
@@ -96,10 +116,8 @@ export class AchievementManager {
      */
     checkAchievements() {
         Achievements.forEach(achievement => {
-            if (!this.unlockedSet.has(achievement.id)) {
-                if (achievement.condition(this.state.progress)) {
-                    this.unlock(achievement);
-                }
+            if (!this.unlockedSet.has(achievement.id) && achievement.condition(this.state.progress)) {
+                this.unlock(achievement);
             }
         });
     }

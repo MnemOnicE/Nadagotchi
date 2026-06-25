@@ -431,7 +431,7 @@ export class Nadagotchi {
      * @returns {string} A unique identifier.
      */
     generateUUID() {
-        // Deterministic UUID generation using SeededRandom
+        // Secure UUID v4 generation
         const chars = '0123456789abcdef';
         let uuid = '';
         for (let i = 0; i < 36; i++) {
@@ -441,10 +441,10 @@ export class Nadagotchi {
                 uuid += '4';
             } else if (i === 19) {
                 // (r & 0x3 | 0x8) logic
-                const r = this.rng.range(0, 16);
+                const r = CryptoUtils.getRandomSafeInt(0, 15);
                 uuid += chars[(r & 0x3) | 0x8];
             } else {
-                uuid += chars[this.rng.range(0, 16)];
+                uuid += chars[CryptoUtils.getRandomSafeInt(0, 15)];
             }
         }
         return uuid;
