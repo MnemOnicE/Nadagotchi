@@ -16,8 +16,8 @@ jest.mock('../js/utils/SoundSynthesizer.js', () => {
     };
 });
 
-const { ButtonFactory } = require('../js/ButtonFactory.js');
-const { SoundSynthesizer } = require('../js/utils/SoundSynthesizer.js');
+import { ButtonFactory } from '../js/ButtonFactory.js';
+import { SoundSynthesizer } from '../js/utils/SoundSynthesizer.js';
 
 describe('ButtonFactory', () => {
     let scene;
