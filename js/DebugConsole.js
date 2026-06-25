@@ -1,4 +1,5 @@
 import { EventKeys } from './EventKeys.js';
+import { Config } from './Config.js';
 import { ItemDefinitions } from './ItemData.js';
 
 export class DebugConsole {
@@ -14,30 +15,18 @@ export class DebugConsole {
     }
 
     createDOM() {
-        this._createContainer();
-        this._createHeaderRow();
-        this._createFpsDisplay();
-
-        this.content = document.createElement('div');
-        this.container.appendChild(this.content);
-
-        this._addDefaultSections();
-
-        document.body.appendChild(this.container);
-    }
-
-    _createContainer() {
         this.container = document.createElement('div');
         this.container.id = 'debug-console';
+        // Style it to look like a hacking terminal or raw dev tool
+        // Added top padding to account for safe area just in case, though it's an overlay
         this.container.style.cssText = `
             display: none; position: fixed; top: 5%; left: 5%; width: 90%; height: 90%;
             background: rgba(0, 0, 0, 0.90); border: 2px solid #00FF00; color: #00FF00;
             z-index: 5000; overflow-y: scroll; padding: 10px; font-family: monospace;
             box-sizing: border-box; box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
         `;
-    }
 
-    _createHeaderRow() {
+        // Header Row
         const headerRow = document.createElement('div');
         headerRow.style.cssText = "display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00FF00; padding-bottom: 10px; margin-bottom: 10px;";
 
@@ -46,6 +35,7 @@ export class DebugConsole {
         title.style.margin = "0";
         headerRow.appendChild(title);
 
+        // Add Close Button
         const closeBtn = document.createElement('button');
         closeBtn.innerText = "[X] CLOSE";
         closeBtn.style.cssText = "color: red; background: black; border: 1px solid red; padding: 5px 10px; font-family: monospace; font-weight: bold; cursor: pointer;";
@@ -53,16 +43,19 @@ export class DebugConsole {
         headerRow.appendChild(closeBtn);
 
         this.container.appendChild(headerRow);
-    }
 
-    _createFpsDisplay() {
+        // FPS Counter in Console
         this.fpsDisplay = document.createElement('div');
         this.fpsDisplay.innerText = "FPS: -- | Delta: --";
         this.fpsDisplay.style.marginBottom = "10px";
         this.container.appendChild(this.fpsDisplay);
-    }
 
-    _addDefaultSections() {
+        // Add Content Area
+        this.content = document.createElement('div');
+        this.container.appendChild(this.content);
+
+        // --- SECTIONS ---
+
         this.addSection("Vitals", [
             { label: "Fill Stats (100)", action: () => this.modifyStats(100, 100, 100) },
             { label: "Starve (Hunger 0)", action: () => this.modifyStats(0, null, null) },
@@ -96,8 +89,10 @@ export class DebugConsole {
             { label: "Toggle Hitbox Bounds", action: () => this.toggleBounds() },
             { label: "Simulate Background Resume (8hr)", action: () => this.simulateBackgroundResume() },
             { label: "Export Save (Clipboard)", action: () => this.exportSave() },
-            { label: "Hard Reset (Wipe Save)", action: () => { if(window.confirm("Delete all data?")) { this.scene.persistence.clearAllData(); window.location.reload(); } } }
+            { label: "Hard Reset (Wipe Save)", action: () => { if(confirm("Delete all data?")) { this.scene.persistence.clearAllData(); location.reload(); } } }
         ]);
+
+        document.body.appendChild(this.container);
     }
 
     addSection(title, buttons) {
@@ -131,7 +126,7 @@ export class DebugConsole {
                         b.style.color = "#00FF00";
                     }, 200);
                 } catch(e) {
-                    window.alert("Debug Cmd Failed: " + e.message);
+                    alert("Debug Cmd Failed: " + e.message);
                     console.error(e);
                 }
             };
@@ -213,7 +208,7 @@ export class DebugConsole {
     }
 
     exportSave() {
-        this.scene.persistence.savePet(this.scene.nadagotchi);
+        const saveString = this.scene.persistence.savePet(this.scene.nadagotchi);
         // savePet might return void and save to LS. Let's grab from LS.
         const raw = localStorage.getItem('nadagotchi_pet_v1'); // Assuming key
         // Also grab salt
@@ -289,6 +284,7 @@ export class DebugConsole {
         const uiScene = this.scene.scene.get('UIScene');
         if (uiScene && uiScene.showToast) {
             uiScene.showToast(title, message, icon);
+        } else {
         }
     }
 }
