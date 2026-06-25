@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **New Assets:** Procedurally generated textures for Weeds, Rocks, Poop, Merchant, and Weather Particles.
 
 ### Fixed
+- Removed unused `SoundSynthesizer` import from `HealerMinigameScene` to improve code health.
 - Fixed critical syntax errors in `GeneticsSystem.js` and `PersistenceManager.js` caused by duplicate variable declarations, which were blocking the test suite.
 - Fixed an issue where `TravelingMerchant` events were text-only notifications.
 - Resolved "Deterministic Trap" regression in `Nadagotchi` tests caused by new random tie-breaker logic.
