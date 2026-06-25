@@ -28,8 +28,9 @@ jest.mock('../js/ButtonFactory.js', () => ({
 }));
 
 
-const { DanceMinigameScene } = require('../js/DanceMinigameScene.js');
-const { SoundSynthesizer } = require('../js/utils/SoundSynthesizer.js');
+import { DanceMinigameScene } from '../js/DanceMinigameScene.js';
+import { SoundSynthesizer } from '../js/utils/SoundSynthesizer.js';
+import { ButtonFactory } from '../js/ButtonFactory.js';
 
 describe('DanceMinigameScene Test Suite', () => {
     let scene;
