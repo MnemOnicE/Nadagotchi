@@ -994,9 +994,22 @@ export class MainScene extends Phaser.Scene {
         // Kill existing tweens on the sprite to prevent conflicts
         this.tweens.killTweensOf(this.sprite);
 
-        // Fix for "Movement Warp" bug: Use the sprite's CURRENT position as the base
-        const baseX = this.sprite.x;
-        const baseY = this.sprite.y;
+        if (this.isMoving) return;
+
+        // Fix for "Movement Warp" bug: Use the absolute floor center to prevent cumulative drift
+        // If indoors, preserve the X position as it roams around
+        const dashboardHeight = Math.floor(this.scale.height * Config.UI.DASHBOARD_HEIGHT_RATIO);
+        const gameHeight = this.scale.height - dashboardHeight;
+
+        const baseXMap = {
+            'INDOOR': this.sprite.x,
+            'OUTDOOR': this.scale.width / 2
+        };
+        const baseX = baseXMap[this.location] ?? this.scale.width / 2;
+        const baseY = gameHeight / 2;
+
+        this.sprite.setPosition(baseX, baseY);
+        this.isMoving = false;
 
         // Reset properties to base state (except position)
         this.sprite.setScale(4);

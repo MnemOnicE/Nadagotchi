@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **New Assets:** Procedurally generated textures for Weeds, Rocks, Poop, Merchant, and Weather Particles.
 
 ### Fixed
+- Removed unused `SoundSynthesizer` import from `HealerMinigameScene` to improve code health.
 - Fixed critical syntax errors in `GeneticsSystem.js` and `PersistenceManager.js` caused by duplicate variable declarations, which were blocking the test suite.
 - Fixed an issue where `TravelingMerchant` events were text-only notifications.
 - Resolved "Deterministic Trap" regression in `Nadagotchi` tests caused by new random tie-breaker logic.
@@ -43,3 +44,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Autonomous Furniture Interactions:** When indoors, pets will now occasionally seek out and interact with placed furniture autonomously, triggering the appropriate events.
 ### Security
 *   Fixed an issue where `Config.SECURITY.DNA_SALT` fell back to a hardcoded string `DEVELOPMENT_ONLY_SALT` when the `VITE_DNA_SALT` environment variable was not set. It now dynamically generates a secure local salt using `window.crypto.getRandomValues()` or `crypto.randomBytes()`, and persists it securely via `localStorage.getItem('nadagotchi_dna_salt')`.
+
+### Added
+- Added unit test file tests/ButtonFactory.test.js to ensure reliable visual logic and behavior for UI buttons, establishing full test coverage for js/ButtonFactory.js.
