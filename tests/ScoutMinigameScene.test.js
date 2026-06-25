@@ -146,6 +146,9 @@ describe('ScoutMinigameScene Test Suite', () => {
         scene.init();
         scene.create();
 
+        // Mock delayedCall to not execute immediately so we can test intermediate state
+        scene.time.delayedCall = jest.fn(() => ({ destroy: jest.fn() }));
+
         const cards = scene.add.rectangle.mock.results.map(r => r.value);
 
         const card1 = cards[0];
