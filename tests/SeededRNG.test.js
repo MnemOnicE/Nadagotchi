@@ -133,7 +133,7 @@ describe('Nadagotchi RNG Integration', () => {
         parent.rng = new SeededRandom(123);
         const offspring2 = parent.calculateOffspring([]);
 
-        expect(offspring1.uuid).toBe(offspring2.uuid);
+        expect(offspring1.uuid).not.toBe(offspring2.uuid); // UUIDs must be cryptographically unique
         expect(offspring1.dominantArchetype).toBe(offspring2.dominantArchetype);
         // Deep check genotype
         expect(JSON.stringify(offspring1.genome.genotype)).toBe(JSON.stringify(offspring2.genome.genotype));
