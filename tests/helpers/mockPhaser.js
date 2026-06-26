@@ -23,6 +23,12 @@ export const mockGameObject = () => {
         setScrollFactor: jest.fn().mockReturnThis(),
         setDepth: jest.fn().mockReturnThis(),
         setText: jest.fn().mockReturnThis(),
+        /**
+         * Sets the text color.
+         * @param {string} color - The color string.
+         * @returns {Object} The mocked game object instance for chaining.
+         */
+        setColor: jest.fn().mockReturnThis(),
         setFillStyle: jest.fn().mockReturnThis(),
         setStrokeStyle: jest.fn().mockReturnThis(),
         setBlendMode: jest.fn().mockReturnThis(),
@@ -163,6 +169,16 @@ export const setupPhaserMock = () => {
 
 export const createMockAdd = () => ({
     sprite: jest.fn(() => new Phaser.GameObjects.Sprite()),
+    /**
+     * Creates a mocked circle game object.
+     * @param {number} x - The x coordinate.
+     * @param {number} y - The y coordinate.
+     * @param {number} radius - The radius of the circle.
+     * @param {number} color - The fill color.
+     * @param {number} alpha - The alpha value.
+     * @returns {Object} The mocked circle object.
+     */
+    circle: jest.fn(() => mockGameObject()),
     image: jest.fn(() => new Phaser.GameObjects.Image()),
     graphics: jest.fn(() => new Phaser.GameObjects.Graphics()),
     text: jest.fn(() => new Phaser.GameObjects.Text()),
