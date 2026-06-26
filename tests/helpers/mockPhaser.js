@@ -23,6 +23,11 @@ export const mockGameObject = () => {
         setScrollFactor: jest.fn().mockReturnThis(),
         setDepth: jest.fn().mockReturnThis(),
         setText: jest.fn().mockReturnThis(),
+        /**
+         * Sets the text color.
+         * @param {string} color - The color string.
+         * @returns {Object} The mocked game object instance for chaining.
+         */
         setColor: jest.fn().mockReturnThis(),
         setFillStyle: jest.fn().mockReturnThis(),
         setStrokeStyle: jest.fn().mockReturnThis(),
@@ -30,7 +35,6 @@ export const mockGameObject = () => {
         setScale: jest.fn().mockReturnThis(),
         setAngle: jest.fn().mockReturnThis(),
         setFrame: jest.fn().mockReturnThis(),
-        setColor: jest.fn().mockReturnThis(),
         clear: jest.fn(),
         fillStyle: jest.fn().mockReturnThis(),
         fillRect: jest.fn().mockReturnThis(),
@@ -69,7 +73,7 @@ export const setupPhaserMock = () => {
                 };
                 this.time = {
                     delayedCall: jest.fn((delay, callback) => { callback(); return { destroy: jest.fn() }; }),
-                    addEvent: jest.fn(() => ({ destroy: jest.fn(), remove: jest.fn(), getElapsedSeconds: jest.fn(() => 0) })),
+                    addEvent: jest.fn(() => ({ destroy: jest.fn(), remove: jest.fn() })),
                     now: 0
                 };
                 this.tweens = {
@@ -92,7 +96,7 @@ export const setupPhaserMock = () => {
                 this.game = { events: { emit: jest.fn(), on: jest.fn(), off: jest.fn() } };
                 this.events = { on: jest.fn(), off: jest.fn(), emit: jest.fn() };
                 this.input = {
-                    keyboard: { createCursorKeys: jest.fn(() => ({})), on: jest.fn(), off: jest.fn() },
+                    keyboard: { on: jest.fn(), off: jest.fn() },
                     on: jest.fn(),
                     off: jest.fn(),
                     setDefaultCursor: jest.fn(),
@@ -121,7 +125,6 @@ export const setupPhaserMock = () => {
             Text: class Text { constructor() { Object.assign(this, mockGameObject()); } },
             TileSprite: class TileSprite { constructor() { Object.assign(this, mockGameObject()); } },
             Container: class Container { constructor() { Object.assign(this, mockGameObject()); } },
-            Line: class Line { constructor() { Object.assign(this, mockGameObject()); } },
             RenderTexture: class RenderTexture {
                 constructor() {
                     Object.assign(this, mockGameObject());
@@ -155,7 +158,7 @@ export const setupPhaserMock = () => {
                 constructor(x, y, width, height) {
                     this.x = x; this.y = y; this.width = width; this.height = height;
                 }
-                contains() { return true; }
+                contains(x, y) { return true; }
             },
             Intersects: {
                 RectangleToRectangle: jest.fn().mockReturnValue(false)
@@ -166,13 +169,21 @@ export const setupPhaserMock = () => {
 
 export const createMockAdd = () => ({
     sprite: jest.fn(() => new Phaser.GameObjects.Sprite()),
+    /**
+     * Creates a mocked circle game object.
+     * @param {number} x - The x coordinate.
+     * @param {number} y - The y coordinate.
+     * @param {number} radius - The radius of the circle.
+     * @param {number} color - The fill color.
+     * @param {number} alpha - The alpha value.
+     * @returns {Object} The mocked circle object.
+     */
     circle: jest.fn(() => mockGameObject()),
     image: jest.fn(() => new Phaser.GameObjects.Image()),
     graphics: jest.fn(() => new Phaser.GameObjects.Graphics()),
     text: jest.fn(() => new Phaser.GameObjects.Text()),
     tileSprite: jest.fn(() => new Phaser.GameObjects.TileSprite()),
     rectangle: jest.fn(() => mockGameObject()),
-    line: jest.fn(() => mockGameObject()),
     zone: jest.fn(() => mockGameObject()),
     renderTexture: jest.fn(() => new Phaser.GameObjects.RenderTexture()),
     container: jest.fn(() => ({ ...mockGameObject(), add: jest.fn(), removeAll: jest.fn() })),

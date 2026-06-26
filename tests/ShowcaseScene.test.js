@@ -5,10 +5,24 @@ setupPhaserMock();
 
 // Enhance Container mock for list management
 const originalContainer = global.Phaser.GameObjects.Container;
+/**
+ * @class Container
+ * @classdesc
+ * Enhanced mock for Phaser.GameObjects.Container that supports list management and adding multiple children.
+ */
 global.Phaser.GameObjects.Container = class Container {
+    /**
+     * Initializes the mock container with an empty list.
+     */
     constructor() {
         Object.assign(this, mockGameObject());
         this.list = [];
+
+        /**
+         * Adds a single child or an array of children to the container.
+         * @param {Object|Array} child - The child object(s) to add.
+         * @returns {Container} The container instance for chaining.
+         */
         this.add = (child) => {
             if (Array.isArray(child)) {
                 this.list = this.list.concat(child);
@@ -17,6 +31,12 @@ global.Phaser.GameObjects.Container = class Container {
             }
             return this;
         };
+
+        /**
+         * Adds an array of children to the container.
+         * @param {Array} children - The array of child objects to add.
+         * @returns {Container} The container instance for chaining.
+         */
         this.addMultiple = (children) => { this.list = this.list.concat(children); return this; };
     }
 };
@@ -46,6 +66,10 @@ jest.mock('../js/Config', () => ({
         }
     }
 }));
+
+afterAll(() => {
+    global.Phaser.GameObjects.Container = originalContainer;
+});
 
 describe('ShowcaseScene', () => {
     // Ensure we have a circle mock on the scene add object specifically for this test file
