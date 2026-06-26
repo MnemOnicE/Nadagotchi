@@ -135,19 +135,13 @@ describe('WikiUI', () => {
             const renderCatsSpy = jest.spyOn(wikiUI, 'renderCategories');
             const renderEntriesSpy = jest.spyOn(wikiUI, 'renderEntries');
 
-            // Get the rectangle for "items" and simulate click
-            // It sets up click listener on btnBg
-            // itemsBg unused
-            scene.add.rectangle.mock.results.find(res => {
-               // We need to find the listener somehow, but since it's a mock, we can invoke the 'on' handler manually
-               return res.value && res.value.listeners && res.value.listeners['pointerdown'];
-            });
+            // Find all rectangles that have a 'pointerdown' listener registered
+            const catRects = scene.add.rectangle.mock.results
+                .map(res => res.value)
+                .filter(rect => rect && rect.listeners && rect.listeners['pointerdown']);
 
-            // Since our mock GameObject just stores listeners, we can call it:
-            // Find the one for the second category (items)
-            const allRects = scene.add.rectangle.mock.results;
-            // The first two might be overlay and modal BG, then category buttons
-            const catRect2 = allRects[allRects.length - 1].value;
+            // The second category button is "items"
+            const catRect2 = catRects[1];
             catRect2.emit('pointerdown');
 
             expect(wikiUI.currentCategory).toBe("items");
