@@ -126,7 +126,7 @@ describe('ExpeditionSystem', () => {
 describe('ExpeditionSystem Additional Coverage', () => {
     test('generatePath should use rng.range fallback when rng.random is not available', () => {
         const fallbackRng = {
-            range: (min, max) => min + Math.floor(Math.random() * (max - min))
+            range: (min, max) => min + Math.floor(0.5 * (max - min))
         };
         const system = new ExpeditionSystem(fallbackRng);
         const path = system.generatePath('Spring', 'Sunny', 'Forest', 2);
