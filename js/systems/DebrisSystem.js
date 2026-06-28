@@ -78,8 +78,6 @@ export class DebrisSystem {
         const overlapThresholdSq = overlapThreshold * overlapThreshold;
         const location = this.pet.location || 'GARDEN';
 
-        const existingDebris = Object.values(this.pet.debris);
-
         // Try to find a spot that doesn't overlap existing debris
         while (!valid && attempts < maxAttempts) {
             attempts++;
@@ -88,7 +86,9 @@ export class DebrisSystem {
 
             // Check overlap with existing debris in same location
             let isOverlapping = false;
-            for (const d of existingDebris) {
+            for (const key in this.pet.debris) {
+                if (!Object.hasOwn(this.pet.debris, key)) continue;
+                const d = this.pet.debris[key];
                 const dLoc = d.location || 'GARDEN';
                 if (dLoc !== location) continue;
 
