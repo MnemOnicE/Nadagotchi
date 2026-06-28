@@ -56,6 +56,7 @@ export class WeatherParticleManager {
             quantity: 0, // Very sparse
             on: false
         });
+        this.emittersArray = Object.values(this.emitters);
     }
 
     /**
@@ -70,7 +71,9 @@ export class WeatherParticleManager {
         this.currentSeason = season;
 
         // Reset all
-        Object.values(this.emitters).forEach(e => e.stop());
+        for (let i = 0; i < this.emittersArray.length; i++) {
+            this.emittersArray[i].stop();
+        }
 
         // Weather Overrides
         if (weather === 'Rainy') {
@@ -94,14 +97,15 @@ export class WeatherParticleManager {
 
     resize(width, height) {
         // Update emitter bounds
-        Object.values(this.emitters).forEach(e => {
+        for (let i = 0; i < this.emittersArray.length; i++) {
+            const e = this.emittersArray[i];
             e.setPosition(0, -10); // Reset origin
             e.setEmitZone({
                 source: new Phaser.Geom.Rectangle(0, -10, width, 1),
                 type: 'random',
                 quantity: 1
             });
-        });
+        }
 
         // Correct approach for Phaser 3:
         if (this.emitters.rain) this.emitters.rain.setBounds(0, 0, width, height);
