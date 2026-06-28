@@ -87,7 +87,6 @@ export class DebrisSystem {
             // Check overlap with existing debris in same location
             let isOverlapping = false;
             for (const key in this.pet.debris) {
-                if (!Object.hasOwn(this.pet.debris, key)) continue;
                 const d = this.pet.debris[key];
                 const dLoc = d.location || 'GARDEN';
                 if (dLoc !== location) continue;
