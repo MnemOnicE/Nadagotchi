@@ -134,8 +134,9 @@ export class PersistenceManager {
         }
 
         const keysToRemove = [];
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
+        const keys = Object.keys(localStorage);
+        for (let i = 0; i < keys.length; i++) {
+            const key = keys[i];
             if (key && (key.startsWith('nadagotchi_') || key === 'hall_of_fame')) {
                 keysToRemove.push(key);
             }
