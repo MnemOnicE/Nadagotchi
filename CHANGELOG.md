@@ -42,7 +42,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Action Combos:** Performing specific sequences of actions (e.g., Meditate -> Study, Play -> Explore) now applies temporary multipliers or discounts.
 - **Autonomous Furniture Interactions:** When indoors, pets will now occasionally seek out and interact with placed furniture autonomously, triggering the appropriate events.
 ### Security
-*   Fixed an issue where `Config.SECURITY.DNA_SALT` fell back to a hardcoded string `DEVELOPMENT_ONLY_SALT` when the `VITE_DNA_SALT` environment variable was not set. It now dynamically generates a secure local salt using `window.crypto.getRandomValues()` or `crypto.randomBytes()`, and persists it securely via `localStorage.getItem('nadagotchi_dna_salt')`.
+- **Insecure Randomness:** Replaced all fallback usages of `Math.random()` in `GeneticsSystem` with cryptographically secure alternatives (`CryptoUtils.getRandomSafeFloat()` and `CryptoUtils.getRandomSafeInt()`) to prevent predictability and manipulation of game mechanics.
+- Fixed an issue where `Config.SECURITY.DNA_SALT` fell back to a hardcoded string `DEVELOPMENT_ONLY_SALT` when the `VITE_DNA_SALT` environment variable was not set. It now dynamically generates a secure local salt using `window.crypto.getRandomValues()` or `crypto.randomBytes()`, and persists it securely via `localStorage.getItem('nadagotchi_dna_salt')`.
 
 ### Fixed
 - Improved test coverage for `ExpeditionSystem` to cover fallback RNG path and missing skill parameters in choices.

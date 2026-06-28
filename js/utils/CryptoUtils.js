@@ -76,6 +76,14 @@ export class CryptoUtils {
     }
 
     /**
+     * Generates a cryptographically secure random float between 0 (inclusive) and 1 (exclusive).
+     * @returns {number} The random float.
+     */
+    static getRandomSafeFloat() {
+        return this._get32BitRandom() / 4294967296;
+    }
+
+    /**
      * Internal helper to get a random 32-bit unsigned integer.
      * @returns {number}
      * @private

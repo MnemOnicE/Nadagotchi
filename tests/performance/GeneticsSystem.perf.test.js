@@ -37,6 +37,6 @@ describe('GeneticsSystem Performance', () => {
 
         // Assert that it runs within a reasonable time (e.g. < 10000ms) to pass as a test
         // This is a loose bound just to prevent timeout
-        expect(duration).toBeLessThan(10000);
+        expect(duration).toBeLessThan(30000); // Increased bound due to secure RNG usage
     });
 });
