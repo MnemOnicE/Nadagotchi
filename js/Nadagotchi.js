@@ -1253,17 +1253,17 @@ export class Nadagotchi {
         this._cachedGlobalPenalty = 0;
         this._cachedLocalPenalties = {};
 
-        // Use Object.keys for iteration to avoid intermediate array allocation from Object.values()
+        const weedPenalty = Config?.DEBRIS?.HAPPINESS_PENALTY_PER_WEED ?? 0.005;
+        const poopPenalty = Config?.DEBRIS?.HAPPINESS_PENALTY_PER_POOP ?? 0.02;
+
+        // Use for...in with Object.hasOwn to completely avoid intermediate array allocation
         // and reduce Garbage Collection pressure in the live loop.
-        for (const id of Object.keys(this.debris)) {
+        for (const id in this.debris) {
+            if (!Object.hasOwn(this.debris, id)) continue;
             const d = this.debris[id];
             let penalty = 0;
-            const penalties = { weed: Config?.DEBRIS?.HAPPINESS_PENALTY_PER_WEED || 0.005, poop: Config?.DEBRIS?.HAPPINESS_PENALTY_PER_POOP || 0.02 };
-            penalty = penalties[d.type] || 0;
-            if (d.type === 'weed') penalty = Config.DEBRIS?.HAPPINESS_PENALTY_PER_WEED ?? 0.005;
-            else if (d.type === 'poop') penalty = Config.DEBRIS?.HAPPINESS_PENALTY_PER_POOP ?? 0.02;
-            if (d.type === 'weed') penalty = Config?.DEBRIS?.HAPPINESS_PENALTY_PER_WEED || 0.005;
-            else if (d.type === 'poop') penalty = Config?.DEBRIS?.HAPPINESS_PENALTY_PER_POOP || 0.02;
+            if (d.type === 'weed') penalty = weedPenalty;
+            else if (d.type === 'poop') penalty = poopPenalty;
 
             if (penalty > 0) {
                 this._cachedGlobalPenalty += penalty;
