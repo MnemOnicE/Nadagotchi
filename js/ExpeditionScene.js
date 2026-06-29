@@ -307,7 +307,8 @@ export class ExpeditionScene extends Phaser.Scene {
         };
 
         this.input.keyboard.on('keydown-SPACE', handleInput);
-        // this.input.on('pointerdown', handleInput); // Pointer mash is annoying on click
+        // TODO: Re-enabling pointer input requires storing the callback reference first, otherwise this.input.off('pointerdown') will remove other scene-wide tap handlers.
+        // this.input.on('pointerdown', handleInput);
 
         // Add a visual button for mash
         const mashBtn = ButtonFactory.createButton(this, 450, 430, "MASH!", handleInput, { width: 100, height: 60, color: 0xFF0000 });

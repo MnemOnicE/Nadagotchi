@@ -185,6 +185,11 @@ describe('AchievementManager', () => {
     });
 
     describe('Initialization Edge Cases', () => {
+        /**
+         * Sets the PersistenceManager mock implementation to return a specific state.
+         * @param {object} state - The state object to return from loadAchievements.
+         * @returns {void}
+         */
         const mockLoadResponse = (state) => {
             PersistenceManager.mockImplementationOnce(() => ({
                 loadAchievements: () => state,
