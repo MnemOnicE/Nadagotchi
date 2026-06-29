@@ -280,10 +280,10 @@ export const Config = {
                             const bytes = crypto.randomBytes(16);
                             for (let i = 0; i < 4; i++) array[i] = bytes.readUInt32BE(i * 4);
                         } catch (e) {
-                            for(let i=0; i<4; i++) array[i] = Math.floor(Math.random() * 0xFFFFFFFF);
+                            throw new Error("No secure random number generator available.");
                         }
                     } else {
-                        for(let i=0; i<4; i++) array[i] = Math.floor(Math.random() * 0xFFFFFFFF);
+                        throw new Error("No secure random number generator available.");
                     }
                     salt = Array.from(array).map(b => b.toString(16).padStart(8, '0')).join('');
                     localStorage.setItem('nadagotchi_dna_salt', salt);
