@@ -220,7 +220,7 @@ export class GeneticsSystem {
      */
     static mutateAllele(geneKey, value, rng = null) {
         const random = rng ? () => rng.random() : () => CryptoUtils.getRandomSafeFloat();
-        const choice = rng ? (arr) => rng.choice(arr) : (arr) => arr[CryptoUtils.getRandomSafeInt(0, arr.length - 1)];
+        const choice = rng ? (arr) => rng.choice(arr) : (arr) => (!arr || arr.length === 0) ? null : arr[CryptoUtils.getRandomSafeInt(0, arr.length - 1)];
 
         if (geneKey === 'specialAbility') {
             // Chance to flip to a random trait or back to null
