@@ -185,51 +185,43 @@ describe('AchievementManager', () => {
     });
 
     describe('Initialization Edge Cases', () => {
-        it('should initialize missing state.unlocked property when undefined', () => {
+        const mockLoadResponse = (state) => {
             PersistenceManager.mockImplementationOnce(() => ({
-                loadAchievements: () => ({ unlocked: undefined, progress: {} }),
+                loadAchievements: () => state,
                 saveAchievements: jest.fn()
             }));
+        };
+
+        it('should initialize missing state.unlocked property when undefined', () => {
+            mockLoadResponse({ unlocked: undefined, progress: {} });
             const newManager = new AchievementManager(gameMock);
             expect(newManager.state.unlocked).toEqual([]);
             expect(newManager.state.progress).toEqual({});
         });
 
         it('should initialize missing state.progress property when undefined', () => {
-            PersistenceManager.mockImplementationOnce(() => ({
-                loadAchievements: () => ({ unlocked: [], progress: undefined }),
-                saveAchievements: jest.fn()
-            }));
+            mockLoadResponse({ unlocked: [], progress: undefined });
             const newManager = new AchievementManager(gameMock);
             expect(newManager.state.unlocked).toEqual([]);
             expect(newManager.state.progress).toEqual({});
         });
 
         it('should handle false properties', () => {
-            PersistenceManager.mockImplementationOnce(() => ({
-                loadAchievements: () => ({ unlocked: false, progress: false }),
-                saveAchievements: jest.fn()
-            }));
+            mockLoadResponse({ unlocked: false, progress: false });
             const newManager = new AchievementManager(gameMock);
             expect(newManager.state.unlocked).toEqual([]);
             expect(newManager.state.progress).toEqual({});
         });
 
         it('should initialize completely null state properties explicitly', () => {
-            PersistenceManager.mockImplementationOnce(() => ({
-                loadAchievements: () => ({ unlocked: null, progress: null }),
-                saveAchievements: jest.fn()
-            }));
+            mockLoadResponse({ unlocked: null, progress: null });
             const newManager = new AchievementManager(gameMock);
             expect(newManager.state.unlocked).toEqual([]);
             expect(newManager.state.progress).toEqual({});
         });
 
         it('should initialize missing state properties (empty object)', () => {
-            PersistenceManager.mockImplementationOnce(() => ({
-                loadAchievements: () => ({}),
-                saveAchievements: jest.fn()
-            }));
+            mockLoadResponse({});
             const newManager = new AchievementManager(gameMock);
             expect(newManager.state.unlocked).toEqual([]);
             expect(newManager.state.progress).toEqual({});

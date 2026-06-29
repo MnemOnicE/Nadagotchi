@@ -307,6 +307,7 @@ export class ExpeditionScene extends Phaser.Scene {
         };
 
         this.input.keyboard.on('keydown-SPACE', handleInput);
+        // this.input.on('pointerdown', handleInput); // Pointer mash is annoying on click
 
         // Add a visual button for mash
         const mashBtn = ButtonFactory.createButton(this, 450, 430, "MASH!", handleInput, { width: 100, height: 60, color: 0xFF0000 });
