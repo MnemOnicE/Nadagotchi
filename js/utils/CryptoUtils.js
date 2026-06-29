@@ -80,7 +80,7 @@ export class CryptoUtils {
      * @returns {number} The random float.
      */
     static getRandomSafeFloat() {
-        return CryptoUtils._get32BitRandom() / 4294967296;
+        return this._get32BitRandom() / 4294967296;
     }
 
     /**

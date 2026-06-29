@@ -29,9 +29,7 @@ export class Genome {
      * @param {SeededRandom} [rng=null] - The seeded RNG instance. Required if genes or phenotype are missing/incomplete.
      */
     constructor(genes = null, phenotype = null, rng = null) {
-        // Fallback to secure CryptoUtils randomness if no RNG provided (Legacy support / Safety)
-        const random = rng ? () => rng.random() : () => CryptoUtils.getRandomSafeFloat();
-        const range = rng ? (min, max) => rng.range(min, max) : (min, max) => CryptoUtils.getRandomSafeInt(min, max - 1);
+        const { random, range } = GeneticsSystem._resolveRNG(rng);
 
         // Genotype: The hidden DNA (Pairs of [Allele1, Allele2])
         if (genes) {
@@ -72,8 +70,7 @@ export class Genome {
      * @returns {Object} The phenotype object containing expressed values and homozygous flags.
      */
     calculatePhenotype(rng = null) {
-        const random = rng ? () => rng.random() : () => CryptoUtils.getRandomSafeFloat();
-        const choice = rng ? (arr) => rng.choice(arr) : (arr) => (!arr || arr.length === 0) ? null : arr[CryptoUtils.getRandomSafeInt(0, arr.length - 1)];
+        const { random, choice } = GeneticsSystem._resolveRNG(rng);
 
         const phenotype = {};
         for (const [trait, alleles] of Object.entries(this.genotype)) {
@@ -123,6 +120,19 @@ export class Genome {
  */
 export class GeneticsSystem {
     /**
+     * Resolves the RNG adapters (random, range, choice) using either the provided SeededRandom instance
+     * or the secure CryptoUtils fallback if no RNG is provided.
+     * @param {SeededRandom|null} rng - The seeded RNG instance, or null to use CryptoUtils fallback.
+     * @returns {Object} An object containing the adapter functions { random, range, choice }.
+     */
+    static _resolveRNG(rng = null) {
+        return {
+            random: rng ? () => rng.random() : () => CryptoUtils.getRandomSafeFloat(),
+            range: rng ? (min, max) => rng.range(min, max) : (min, max) => CryptoUtils.getRandomSafeInt(min, max - 1),
+            choice: rng ? (arr) => rng.choice(arr) : (arr) => arr[CryptoUtils.getRandomSafeInt(0, arr.length - 1)]
+        };
+    }
+    /**
      * Map of item IDs to Gene targets and values.
      */
     static ENV_MAP = {
@@ -154,9 +164,7 @@ export class GeneticsSystem {
      * @returns {Genome} A new Genome instance for the offspring.
      */
     static breed(parentGenome, environmentalItems = [], rng = null) {
-        const random = rng ? () => rng.random() : () => CryptoUtils.getRandomSafeFloat();
-        const range = rng ? (min, max) => rng.range(min, max) : (min, max) => CryptoUtils.getRandomSafeInt(min, max - 1);
-        const choice = rng ? (arr) => rng.choice(arr) : (arr) => (!arr || arr.length === 0) ? null : arr[CryptoUtils.getRandomSafeInt(0, arr.length - 1)];
+        const { random, range, choice } = GeneticsSystem._resolveRNG(rng);
 
         const newGenotype = {};
         const parentGenotype = parentGenome.genotype;
@@ -219,8 +227,7 @@ export class GeneticsSystem {
      * @returns {*} The mutated value.
      */
     static mutateAllele(geneKey, value, rng = null) {
-        const random = rng ? () => rng.random() : () => CryptoUtils.getRandomSafeFloat();
-        const choice = rng ? (arr) => rng.choice(arr) : (arr) => (!arr || arr.length === 0) ? null : arr[CryptoUtils.getRandomSafeInt(0, arr.length - 1)];
+        const { random, choice } = GeneticsSystem._resolveRNG(rng);
 
         if (geneKey === 'specialAbility') {
             // Chance to flip to a random trait or back to null

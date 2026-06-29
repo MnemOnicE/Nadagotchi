@@ -1,8 +1,10 @@
 import { GeneticsSystem, Genome } from '../../js/GeneticsSystem.js';
+import { SeededRandom } from '../../js/utils/SeededRandom.js';
 
 describe('GeneticsSystem Performance', () => {
     test('breed() with large environmental items list', () => {
-        const parentGenome = new Genome(); // Random wild genome
+        const deterministicRng = new SeededRandom('performance_seed');
+        const parentGenome = new Genome(null, null, deterministicRng); // Random wild genome
 
         // Construct a large environmental items list
         // Mix of valid items and noise
@@ -27,7 +29,7 @@ describe('GeneticsSystem Performance', () => {
         const start = Date.now();
 
         for (let i = 0; i < iterations; i++) {
-            GeneticsSystem.breed(parentGenome, environmentalItems);
+            GeneticsSystem.breed(parentGenome, environmentalItems, deterministicRng);
         }
 
         const end = Date.now();
@@ -37,6 +39,6 @@ describe('GeneticsSystem Performance', () => {
 
         // Assert that it runs within a reasonable time (e.g. < 10000ms) to pass as a test
         // This is a loose bound just to prevent timeout
-        expect(duration).toBeLessThan(30000); // Increased bound due to secure RNG usage
+        expect(duration).toBeLessThan(10000); // Tighter bound now that deterministic RNG is used
     });
 });
