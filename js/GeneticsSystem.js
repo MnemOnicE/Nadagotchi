@@ -156,7 +156,7 @@ export class GeneticsSystem {
     static breed(parentGenome, environmentalItems = [], rng = null) {
         const random = rng ? () => rng.random() : () => CryptoUtils.getRandomSafeFloat();
         const range = rng ? (min, max) => rng.range(min, max) : (min, max) => CryptoUtils.getRandomSafeInt(min, max - 1);
-        const choice = rng ? (arr) => rng.choice(arr) : (arr) => arr[CryptoUtils.getRandomSafeInt(0, arr.length - 1)];
+        const choice = rng ? (arr) => rng.choice(arr) : (arr) => (!arr || arr.length === 0) ? null : arr[CryptoUtils.getRandomSafeInt(0, arr.length - 1)];
 
         const newGenotype = {};
         const parentGenotype = parentGenome.genotype;
