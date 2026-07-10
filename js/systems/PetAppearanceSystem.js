@@ -29,8 +29,8 @@ export class PetAppearanceSystem {
      */
     _generateBodyParts() {
         // Use genome to influence body part selection if available
-        const genome = this.pet.genome;
-        const dominantArchetype = this.pet.dominantArchetype;
+        const genome = this.pet?.genome;
+        const dominantArchetype = this.pet?.dominantArchetype || 'Adventurer';
 
         // Base body parts with variations
         const headTypes = ['round', 'square', 'pointy', 'heart'];
@@ -39,7 +39,7 @@ export class PetAppearanceSystem {
         const feetTypes = ['small', 'medium', 'large', 'hooved'];
 
         // Select body parts based on archetype or random
-        const seed = genome ? this._hashString(JSON.stringify(genome.dna)) : Math.random();
+        const seed = genome?.dna ? this._hashString(JSON.stringify(genome.dna)) : Math.random();
         const rng = this._seededRandom(seed);
 
         return {
@@ -56,8 +56,8 @@ export class PetAppearanceSystem {
      * @returns {Object} Color configuration with primary, secondary, and accent colors.
      */
     _generateColors() {
-        const genome = this.pet.genome;
-        const seed = genome ? this._hashString(JSON.stringify(genome.dna)) : Math.random();
+        const genome = this.pet?.genome;
+        const seed = genome?.dna ? this._hashString(JSON.stringify(genome.dna)) : Math.random();
         const rng = this._seededRandom(seed + 1); // Different seed for colors
 
         // Color palettes based on archetype
@@ -69,7 +69,7 @@ export class PetAppearanceSystem {
             Recluse: { primary: ['#696969', '#808080', '#A9A9A9'], secondary: ['#000000', '#404040'] }
         };
 
-        const dominantArchetype = this.pet.dominantArchetype;
+        const dominantArchetype = this.pet?.dominantArchetype || 'Adventurer';
         const palette = archetypePalettes[dominantArchetype] || archetypePalettes.Intellectual;
 
         return {
@@ -85,8 +85,8 @@ export class PetAppearanceSystem {
      * @returns {Object} Markings configuration with pattern type and color.
      */
     _generateMarkings() {
-        const genome = this.pet.genome;
-        const seed = genome ? this._hashString(JSON.stringify(genome.dna)) : Math.random();
+        const genome = this.pet?.genome;
+        const seed = genome?.dna ? this._hashString(JSON.stringify(genome.dna)) : Math.random();
         const rng = this._seededRandom(seed + 2); // Different seed for markings
 
         const markingTypes = ['none', 'stripes', 'spots', 'swirls', 'patches', 'gradient'];
@@ -160,6 +160,7 @@ export class PetAppearanceSystem {
      * @returns {number} Hash value.
      */
     _hashString(str) {
+        if (!str) return Math.random();
         let hash = 0;
         for (let i = 0; i < str.length; i++) {
             const char = str.charCodeAt(i);
