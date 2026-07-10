@@ -33,10 +33,13 @@ export class PetAppearanceSystem {
         const dominantArchetype = this.pet?.dominantArchetype || 'Adventurer';
 
         // Base body parts with variations
-        const headTypes = ['round', 'square', 'pointy', 'heart'];
-        const torsoTypes = ['small', 'medium', 'large', 'stocky'];
-        const handTypes = ['small', 'medium', 'large', 'paw'];
-        const feetTypes = ['small', 'medium', 'large', 'hooved'];
+        const headTypes = ['round', 'square', 'pointy', 'heart', 'oval', 'diamond'];
+        const torsoTypes = ['small', 'medium', 'large', 'stocky', 'slim', 'plump'];
+        const handTypes = ['small', 'medium', 'large', 'paw', 'claw', 'hoof'];
+        const feetTypes = ['small', 'medium', 'large', 'hooved', 'pawed', 'clawed'];
+        const earTypes = ['round', 'pointy', 'floppy', 'perked', 'long', 'short', 'bat'];
+        const tailTypes = ['none', 'short', 'long', 'curly', 'bushy', 'spiked', 'fluffy'];
+        const accessoryTypes = ['none', 'hat', 'glasses', 'scarf', 'bowtie', 'crown', 'bandana', 'wings'];
 
         // Select body parts based on archetype or random
         const seed = genome?.dna ? this._hashString(JSON.stringify(genome.dna)) : Math.random();
@@ -46,7 +49,10 @@ export class PetAppearanceSystem {
             head: this._selectWithBias(headTypes, dominantArchetype, 'head', rng),
             torso: this._selectWithBias(torsoTypes, dominantArchetype, 'torso', rng),
             hands: this._selectWithBias(handTypes, dominantArchetype, 'hands', rng),
-            feet: this._selectWithBias(feetTypes, dominantArchetype, 'feet', rng)
+            feet: this._selectWithBias(feetTypes, dominantArchetype, 'feet', rng),
+            ears: this._selectWithBias(earTypes, dominantArchetype, 'ears', rng),
+            tail: this._selectWithBias(tailTypes, dominantArchetype, 'tail', rng),
+            accessory: this._selectWithBias(accessoryTypes, dominantArchetype, 'accessory', rng)
         };
     }
 
@@ -115,11 +121,51 @@ export class PetAppearanceSystem {
     _selectWithBias(options, archetype, partType, rng) {
         // Define archetype preferences for each body part
         const preferences = {
-            Intellectual: { head: 'round', torso: 'medium', hands: 'medium', feet: 'small' },
-            Adventurer: { head: 'square', torso: 'large', hands: 'large', feet: 'large' },
-            Nurturer: { head: 'heart', torso: 'medium', hands: 'small', feet: 'small' },
-            Mischievous: { head: 'pointy', torso: 'small', hands: 'paw', feet: 'hooved' },
-            Recluse: { head: 'round', torso: 'stocky', hands: 'small', feet: 'medium' }
+            Intellectual: {
+                head: 'round',
+                torso: 'medium',
+                hands: 'medium',
+                feet: 'small',
+                ears: 'pointy',
+                tail: 'none',
+                accessory: 'glasses'
+            },
+            Adventurer: {
+                head: 'square',
+                torso: 'large',
+                hands: 'large',
+                feet: 'large',
+                ears: 'perked',
+                tail: 'bushy',
+                accessory: 'bandana'
+            },
+            Nurturer: {
+                head: 'heart',
+                torso: 'plump',
+                hands: 'small',
+                feet: 'small',
+                ears: 'floppy',
+                tail: 'curly',
+                accessory: 'bowtie'
+            },
+            Mischievous: {
+                head: 'pointy',
+                torso: 'slim',
+                hands: 'paw',
+                feet: 'hooved',
+                ears: 'bat',
+                tail: 'spiked',
+                accessory: 'crown'
+            },
+            Recluse: {
+                head: 'oval',
+                torso: 'stocky',
+                hands: 'small',
+                feet: 'medium',
+                ears: 'round',
+                tail: 'none',
+                accessory: 'scarf'
+            }
         };
 
         const pref = preferences[archetype]?.[partType];
@@ -236,15 +282,19 @@ export class PetAppearanceSystem {
         
         // Define base sizes for different body parts
         const partSizes = {
-            head: { small: 40, medium: 50, large: 60 },
-            torso: { small: 60, medium: 70, large: 80, stocky: 75 },
-            hands: { small: 20, medium: 25, large: 30, paw: 22 },
-            feet: { small: 25, medium: 30, large: 35, hooved: 32 }
+            head: { small: 40, medium: 50, large: 60, round: 50, square: 55, pointy: 45, heart: 50, oval: 48, diamond: 52 },
+            torso: { small: 60, medium: 70, large: 80, stocky: 75, slim: 65, plump: 78 },
+            hands: { small: 20, medium: 25, large: 30, paw: 22, claw: 24, hoof: 26 },
+            feet: { small: 25, medium: 30, large: 35, hooved: 32, pawed: 28, clawed: 26 },
+            ears: { round: 15, pointy: 20, floppy: 25, perked: 18, long: 22, short: 12, bat: 28 },
+            tail: { short: 20, long: 40, curly: 35, bushy: 45, spiked: 30, fluffy: 50 },
+            accessory: { hat: 30, glasses: 25, scarf: 40, bowtie: 20, crown: 35, bandana: 25, wings: 60 }
         };
 
         // Map body part types to sizes
         const headSize = partSizes.head[appearance.bodyParts.head] || 50;
         const torsoSize = partSizes.torso[appearance.bodyParts.torso] || 70;
+        const earSize = partSizes.ears[appearance.bodyParts.ears] || 15;
 
         return {
             // Base body configuration
@@ -298,10 +348,45 @@ export class PetAppearanceSystem {
                     offsetY: torsoSize / 2 + 5
                 }
             },
+            // Ears configuration
+            ears: {
+                left: {
+                    width: earSize,
+                    height: earSize * 1.5,
+                    color: appearance.colors.secondary,
+                    offsetX: -headSize / 2 + 5,
+                    offsetY: -torsoSize / 2 - headSize / 2 - earSize / 2
+                },
+                right: {
+                    width: earSize,
+                    height: earSize * 1.5,
+                    color: appearance.colors.secondary,
+                    offsetX: headSize / 2 - 5,
+                    offsetY: -torsoSize / 2 - headSize / 2 - earSize / 2
+                }
+            },
+            // Tail configuration
+            tail: appearance.bodyParts.tail !== 'none' ? {
+                width: 15,
+                height: partSizes.tail[appearance.bodyParts.tail] || 30,
+                color: appearance.colors.accent,
+                offsetX: torsoSize / 2 + 10,
+                offsetY: torsoSize / 2 + 5,
+                type: appearance.bodyParts.tail
+            } : null,
+            // Accessory configuration
+            accessory: appearance.bodyParts.accessory !== 'none' ? {
+                type: appearance.bodyParts.accessory,
+                color: appearance.colors.accent,
+                offsetX: 0,
+                offsetY: -torsoSize / 2 - headSize / 2 - 10
+            } : null,
             // Markings
             markings: appearance.markings,
             // Colors
-            colors: appearance.colors
+            colors: appearance.colors,
+            // Raw body parts for reference
+            bodyParts: appearance.bodyParts
         };
     }
 
@@ -354,6 +439,22 @@ export class PetAppearanceSystem {
         this._styleShape(parts.head, config.head.shape);
         container.add(parts.head);
 
+        // Create ears
+        if (config.ears) {
+            parts.leftEar = this._createEar(scene, config.ears.left);
+            parts.rightEar = this._createEar(scene, config.ears.right);
+            container.add(parts.leftEar);
+            container.add(parts.rightEar);
+        }
+
+        // Create accessory (on head)
+        if (config.accessory) {
+            parts.accessory = this._createAccessory(scene, config.accessory, config.head.offsetX, config.head.offsetY);
+            if (parts.accessory) {
+                container.add(parts.accessory);
+            }
+        }
+
         // Create hands
         parts.leftHand = scene.add.rectangle(
             config.hands.left.offsetX,
@@ -395,6 +496,12 @@ export class PetAppearanceSystem {
         );
         this._styleShape(parts.rightFoot, 'rounded-rectangle');
         container.add(parts.rightFoot);
+
+        // Create tail if present
+        if (config.tail) {
+            parts.tail = this._createTail(scene, config.tail);
+            container.add(parts.tail);
+        }
 
         // Add markings if present
         if (config.markings.type !== 'none') {
@@ -451,6 +558,179 @@ export class PetAppearanceSystem {
                 0x000000
             )
         };
+    }
+
+    /**
+     * Creates an ear GameObject based on ear type.
+     * @private
+     * @param {Phaser.Scene} scene - The Phaser scene.
+     * @param {Object} earConfig - Ear configuration.
+     * @returns {Phaser.GameObjects.Rectangle} Ear GameObject.
+     */
+    _createEar(scene, earConfig) {
+        const ear = scene.add.rectangle(
+            earConfig.offsetX,
+            earConfig.offsetY,
+            earConfig.width,
+            earConfig.height,
+            this._hexToNumber(earConfig.color)
+        );
+        
+        // Style ears based on type
+        if (['floppy', 'long'].includes(earConfig.type)) {
+            ear.setRadius(earConfig.width / 2);
+        } else if (['pointy', 'bat'].includes(earConfig.type)) {
+            // Pointy ears - triangle shape using graphics
+            ear.destroy();
+            const graphics = scene.add.graphics({ x: earConfig.offsetX, y: earConfig.offsetY });
+            graphics.fillStyle(this._hexToNumber(earConfig.color));
+            graphics.beginPath();
+            graphics.moveTo(0, 0);
+            graphics.lineTo(earConfig.width / 2, -earConfig.height);
+            graphics.lineTo(-earConfig.width / 2, -earConfig.height);
+            graphics.closePath();
+            graphics.fillPath();
+            return graphics;
+        } else {
+            ear.setRadius(earConfig.width / 4);
+        }
+        
+        return ear;
+    }
+
+    /**
+     * Creates a tail GameObject based on tail type.
+     * @private
+     * @param {Phaser.Scene} scene - The Phaser scene.
+     * @param {Object} tailConfig - Tail configuration.
+     * @returns {Phaser.GameObjects.Graphics} Tail GameObject.
+     */
+    _createTail(scene, tailConfig) {
+        const graphics = scene.add.graphics({ 
+            x: tailConfig.offsetX, 
+            y: tailConfig.offsetY 
+        });
+        const color = this._hexToNumber(tailConfig.color);
+        const width = tailConfig.width || 15;
+        const height = tailConfig.height || 30;
+        
+        graphics.fillStyle(color);
+        
+        switch (tailConfig.type) {
+            case 'short':
+                graphics.fillRoundedRect(-width/2, 0, width, height, width/2);
+                break;
+            case 'long':
+                graphics.fillRoundedRect(-width/2, 0, width, height, width/2);
+                break;
+            case 'curly':
+                // Draw a curly tail (spiral)
+                graphics.beginPath();
+                graphics.moveTo(0, 0);
+                for (let i = 0; i < Math.PI * 4; i += 0.2) {
+                    const r = height * 0.3 * (1 - i / (Math.PI * 4));
+                    const x = Math.cos(i) * r;
+                    const y = Math.sin(i) * r + height * 0.3 * (i / (Math.PI * 4));
+                    graphics.lineTo(x, y);
+                }
+                graphics.strokePath();
+                break;
+            case 'bushy':
+                // Draw a bushy tail (ellipse)
+                graphics.fillEllipse(0, height/2, width, height/1.5);
+                break;
+            case 'spiked':
+                // Draw spikes
+                for (let i = 0; i < 5; i++) {
+                    const angle = (i / 5) * Math.PI * 2;
+                    const spikeWidth = width * 0.4;
+                    const spikeHeight = height * 0.3;
+                    graphics.fillRoundedRect(
+                        -spikeWidth/2 + Math.cos(angle) * width,
+                        -spikeHeight/2 + Math.sin(angle) * width,
+                        spikeWidth, spikeHeight, spikeWidth/2
+                    );
+                }
+                break;
+            case 'fluffy':
+                // Draw a fluffy tail (large ellipse)
+                graphics.fillEllipse(0, height/2, width * 1.5, height);
+                break;
+            default:
+                graphics.fillRoundedRect(-width/2, 0, width, height, width/2);
+        }
+        
+        return graphics;
+    }
+
+    /**
+     * Creates an accessory GameObject based on accessory type.
+     * @private
+     * @param {Phaser.Scene} scene - The Phaser scene.
+     * @param {Object} accessoryConfig - Accessory configuration.
+     * @param {number} headX - Head X position.
+     * @param {number} headY - Head Y position.
+     * @returns {Phaser.GameObjects.Rectangle|Phaser.GameObjects.Graphics|null} Accessory GameObject.
+     */
+    _createAccessory(scene, accessoryConfig, headX, headY) {
+        const color = this._hexToNumber(accessoryConfig.color);
+        
+        switch (accessoryConfig.type) {
+            case 'hat':
+                return scene.add.rectangle(
+                    headX,
+                    headY - 30,
+                    40,
+                    20,
+                    color
+                ).setRadius(5);
+            case 'glasses':
+                // Create glasses with two lenses and a bridge
+                const glasses = scene.add.container(headX, headY);
+                const lensSize = 12;
+                const bridgeWidth = 10;
+                
+                glasses.add(scene.add.circle(-10, -5, lensSize, color));
+                glasses.add(scene.add.circle(10, -5, lensSize, color));
+                glasses.add(scene.add.rectangle(0, -5, bridgeWidth, 4, color));
+                return glasses;
+            case 'scarf':
+                return scene.add.rectangle(
+                    headX,
+                    headY + 15,
+                    50,
+                    15,
+                    color
+                );
+            case 'bowtie':
+                const bowtie = scene.add.container(headX, headY + 10);
+                bowtie.add(scene.add.rectangle(-8, 0, 16, 8, color).setRadius(4));
+                bowtie.add(scene.add.rectangle(-4, -4, 8, 8, color).setRadius(4));
+                return bowtie;
+            case 'crown':
+                const crown = scene.add.container(headX, headY - 25);
+                for (let i = -2; i <= 2; i++) {
+                    const spike = scene.add.triangle(
+                        i * 15, -10, 0, -20, i * 15, 0, color
+                    );
+                    crown.add(spike);
+                }
+                return crown;
+            case 'bandana':
+                return scene.add.triangle(
+                    headX - 10, headY - 10,
+                    headX + 10, headY - 10,
+                    headX, headY - 25,
+                    color
+                );
+            case 'wings':
+                const wings = scene.add.container(headX, headY);
+                wings.add(scene.add.triangle(-20, 0, -40, -15, -40, 15, color));
+                wings.add(scene.add.triangle(20, 0, 40, -15, 40, 15, color));
+                return wings;
+            default:
+                return null;
+        }
     }
 
     /**

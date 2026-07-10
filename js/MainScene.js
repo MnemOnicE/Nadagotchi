@@ -178,6 +178,9 @@ export class MainScene extends Phaser.Scene {
             this.petContainer = petSprite.container;
             this.petContainer.setDepth(20);
             this.sprite = this.petContainer; // Use container as the main pet reference
+            
+            // Initialize animation system
+            this.nadagotchi.initAnimationSystem(this, this.petContainer, petSprite.parts);
         } else {
             this.sprite = this.add.sprite(this.scale.width / 2, this.scale.height / 2, 'pet').setScale(4).setDepth(20);
         }
@@ -660,6 +663,7 @@ export class MainScene extends Phaser.Scene {
             if (this.petContainer && this.nadagotchi.appearanceSystem.resize) {
                 this.nadagotchi.appearanceSystem.resize(gameSize);
             }
+            // Animation system will automatically use updated positions
         }
 
         // Resize dynamic textures via managers

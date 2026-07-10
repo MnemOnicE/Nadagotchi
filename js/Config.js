@@ -8,7 +8,7 @@ export const Config = {
     // Feature Flags
     FEATURES: {
         PROCEDURAL_PETS: true,  // Enable procedurally generated pet appearance
-        ANIMATED_PETS: false    // Future: Enable pet animations
+        ANIMATED_PETS: true     // Enable pet animations (blinking, mood-based)
     },
 
     // Game Start & Genetics

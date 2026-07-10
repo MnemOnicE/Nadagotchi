@@ -12,6 +12,7 @@ import { InventorySystem } from './systems/InventorySystem.js';
 import { QuestSystem } from './systems/QuestSystem.js';
 import { DebrisSystem } from './systems/DebrisSystem.js';
 import { PetAppearanceSystem } from './systems/PetAppearanceSystem.js';
+import { PetAnimationSystem } from './systems/PetAnimationSystem.js';
 
 /**
  * @fileoverview Core logic for the Nadagotchi pet.
@@ -274,6 +275,13 @@ export class Nadagotchi {
         // Initialize Pet Appearance System
         Object.defineProperty(this, 'appearanceSystem', {
             value: new PetAppearanceSystem(this),
+            enumerable: false,
+            writable: true
+        });
+
+        // Initialize Pet Animation System
+        Object.defineProperty(this, 'animationSystem', {
+            value: new PetAnimationSystem(this.appearanceSystem),
             enumerable: false,
             writable: true
         });
@@ -1601,6 +1609,66 @@ export class Nadagotchi {
      */
     regenerateAppearance() {
         this.appearanceSystem.regenerate();
+    }
+
+    /**
+     * Initializes the animation system with the pet sprite.
+     * @param {Phaser.Scene} scene - The Phaser scene.
+     * @param {Phaser.GameObjects.Container} container - The pet container.
+     * @param {Object} parts - The pet parts object.
+     */
+    initAnimationSystem(scene, container, parts) {
+        this.animationSystem.init(scene, container, parts);
+    }
+
+    /**
+     * Updates the pet's animation based on mood.
+     * @param {string} mood - The mood to display (idle, happy, sad, angry, sleep, excited, eat).
+     */
+    updatePetAnimation(mood) {
+        if (this.animationSystem) {
+            this.animationSystem.updateMood(mood);
+        }
+    }
+
+    /**
+     * Plays a specific animation.
+     * @param {string} animation - The animation to play (idle, happy, sad, angry, sleep, excited, eat).
+     */
+    playAnimation(animation) {
+        if (this.animationSystem) {
+            switch (animation) {
+                case 'happy':
+                    this.animationSystem.playHappy();
+                    break;
+                case 'sad':
+                    this.animationSystem.playSad();
+                    break;
+                case 'angry':
+                    this.animationSystem.playAngry();
+                    break;
+                case 'sleep':
+                    this.animationSystem.playSleep();
+                    break;
+                case 'excited':
+                    this.animationSystem.playExcited();
+                    break;
+                case 'eat':
+                    this.animationSystem.playEat();
+                    break;
+                default:
+                    this.animationSystem.playIdle();
+            }
+        }
+    }
+
+    /**
+     * Cleans up animation system (call when scene changes).
+     */
+    cleanupAnimations() {
+        if (this.animationSystem) {
+            this.animationSystem.cleanup();
+        }
     }
 }
 // CI Integrity Check Fix

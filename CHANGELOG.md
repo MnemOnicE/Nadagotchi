@@ -41,18 +41,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added energy cost to NPC interactions (5 energy per interaction).
 
 ### Added
-- **Procedural Pet Appearance System**: Complete body part system with head, torso, hands, and feet.
-  - 4 head types: round, square, pointy, heart
-  - 4 torso types: small, medium, large, stocky
-  - 4 hand types: small, medium, large, paw
-  - 4 feet types: small, medium, large, hooved
+- **Procedural Pet Appearance System**: Complete body part system with head, torso, hands, feet, ears, tail, and accessories.
+  - 6 head types: round, square, pointy, heart, oval, diamond
+  - 6 torso types: small, medium, large, stocky, slim, plump
+  - 6 hand types: small, medium, large, paw, claw, hoof
+  - 6 feet types: small, medium, large, hooved, pawed, clawed
+  - 7 ear types: round, pointy, floppy, perked, long, short, bat
+  - 7 tail types: none, short, long, curly, bushy, spiked, fluffy
+  - 8 accessory types: none, hat, glasses, scarf, bowtie, crown, bandana, wings
   - Archetype-based color palettes (Intellectual=blue, Adventurer=orange, Nurturer=pink, Mischievous=purple, Recluse=gray)
   - 6 marking types: stripes, spots, swirls, patches, gradient, none
   - Deterministic generation from pet DNA for consistent appearance across sessions
   - Feature flag `PROCEDURAL_PETS` to enable/disable (enabled by default)
   - Full test suite (22 tests) for the appearance system
-- **Phase 2.5 & 2.6**: Procedural Pet System and Extra Programmatic Art completed
-- Updated ROADMAP with detailed Phase 2, 2.5, 2.6, and Phase 4 breakdowns
+- **Pet Animation System**: Complete animation framework for procedural pets.
+  - Blinking eyes (every 4 seconds, mood-dependent speed)
+  - Floating idle animation
+  - Mood-based animations: happy (bounce + sparkles), sad (droop), angry (shake + narrow eyes), sleep (breathing), excited (fast bounce), eat (chew)
+  - Tail animations: normal wag, happy wag (faster)
+  - Ear animations: droop when sad
+  - Feature flag `ANIMATED_PETS` to enable/disable (enabled by default)
+  - Full test suite for the animation system
+- **Phase 2.5, 2.6, 2.7**: Procedural Pet System, Extra Programmatic Art, and Enhanced Procedural Art completed
+- **Phase 4**: Pet Animation System added
+- Updated ROADMAP with Phase 2, 2.5, 2.6, 2.7, and expanded Phase 4
 
 ## [0.1.0] - 2024-05-20
 
