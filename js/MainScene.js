@@ -173,7 +173,7 @@ export class MainScene extends Phaser.Scene {
 
         // --- Game Objects ---
         // Procedural pet (if enabled) or static sprite
-        if (Config.FEATURES.PROCEDURAL_PETS && this.nadagotchi.appearanceSystem) {
+        if ((Config.FEATURES && Config.FEATURES.PROCEDURAL_PETS) && this.nadagotchi.appearanceSystem) {
             const petSprite = this.nadagotchi.createPetSprite(this, this.scale.width / 2, this.scale.height / 2);
             this.petContainer = petSprite.container;
             this.petContainer.setDepth(20);
@@ -658,7 +658,7 @@ export class MainScene extends Phaser.Scene {
         }
 
         // Resize procedural pet if enabled
-        if (Config.FEATURES.PROCEDURAL_PETS && this.nadagotchi?.appearanceSystem) {
+        if ((Config.FEATURES && Config.FEATURES.PROCEDURAL_PETS) && this.nadagotchi?.appearanceSystem) {
             this.petContainer?.setPosition(width / 2, gameHeight / 2);
             if (this.petContainer && this.nadagotchi.appearanceSystem.resize) {
                 this.nadagotchi.appearanceSystem.resize(gameSize);
