@@ -133,11 +133,9 @@ export class ArtisanMinigameScene extends Phaser.Scene {
      * @param {Phaser.Scale.ScaleManager} gameSize - The new game dimensions.
      */
     resize(gameSize) {
+        if (!this.titleText) return;
         const width = gameSize.width;
         const height = gameSize.height;
-
-        // Reposition text
-        this.titleText.setPosition(width / 2, 50);
         this.statusText.setPosition(width / 2, 100);
 
         // Reposition grid
