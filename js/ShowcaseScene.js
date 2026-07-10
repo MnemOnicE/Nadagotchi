@@ -1,5 +1,4 @@
 import { ButtonFactory } from './ButtonFactory.js';
-import { EventKeys } from './EventKeys.js';
 import { Config } from './Config.js';
 import { ToastManager } from './systems/ToastManager.js';
 
