@@ -387,15 +387,49 @@
         archetypesData.forEach(arch => {
             const card = document.createElement('div');
             card.className = 'archetype-card p-4 border border-[#D8A373]/50 rounded-lg hover:shadow-md transition-shadow cursor-pointer bg-white';
-            card.innerHTML = `
-                <h4 class="font-semibold text-lg text-[#D8A373] mb-1 flex items-center"><span class="text-2xl mr-2">${arch.icon}</span>${arch.name}</h4>
-                <p class="text-xs text-gray-600 mb-2 leading-relaxed">${arch.description}</p>
-                <div class="text-xs details">
-                    <p class="mt-1"><strong>Happy:</strong> ${arch.happy}</p>
-                    <p class="mt-1"><strong>Sad:</strong> ${arch.sad}</p>
-                    <p class="mt-1"><strong>Angry:</strong> ${arch.angry}</p>
-                </div>
-            `;
+            const h4 = document.createElement('h4');
+            h4.className = 'font-semibold text-lg text-[#D8A373] mb-1 flex items-center';
+            const span = document.createElement('span');
+            span.className = 'text-2xl mr-2';
+            span.textContent = arch.icon;
+            h4.appendChild(span);
+            h4.appendChild(document.createTextNode(arch.name));
+
+            const pDesc = document.createElement('p');
+            pDesc.className = 'text-xs text-gray-600 mb-2 leading-relaxed';
+            pDesc.textContent = arch.description;
+
+            const divDetails = document.createElement('div');
+            divDetails.className = 'text-xs details';
+
+            const pHappy = document.createElement('p');
+            pHappy.className = 'mt-1';
+            const strongHappy = document.createElement('strong');
+            strongHappy.textContent = 'Happy:';
+            pHappy.appendChild(strongHappy);
+            pHappy.appendChild(document.createTextNode(' ' + arch.happy));
+
+            const pSad = document.createElement('p');
+            pSad.className = 'mt-1';
+            const strongSad = document.createElement('strong');
+            strongSad.textContent = 'Sad:';
+            pSad.appendChild(strongSad);
+            pSad.appendChild(document.createTextNode(' ' + arch.sad));
+
+            const pAngry = document.createElement('p');
+            pAngry.className = 'mt-1';
+            const strongAngry = document.createElement('strong');
+            strongAngry.textContent = 'Angry:';
+            pAngry.appendChild(strongAngry);
+            pAngry.appendChild(document.createTextNode(' ' + arch.angry));
+
+            divDetails.appendChild(pHappy);
+            divDetails.appendChild(pSad);
+            divDetails.appendChild(pAngry);
+
+            card.appendChild(h4);
+            card.appendChild(pDesc);
+            card.appendChild(divDetails);
             card.addEventListener('click', () => {
                 card.classList.toggle('open');
             });
