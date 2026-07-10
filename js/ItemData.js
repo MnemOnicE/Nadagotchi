@@ -113,7 +113,7 @@ export const Recipes = {
     },
     "Chamomile": {
         materials: { "Frostbloom": 3 },
-        pattern: [null, "Frostbloom", null, "Frostbloom", "Frostbloom", "Frostbloom", null, null, null],
+        pattern: [null, "Frostbloom", null, "Frostbloom", "Frostbloom", null, null, null, null],
         description: "A calming tea to slow you down."
     }
 };
