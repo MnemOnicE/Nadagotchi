@@ -97,8 +97,6 @@ export class MainScene extends Phaser.Scene {
         this.persistence = new PersistenceManager();
         this.wikiSystem = new WikiSystem(this.persistence);
         await this.wikiSystem.init();
-        this.wikiSystem = new WikiSystem(this.persistence);
-        await this.wikiSystem.init();
         const loadedCalendar = await this.persistence.loadCalendar();
         this.calendar = new Calendar(loadedCalendar);
         this.eventManager = new EventManager(this.calendar);
