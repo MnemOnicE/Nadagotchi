@@ -114,6 +114,23 @@ describe('PersistenceManager', () => {
         consoleErrorSpy.mockRestore();
     });
 
+
+    test('should return null and log error when loaded legacy JSON is invalid', async () => {
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+        localStorage.setItem('nadagotchi_settings', '{ invalid_legacy_json ');
+
+        const loadedData = await persistenceManager.loadSettings();
+
+        expect(loadedData).toBeNull();
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+            expect.stringContaining('Failed to parse legacy save for key nadagotchi_settings'),
+            expect.any(Error)
+        );
+
+        consoleErrorSpy.mockRestore();
+    });
+
     describe('_save error handling', () => {
         it('should catch and log errors when localStorage.setItem throws', async () => {
             const data = { test: 123 };
