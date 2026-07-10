@@ -118,6 +118,7 @@ export class ArtisanMinigameScene extends Phaser.Scene {
 
                     button.on('pointerdown', () => handleGridClick(button));
                     this.gridButtons.push(button);
+                    gridButtons.push(button);
                 }
             }
         };

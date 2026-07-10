@@ -63,6 +63,7 @@ const createMockRectangle = () => {
 const createMockText = () => ({
     setOrigin: jest.fn().mockReturnThis(),
     setText: jest.fn(),
+    setName: jest.fn().mockReturnThis(),
     fill: '',
     fontSize: ''
 });
