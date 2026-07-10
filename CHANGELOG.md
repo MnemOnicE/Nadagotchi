@@ -82,3 +82,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Improved test coverage for `ExpeditionSystem` to cover fallback RNG path and missing skill parameters in choices.
+
+### Fixed
+- Fixed Android build compilation failure by resolving duplicate Kotlin standard library classes and aligning Capacitor SDK settings.

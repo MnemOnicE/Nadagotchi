@@ -163,3 +163,10 @@ Swapped the order of operations in the "Return Home" button callback to ensure `
 **Line:** N/A
 **Description:** No static or semantic analysis tools were integrated into the project to help catch logical errors and formatting issues before execution or deployment.
 **Fix:** Added ESLint as a development dependency with a configuration file (`eslint.config.js`) supporting ES modules to handle syntactic checking locally, and a GitHub Actions workflow (`codeql.yml`) to perform semantic analysis.
+
+---
+
+**File:** `android/variables.gradle` and `android/app/build.gradle`
+**Line:** N/A
+**Description:** The Android build was failing due to SDK version mismatches (API 34 instead of 35 required by Capacitor vanilla_ice_cream code) and subsequent duplicate class errors in the Kotlin standard library when upgrading the SDK. Also, Javascript unit tests failed on a regression relating to `Config.FEATURES.PROCEDURAL_PETS` check when the mock did not define `FEATURES`.
+**Fix:** Updated `compileSdkVersion` and `targetSdkVersion` to 35 in `variables.gradle`. Excluded the `kotlin-stdlib-jdk7` and `kotlin-stdlib-jdk8` dependencies globally in `android/app/build.gradle`. Additionally fixed the tests regression in Javascript by handling undefined `Config.FEATURES`.
