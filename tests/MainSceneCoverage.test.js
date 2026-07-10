@@ -221,11 +221,11 @@ describe('MainScene Coverage', () => {
 
         scene.resize({ width: 1000, height: 800 });
 
-        // Dashboard is 35% of 800 = 280. Game height = 520.
-        expect(scene.cameras.main.setViewport).toHaveBeenCalledWith(0, 0, 1000, 520);
-        expect(scene.cameras.main.setSize).toHaveBeenCalledWith(1000, 520);
+        // Dashboard is 45% of 800 = 360. Game height = 440.
+        expect(scene.cameras.main.setViewport).toHaveBeenCalledWith(0, 0, 1000, 440);
+        expect(scene.cameras.main.setSize).toHaveBeenCalledWith(1000, 440);
 
-        expect(mockWeatherParticles.resize).toHaveBeenCalledWith(1000, 520);
+        expect(mockWeatherParticles.resize).toHaveBeenCalledWith(1000, 440);
     });
 
     test('update loop should update nadagotchi and stats', async () => {

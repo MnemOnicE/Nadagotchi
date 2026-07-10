@@ -28,7 +28,7 @@ export class LogicPuzzleScene extends Phaser.Scene {
      */
     create() {
         this.cameras.main.setBackgroundColor('#333');
-        this.add.text(this.cameras.main.width / 2, 50, 'Logic Puzzle: Repeat the Sequence', { fontSize: '24px', fill: '#FFF' }).setOrigin(0.5);
+        this.add.text(this.cameras.main.width / 2, 50, 'Logic Puzzle: Repeat the Sequence', { fontSize: '24px', fill: '#FFF' }).setOrigin(0.5).setName('title');
 
         // --- Private State (Closure Scope) ---
         let sequence = [];
@@ -106,5 +106,36 @@ export class LogicPuzzleScene extends Phaser.Scene {
         colorButtons.yellow = createColorButton(this.cameras.main.width / 2, 300, 0xffff00, 'yellow');
 
         this.time.delayedCall(1000, () => generateSequence());
+    }
+
+    /**
+     * Handles window resize to reposition UI elements.
+     * @param {Phaser.Scale.ScaleManager} gameSize - The new game dimensions.
+     */
+    resize(gameSize) {
+        const width = gameSize.width;
+        const height = gameSize.height;
+
+        // Reposition title
+        const title = this.children.getByName('title');
+        if (title) {
+            title.setPosition(width / 2, 50);
+        }
+
+        // Reposition color buttons
+        const colorButtons = ['red', 'green', 'blue', 'yellow'];
+        const buttonPositions = {
+            red: { x: width / 2 - 100, y: 200 },
+            green: { x: width / 2, y: 200 },
+            blue: { x: width / 2 + 100, y: 200 },
+            yellow: { x: width / 2, y: 300 }
+        };
+
+        colorButtons.forEach(color => {
+            const button = this.children.list.find(child => child.name === color);
+            if (button) {
+                button.setPosition(buttonPositions[color].x, buttonPositions[color].y);
+            }
+        });
     }
 }

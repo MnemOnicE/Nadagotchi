@@ -37,17 +37,21 @@ export class ScoutMinigameScene extends Phaser.Scene {
      */
     create() {
         this.cameras.main.setBackgroundColor('#2E8B57'); // Forest green
-        this.add.text(this.cameras.main.width / 2, 50, `${this.careerName} Mission: Match the Pairs!`, { fontSize: '24px', fill: '#FFF' }).setOrigin(0.5);
-        const timerText = this.add.text(this.cameras.main.width - 150, 50, `Time: 30`, { fontSize: '20px', fill: '#FFF' }).setOrigin(0.5);
+        this.titleText = this.add.text(this.cameras.main.width / 2, 50, `${this.careerName} Mission: Match the Pairs!`, { fontSize: '24px', fill: '#FFF' }).setOrigin(0.5);
+        this.timerText = this.add.text(this.cameras.main.width - 150, 50, `Time: 30`, { fontSize: '20px', fill: '#FFF' }).setOrigin(0.5);
+        this.gridCards = [];
+        this.gridConfig = { rows: 3, cols: 4, cardWidth: 100, cardHeight: 100, spacing: 20 };
 
         // --- Private State (Closure Scope) ---
         const icons = ['🌳', '🍄', '🐝', '🍁', '🌿', '🐾'];
-        let grid = [];
         let firstSelection = null;
         let secondSelection = null;
         let matchesFound = 0;
         let timeLeft = 30;
         let timer = null;
+        
+        // Store grid on instance for resize access
+        this.minigameGrid = [];
 
         // --- Helper Functions (Closure) ---
 
@@ -60,7 +64,7 @@ export class ScoutMinigameScene extends Phaser.Scene {
 
         const updateTimer = () => {
             timeLeft--;
-            timerText.setText(`Time: ${timeLeft}`);
+            this.timerText.setText(`Time: ${timeLeft}`);
             if (timeLeft <= 0) {
                 endGame(false);
             }
@@ -109,16 +113,17 @@ export class ScoutMinigameScene extends Phaser.Scene {
         };
 
         const setupGrid = () => {
-            grid = Phaser.Utils.Array.Shuffle(icons.concat(icons));
+            this.minigameGrid = Phaser.Utils.Array.Shuffle(icons.concat(icons));
         };
 
         const createGridDisplay = () => {
-            const rows = 3, cols = 4;
-            const cardWidth = 100, cardHeight = 100, spacing = 20;
+            const { rows, cols, cardWidth, cardHeight, spacing } = this.gridConfig;
             const startX = (this.cameras.main.width - (cols * cardWidth + (cols - 1) * spacing)) / 2;
             const startY = (this.cameras.main.height - (rows * cardHeight + (rows - 1) * spacing)) / 2;
 
-            grid.forEach((icon, i) => {
+            this.gridCards = []; // Clear previous cards
+
+            this.minigameGrid.forEach((icon, i) => {
                 const row = Math.floor(i / cols);
                 const col = i % cols;
                 const x = startX + col * (cardWidth + spacing) + cardWidth / 2;
@@ -131,6 +136,8 @@ export class ScoutMinigameScene extends Phaser.Scene {
                 card.setData('iconText', iconText);
 
                 card.on('pointerdown', () => handleCardClick(card));
+
+                this.gridCards.push({ card, iconText });
             });
         };
 
@@ -143,6 +150,32 @@ export class ScoutMinigameScene extends Phaser.Scene {
             callback: updateTimer,
             callbackScope: this, // Still useful if accessing scene methods, though updateTimer is closed
             loop: true
+        });
+    }
+
+    /**
+     * Handles window resize to reposition UI elements.
+     * @param {Phaser.Scale.ScaleManager} gameSize - The new game dimensions.
+     */
+    resize(gameSize) {
+        if (!this.titleText) return;
+        const width = gameSize.width;
+        const height = gameSize.height;
+        this.timerText.setPosition(width - 150, 50);
+
+        // Reposition grid cards
+        const { rows, cols, cardWidth, cardHeight, spacing } = this.gridConfig;
+        const startX = (width - (cols * cardWidth + (cols - 1) * spacing)) / 2;
+        const startY = (height - (rows * cardHeight + (rows - 1) * spacing)) / 2;
+
+        this.gridCards.forEach((entry, i) => {
+            const row = Math.floor(i / cols);
+            const col = i % cols;
+            const x = startX + col * (cardWidth + spacing) + cardWidth / 2;
+            const y = startY + row * (cardHeight + spacing) + cardHeight / 2;
+
+            entry.card.setPosition(x, y);
+            entry.iconText.setPosition(x, y);
         });
     }
 }

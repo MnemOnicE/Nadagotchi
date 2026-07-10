@@ -100,5 +100,20 @@ export const Recipes = {
         materials: { "Frostbloom": 2, "Berries": 1 },
         pattern: [null, "Frostbloom", null, "Frostbloom", "Berries", null, null, null, null],
         description: "A tonic that slows metabolism."
+    },
+    "Nutrient Bar": {
+        materials: { "Berries": 3, "Sticks": 1 },
+        pattern: [null, "Berries", null, "Berries", "Sticks", "Berries", null, null, null],
+        description: "A dense bar packed with vitamins."
+    },
+    "Espresso": {
+        materials: { "Berries": 5 },
+        pattern: [null, "Berries", null, "Berries", "Berries", "Berries", null, "Berries", null],
+        description: "A strong coffee to speed you up."
+    },
+    "Chamomile": {
+        materials: { "Frostbloom": 3 },
+        pattern: [null, "Frostbloom", null, "Frostbloom", "Frostbloom", null, null, null, null],
+        description: "A calming tea to slow you down."
     }
 };
