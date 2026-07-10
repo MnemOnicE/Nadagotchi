@@ -270,8 +270,13 @@ export class InventorySystem {
         // Use RNG to select item
         const foundItem = this.pet.rng.choice(potentialItems);
         
-        // Apply weather multiplier - in good weather, may find extra items
-        const quantity = weatherMultiplier > 1.2 ? 2 : 1; // Double items in very good weather (1.5x)
+        if (this.pet.rng.random() > weatherMultiplier) {
+            this.pet.addJournalEntry(`I went foraging in the ${this.pet.location} but the weather made it too difficult to find anything.`);
+            this.pet.location = 'Home';
+            return;
+        }
+
+        const quantity = weatherMultiplier > 1.2 ? 2 : 1;
         this.addItem(foundItem, quantity);
 
         if (foundItem === 'Frostbloom') {
