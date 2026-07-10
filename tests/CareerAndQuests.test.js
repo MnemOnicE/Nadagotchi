@@ -25,6 +25,14 @@ jest.mock('../js/Config.js', () => ({
         DEBRIS: {
             HAPPINESS_PENALTY_PER_WEED: 0.005,
             HAPPINESS_PENALTY_PER_POOP: 0.02
+        },
+        WEATHER_EFFECTS: {
+            FORAGING: {
+                Sunny: 1.0,
+                Cloudy: 1.0,
+                Rainy: 1.5,
+                Stormy: 0.5
+            }
         }
     }
 }));

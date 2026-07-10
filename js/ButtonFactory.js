@@ -35,6 +35,9 @@ export class ButtonFactory {
         const textColor = options.textColor || '#4A4A4A'; // Deep Warm Gray
         const fontSize = options.fontSize || '24px';
         const fontFamily = 'VT323';
+        
+        // Adjust font size based on button width for better mobile fit
+        const adjustedFontSize = Math.min(parseInt(fontSize), width / 5) + 'px';
 
         const container = scene.add.container(x, y);
 
@@ -58,7 +61,7 @@ export class ButtonFactory {
         // Text
         const btnText = scene.add.text(0, 0, text, {
             fontFamily: fontFamily,
-            fontSize: fontSize,
+            fontSize: adjustedFontSize,
             color: textColor
         }).setOrigin(0.5);
 

@@ -11,6 +11,8 @@ import { RelationshipSystem } from './systems/RelationshipSystem.js';
 import { InventorySystem } from './systems/InventorySystem.js';
 import { QuestSystem } from './systems/QuestSystem.js';
 import { DebrisSystem } from './systems/DebrisSystem.js';
+import { PetAppearanceSystem } from './systems/PetAppearanceSystem.js';
+import { PetAnimationSystem } from './systems/PetAnimationSystem.js';
 
 /**
  * @fileoverview Core logic for the Nadagotchi pet.
@@ -266,6 +268,20 @@ export class Nadagotchi {
         this.quests = loadedData?.quests || {};
         Object.defineProperty(this, 'questSystem', {
             value: new QuestSystem(this),
+            enumerable: false,
+            writable: true
+        });
+
+        // Initialize Pet Appearance System
+        Object.defineProperty(this, 'appearanceSystem', {
+            value: new PetAppearanceSystem(this),
+            enumerable: false,
+            writable: true
+        });
+
+        // Initialize Pet Animation System
+        Object.defineProperty(this, 'animationSystem', {
+            value: new PetAnimationSystem(this.appearanceSystem),
             enumerable: false,
             writable: true
         });
@@ -1558,6 +1574,101 @@ export class Nadagotchi {
             homeConfig: initialHomeConfig,
             universeSeed: CryptoUtils.getRandomSafeInt(0, Number.MAX_SAFE_INTEGER)
         };
+    }
+
+    /**
+     * Gets the pet's current visual appearance configuration.
+     * @returns {Object} Appearance configuration with body parts, colors, and markings.
+     */
+    getAppearance() {
+        return this.appearanceSystem.getAppearance();
+    }
+
+    /**
+     * Gets the sprite configuration for rendering the pet.
+     * @returns {Object} Sprite configuration for Phaser rendering.
+     */
+    getSpriteConfig() {
+        return this.appearanceSystem.getSpriteConfig();
+    }
+
+    /**
+     * Creates Phaser GameObjects for the pet sprite.
+     * @param {Phaser.Scene} scene - The Phaser scene to create objects in.
+     * @param {number} x - X position.
+     * @param {number} y - Y position.
+     * @returns {Object} Container and parts for the pet sprite.
+     */
+    createPetSprite(scene, x, y) {
+        return this.appearanceSystem.createPetSprite(scene, x, y);
+    }
+
+    /**
+     * Regenerates the pet's appearance based on current genetics.
+     * Call this when genetics change or when loading a saved pet.
+     */
+    regenerateAppearance() {
+        this.appearanceSystem.regenerate();
+    }
+
+    /**
+     * Initializes the animation system with the pet sprite.
+     * @param {Phaser.Scene} scene - The Phaser scene.
+     * @param {Phaser.GameObjects.Container} container - The pet container.
+     * @param {Object} parts - The pet parts object.
+     */
+    initAnimationSystem(scene, container, parts) {
+        this.animationSystem.init(scene, container, parts);
+    }
+
+    /**
+     * Updates the pet's animation based on mood.
+     * @param {string} mood - The mood to display (idle, happy, sad, angry, sleep, excited, eat).
+     */
+    updatePetAnimation(mood) {
+        if (this.animationSystem) {
+            this.animationSystem.updateMood(mood);
+        }
+    }
+
+    /**
+     * Plays a specific animation.
+     * @param {string} animation - The animation to play (idle, happy, sad, angry, sleep, excited, eat).
+     */
+    playAnimation(animation) {
+        if (this.animationSystem) {
+            switch (animation) {
+                case 'happy':
+                    this.animationSystem.playHappy();
+                    break;
+                case 'sad':
+                    this.animationSystem.playSad();
+                    break;
+                case 'angry':
+                    this.animationSystem.playAngry();
+                    break;
+                case 'sleep':
+                    this.animationSystem.playSleep();
+                    break;
+                case 'excited':
+                    this.animationSystem.playExcited();
+                    break;
+                case 'eat':
+                    this.animationSystem.playEat();
+                    break;
+                default:
+                    this.animationSystem.playIdle();
+            }
+        }
+    }
+
+    /**
+     * Cleans up animation system (call when scene changes).
+     */
+    cleanupAnimations() {
+        if (this.animationSystem) {
+            this.animationSystem.cleanup();
+        }
     }
 }
 // CI Integrity Check Fix

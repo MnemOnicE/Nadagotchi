@@ -166,45 +166,125 @@ export class UIScene extends Phaser.Scene {
     }
     layoutActionButtons(actions, startY) {
         const width = this.cameras.main.width;
-        let currentX = 20, currentY = startY;
+        const safeAreaBottom = Config.UI.SAFE_AREA_BOTTOM || 30;
+        const maxButtonWidth = width - 30; // Account for padding on both sides
+        let currentX = Config.UI.BUTTON_PADDING || 8;
+        let currentY = startY;
+        
         actions.forEach(item => {
-            const btnWidth = (item.text.length * 12) + 40;
-            if (currentX + btnWidth > width - 20) { currentX = 20; currentY += 55; }
-            const btn = ButtonFactory.createButton(this, currentX, currentY, item.text, () => { this.game.events.emit(EventKeys.UI_ACTION, item.action, item.data); }, { width: btnWidth, height: 40, color: 0x6A0DAD, fontSize: '24px', textColor: '#FFFFFF', onDisabledClick: () => { this.showToast("Action Locked", item.disabledMessage || "Not available yet.", "🔒"); } });
+            // Calculate button width with better text measurement
+            // Use smaller font size for mobile
+            const fontSize = width < 500 ? 16 : 20;
+            const textWidth = Math.min(item.text.length * (fontSize / 1.5), maxButtonWidth - 40);
+            const btnWidth = Math.min(textWidth + 40, maxButtonWidth);
+            
+            // Check if button would exceed width, if so move to next row
+            if (currentX + btnWidth > width - (Config.UI.BUTTON_PADDING || 8)) {
+                currentX = Config.UI.BUTTON_PADDING || 8;
+                currentY += (Config.UI.BUTTON_ROW_SPACING || 55);
+            }
+            
+            // Ensure we don't place buttons too close to the bottom
+            const dashboardHeight = Math.floor(this.cameras.main.height * Config.UI.DASHBOARD_HEIGHT_RATIO);
+            const maxY = this.cameras.main.height - safeAreaBottom - 40;
+            
+            if (currentY + 40 > maxY) {
+                // Not enough space, skip this button
+                console.warn(`Button "${item.text}" would be cut off, skipping`);
+                return;
+            }
+            
+            const btn = ButtonFactory.createButton(this, currentX, currentY, item.text, () => { 
+                this.game.events.emit(EventKeys.UI_ACTION, item.action, item.data); 
+            }, { 
+                width: btnWidth, 
+                height: 40, 
+                color: 0x6A0DAD, 
+                fontSize: fontSize + 'px', // Dynamic font size based on screen width
+                textColor: '#FFFFFF', 
+                onDisabledClick: () => { 
+                    this.showToast("Action Locked", item.disabledMessage || "Not available yet.", "🔒"); 
+                } 
+            });
+            
             if (item.condition && !item.condition()) btn.setDisabled(true);
             this.actionButtons.push(btn);
-            currentX += btnWidth + 15;
+            currentX += btnWidth + (Config.UI.BUTTON_PADDING || 8);
         });
     }
     resize(gameSize) {
         const width = gameSize.width, height = gameSize.height;
+        const safeAreaTop = Config.UI.SAFE_AREA_TOP || 50;
+        const safeAreaBottom = Config.UI.SAFE_AREA_BOTTOM || 20;
+        
         const dashboardHeight = Math.floor(height * Config.UI.DASHBOARD_HEIGHT_RATIO);
         const dashboardY = height - dashboardHeight;
+        
         this.cameras.main.setSize(width, height);
-        this.dashboardBg.setPosition(0, dashboardY); this.dashboardBg.setSize(width, dashboardHeight);
-        this.dashboardBorder.setPosition(0, dashboardY); this.dashboardBorder.setSize(width, 4);
+        this.dashboardBg.setPosition(0, dashboardY); 
+        this.dashboardBg.setSize(width, dashboardHeight);
+        this.dashboardBorder.setPosition(0, dashboardY); 
+        this.dashboardBorder.setSize(width, 4);
+        
+        // Responsive tab layout
         const tabWidth = Math.min(120, (width - 40) / 4);
-        let tabX = 20;
-        this.tabButtons.forEach(btn => { btn.setPosition(tabX, dashboardY + 10); tabX += tabWidth + 10; });
-        if (this.jobBoardButton) this.jobBoardButton.setPosition(width - 130, height - 60);
-        if (this.retireButton) this.retireButton.setPosition(width - 10, 50);
+        let tabX = Config.UI.BUTTON_PADDING || 10;
+        this.tabButtons.forEach(btn => { 
+            btn.setPosition(tabX, dashboardY + 10); 
+            tabX += tabWidth + (Config.UI.BUTTON_PADDING || 10);
+        });
+        
+        // Position fixed buttons with safe area considerations
+        if (this.jobBoardButton) {
+            this.jobBoardButton.setPosition(width - 130, height - 60 - safeAreaBottom);
+        }
+        
+        if (this.retireButton) {
+            this.retireButton.setPosition(width - 10, safeAreaTop + 50);
+        }
 
-        const safeTop = Config.UI.SAFE_AREA_TOP || 0;
-        if (this.calendarDropdown) this.calendarDropdown.setPosition(width - 160, safeTop);
+        if (this.calendarDropdown) {
+            this.calendarDropdown.setPosition(width - 160, safeAreaTop);
+        }
+
+        // Adjust stats text position with safe area
+        if (this.statsText) {
+            this.statsText.setPosition(10, safeAreaTop + 10);
+        }
 
         this.updateActionButtons(true);
         this.resizeModals(width, height);
     }
     resizeModals(width, height) {
-        const modalWidth = Math.min(500, width - 40);
-        const modalHeight = Math.min(400, height - 100);
+        const safeAreaTop = Config.UI.SAFE_AREA_TOP || 50;
+        const safeAreaBottom = Config.UI.SAFE_AREA_BOTTOM || 20;
+        const maxModalWidth = Math.min(500, width * (Config.UI.MODAL_MAX_WIDTH_RATIO || 0.9));
+        const maxModalHeight = Math.min(400, (height - safeAreaTop - safeAreaBottom) * (Config.UI.MODAL_MAX_HEIGHT_RATIO || 0.8));
+        
         this.allModals.forEach(container => {
             if (!container.active) return;
-            container.setPosition(width / 2, height / 2);
-            if (container.bg) container.bg.setSize(modalWidth, modalHeight);
-            if (container.modalTitle) container.modalTitle.setPosition(0, -modalHeight / 2 + 30);
-            if (container.closeButton) container.closeButton.setPosition(modalWidth / 2 - 40, -modalHeight / 2 + 30);
-            if (container.content) container.content.setStyle({ wordWrap: { width: modalWidth - 40 } });
+            
+            // Center modal with safe area considerations
+            container.setPosition(width / 2, (height + safeAreaTop - safeAreaBottom) / 2);
+            
+            if (container.bg) {
+                container.bg.setSize(maxModalWidth, maxModalHeight);
+            }
+            
+            if (container.modalTitle) {
+                container.modalTitle.setPosition(0, -maxModalHeight / 2 + 30);
+            }
+            
+            if (container.closeButton) {
+                container.closeButton.setPosition(maxModalWidth / 2 - 40, -maxModalHeight / 2 + 30);
+            }
+            
+            if (container.content) {
+                container.content.setStyle({ 
+                    wordWrap: { width: maxModalWidth - 40 }, 
+                    fontSize: Math.min(24, maxModalWidth / 25) + 'px' // Responsive font size
+                });
+            }
         });
     }
     async handleUIActions(action, data) {

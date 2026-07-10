@@ -172,7 +172,18 @@ export class MainScene extends Phaser.Scene {
         this.roomDoors = [];
 
         // --- Game Objects ---
-        this.sprite = this.add.sprite(this.scale.width / 2, this.scale.height / 2, 'pet').setScale(4).setDepth(20);
+        // Procedural pet (if enabled) or static sprite
+        if (Config.FEATURES.PROCEDURAL_PETS && this.nadagotchi.appearanceSystem) {
+            const petSprite = this.nadagotchi.createPetSprite(this, this.scale.width / 2, this.scale.height / 2);
+            this.petContainer = petSprite.container;
+            this.petContainer.setDepth(20);
+            this.sprite = this.petContainer; // Use container as the main pet reference
+            
+            // Initialize animation system
+            this.nadagotchi.initAnimationSystem(this, this.petContainer, petSprite.parts);
+        } else {
+            this.sprite = this.add.sprite(this.scale.width / 2, this.scale.height / 2, 'pet').setScale(4).setDepth(20);
+        }
         this.thoughtBubble = this.add.sprite(this.sprite.x, this.sprite.y - 40, 'thought_bubble').setVisible(false).setDepth(21);
         this.exploreBubble = this.add.sprite(this.sprite.x, this.sprite.y - 40, 'explore_bubble').setVisible(false).setDepth(21);
 
@@ -644,6 +655,15 @@ export class MainScene extends Phaser.Scene {
             this.startIdleAnimation(this.currentMood);
         } else {
             this.sprite.setPosition(width / 2, gameHeight / 2);
+        }
+
+        // Resize procedural pet if enabled
+        if (Config.FEATURES.PROCEDURAL_PETS && this.nadagotchi?.appearanceSystem) {
+            this.petContainer?.setPosition(width / 2, gameHeight / 2);
+            if (this.petContainer && this.nadagotchi.appearanceSystem.resize) {
+                this.nadagotchi.appearanceSystem.resize(gameSize);
+            }
+            // Animation system will automatically use updated positions
         }
 
         // Resize dynamic textures via managers

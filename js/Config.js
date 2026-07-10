@@ -5,6 +5,12 @@
  */
 
 export const Config = {
+    // Feature Flags
+    FEATURES: {
+        PROCEDURAL_PETS: true,  // Enable procedurally generated pet appearance
+        ANIMATED_PETS: true     // Enable pet animations (blinking, mood-based)
+    },
+
     // Game Start & Genetics
     INITIAL_STATE: {
         STATS: { hunger: 100, energy: 100, happiness: 70 },
@@ -307,9 +313,46 @@ export const Config = {
         CLEAN_SKILL_GAIN: 0.1
     },
 
+    // Weather Effects on Gameplay
+    WEATHER_EFFECTS: {
+        // Multipliers for foraging success in different weather
+        FORAGING: {
+            Sunny: 1.0,
+            Cloudy: 1.0,
+            Rainy: 1.5,  // More plants/berries grow in rain
+            Stormy: 0.5  // Harder to forage in storms
+        },
+        // Multipliers for expedition rewards in different weather
+        EXPEDITION: {
+            Sunny: 1.0,
+            Cloudy: 1.0,
+            Rainy: 0.8,  // Fewer items found in rain
+            Stormy: 0.5  // Dangerous to explore in storms
+        },
+        // Minigame difficulty modifiers
+        MINIGAME: {
+            Sunny: 1.0,
+            Cloudy: 1.0,
+            Rainy: 0.9,  // Slightly easier (slower pace)
+            Stormy: 1.1  // Slightly harder (distractions)
+        },
+        // Stat decay modifiers
+        STAT_DECAY: {
+            Sunny: 1.0,
+            Cloudy: 1.0,
+            Rainy: 0.8,  // Slower decay when indoors more
+            Stormy: 0.7  // Even slower decay
+        }
+    },
+
     // UI Configuration
     UI: {
-        DASHBOARD_HEIGHT_RATIO: 0.35, // Increased from 0.25 to prevent button overlap on mobile
-        SAFE_AREA_TOP: 40 // Mobile Notch / Status Bar Offset (px)
+        DASHBOARD_HEIGHT_RATIO: 0.45, // Increased from 0.40 to better accommodate mobile screens
+        SAFE_AREA_TOP: 50, // Increased from 40 to better handle mobile notches
+        SAFE_AREA_BOTTOM: 30, // Increased from 20 to better handle mobile navigation bars
+        BUTTON_PADDING: 8, // Reduced from 10 for better space utilization
+        BUTTON_ROW_SPACING: 55, // Reduced from 60 for better space utilization
+        MODAL_MAX_WIDTH_RATIO: 0.9, // Max width ratio for modals on small screens
+        MODAL_MAX_HEIGHT_RATIO: 0.75 // Reduced from 0.8 to better fit mobile screens
     }
 };

@@ -66,21 +66,28 @@ export class HealerMinigameScene extends Phaser.Scene {
 
         // State for Selection
         this.selectedRemedies = new Set();
+        
+        // Store for resize
+        this.patientSymptoms = patientSymptoms;
+        this.remedyOptions = options;
+        this.requiredRemedies = requiredRemedies;
 
         // --- UI ---
-        this.add.text(this.cameras.main.width / 2, 40, 'DIAGNOSIS REQUIRED', { fontFamily: 'VT323', fontSize: '32px', fill: '#000' }).setOrigin(0.5);
+        this.titleText = this.add.text(this.cameras.main.width / 2, 40, 'DIAGNOSIS REQUIRED', { fontFamily: 'VT323', fontSize: '32px', fill: '#000' }).setOrigin(0.5);
 
         // Timer Bar
         this.timerBarBg = this.add.rectangle(this.cameras.main.width / 2, 80, 600, 20, 0x555555).setOrigin(0.5);
         this.timerBarFill = this.add.rectangle(this.cameras.main.width / 2 - 300, 80, 600, 20, 0x00FF00).setOrigin(0, 0.5);
 
         // Patient Display
-        this.add.text(this.cameras.main.width / 2, 130, 'Patient Symptoms:', { fontFamily: 'VT323', fontSize: '24px', fill: '#000' }).setOrigin(0.5);
+        this.symptomsTitle = this.add.text(this.cameras.main.width / 2, 130, 'Patient Symptoms:', { fontFamily: 'VT323', fontSize: '24px', fill: '#000' }).setOrigin(0.5);
+        this.symptomElements = [];
 
         let symX = this.cameras.main.width / 2 - ((patientSymptoms.length - 1) * 80) / 2;
         patientSymptoms.forEach(sym => {
-            this.add.text(symX, 180, sym.emoji, { fontSize: '64px' }).setOrigin(0.5);
-            this.add.text(symX, 220, sym.text, { fontFamily: 'VT323', fontSize: '20px', fill: '#000' }).setOrigin(0.5);
+            const emojiText = this.add.text(symX, 180, sym.emoji, { fontSize: '64px' }).setOrigin(0.5);
+            const descText = this.add.text(symX, 220, sym.text, { fontFamily: 'VT323', fontSize: '20px', fill: '#000' }).setOrigin(0.5);
+            this.symptomElements.push({ emoji: emojiText, desc: descText, x: symX });
             symX += 80;
         });
 
@@ -90,6 +97,8 @@ export class HealerMinigameScene extends Phaser.Scene {
         // Grid layout for options (2x2 or 2x3)
         const startX = this.cameras.main.width / 2 - 100;
         const startY = 320;
+        
+        this.remedyButtons = [];
 
         options.forEach((remedy, index) => {
             const row = Math.floor(index / 2);
@@ -112,10 +121,12 @@ export class HealerMinigameScene extends Phaser.Scene {
                     bg.setFillStyle(0xADD8E6); // Highlight
                 }
             });
+
+            this.remedyButtons.push({ container: btn, bg, text, remedy, row, col });
         });
 
         // Cure Button
-        ButtonFactory.createButton(this, (this.cameras.main.width / 2) + 150, 560, "ADMINISTER CURE", () => {
+        this.cureButton = ButtonFactory.createButton(this, (this.cameras.main.width / 2) + 150, 560, "ADMINISTER CURE", () => {
             this.checkSolution(requiredRemedies);
         }, { width: 300, height: 60, color: 0x4CAF50, fontSize: '32px' });
 
@@ -177,5 +188,43 @@ export class HealerMinigameScene extends Phaser.Scene {
 
     update(time, delta) {
         this.events.emit('update', time, delta);
+    }
+
+    /**
+     * Handles window resize to reposition UI elements.
+     * @param {Phaser.Scale.ScaleManager} gameSize - The new game dimensions.
+     */
+    resize(gameSize) {
+        if (!this.titleText) return;
+        const width = gameSize.width;
+        const height = gameSize.height;
+        this.timerBarBg.setPosition(width / 2, 80);
+        this.timerBarFill.setPosition(width / 2 - 300, 80);
+
+        // Reposition symptoms title and elements
+        this.symptomsTitle.setPosition(width / 2, 130);
+        
+        const symptomCount = this.patientSymptoms.length;
+        let symX = width / 2 - ((symptomCount - 1) * 80) / 2;
+        this.symptomElements.forEach(entry => {
+            entry.emoji.setPosition(symX, 180);
+            entry.desc.setPosition(symX, 220);
+            symX += 80;
+        });
+
+        // Reposition remedy buttons
+        const startY = 320;
+        this.remedyButtons.forEach((btnData, index) => {
+            const row = Math.floor(index / 2);
+            const col = index % 2;
+            const x = width / 2 + (col === 0 ? -100 : 100);
+            const y = startY + (row * 80);
+            btnData.container.setPosition(x, y);
+        });
+
+        // Reposition cure button
+        if (this.cureButton) {
+            this.cureButton.setPosition(width / 2 + 150, 560);
+        }
     }
 }
