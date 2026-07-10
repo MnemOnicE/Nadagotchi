@@ -67,8 +67,8 @@ describe('PetAppearanceSystem', () => {
             const system = new PetAppearanceSystem(mockPet);
             
             // These are probabilistic, so we just check they're valid
-            expect(['round', 'square', 'pointy', 'heart']).toContain(system.bodyParts.head);
-            expect(['small', 'medium', 'large', 'stocky']).toContain(system.bodyParts.torso);
+            expect(['round', 'square', 'pointy', 'heart', 'oval', 'diamond']).toContain(system.bodyParts.head);
+            expect(['small', 'medium', 'large', 'stocky', 'slim', 'plump']).toContain(system.bodyParts.torso);
         });
 
         test('Nurturer should prefer heart head', () => {
@@ -79,7 +79,7 @@ describe('PetAppearanceSystem', () => {
             
             // Nurturer has 60% chance for heart head
             // We can't guarantee it, but it should be one of the valid options
-            expect(['round', 'square', 'pointy', 'heart']).toContain(system.bodyParts.head);
+            expect(['round', 'square', 'pointy', 'heart', 'oval', 'diamond']).toContain(system.bodyParts.head);
         });
     });
 

@@ -27,6 +27,14 @@ import { PetAnimationSystem } from './systems/PetAnimationSystem.js';
  */
 export class Nadagotchi {
     unlockAllCareers() {
+        if (!this.unlockedCareers) this.unlockedCareers = [];
+        const allCareers = Object.keys(Config.CAREER.CAREERS || {});
+        allCareers.forEach(c => {
+            if (!this.unlockedCareers.includes(c)) this.unlockedCareers.push(c);
+        });
+        this.save();
+    }
+    unlockAllCareers() {
         const allCareerIds = Object.keys(Config.CAREER.CAREERS || {});
         const unlockedSet = new Set(this.unlockedCareers || []);
         allCareerIds.forEach(id => unlockedSet.add(id));
@@ -102,6 +110,7 @@ export class Nadagotchi {
         this.dailyQuest = data.dailyQuest || null;
         this.coins = data.coins || 0;
         this.inventory = data.inventory || {};
+        this.coins = data.coins || 0;
         this.age = data.age;
         this.generation = data.generation || 1;
         this.isLegacyReady = data.isLegacyReady || false;
@@ -182,6 +191,7 @@ export class Nadagotchi {
         this.careerXP = {};
         this.dailyQuest = null;
         this.inventory = {};
+        this.coins = 0;
         this.coins = 0;
         this.age = 0;
         this.generation = 1;
@@ -521,6 +531,7 @@ export class Nadagotchi {
             skills: { ...Config.INITIAL_STATE.SKILLS },
             currentCareer: null,
             inventory: {},
+            coins: 0,
             coins: 0,
             age: 0,
             generation: this.generation + 1,
@@ -1556,6 +1567,7 @@ export class Nadagotchi {
             careerXP: {},
             dailyQuest: null,
             inventory: {},
+            coins: 0,
             coins: 0,
             age: 0,
             generation: 1, // Imported pets start their own lineage
