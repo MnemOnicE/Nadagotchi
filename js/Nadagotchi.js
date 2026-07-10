@@ -462,7 +462,7 @@ export class Nadagotchi {
         const activeFactors = this.environmentalFactors.filter(factor => {
             if (factor.type === 'item') {
                 // Adapt to object map inventory structure
-                return Object.hasOwn(this.inventory, factor.id) && this.inventory[factor.id] > 0;
+                return this.inventory && Object.hasOwn(this.inventory, factor.id) && this.inventory[factor.id] > 0;
             }
             return true; // Non-item factors (like room temp) are always active if set.
         });
