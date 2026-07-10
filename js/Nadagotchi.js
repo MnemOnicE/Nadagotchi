@@ -11,6 +11,7 @@ import { RelationshipSystem } from './systems/RelationshipSystem.js';
 import { InventorySystem } from './systems/InventorySystem.js';
 import { QuestSystem } from './systems/QuestSystem.js';
 import { DebrisSystem } from './systems/DebrisSystem.js';
+import { PetAppearanceSystem } from './systems/PetAppearanceSystem.js';
 
 /**
  * @fileoverview Core logic for the Nadagotchi pet.
@@ -266,6 +267,13 @@ export class Nadagotchi {
         this.quests = loadedData?.quests || {};
         Object.defineProperty(this, 'questSystem', {
             value: new QuestSystem(this),
+            enumerable: false,
+            writable: true
+        });
+
+        // Initialize Pet Appearance System
+        Object.defineProperty(this, 'appearanceSystem', {
+            value: new PetAppearanceSystem(this),
             enumerable: false,
             writable: true
         });
@@ -1558,6 +1566,41 @@ export class Nadagotchi {
             homeConfig: initialHomeConfig,
             universeSeed: CryptoUtils.getRandomSafeInt(0, Number.MAX_SAFE_INTEGER)
         };
+    }
+
+    /**
+     * Gets the pet's current visual appearance configuration.
+     * @returns {Object} Appearance configuration with body parts, colors, and markings.
+     */
+    getAppearance() {
+        return this.appearanceSystem.getAppearance();
+    }
+
+    /**
+     * Gets the sprite configuration for rendering the pet.
+     * @returns {Object} Sprite configuration for Phaser rendering.
+     */
+    getSpriteConfig() {
+        return this.appearanceSystem.getSpriteConfig();
+    }
+
+    /**
+     * Creates Phaser GameObjects for the pet sprite.
+     * @param {Phaser.Scene} scene - The Phaser scene to create objects in.
+     * @param {number} x - X position.
+     * @param {number} y - Y position.
+     * @returns {Object} Container and parts for the pet sprite.
+     */
+    createPetSprite(scene, x, y) {
+        return this.appearanceSystem.createPetSprite(scene, x, y);
+    }
+
+    /**
+     * Regenerates the pet's appearance based on current genetics.
+     * Call this when genetics change or when loading a saved pet.
+     */
+    regenerateAppearance() {
+        this.appearanceSystem.regenerate();
     }
 }
 // CI Integrity Check Fix

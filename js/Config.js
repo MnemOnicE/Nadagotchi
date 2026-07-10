@@ -5,6 +5,12 @@
  */
 
 export const Config = {
+    // Feature Flags
+    FEATURES: {
+        PROCEDURAL_PETS: true,  // Enable procedurally generated pet appearance
+        ANIMATED_PETS: false    // Future: Enable pet animations
+    },
+
     // Game Start & Genetics
     INITIAL_STATE: {
         STATS: { hunger: 100, energy: 100, happiness: 70 },

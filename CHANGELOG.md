@@ -40,6 +40,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added comprehensive weather effects configuration for foraging, expeditions, minigames, and stat decay.
 - Added energy cost to NPC interactions (5 energy per interaction).
 
+### Added
+- **Procedural Pet Appearance System**: Complete body part system with head, torso, hands, and feet.
+  - 4 head types: round, square, pointy, heart
+  - 4 torso types: small, medium, large, stocky
+  - 4 hand types: small, medium, large, paw
+  - 4 feet types: small, medium, large, hooved
+  - Archetype-based color palettes (Intellectual=blue, Adventurer=orange, Nurturer=pink, Mischievous=purple, Recluse=gray)
+  - 6 marking types: stripes, spots, swirls, patches, gradient, none
+  - Deterministic generation from pet DNA for consistent appearance across sessions
+  - Feature flag `PROCEDURAL_PETS` to enable/disable (enabled by default)
+  - Full test suite (22 tests) for the appearance system
+- **Phase 2.5 & 2.6**: Procedural Pet System and Extra Programmatic Art completed
+- Updated ROADMAP with detailed Phase 2, 2.5, 2.6, and Phase 4 breakdowns
+
 ## [0.1.0] - 2024-05-20
 
 ### Added
