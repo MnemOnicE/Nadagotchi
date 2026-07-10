@@ -195,11 +195,9 @@ export class HealerMinigameScene extends Phaser.Scene {
      * @param {Phaser.Scale.ScaleManager} gameSize - The new game dimensions.
      */
     resize(gameSize) {
+        if (!this.titleText) return;
         const width = gameSize.width;
         const height = gameSize.height;
-
-        // Reposition title and timer bar
-        this.titleText.setPosition(width / 2, 40);
         this.timerBarBg.setPosition(width / 2, 80);
         this.timerBarFill.setPosition(width / 2 - 300, 80);
 
