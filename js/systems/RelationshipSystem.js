@@ -1,6 +1,5 @@
 import { Config } from '../Config.js';
 import { NarrativeSystem } from '../NarrativeSystem.js';
-import { EventKeys } from '../EventKeys.js';
 
 /**
  * @fileoverview System for managing NPC relationships and interactions.

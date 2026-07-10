@@ -263,6 +263,9 @@ export const Config = {
         get DNA_SALT() {
             if (this._dnaSalt !== null) return this._dnaSalt;
             if (typeof process !== 'undefined' && process.env && process.env.VITE_DNA_SALT) {
+                if (process.env.VITE_DNA_SALT === "DEVELOPMENT_ONLY_SALT") {
+                    throw new Error("SECURITY EXCEPTION: Hardcoded default salt 'DEVELOPMENT_ONLY_SALT' is not allowed.");
+                }
                 return process.env.VITE_DNA_SALT;
             }
             if (typeof localStorage !== 'undefined') {
@@ -287,7 +290,7 @@ export const Config = {
                 }
                 return salt;
             }
-            return "DEVELOPMENT_ONLY_SALT";
+            throw new Error("SECURITY EXCEPTION: VITE_DNA_SALT environment variable is required and no secure local salt could be generated.");
         },
         set DNA_SALT(val) {
             this._dnaSalt = val;
