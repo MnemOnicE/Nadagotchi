@@ -158,11 +158,9 @@ export class ScoutMinigameScene extends Phaser.Scene {
      * @param {Phaser.Scale.ScaleManager} gameSize - The new game dimensions.
      */
     resize(gameSize) {
+        if (!this.titleText) return;
         const width = gameSize.width;
         const height = gameSize.height;
-
-        // Reposition title and timer
-        this.titleText.setPosition(width / 2, 50);
         this.timerText.setPosition(width - 150, 50);
 
         // Reposition grid cards
