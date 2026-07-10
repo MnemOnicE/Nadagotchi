@@ -234,6 +234,7 @@ export class InventorySystem {
 
     /**
      * Simulates foraging for items, changing location, updating stats, and adding items to inventory.
+     * Weather affects foraging efficiency - rainy weather yields more items.
      */
     forage() {
         if (this.pet.stats.energy < Config.ACTIONS.FORAGE.ENERGY_COST) return;
@@ -250,6 +251,10 @@ export class InventorySystem {
             potentialItems.push('Muse Flower');
         }
 
+        // Get weather effect multiplier
+        const currentWeather = this.pet.currentWeather || 'Sunny';
+        const weatherMultiplier = Config.WEATHER_EFFECTS.FORAGING[currentWeather] || 1.0;
+
         // Rare Artifact Drop (2% chance) - Fix for "Missing Items" unobtainable bug
         if (this.pet.rng.random() < 0.02) {
              const artifacts = ['Ancient Tome', 'Heart Amulet', 'Genetic Scanner'];
@@ -264,13 +269,17 @@ export class InventorySystem {
 
         // Use RNG to select item
         const foundItem = this.pet.rng.choice(potentialItems);
-        this.addItem(foundItem, 1);
+        
+        // Apply weather multiplier - in good weather, may find extra items
+        const quantity = weatherMultiplier > 1.2 ? 2 : 1; // Double items in very good weather (1.5x)
+        this.addItem(foundItem, quantity);
 
         if (foundItem === 'Frostbloom') {
             this.discoverRecipe("Metabolism-Slowing Tonic");
         }
 
-        this.pet.addJournalEntry(`I went foraging in the ${this.pet.location} and found a ${foundItem}.`);
+        const quantityText = quantity > 1 ? `x${quantity} ` : '';
+        this.pet.addJournalEntry(`I went foraging in the ${this.pet.location} and found ${quantityText}a ${foundItem}.`);
         this.pet.location = 'Home';
     }
 

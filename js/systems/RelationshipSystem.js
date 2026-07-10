@@ -28,7 +28,7 @@ export class RelationshipSystem {
         // Check for energy cost
         if (this.pet.stats.energy < Config.ACTIONS.INTERACT_NPC.ENERGY_COST) {
             this.pet.addJournalEntry("I'm too tired to interact right now.");
-            return { text: "I'm too tired to interact right now.", options: [{ label: "Close", action: null }] };
+            return null;
         }
 
         this.pet.stats.energy -= Config.ACTIONS.INTERACT_NPC.ENERGY_COST;

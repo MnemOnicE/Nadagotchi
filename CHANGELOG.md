@@ -30,6 +30,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Performance Optimization:** Optimized `SkyManager` update loop by throttling expensive canvas repaints. Redraws now only occur when the `daylightFactor` changes by more than 0.01 or at least 3 seconds have passed.
 - Refactored test suite to use a centralized `mockPhaser` helper, reducing code duplication.
 - Hardened test environment with robust mocks for Phaser Events, Zones, and Particles.
+- **Mobile Responsiveness:** Improved UI for mobile devices with better button layout, safe area handling, and touch optimizations.
+
+### Fixed
+- Added missing recipes for `Nutrient Bar`, `Espresso`, and `Chamomile` to make breeding items obtainable through crafting.
+- Implemented resize handlers for all minigame scenes (LogicPuzzle, Scout, Healer, Artisan) to properly handle window resizing during gameplay.
+- Fixed NPC interaction energy exploit by ensuring interactions return `null` when energy is insufficient, preventing the dialogue modal from appearing.
+- Enhanced foraging system with weather effects - rainy weather now yields more items (1.5x multiplier).
+- Added comprehensive weather effects configuration for foraging, expeditions, minigames, and stat decay.
+- Added energy cost to NPC interactions (5 energy per interaction).
 
 ## [0.1.0] - 2024-05-20
 

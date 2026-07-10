@@ -27,8 +27,12 @@ export class ArtisanMinigameScene extends Phaser.Scene {
      */
     create() {
         this.cameras.main.setBackgroundColor('#663399'); // A creative purple
-        this.add.text(this.cameras.main.width / 2, 50, 'Artisan Craft: Recreate the Pattern', { fontSize: '24px', fill: '#FFF' }).setOrigin(0.5);
+        this.titleText = this.add.text(this.cameras.main.width / 2, 50, 'Artisan Craft: Recreate the Pattern', { fontSize: '24px', fill: '#FFF' }).setOrigin(0.5);
         this.statusText = this.add.text(this.cameras.main.width / 2, 100, 'Memorize the pattern!', { fontSize: '20px', fill: '#FFF' }).setOrigin(0.5);
+        
+        // Store for resize
+        this.gridSize = 3;
+        this.gridButtons = [];
 
         // --- Private State (Closure Scope) ---
         // These variables are inaccessible from the browser console (game.scene.getScene...)
@@ -100,20 +104,20 @@ export class ArtisanMinigameScene extends Phaser.Scene {
         const createGrid = () => {
             const buttonSize = 80;
             const spacing = 15;
-            const startX = (this.cameras.main.width - (gridSize * buttonSize + (gridSize - 1) * spacing)) / 2;
-            const startY = (this.cameras.main.height - (gridSize * buttonSize + (gridSize - 1) * spacing)) / 2;
+            const startX = (this.cameras.main.width - (this.gridSize * buttonSize + (this.gridSize - 1) * spacing)) / 2;
+            const startY = (this.cameras.main.height - (this.gridSize * buttonSize + (this.gridSize - 1) * spacing)) / 2;
 
-            for (let row = 0; row < gridSize; row++) {
-                for (let col = 0; col < gridSize; col++) {
+            for (let row = 0; row < this.gridSize; row++) {
+                for (let col = 0; col < this.gridSize; col++) {
                     const x = startX + col * (buttonSize + spacing) + buttonSize / 2;
                     const y = startY + row * (buttonSize + spacing) + buttonSize / 2;
-                    const index = row * gridSize + col;
+                    const index = row * this.gridSize + col;
 
                     const button = this.add.rectangle(x, y, buttonSize, buttonSize, 0xD3D3D3).setInteractive({ useHandCursor: true });
                     button.setData('index', index);
 
                     button.on('pointerdown', () => handleGridClick(button));
-                    gridButtons.push(button);
+                    this.gridButtons.push(button);
                 }
             }
         };
@@ -122,5 +126,32 @@ export class ArtisanMinigameScene extends Phaser.Scene {
         createGrid();
         generatePattern();
         displayPattern();
+    }
+
+    /**
+     * Handles window resize to reposition UI elements.
+     * @param {Phaser.Scale.ScaleManager} gameSize - The new game dimensions.
+     */
+    resize(gameSize) {
+        const width = gameSize.width;
+        const height = gameSize.height;
+
+        // Reposition text
+        this.titleText.setPosition(width / 2, 50);
+        this.statusText.setPosition(width / 2, 100);
+
+        // Reposition grid
+        const buttonSize = 80;
+        const spacing = 15;
+        const startX = (width - (this.gridSize * buttonSize + (this.gridSize - 1) * spacing)) / 2;
+        const startY = (height - (this.gridSize * buttonSize + (this.gridSize - 1) * spacing)) / 2;
+
+        this.gridButtons.forEach((button, index) => {
+            const row = Math.floor(index / this.gridSize);
+            const col = index % this.gridSize;
+            const x = startX + col * (buttonSize + spacing) + buttonSize / 2;
+            const y = startY + row * (buttonSize + spacing) + buttonSize / 2;
+            button.setPosition(x, y);
+        });
     }
 }
